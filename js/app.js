@@ -15,6 +15,8 @@ import { logWord } from "./events.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
+const MODEL_RETURN_DELAY_MS = 600;   // model mode: pause on the category page
+let returning = false;                // true during that pause
 
 const state = {
   board: null,        // the word map (data/core-board.json)
@@ -32,7 +34,7 @@ function currentPageDef() {
   const { board, page } = state;
   if (page === "core") return { id: "core", name: "", buttons: board.buttons, homeAt: null };
   const def = board.pages[page];
-  // The Home cell sits where this category's button sits on the main board.
+  // The Back cell sits where this category's button sits on the main board.
   const catButton = board.buttons.find((b) => b.loadBoard === page);
   return { id: page, name: def.name, buttons: def.buttons, homeAt: { row: catButton.row, col: catButton.col } };
 }
@@ -98,9 +100,9 @@ function ringCell(key, ms) {
 // ---------- Taps on the board ----------
 function onCellTap(cellEl) {
   const d = state.cells.get(cellEl.dataset.key);
-  if (!d) return;
+  if (!d || returning) return;
 
-  // Home button: back to the main board (never speaks).
+  // Back button: back to the main board (never speaks).
   if (d.kind === "home") { goTo("core"); return; }
 
   if (state.editing) { editCell(d); return; }
@@ -117,10 +119,18 @@ function onCellTap(cellEl) {
   if (state.page !== "core") {
     // Category item: go back to the main board automatically.
     const fromPage = currentPageDef();
-    goTo("core");
     if (state.modeling) {
-      // Re-highlight the path: the category button the item came from.
-      ringCell(cellKey("core", fromPage.homeAt.row, fromPage.homeAt.col), 800);
+      // Model mode: keep the page visible briefly so the item's ring is seen,
+      // then return and ring the category button (the path).
+      ringCell(d.key, 1200);
+      returning = true;                    // ignore taps during the pause
+      setTimeout(() => {
+        returning = false;
+        goTo("core");
+        ringCell(cellKey("core", fromPage.homeAt.row, fromPage.homeAt.col), 800);
+      }, MODEL_RETURN_DELAY_MS);
+    } else {
+      goTo("core");                        // learner taps return immediately
     }
   } else if (state.modeling) {
     ringCell(d.key, 1200);

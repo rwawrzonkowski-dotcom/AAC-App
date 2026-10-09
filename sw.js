@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "aac-v2";
+const CACHE_VERSION = "aac-v3";
 const FILES = [
   "./", "index.html", "styles.css", "manifest.webmanifest",
   "js/app.js", "js/board.js", "js/speech.js", "js/storage.js",

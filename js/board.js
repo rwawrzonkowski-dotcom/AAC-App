@@ -52,7 +52,7 @@ export function resolvePage(page, profile) {
       const d = { key, row, col, base, ov };
 
       if (page.homeAt && page.homeAt.row === row && page.homeAt.col === col) {
-        d.kind = "home";                             // Home button: not editable
+        d.kind = "home";                             // Back button: not editable
         d.visible = true;
       } else if (base) {
         d.kind = "word";
@@ -98,9 +98,9 @@ export function renderBoard(boardEl, cells, { editing, photoUrl }) {
     if (d.kind === "home") {
       cell.className = "cell tap type-home";
       cell.setAttribute("role", "button");
-      cell.setAttribute("aria-label", "Home");
-      cell.innerHTML = '<div class="cell-image"><span class="placeholder">\u{1F3E0}</span></div>' +
-        '<div class="cell-label">Home</div>';
+      cell.setAttribute("aria-label", "Back");
+      cell.innerHTML = '<div class="cell-image"><span class="placeholder">\u2B05\uFE0F</span></div>' +
+        '<div class="cell-label">Back</div>';
     } else if (d.kind === "word" && (d.visible || editing)) {
       cell.className = "cell tap type-" + d.wordType + (d.visible ? "" : " ghost");
       cell.setAttribute("role", "button");

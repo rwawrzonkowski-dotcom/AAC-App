@@ -12,7 +12,7 @@ A free, offline communication board for children who are new to AAC
 - **Category pages (two taps).** Tap Food, Drinks, Play, Places, People or
   Favorites: the page opens (no speech) with an orange background and the page
   name at the top. Tap an item: it speaks, is added to the message bar, and the
-  board returns to the main page. The orange **Home** button sits in the same
+  board returns to the main page. The orange **Back** button (left arrow) sits in the same
   spot the category button had on the main board.
 - Several learners can share one iPad. Each has their own stage, hidden/shown
   words, renamed words, photos, added words and voice settings.
@@ -44,8 +44,8 @@ clearing this app's data from iPad Settings (this also erases profiles and photo
 - **Voice:** pick a voice, set pitch and speed, tap **Preview**, or reset to the
   child or adult default. Saved per learner.
 - **Start modeling:** a purple "Modeling" bar appears. Your taps work normally and the
-  tapped button gets a bright pulsing ring; after a category item, the category button
-  is highlighted to show the path. Hold **End** for 2 seconds to stop.
+  tapped button gets a bright pulsing ring; after a category item, the page stays up briefly so the item's ring is seen, then
+  the category button is highlighted to show the path. Hold **End** for 2 seconds to stop.
 
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.
