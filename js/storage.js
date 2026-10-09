@@ -22,3 +22,9 @@ export function save(key, value) {
     console.warn("Could not save to localStorage:", key);
   }
 }
+
+// Remove a saved value (used when migrating old settings into a profile).
+export function remove(key) {
+  delete memory[key];
+  try { localStorage.removeItem(PREFIX + key); } catch (e) { /* ignore */ }
+}

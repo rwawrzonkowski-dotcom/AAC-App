@@ -1,6 +1,6 @@
 {
  "format": "aac-board-v1",
- "_note": "A word's row/col is PERMANENT. Never reorder or move entries. 'stage' only controls when a word is revealed (shown if stage <= current stage).",
+ "_note": "A word's row/col is PERMANENT, on this board and on every category page. Never reorder or move entries. On the main board, 'stage' only controls when a word is revealed (shown if stage <= current stage). Category page items have no stage: they are visible whenever their category button is visible. The Home cell of each page is NOT listed here; it is always the cell at the same row/col as that category's button on the main board.",
  "id": "core",
  "name": "Core Board",
  "columns": 9,
@@ -449,5 +449,284 @@
    "name": "Favorites",
    "buttons": []
   }
- ]
+ ],
+ "pages": {
+  "food": {
+   "name": "Food",
+   "buttons": [
+    {
+     "id": "cracker",
+     "label": "cracker",
+     "spokenText": "cracker",
+     "row": 0,
+     "col": 0,
+     "wordType": "noun"
+    },
+    {
+     "id": "apple",
+     "label": "apple",
+     "spokenText": "apple",
+     "row": 0,
+     "col": 1,
+     "wordType": "noun"
+    },
+    {
+     "id": "banana",
+     "label": "banana",
+     "spokenText": "banana",
+     "row": 0,
+     "col": 2,
+     "wordType": "noun"
+    },
+    {
+     "id": "chips",
+     "label": "chips",
+     "spokenText": "chips",
+     "row": 0,
+     "col": 3,
+     "wordType": "noun"
+    },
+    {
+     "id": "cheese",
+     "label": "cheese",
+     "spokenText": "cheese",
+     "row": 0,
+     "col": 4,
+     "wordType": "noun"
+    },
+    {
+     "id": "sandwich",
+     "label": "sandwich",
+     "spokenText": "sandwich",
+     "row": 0,
+     "col": 5,
+     "wordType": "noun"
+    },
+    {
+     "id": "pizza",
+     "label": "pizza",
+     "spokenText": "pizza",
+     "row": 0,
+     "col": 6,
+     "wordType": "noun"
+    },
+    {
+     "id": "cookie",
+     "label": "cookie",
+     "spokenText": "cookie",
+     "row": 0,
+     "col": 7,
+     "wordType": "noun"
+    }
+   ]
+  },
+  "drinks": {
+   "name": "Drinks",
+   "buttons": [
+    {
+     "id": "water",
+     "label": "water",
+     "spokenText": "water",
+     "row": 0,
+     "col": 0,
+     "wordType": "noun"
+    },
+    {
+     "id": "juice",
+     "label": "juice",
+     "spokenText": "juice",
+     "row": 0,
+     "col": 1,
+     "wordType": "noun"
+    },
+    {
+     "id": "milk",
+     "label": "milk",
+     "spokenText": "milk",
+     "row": 0,
+     "col": 2,
+     "wordType": "noun"
+    }
+   ]
+  },
+  "play": {
+   "name": "Play",
+   "buttons": [
+    {
+     "id": "ball",
+     "label": "ball",
+     "spokenText": "ball",
+     "row": 0,
+     "col": 0,
+     "wordType": "noun"
+    },
+    {
+     "id": "bubbles",
+     "label": "bubbles",
+     "spokenText": "bubbles",
+     "row": 0,
+     "col": 1,
+     "wordType": "noun"
+    },
+    {
+     "id": "blocks",
+     "label": "blocks",
+     "spokenText": "blocks",
+     "row": 0,
+     "col": 2,
+     "wordType": "noun"
+    },
+    {
+     "id": "swing",
+     "label": "swing",
+     "spokenText": "swing",
+     "row": 0,
+     "col": 3,
+     "wordType": "noun"
+    },
+    {
+     "id": "slide",
+     "label": "slide",
+     "spokenText": "slide",
+     "row": 0,
+     "col": 4,
+     "wordType": "noun"
+    },
+    {
+     "id": "tablet",
+     "label": "tablet",
+     "spokenText": "tablet",
+     "row": 0,
+     "col": 5,
+     "wordType": "noun"
+    },
+    {
+     "id": "music",
+     "label": "music",
+     "spokenText": "music",
+     "row": 0,
+     "col": 6,
+     "wordType": "noun"
+    },
+    {
+     "id": "book",
+     "label": "book",
+     "spokenText": "book",
+     "row": 0,
+     "col": 7,
+     "wordType": "noun"
+    }
+   ]
+  },
+  "places": {
+   "name": "Places",
+   "buttons": [
+    {
+     "id": "outside",
+     "label": "outside",
+     "spokenText": "outside",
+     "row": 0,
+     "col": 0,
+     "wordType": "place"
+    },
+    {
+     "id": "home",
+     "label": "home",
+     "spokenText": "home",
+     "row": 0,
+     "col": 1,
+     "wordType": "place"
+    },
+    {
+     "id": "school",
+     "label": "school",
+     "spokenText": "school",
+     "row": 0,
+     "col": 2,
+     "wordType": "place"
+    },
+    {
+     "id": "car",
+     "label": "car",
+     "spokenText": "car",
+     "row": 0,
+     "col": 3,
+     "wordType": "place"
+    },
+    {
+     "id": "park",
+     "label": "park",
+     "spokenText": "park",
+     "row": 0,
+     "col": 4,
+     "wordType": "place"
+    },
+    {
+     "id": "bed",
+     "label": "bed",
+     "spokenText": "bed",
+     "row": 0,
+     "col": 5,
+     "wordType": "place"
+    }
+   ]
+  },
+  "people": {
+   "name": "People",
+   "buttons": [
+    {
+     "id": "mom",
+     "label": "mom",
+     "spokenText": "mom",
+     "row": 0,
+     "col": 0,
+     "wordType": "people"
+    },
+    {
+     "id": "dad",
+     "label": "dad",
+     "spokenText": "dad",
+     "row": 0,
+     "col": 1,
+     "wordType": "people"
+    },
+    {
+     "id": "teacher",
+     "label": "teacher",
+     "spokenText": "teacher",
+     "row": 0,
+     "col": 2,
+     "wordType": "people"
+    },
+    {
+     "id": "friend",
+     "label": "friend",
+     "spokenText": "friend",
+     "row": 0,
+     "col": 3,
+     "wordType": "people"
+    },
+    {
+     "id": "he",
+     "label": "he",
+     "spokenText": "he",
+     "row": 0,
+     "col": 4,
+     "wordType": "people"
+    },
+    {
+     "id": "she",
+     "label": "she",
+     "spokenText": "she",
+     "row": 0,
+     "col": 5,
+     "wordType": "people"
+    }
+   ]
+  },
+  "favorites": {
+   "name": "Favorites",
+   "buttons": []
+  }
+ }
 }
