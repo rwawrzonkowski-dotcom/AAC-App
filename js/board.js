@@ -4,8 +4,10 @@
 // sorts, filters-out, or reflows buttons. Words not yet revealed are drawn as
 // blank gray tiles that still occupy their cell, so visible words never move.
 
-// TODO (step 10): replace these emoji placeholders with real photos/symbols.
-// The image area has a fixed proportion, so swapping will not change layout.
+// Every button now has an open-licensed symbol (the "image" field in
+// data/core-board.json, credited in CREDITS.md). These emoji are only an
+// internal FALLBACK, used if a symbol file ever fails to load. An adult's own
+// photo (edit mode) always wins over the built-in symbol.
 const PLACEHOLDERS = {
   i: "\u{1F9D1}", you: "\u{1FAF5}", it: "\u{1F4E6}", that: "\u{1F449}", what: "❓",
   where: "\u{1F4CD}", who: "\u{1F9D1}‍\u{1F91D}‍\u{1F9D1}", when: "\u{1F552}", why: "\u{1F914}",
@@ -87,7 +89,10 @@ export function resolvePage(page, profile) {
 // is inside a cell can never change its size or position.
 //   editing  = true shows hidden words (faded, dashed) and empty cells too.
 //   photoUrl = function(cellKey) -> picture URL or null
-export function renderBoard(boardEl, cells, { editing, photoUrl }) {
+//   backImage = symbol file for the Back button
+// The picture always goes inside the same fixed-size ".cell-image" box, so a
+// symbol, a photo or the emoji fallback can never change a cell's layout.
+export function renderBoard(boardEl, cells, { editing, photoUrl, backImage }) {
   boardEl.innerHTML = "";
   for (const d of cells) {
     const cell = document.createElement("div");
@@ -99,8 +104,8 @@ export function renderBoard(boardEl, cells, { editing, photoUrl }) {
       cell.className = "cell tap type-home";
       cell.setAttribute("role", "button");
       cell.setAttribute("aria-label", "Back");
-      cell.innerHTML = '<div class="cell-image"><span class="placeholder">\u2B05\uFE0F</span></div>' +
-        '<div class="cell-label">Back</div>';
+      cell.innerHTML = '<div class="cell-image"></div><div class="cell-label">Back</div>';
+      showSymbol(cell.querySelector(".cell-image"), backImage, "\u2B05\uFE0F");
     } else if (d.kind === "word" && (d.visible || editing)) {
       cell.className = "cell tap type-" + d.wordType + (d.visible ? "" : " ghost");
       cell.setAttribute("role", "button");
@@ -108,15 +113,19 @@ export function renderBoard(boardEl, cells, { editing, photoUrl }) {
       cell.innerHTML = '<div class="cell-image"><span class="placeholder"></span></div>' +
         '<div class="cell-label"></div>';
       const url = photoUrl(d.key);
+      const area = cell.querySelector(".cell-image");
+      const letter = PLACEHOLDERS[d.base ? d.base.id : ""] || d.label.charAt(0).toUpperCase();
       if (url) {
+        // The adult's own photo overrides the built-in symbol.
         const img = document.createElement("img");
         img.className = "photo";
         img.alt = "";
         img.src = url;
-        cell.querySelector(".cell-image").replaceChildren(img);
+        area.replaceChildren(img);
+      } else if (d.base && d.base.image) {
+        showSymbol(area, d.base.image, letter);
       } else {
-        cell.querySelector(".placeholder").textContent =
-          PLACEHOLDERS[d.base ? d.base.id : ""] || d.label.charAt(0).toUpperCase();
+        area.querySelector(".placeholder").textContent = letter;   // adult-added word, no picture yet
       }
       cell.querySelector(".cell-label").textContent = d.label;
     } else if (editing) {
@@ -132,25 +141,82 @@ export function renderBoard(boardEl, cells, { editing, photoUrl }) {
   }
 }
 
+// Put a built-in symbol in an image area. If the file cannot be loaded, show the
+// emoji fallback instead (same box, so nothing moves).
+function showSymbol(area, src, fallbackEmoji) {
+  const img = document.createElement("img");
+  img.className = "symbol";
+  img.alt = "";
+  img.draggable = false;
+  img.addEventListener("error", () => {
+    const span = document.createElement("span");
+    span.className = "placeholder";
+    span.textContent = fallbackEmoji;
+    area.replaceChildren(span);
+  });
+  img.src = src;
+  area.replaceChildren(img);
+}
+
 // Pointer handling shared by the grid: darken on press, fire on pointerup only
 // if the finger is still on the same button it started on (slide-off = ignored).
-export function attachPressHandling(container, onActivate, selector = ".cell.tap") {
-  let down = null;
-  const clear = () => { if (down) down.classList.remove("pressed"); down = null; };
+//
+// Optional touch supports (used only for the child's board, see app.js):
+//   options.holdMs()  -> milliseconds a finger must stay down before the button
+//                        fires (0 = off). A ring fills while holding. Lifting
+//                        early or sliding off cancels, with no speech.
+//   options.blocked() -> true while taps must be ignored (the "ignore repeated
+//                        taps" window). Nothing is shown and nothing happens.
+export function attachPressHandling(container, onActivate, selector = ".cell.tap", options = {}) {
+  let down = null;       // the button the finger is on
+  let holdTimer = null;  // running only while a hold is in progress
+  let holdOverlay = null;
+
+  const clear = () => {
+    if (down) down.classList.remove("pressed");
+    down = null;
+    clearTimeout(holdTimer);
+    holdTimer = null;
+    if (holdOverlay) { holdOverlay.remove(); holdOverlay = null; }
+  };
+
+  // The filling ring is an absolutely positioned layer inside the button, so
+  // it cannot change the button's size or the image area.
+  function startHold(el, ms) {
+    holdOverlay = document.createElement("div");
+    holdOverlay.className = "touch-hold";
+    holdOverlay.style.setProperty("--hold-ms", ms + "ms");
+    holdOverlay.innerHTML =
+      '<svg viewBox="0 0 40 40" aria-hidden="true"><circle class="th-bg" cx="20" cy="20" r="16"/>' +
+      '<circle class="th-fg" cx="20" cy="20" r="16" pathLength="100"/></svg>';
+    el.appendChild(holdOverlay);
+    holdTimer = setTimeout(() => {
+      const start = down;
+      clear();
+      if (start) onActivate(start);   // held long enough: select it now
+    }, ms);
+  }
 
   container.addEventListener("pointerdown", (e) => {
     const el = e.target.closest(selector);
     if (!el) return;
+    if (options.blocked && options.blocked()) return;   // ignore-repeats window: show nothing
+    clear();
     down = el;
     el.classList.add("pressed");
+    const ms = options.holdMs ? options.holdMs() : 0;
+    if (ms > 0) startHold(el, ms);
   });
   container.addEventListener("pointerup", (e) => {
     if (!down) return;
     const start = down;
+    const wasHolding = holdTimer !== null;
     clear();
+    if (wasHolding) return;           // released before the hold time: cancel, no speech
     // Touch pointers are captured to the start element, so check what is under the finger.
     const under = document.elementFromPoint(e.clientX, e.clientY);
-    if (under && under.closest(selector) === start) onActivate(start);
+    if (under && under.closest(selector) === start &&
+        !(options.blocked && options.blocked())) onActivate(start);
   });
   container.addEventListener("pointercancel", clear);
   container.addEventListener("pointerleave", clear);
@@ -158,6 +224,8 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
   container.addEventListener("pointermove", (e) => {
     if (!down) return;
     const under = document.elementFromPoint(e.clientX, e.clientY);
-    down.classList.toggle("pressed", !!under && under.closest(selector) === down);
+    const on = !!under && under.closest(selector) === down;
+    if (!on && holdTimer !== null) { clear(); return; }   // slid off during a hold: cancel
+    down.classList.toggle("pressed", on);
   });
 }

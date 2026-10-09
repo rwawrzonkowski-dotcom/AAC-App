@@ -138,6 +138,10 @@ button { font: inherit; touch-action: manipulation; }
   pointer-events: none;
 }
 .cell-image .placeholder { font-size: min(5.2vw, 8dvh); line-height: 1; }
+/* Built-in symbol: centered, scaled to fit INSIDE the fixed image area (never
+   stretched, never cropped), on the button's own colour. The image area keeps
+   its size whatever picture is in it. */
+.cell-image img.symbol { width: 100%; height: 100%; padding: 3% 6%; object-fit: contain; -webkit-user-drag: none; }
 .cell-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
 /* A photo fills the same fixed image area (cropped, never stretched) */
 .cell-image img.photo { width: 100%; height: 100%; object-fit: cover; }
@@ -146,6 +150,19 @@ button { font: inherit; touch-action: manipulation; }
   font-size: 1.7vw; font-weight: 800; letter-spacing: -0.01em;
   white-space: nowrap; overflow: hidden; pointer-events: none;
 }
+
+/* ---------- Hold to select: filling ring on the pressed button ----------
+   A layer on top of the button (absolute, so nothing is resized or moved). */
+.touch-hold {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.35);
+}
+.touch-hold svg { height: 78%; max-width: 90%; transform: rotate(-90deg); }
+.touch-hold circle { fill: none; stroke-width: 5; }
+.touch-hold .th-bg { stroke: rgba(0, 0, 0, 0.22); }
+.touch-hold .th-fg { stroke: #0b4fa8; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100;
+  animation: fill-ring var(--hold-ms) linear forwards; }
 
 /* ---------- Portrait: show only the rotate message ---------- */
 #rotate-message {
@@ -269,6 +286,22 @@ button { font: inherit; touch-action: manipulation; }
 .photo-btns { display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .file-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .form-error { color: #b91c1c; font-weight: 700; min-height: 1.2em; margin: 8px 0 0; }
+
+.pic-state { margin: 0; font-weight: 700; color: #334155; }
+.photo-thumb img.symbol { object-fit: contain; padding: 6px; background: #f8fafc; }
+
+/* Touch settings and Backup */
+.touch-setting { padding: 10px 0 4px; border-top: 1px solid #e2e8f0; }
+.touch-setting:first-of-type { border-top: 0; }
+.touch-seg { max-width: 260px; }
+.touch-slider { grid-template-columns: 60px 1fr 70px; }
+.touch-slider.off { opacity: 0.4; }
+.backup-status { font-weight: 700; color: #166534; min-height: 1.3em; margin: 12px 0 0; word-break: break-word; }
+.restore-list { display: flex; flex-direction: column; gap: 12px; max-height: 50dvh; overflow-y: auto; }
+.restore-row { border: 1px solid #d5dde6; border-radius: 10px; padding: 12px; }
+.restore-row .muted { margin: 2px 0 8px; }
+.restore-name { font-weight: 800; font-size: 1.1em; }
+.restore-row .seg-row { flex-wrap: wrap; }
 
 /* Passcode keypad */
 .sheet.adult.lock { width: min(420px, 92vw); text-align: center; }

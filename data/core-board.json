@@ -13,7 +13,8 @@
    "row": 0,
    "col": 0,
    "wordType": "people",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/i.svg"
   },
   {
    "id": "you",
@@ -22,7 +23,8 @@
    "row": 0,
    "col": 1,
    "wordType": "people",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/you.svg"
   },
   {
    "id": "it",
@@ -31,7 +33,8 @@
    "row": 0,
    "col": 2,
    "wordType": "people",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/it.svg"
   },
   {
    "id": "that",
@@ -40,7 +43,8 @@
    "row": 0,
    "col": 3,
    "wordType": "people",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/that.svg"
   },
   {
    "id": "what",
@@ -49,7 +53,8 @@
    "row": 0,
    "col": 4,
    "wordType": "question",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/what.svg"
   },
   {
    "id": "where",
@@ -58,7 +63,8 @@
    "row": 0,
    "col": 5,
    "wordType": "question",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/where.svg"
   },
   {
    "id": "who",
@@ -67,7 +73,8 @@
    "row": 0,
    "col": 6,
    "wordType": "question",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/who.svg"
   },
   {
    "id": "when",
@@ -76,7 +83,8 @@
    "row": 0,
    "col": 7,
    "wordType": "question",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/when.svg"
   },
   {
    "id": "why",
@@ -85,7 +93,8 @@
    "row": 0,
    "col": 8,
    "wordType": "question",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/why.svg"
   },
   {
    "id": "want",
@@ -94,7 +103,8 @@
    "row": 1,
    "col": 0,
    "wordType": "action",
-   "stage": 2
+   "stage": 2,
+   "image": "images/symbols/want.svg"
   },
   {
    "id": "like",
@@ -103,7 +113,8 @@
    "row": 1,
    "col": 1,
    "wordType": "action",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/like.svg"
   },
   {
    "id": "get",
@@ -112,7 +123,8 @@
    "row": 1,
    "col": 2,
    "wordType": "action",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/get.svg"
   },
   {
    "id": "go",
@@ -121,7 +133,8 @@
    "row": 1,
    "col": 3,
    "wordType": "action",
-   "stage": 2
+   "stage": 2,
+   "image": "images/symbols/go.svg"
   },
   {
    "id": "stop",
@@ -130,7 +143,8 @@
    "row": 1,
    "col": 4,
    "wordType": "social",
-   "stage": 1
+   "stage": 1,
+   "image": "images/symbols/stop.svg"
   },
   {
    "id": "help",
@@ -139,7 +153,8 @@
    "row": 1,
    "col": 5,
    "wordType": "social",
-   "stage": 1
+   "stage": 1,
+   "image": "images/symbols/help.svg"
   },
   {
    "id": "more",
@@ -148,7 +163,8 @@
    "row": 1,
    "col": 6,
    "wordType": "social",
-   "stage": 1
+   "stage": 1,
+   "image": "images/symbols/more.svg"
   },
   {
    "id": "all",
@@ -157,7 +173,8 @@
    "row": 1,
    "col": 7,
    "wordType": "describing",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/all.svg"
   },
   {
    "id": "some",
@@ -166,7 +183,8 @@
    "row": 1,
    "col": 8,
    "wordType": "describing",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/some.svg"
   },
   {
    "id": "do",
@@ -175,7 +193,8 @@
    "row": 2,
    "col": 0,
    "wordType": "action",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/do.svg"
   },
   {
    "id": "make",
@@ -184,7 +203,8 @@
    "row": 2,
    "col": 1,
    "wordType": "action",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/make.svg"
   },
   {
    "id": "put",
@@ -193,7 +213,8 @@
    "row": 2,
    "col": 2,
    "wordType": "action",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/put.svg"
   },
   {
    "id": "turn",
@@ -202,7 +223,8 @@
    "row": 2,
    "col": 3,
    "wordType": "action",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/turn.svg"
   },
   {
    "id": "look",
@@ -211,7 +233,8 @@
    "row": 2,
    "col": 4,
    "wordType": "action",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/look.svg"
   },
   {
    "id": "open",
@@ -220,7 +243,8 @@
    "row": 2,
    "col": 5,
    "wordType": "action",
-   "stage": 2
+   "stage": 2,
+   "image": "images/symbols/open.svg"
   },
   {
    "id": "eat",
@@ -229,7 +253,8 @@
    "row": 2,
    "col": 6,
    "wordType": "action",
-   "stage": 1
+   "stage": 1,
+   "image": "images/symbols/eat.svg"
   },
   {
    "id": "drink",
@@ -238,7 +263,8 @@
    "row": 2,
    "col": 7,
    "wordType": "action",
-   "stage": 1
+   "stage": 1,
+   "image": "images/symbols/drink.svg"
   },
   {
    "id": "bathroom",
@@ -247,7 +273,8 @@
    "row": 2,
    "col": 8,
    "wordType": "place",
-   "stage": 1
+   "stage": 1,
+   "image": "images/symbols/bathroom.svg"
   },
   {
    "id": "can",
@@ -256,7 +283,8 @@
    "row": 3,
    "col": 0,
    "wordType": "action",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/can.svg"
   },
   {
    "id": "not",
@@ -265,7 +293,8 @@
    "row": 3,
    "col": 1,
    "wordType": "describing",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/not.svg"
   },
   {
    "id": "finished",
@@ -274,7 +303,8 @@
    "row": 3,
    "col": 2,
    "wordType": "describing",
-   "stage": 2
+   "stage": 2,
+   "image": "images/symbols/finished.svg"
   },
   {
    "id": "good",
@@ -283,7 +313,8 @@
    "row": 3,
    "col": 3,
    "wordType": "describing",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/good.svg"
   },
   {
    "id": "different",
@@ -292,7 +323,8 @@
    "row": 3,
    "col": 4,
    "wordType": "describing",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/different.svg"
   },
   {
    "id": "same",
@@ -301,7 +333,8 @@
    "row": 3,
    "col": 5,
    "wordType": "describing",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/same.svg"
   },
   {
    "id": "up",
@@ -310,7 +343,8 @@
    "row": 3,
    "col": 6,
    "wordType": "place",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/up.svg"
   },
   {
    "id": "in",
@@ -319,7 +353,8 @@
    "row": 3,
    "col": 7,
    "wordType": "place",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/in.svg"
   },
   {
    "id": "on",
@@ -328,7 +363,8 @@
    "row": 3,
    "col": 8,
    "wordType": "place",
-   "stage": 3
+   "stage": 3,
+   "image": "images/symbols/on.svg"
   },
   {
    "id": "yes",
@@ -337,7 +373,8 @@
    "row": 4,
    "col": 0,
    "wordType": "social",
-   "stage": 2
+   "stage": 2,
+   "image": "images/symbols/yes.svg"
   },
   {
    "id": "no",
@@ -346,7 +383,8 @@
    "row": 4,
    "col": 1,
    "wordType": "social",
-   "stage": 2
+   "stage": 2,
+   "image": "images/symbols/no.svg"
   },
   {
    "id": "here",
@@ -355,7 +393,8 @@
    "row": 4,
    "col": 2,
    "wordType": "social",
-   "stage": 4
+   "stage": 4,
+   "image": "images/symbols/here.svg"
   },
   {
    "id": "play",
@@ -365,7 +404,8 @@
    "col": 3,
    "wordType": "category",
    "stage": 4,
-   "loadBoard": "play"
+   "loadBoard": "play",
+   "image": "images/symbols/play.svg"
   },
   {
    "id": "people",
@@ -375,7 +415,8 @@
    "col": 4,
    "wordType": "category",
    "stage": 4,
-   "loadBoard": "people"
+   "loadBoard": "people",
+   "image": "images/symbols/people.svg"
   },
   {
    "id": "favorites",
@@ -385,7 +426,8 @@
    "col": 5,
    "wordType": "category",
    "stage": 4,
-   "loadBoard": "favorites"
+   "loadBoard": "favorites",
+   "image": "images/symbols/favorites.svg"
   },
   {
    "id": "food",
@@ -395,7 +437,8 @@
    "col": 6,
    "wordType": "category",
    "stage": 2,
-   "loadBoard": "food"
+   "loadBoard": "food",
+   "image": "images/symbols/food.svg"
   },
   {
    "id": "drinks",
@@ -405,7 +448,8 @@
    "col": 7,
    "wordType": "category",
    "stage": 2,
-   "loadBoard": "drinks"
+   "loadBoard": "drinks",
+   "image": "images/symbols/drinks.svg"
   },
   {
    "id": "places",
@@ -415,7 +459,8 @@
    "col": 8,
    "wordType": "category",
    "stage": 4,
-   "loadBoard": "places"
+   "loadBoard": "places",
+   "image": "images/symbols/places.svg"
   }
  ],
  "categoryBoards": [
@@ -460,7 +505,8 @@
      "spokenText": "cracker",
      "row": 0,
      "col": 0,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/cracker.svg"
     },
     {
      "id": "apple",
@@ -468,7 +514,8 @@
      "spokenText": "apple",
      "row": 0,
      "col": 1,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/apple.svg"
     },
     {
      "id": "banana",
@@ -476,7 +523,8 @@
      "spokenText": "banana",
      "row": 0,
      "col": 2,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/banana.svg"
     },
     {
      "id": "chips",
@@ -484,7 +532,8 @@
      "spokenText": "chips",
      "row": 0,
      "col": 3,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/chips.svg"
     },
     {
      "id": "cheese",
@@ -492,7 +541,8 @@
      "spokenText": "cheese",
      "row": 0,
      "col": 4,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/cheese.svg"
     },
     {
      "id": "sandwich",
@@ -500,7 +550,8 @@
      "spokenText": "sandwich",
      "row": 0,
      "col": 5,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/sandwich.svg"
     },
     {
      "id": "pizza",
@@ -508,7 +559,8 @@
      "spokenText": "pizza",
      "row": 0,
      "col": 6,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/pizza.svg"
     },
     {
      "id": "cookie",
@@ -516,7 +568,8 @@
      "spokenText": "cookie",
      "row": 0,
      "col": 7,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/cookie.svg"
     }
    ]
   },
@@ -529,7 +582,8 @@
      "spokenText": "water",
      "row": 0,
      "col": 0,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/water.svg"
     },
     {
      "id": "juice",
@@ -537,7 +591,8 @@
      "spokenText": "juice",
      "row": 0,
      "col": 1,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/juice.svg"
     },
     {
      "id": "milk",
@@ -545,7 +600,8 @@
      "spokenText": "milk",
      "row": 0,
      "col": 2,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/milk.svg"
     }
    ]
   },
@@ -558,7 +614,8 @@
      "spokenText": "ball",
      "row": 0,
      "col": 0,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/ball.svg"
     },
     {
      "id": "bubbles",
@@ -566,7 +623,8 @@
      "spokenText": "bubbles",
      "row": 0,
      "col": 1,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/bubbles.svg"
     },
     {
      "id": "blocks",
@@ -574,7 +632,8 @@
      "spokenText": "blocks",
      "row": 0,
      "col": 2,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/blocks.svg"
     },
     {
      "id": "swing",
@@ -582,7 +641,8 @@
      "spokenText": "swing",
      "row": 0,
      "col": 3,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/swing.svg"
     },
     {
      "id": "slide",
@@ -590,7 +650,8 @@
      "spokenText": "slide",
      "row": 0,
      "col": 4,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/slide.svg"
     },
     {
      "id": "tablet",
@@ -598,7 +659,8 @@
      "spokenText": "tablet",
      "row": 0,
      "col": 5,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/tablet.svg"
     },
     {
      "id": "music",
@@ -606,7 +668,8 @@
      "spokenText": "music",
      "row": 0,
      "col": 6,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/music.svg"
     },
     {
      "id": "book",
@@ -614,7 +677,8 @@
      "spokenText": "book",
      "row": 0,
      "col": 7,
-     "wordType": "noun"
+     "wordType": "noun",
+     "image": "images/symbols/book.svg"
     }
    ]
   },
@@ -627,7 +691,8 @@
      "spokenText": "outside",
      "row": 0,
      "col": 0,
-     "wordType": "place"
+     "wordType": "place",
+     "image": "images/symbols/outside.svg"
     },
     {
      "id": "home",
@@ -635,7 +700,8 @@
      "spokenText": "home",
      "row": 0,
      "col": 1,
-     "wordType": "place"
+     "wordType": "place",
+     "image": "images/symbols/home.svg"
     },
     {
      "id": "school",
@@ -643,7 +709,8 @@
      "spokenText": "school",
      "row": 0,
      "col": 2,
-     "wordType": "place"
+     "wordType": "place",
+     "image": "images/symbols/school.svg"
     },
     {
      "id": "car",
@@ -651,7 +718,8 @@
      "spokenText": "car",
      "row": 0,
      "col": 3,
-     "wordType": "place"
+     "wordType": "place",
+     "image": "images/symbols/car.svg"
     },
     {
      "id": "park",
@@ -659,7 +727,8 @@
      "spokenText": "park",
      "row": 0,
      "col": 4,
-     "wordType": "place"
+     "wordType": "place",
+     "image": "images/symbols/park.svg"
     },
     {
      "id": "bed",
@@ -667,7 +736,8 @@
      "spokenText": "bed",
      "row": 0,
      "col": 5,
-     "wordType": "place"
+     "wordType": "place",
+     "image": "images/symbols/bed.svg"
     }
    ]
   },
@@ -680,7 +750,8 @@
      "spokenText": "mom",
      "row": 0,
      "col": 0,
-     "wordType": "people"
+     "wordType": "people",
+     "image": "images/symbols/mom.svg"
     },
     {
      "id": "dad",
@@ -688,7 +759,8 @@
      "spokenText": "dad",
      "row": 0,
      "col": 1,
-     "wordType": "people"
+     "wordType": "people",
+     "image": "images/symbols/dad.svg"
     },
     {
      "id": "teacher",
@@ -696,7 +768,8 @@
      "spokenText": "teacher",
      "row": 0,
      "col": 2,
-     "wordType": "people"
+     "wordType": "people",
+     "image": "images/symbols/teacher.svg"
     },
     {
      "id": "friend",
@@ -704,7 +777,8 @@
      "spokenText": "friend",
      "row": 0,
      "col": 3,
-     "wordType": "people"
+     "wordType": "people",
+     "image": "images/symbols/friend.svg"
     },
     {
      "id": "he",
@@ -712,7 +786,8 @@
      "spokenText": "he",
      "row": 0,
      "col": 4,
-     "wordType": "people"
+     "wordType": "people",
+     "image": "images/symbols/he.svg"
     },
     {
      "id": "she",
@@ -720,7 +795,8 @@
      "spokenText": "she",
      "row": 0,
      "col": 5,
-     "wordType": "people"
+     "wordType": "people",
+     "image": "images/symbols/she.svg"
     }
    ]
   },
@@ -728,5 +804,6 @@
    "name": "Favorites",
    "buttons": []
   }
- }
+ },
+ "backImage": "images/symbols/back.svg"
 }

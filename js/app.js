@@ -18,6 +18,22 @@ const HOLD_TO_END_MODEL_MS = 2000;
 const MODEL_RETURN_DELAY_MS = 600;   // model mode: pause on the category page
 let returning = false;                // true during that pause
 
+// ---------- Touch supports (adult menu > Touch), per learner ----------
+// Only the child's board uses these, and not in Edit mode.
+let lastSelectAt = -Infinity;        // when a word was last selected (ms)
+const touchActive = () => !state.editing;
+
+// How long a finger must stay down on a button (0 = no hold needed).
+function holdMs() {
+  const t = getCurrent().touch;
+  return touchActive() && t.holdOn ? Math.round(t.holdSec * 1000) : 0;
+}
+// True while repeated taps are being ignored.
+function tapsBlocked() {
+  const t = getCurrent().touch;
+  return touchActive() && t.ignoreOn && performance.now() - lastSelectAt < t.ignoreSec * 1000;
+}
+
 const state = {
   board: null,        // the word map (data/core-board.json)
   page: "core",       // "core" or a category id such as "food"
@@ -46,7 +62,7 @@ function renderAll() {
   const cells = resolvePage(page, profile);
   state.cells = new Map(cells.map((d) => [d.key, d]));
 
-  renderBoard($("board"), cells, { editing: state.editing, photoUrl: getPhotoUrl });
+  renderBoard($("board"), cells, { editing: state.editing, photoUrl: getPhotoUrl, backImage: state.board.backImage });
 
   // Visual cue that the page changed: tinted background + page title.
   const onCategory = state.page !== "core";
@@ -111,6 +127,7 @@ function onCellTap(cellEl) {
   if (d.loadBoard) { goTo(d.loadBoard); return; }
 
   // A normal word: speak immediately, add to the message bar.
+  lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on
   speak(d.spoken);
   state.sentence.push({ label: d.label, spoken: d.spoken });
   drawMessage();
@@ -209,7 +226,7 @@ async function start() {
   await initProfiles();
   state.board = await (await fetch("data/core-board.json")).json();
 
-  attachPressHandling($("board"), onCellTap);
+  attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked });
 
   // Message bar: tap text to speak the sentence; Delete / Clear
   attachPressHandling($("message-bar"), (el) => {

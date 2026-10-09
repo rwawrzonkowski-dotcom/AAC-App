@@ -8,7 +8,11 @@
 //       "core:1,0": { show: true|false, label: "...", spoken: "..." },
 //       "favorites:0,0": { custom: true, label: "dino", spoken: "dino" },
 //     },
-//     voice: { voiceURI: "", pitch: 1.5, rate: 1.05 }
+//     voice: { voiceURI: "", pitch: 1.5, rate: 1.05 },
+//     touch: {                          // touch supports (adult menu > Touch)
+//       holdOn: false, holdSec: 0.5,    // hold to select
+//       ignoreOn: false, ignoreSec: 1,  // ignore repeated taps
+//     }
 //   }
 // Cell keys are "<page>:<row>,<col>". Positions are permanent, so a key always
 // means the same place on the board.
@@ -27,14 +31,18 @@ const photos = new Map(); // cellKey -> { blob, url } for the CURRENT learner on
 
 function newId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
+export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1 };
+
 function makeProfile(name, stage = 1, voice = CHILD_VOICE) {
-  return { id: newId(), name, created: Date.now(), stage, cells: {}, voice: { ...voice } };
+  return { id: newId(), name, created: Date.now(), stage, cells: {}, voice: { ...voice }, touch: { ...DEFAULT_TOUCH } };
 }
 
 export async function initProfiles() {
   const stored = await db.getAll("profiles");
   profiles.length = 0;
   profiles.push(...stored.sort((a, b) => a.created - b.created));
+  // Learners saved before touch supports existed get the (all off) defaults.
+  for (const p of profiles) p.touch = { ...DEFAULT_TOUCH, ...(p.touch || {}) };
 
   if (profiles.length === 0) {
     // First run. Carry over the old temporary ?stage= / ?voice= settings, if any.
@@ -119,4 +127,38 @@ export async function removePhoto(cellKey) {
   if (old) URL.revokeObjectURL(old.url);
   photos.delete(cellKey);
   await db.del("photos", currentId + "|" + cellKey);
+}
+
+// ---- Backup and restore support ----
+// Every photo of one learner (works for any learner, not just the current one):
+// returns [{ key: cellKey, blob }, ...]
+export async function getPhotoBlobs(profileId) {
+  const prefix = profileId + "|";
+  const rows = await db.getPrefix("photos", prefix);
+  return rows.filter((r) => r.value && r.value.blob).map((r) => ({ key: r.key.slice(prefix.length), blob: r.value.blob }));
+}
+
+// Add the clean learner `data` (from js/backup.js) to this device.
+//   replaceId = id of an existing learner to overwrite, or null to add a new one.
+// `data` = { name, stage, cells, voice, touch, photos: [{ key, blob }] }
+// Returns the saved profile.
+export async function importLearner(data, replaceId = null) {
+  let p = replaceId ? profiles.find((x) => x.id === replaceId) : null;
+  if (p) {
+    p.name = data.name;
+    p.stage = data.stage;
+    p.cells = data.cells;
+    p.voice = data.voice;
+    p.touch = data.touch;
+    await db.delPrefix("photos", p.id + "|");
+  } else {
+    p = makeProfile(data.name, data.stage, data.voice);
+    p.cells = data.cells;
+    p.touch = data.touch;
+    profiles.push(p);
+  }
+  await saveProfile(p);
+  for (const ph of data.photos) await db.put("photos", p.id + "|" + ph.key, { blob: ph.blob });
+  if (p.id === currentId) await loadPhotos();   // the learner on screen changed: reload their photos
+  return p;
 }

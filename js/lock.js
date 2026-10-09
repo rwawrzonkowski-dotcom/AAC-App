@@ -73,9 +73,11 @@ export function requestAdultAccess() {
       type: "button", class: "link-btn", text: "Forgot passcode?",
       onclick: () => {
         forgot.hidden = false;
-        forgot.textContent = "The passcode can only be reset by clearing this app's data " +
+        forgot.textContent = "The passcode can only be reset by clearing this app's website data " +
           "(iPad Settings > Safari > Advanced > Website Data, then remove this site). " +
-          "Warning: this also erases all learner profiles, settings and photos on this device.";
+          "Warning: this resets the passcode AND erases every learner, setting and photo on this iPad. " +
+          "Keep a recent backup (adult menu > Backup). After resetting, make a new passcode and use " +
+          "Restore from backup to bring the learners back.";
       },
     });
     const o = openOverlay([title, hint, dots, pad, saved ? forgotLink : null, forgot], { sheetClass: "lock" });

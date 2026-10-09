@@ -1,5 +1,5 @@
 // The adult menu: a large overlay for learners, vocabulary stage, edit mode,
-// voice settings and model mode. Adult-styled so it looks different from the
+// voice settings, touch supports, backup and model mode. Adult-styled so it looks different from the
 // child's board.
 import { h, openOverlay, askText, askConfirm } from "./ui.js";
 import {
@@ -7,6 +7,7 @@ import {
   saveProfile, CHILD_VOICE, ADULT_VOICE,
 } from "./profiles.js";
 import { setVoiceSettings, speak, listVoices, onVoicesChanged } from "./speech.js";
+import { saveBackup, restoreFromFile } from "./backup.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";
 
@@ -18,6 +19,7 @@ const PREVIEW_TEXT = "I want more bubbles please";
 export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onEdit, onModel }) {
   const body = h("div", { class: "menu-body" });
   let stopVoiceListener = () => {};
+  let backupMessage = "";   // result of the last save / restore, shown in the Backup section
 
   const o = openOverlay([
     h("div", { class: "menu-head" },
@@ -36,6 +38,7 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onEdit,
     const top = body.scrollTop;
     stopVoiceListener();
     body.replaceChildren(learnerSection(), stageSection(), actionSection(), voiceSection(),
+      touchSection(), backupSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close }));
     body.scrollTop = top;
   }
@@ -166,6 +169,86 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onEdit,
           onclick: resetTo(CHILD_VOICE) }),
         h("button", { type: "button", class: "btn", id: "voice-adult", text: "Reset to adult default",
           onclick: resetTo(ADULT_VOICE) })));
+  }
+
+  // ---------- Touch supports ----------
+  // Two optional helps for children who tap too lightly, too often, or by accident.
+  // They only affect the child's board (words, category buttons, Back) in normal
+  // and modeling mode. Saved per learner.
+  function touchSection() {
+    const cur = getCurrent();
+    const t = cur.touch;
+    const persist = () => saveProfile(cur);
+
+    // One setting = Off/On buttons + a slider (only usable when On) + an explanation.
+    function setting({ id, title, onKey, secKey, min, max, step, decimals, help }) {
+      const num = h("span", { class: "slider-num", id: `${id}-val`, text: Number(t[secKey]).toFixed(decimals) + " s" });
+      const input = h("input", { type: "range", id: `${id}-slider`, min, max, step, value: t[secKey],
+        disabled: !t[onKey],
+        oninput: () => {
+          t[secKey] = parseFloat(input.value);
+          num.textContent = t[secKey].toFixed(decimals) + " s";
+          persist();
+        } });
+      const offBtn = h("button", { type: "button", class: "seg" + (t[onKey] ? "" : " on"), id: `${id}-off`, text: "Off",
+        onclick: () => { t[onKey] = false; persist(); refresh(); } });
+      const onBtn = h("button", { type: "button", class: "seg" + (t[onKey] ? " on" : ""), id: `${id}-on`, text: "On",
+        onclick: () => { t[onKey] = true; persist(); refresh(); } });
+      return h("div", { class: "field touch-setting" },
+        h("label", { text: title }),
+        h("div", { class: "seg-row touch-seg" }, offBtn, onBtn),
+        h("div", { class: "slider-row touch-slider" + (t[onKey] ? "" : " off") },
+          h("label", { for: `${id}-slider`, text: "Time" }), input, num),
+        h("p", { class: "muted", text: help }));
+    }
+
+    return h("section", { class: "panel", id: "sec-touch" },
+      h("h2", { text: "Touch (for this learner)" }),
+      setting({
+        id: "touch-hold", title: "Hold to select", onKey: "holdOn", secKey: "holdSec",
+        min: 0.1, max: 2, step: 0.1, decimals: 1,
+        help: "The child must keep a finger on a button for this long before it speaks. A ring fills while they hold. " +
+          "Lifting early or sliding off does nothing. Helps when a child brushes or swipes across buttons by accident.",
+      }),
+      setting({
+        id: "touch-ignore", title: "Ignore repeated taps", onKey: "ignoreOn", secKey: "ignoreSec",
+        min: 0.25, max: 3, step: 0.25, decimals: 2,
+        help: "After a word is spoken, taps on any board button are ignored for this long (nothing is shown or said). " +
+          "Helps when a child taps the same button again and again. Opening a category does not start the wait.",
+      }),
+      h("p", { class: "muted", text: "These do not affect the message bar, Delete, Clear or the adult screens." }));
+  }
+
+  // ---------- Backup and restore ----------
+  function backupSection() {
+    const cur = getCurrent();
+    const status = h("p", { class: "backup-status", id: "backup-status", role: "status", text: backupMessage });
+    const run = async (fn) => {
+      try { backupMessage = await fn(); }
+      catch (e) { backupMessage = "That did not work: " + (e && e.message ? e.message : "unknown problem"); }
+      status.textContent = backupMessage;
+    };
+    const fileIn = h("input", { type: "file", accept: ".json,application/json", id: "restore-file", class: "file-hidden",
+      onchange: async () => {
+        const f = fileIn.files && fileIn.files[0];
+        fileIn.value = "";                     // so choosing the same file again still works
+        if (!f) return;
+        const msg = await restoreFromFile(f);
+        if (msg) { backupMessage = msg; onLearnerChanged(); refresh(); }
+      } });
+    return h("section", { class: "panel", id: "sec-backup" },
+      h("h2", { text: "Backup" }),
+      h("p", { class: "muted", text:
+        "A backup is one file with a learner's stage, button changes, voice, touch settings and photos. " +
+        "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included." }),
+      h("div", { class: "btn-row left" },
+        h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
+          onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name) + ". Keep it somewhere safe.") }),
+        h("button", { type: "button", class: "btn", id: "backup-all", text: "Save backup of all learners",
+          onclick: () => run(async () => "Saved " + await saveBackup(listProfiles(), "all") + ". Keep it somewhere safe.") }),
+        h("label", { class: "btn", for: "restore-file", id: "restore-btn", text: "Restore from backup" }),
+        fileIn),
+      status);
   }
 
   refresh();

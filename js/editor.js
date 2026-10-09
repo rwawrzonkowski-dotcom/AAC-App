@@ -47,9 +47,21 @@ export function openCellEditor(d, photoUrl, { onOpenPage } = {}) {
     labelIn.addEventListener("input", () => { if (linked) spokenIn.value = labelIn.value; });
     spokenIn.addEventListener("input", () => { linked = false; });
 
+    // The built-in symbol (if this button has one) shows when there is no photo.
+    const symbolUrl = d.base && d.base.image ? d.base.image : null;
     const thumb = h("div", { class: "photo-thumb" });
+    const picState = h("p", { class: "pic-state", id: "ed-pic-state" });
     function paintThumb() {
-      thumb.replaceChildren(previewUrl ? h("img", { src: previewUrl, alt: "" }) : h("span", { text: "No photo" }));
+      if (previewUrl) {
+        thumb.replaceChildren(h("img", { src: previewUrl, alt: "" }));
+        picState.textContent = "Using your photo";
+      } else if (symbolUrl) {
+        thumb.replaceChildren(h("img", { class: "symbol", src: symbolUrl, alt: "" }));
+        picState.textContent = "Using built-in symbol";
+      } else {
+        thumb.replaceChildren(h("span", { text: "No picture" }));
+        picState.textContent = "No picture yet";
+      }
     }
     paintThumb();
 
@@ -105,9 +117,10 @@ export function openCellEditor(d, photoUrl, { onOpenPage } = {}) {
       h("div", { class: "field" }, h("label", { text: "Photo" }),
         h("div", { class: "photo-row" }, thumb,
           h("div", { class: "photo-btns" },
+            picState,
             h("label", { class: "btn", for: "ed-photo", text: "Take or choose photo" }),
             fileIn,
-            h("button", { type: "button", class: "btn", id: "ed-remove-photo", text: "Remove photo",
+            h("button", { type: "button", class: "btn", id: "ed-remove-photo", text: symbolUrl ? "Remove my photo (use symbol)" : "Remove photo",
               onclick: () => { photo = null; previewUrl = null; paintThumb(); } })))),
       d.loadBoard && onOpenPage
         ? h("button", { type: "button", class: "btn wide", text: "Open this page",
