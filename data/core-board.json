@@ -1,0 +1,453 @@
+{
+ "format": "aac-board-v1",
+ "_note": "A word's row/col is PERMANENT. Never reorder or move entries. 'stage' only controls when a word is revealed (shown if stage <= current stage).",
+ "id": "core",
+ "name": "Core Board",
+ "columns": 9,
+ "rows": 5,
+ "buttons": [
+  {
+   "id": "i",
+   "label": "I",
+   "spokenText": "i",
+   "row": 0,
+   "col": 0,
+   "wordType": "people",
+   "stage": 3
+  },
+  {
+   "id": "you",
+   "label": "you",
+   "spokenText": "you",
+   "row": 0,
+   "col": 1,
+   "wordType": "people",
+   "stage": 3
+  },
+  {
+   "id": "it",
+   "label": "it",
+   "spokenText": "it",
+   "row": 0,
+   "col": 2,
+   "wordType": "people",
+   "stage": 4
+  },
+  {
+   "id": "that",
+   "label": "that",
+   "spokenText": "that",
+   "row": 0,
+   "col": 3,
+   "wordType": "people",
+   "stage": 4
+  },
+  {
+   "id": "what",
+   "label": "what",
+   "spokenText": "what",
+   "row": 0,
+   "col": 4,
+   "wordType": "question",
+   "stage": 4
+  },
+  {
+   "id": "where",
+   "label": "where",
+   "spokenText": "where",
+   "row": 0,
+   "col": 5,
+   "wordType": "question",
+   "stage": 4
+  },
+  {
+   "id": "who",
+   "label": "who",
+   "spokenText": "who",
+   "row": 0,
+   "col": 6,
+   "wordType": "question",
+   "stage": 4
+  },
+  {
+   "id": "when",
+   "label": "when",
+   "spokenText": "when",
+   "row": 0,
+   "col": 7,
+   "wordType": "question",
+   "stage": 4
+  },
+  {
+   "id": "why",
+   "label": "why",
+   "spokenText": "why",
+   "row": 0,
+   "col": 8,
+   "wordType": "question",
+   "stage": 4
+  },
+  {
+   "id": "want",
+   "label": "want",
+   "spokenText": "want",
+   "row": 1,
+   "col": 0,
+   "wordType": "action",
+   "stage": 2
+  },
+  {
+   "id": "like",
+   "label": "like",
+   "spokenText": "like",
+   "row": 1,
+   "col": 1,
+   "wordType": "action",
+   "stage": 3
+  },
+  {
+   "id": "get",
+   "label": "get",
+   "spokenText": "get",
+   "row": 1,
+   "col": 2,
+   "wordType": "action",
+   "stage": 3
+  },
+  {
+   "id": "go",
+   "label": "go",
+   "spokenText": "go",
+   "row": 1,
+   "col": 3,
+   "wordType": "action",
+   "stage": 2
+  },
+  {
+   "id": "stop",
+   "label": "stop",
+   "spokenText": "stop",
+   "row": 1,
+   "col": 4,
+   "wordType": "social",
+   "stage": 1
+  },
+  {
+   "id": "help",
+   "label": "help",
+   "spokenText": "help",
+   "row": 1,
+   "col": 5,
+   "wordType": "social",
+   "stage": 1
+  },
+  {
+   "id": "more",
+   "label": "more",
+   "spokenText": "more",
+   "row": 1,
+   "col": 6,
+   "wordType": "social",
+   "stage": 1
+  },
+  {
+   "id": "all",
+   "label": "all",
+   "spokenText": "all",
+   "row": 1,
+   "col": 7,
+   "wordType": "describing",
+   "stage": 3
+  },
+  {
+   "id": "some",
+   "label": "some",
+   "spokenText": "some",
+   "row": 1,
+   "col": 8,
+   "wordType": "describing",
+   "stage": 3
+  },
+  {
+   "id": "do",
+   "label": "do",
+   "spokenText": "do",
+   "row": 2,
+   "col": 0,
+   "wordType": "action",
+   "stage": 4
+  },
+  {
+   "id": "make",
+   "label": "make",
+   "spokenText": "make",
+   "row": 2,
+   "col": 1,
+   "wordType": "action",
+   "stage": 4
+  },
+  {
+   "id": "put",
+   "label": "put",
+   "spokenText": "put",
+   "row": 2,
+   "col": 2,
+   "wordType": "action",
+   "stage": 3
+  },
+  {
+   "id": "turn",
+   "label": "turn",
+   "spokenText": "turn",
+   "row": 2,
+   "col": 3,
+   "wordType": "action",
+   "stage": 4
+  },
+  {
+   "id": "look",
+   "label": "look",
+   "spokenText": "look",
+   "row": 2,
+   "col": 4,
+   "wordType": "action",
+   "stage": 4
+  },
+  {
+   "id": "open",
+   "label": "open",
+   "spokenText": "open",
+   "row": 2,
+   "col": 5,
+   "wordType": "action",
+   "stage": 2
+  },
+  {
+   "id": "eat",
+   "label": "eat",
+   "spokenText": "eat",
+   "row": 2,
+   "col": 6,
+   "wordType": "action",
+   "stage": 1
+  },
+  {
+   "id": "drink",
+   "label": "drink",
+   "spokenText": "drink",
+   "row": 2,
+   "col": 7,
+   "wordType": "action",
+   "stage": 1
+  },
+  {
+   "id": "bathroom",
+   "label": "bathroom",
+   "spokenText": "bathroom",
+   "row": 2,
+   "col": 8,
+   "wordType": "place",
+   "stage": 1
+  },
+  {
+   "id": "can",
+   "label": "can",
+   "spokenText": "can",
+   "row": 3,
+   "col": 0,
+   "wordType": "action",
+   "stage": 4
+  },
+  {
+   "id": "not",
+   "label": "not",
+   "spokenText": "not",
+   "row": 3,
+   "col": 1,
+   "wordType": "describing",
+   "stage": 4
+  },
+  {
+   "id": "finished",
+   "label": "finished",
+   "spokenText": "finished",
+   "row": 3,
+   "col": 2,
+   "wordType": "describing",
+   "stage": 2
+  },
+  {
+   "id": "good",
+   "label": "good",
+   "spokenText": "good",
+   "row": 3,
+   "col": 3,
+   "wordType": "describing",
+   "stage": 4
+  },
+  {
+   "id": "different",
+   "label": "different",
+   "spokenText": "different",
+   "row": 3,
+   "col": 4,
+   "wordType": "describing",
+   "stage": 4
+  },
+  {
+   "id": "same",
+   "label": "same",
+   "spokenText": "same",
+   "row": 3,
+   "col": 5,
+   "wordType": "describing",
+   "stage": 4
+  },
+  {
+   "id": "up",
+   "label": "up",
+   "spokenText": "up",
+   "row": 3,
+   "col": 6,
+   "wordType": "place",
+   "stage": 3
+  },
+  {
+   "id": "in",
+   "label": "in",
+   "spokenText": "in",
+   "row": 3,
+   "col": 7,
+   "wordType": "place",
+   "stage": 3
+  },
+  {
+   "id": "on",
+   "label": "on",
+   "spokenText": "on",
+   "row": 3,
+   "col": 8,
+   "wordType": "place",
+   "stage": 3
+  },
+  {
+   "id": "yes",
+   "label": "yes",
+   "spokenText": "yes",
+   "row": 4,
+   "col": 0,
+   "wordType": "social",
+   "stage": 2
+  },
+  {
+   "id": "no",
+   "label": "no",
+   "spokenText": "no",
+   "row": 4,
+   "col": 1,
+   "wordType": "social",
+   "stage": 2
+  },
+  {
+   "id": "here",
+   "label": "here",
+   "spokenText": "here",
+   "row": 4,
+   "col": 2,
+   "wordType": "social",
+   "stage": 4
+  },
+  {
+   "id": "play",
+   "label": "Play",
+   "spokenText": "Play",
+   "row": 4,
+   "col": 3,
+   "wordType": "category",
+   "stage": 4,
+   "loadBoard": "play"
+  },
+  {
+   "id": "people",
+   "label": "People",
+   "spokenText": "People",
+   "row": 4,
+   "col": 4,
+   "wordType": "category",
+   "stage": 4,
+   "loadBoard": "people"
+  },
+  {
+   "id": "favorites",
+   "label": "Favorites",
+   "spokenText": "Favorites",
+   "row": 4,
+   "col": 5,
+   "wordType": "category",
+   "stage": 4,
+   "loadBoard": "favorites"
+  },
+  {
+   "id": "food",
+   "label": "Food",
+   "spokenText": "Food",
+   "row": 4,
+   "col": 6,
+   "wordType": "category",
+   "stage": 2,
+   "loadBoard": "food"
+  },
+  {
+   "id": "drinks",
+   "label": "Drinks",
+   "spokenText": "Drinks",
+   "row": 4,
+   "col": 7,
+   "wordType": "category",
+   "stage": 2,
+   "loadBoard": "drinks"
+  },
+  {
+   "id": "places",
+   "label": "Places",
+   "spokenText": "Places",
+   "row": 4,
+   "col": 8,
+   "wordType": "category",
+   "stage": 4,
+   "loadBoard": "places"
+  }
+ ],
+ "categoryBoards": [
+  {
+   "id": "food",
+   "name": "Food",
+   "buttons": []
+  },
+  {
+   "id": "drinks",
+   "name": "Drinks",
+   "buttons": []
+  },
+  {
+   "id": "play",
+   "name": "Play",
+   "buttons": []
+  },
+  {
+   "id": "places",
+   "name": "Places",
+   "buttons": []
+  },
+  {
+   "id": "people",
+   "name": "People",
+   "buttons": []
+  },
+  {
+   "id": "favorites",
+   "name": "Favorites",
+   "buttons": []
+  }
+ ]
+}

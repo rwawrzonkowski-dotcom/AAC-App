@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AAC Board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AAC Board">
+<meta name="theme-color" content="#1e6ec8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Shown only when the iPad is held upright (see styles.css) -->
+  <div id="rotate-message" role="alert">
+    <div class="rotate-icon" aria-hidden="true">&#x1F4F1;&#x21BB;</div>
+    <p>Please turn the iPad sideways</p>
+  </div>
+
+  <main id="app">
+    <!-- Message bar: tapped words appear here. Tap the text area to speak the sentence. -->
+    <header id="message-bar">
+      <div id="message-text" role="button" aria-label="Speak the whole message">
+        <div id="message-chips"></div>
+      </div>
+      <button id="delete-btn" class="bar-btn" type="button">&#x232B; Delete</button>
+      <button id="clear-btn" class="bar-btn" type="button">&#x2715; Clear</button>
+    </header>
+
+    <!-- Context strip: reserved for Phase 3 (photo-suggested words). No interaction yet. -->
+    <section id="context-strip" aria-hidden="true"></section>
+
+    <!-- Core grid: 9 x 5 = 45 fixed cells, built by js/board.js -->
+    <section id="board" aria-label="Communication board"></section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

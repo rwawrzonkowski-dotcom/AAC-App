@@ -1,0 +1,16 @@
+{
+  "name": "AAC Board",
+  "short_name": "AAC Board",
+  "description": "A free, offline communication board for children new to AAC.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1e6ec8",
+  "theme_color": "#1e6ec8",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

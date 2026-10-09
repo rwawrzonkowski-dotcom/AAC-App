@@ -1,0 +1,128 @@
+/* ---------- Basics: fixed full-screen app, no scrolling, no selection ---------- */
+:root {
+  --gap: 0.6vmin;
+  --radius: 1.2vmin;
+  /* Modified Fitzgerald Key colours (soft) */
+  --c-people: #fff3a8;
+  --c-action: #bfe8b8;
+  --c-describing: #bcd9f5;
+  --c-question: #d9c6f0;
+  --c-social: #f8c4d8;
+  --c-category: #fcd6a6;
+  --c-place: #bcd9f5;
+  --c-hidden: #e2e2e2;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; width: 100%;
+  overflow: hidden;
+  position: fixed;               /* stops iOS rubber-band scrolling */
+  overscroll-behavior: none;     /* stops pull-to-refresh */
+  background: #f4f4f4;
+  font-family: -apple-system, "SF Pro Rounded", "Helvetica Neue", Arial, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;   /* no long-press callout */
+  touch-action: manipulation;    /* no double-tap zoom */
+}
+button { font: inherit; touch-action: manipulation; }
+
+/* ---------- Page layout: message bar / context strip / grid ---------- */
+#app {
+  height: 100vh; height: 100dvh; width: 100vw;
+  display: grid;
+  grid-template-rows: 12fr 10fr 78fr;
+  gap: var(--gap);
+  padding: var(--gap);
+}
+
+/* ---------- Message bar ---------- */
+#message-bar { display: flex; gap: var(--gap); min-height: 0; }
+#message-text {
+  flex: 1; min-width: 0; background: #fff; border: 0.3vmin solid #9aa5b1;
+  border-radius: var(--radius); display: flex; align-items: center;
+  padding: 0 1.5vmin; cursor: pointer; overflow: hidden;
+}
+#message-text.pressed { background: #e6eef7; }
+#message-chips {
+  display: flex; gap: 1vmin; align-items: center; white-space: nowrap;
+  width: 100%; justify-content: flex-start;
+}
+.chip {
+  flex: 0 0 auto; background: #e8eef5; border: 0.25vmin solid #9aa5b1;
+  border-radius: 1vmin; padding: 0.4vmin 1.6vmin;
+  font-size: min(4vmin, 5.5dvh); font-weight: 700; color: #222;
+}
+.bar-btn {
+  flex: 0 0 13vw; border: 0.3vmin solid #6b7480; border-radius: var(--radius);
+  font-size: min(2.4vw, 4dvh); font-weight: 800; color: #222; cursor: pointer;
+}
+#delete-btn { background: #ffd9a0; }
+#clear-btn  { background: #ffb3b3; }
+.bar-btn.pressed { filter: brightness(0.8); }
+
+/* ---------- Context strip (Phase 3 placeholder) ---------- */
+#context-strip {
+  background: #ebeef2; border-radius: var(--radius);
+  border: 0.2vmin dashed #cfd5dc; pointer-events: none;
+}
+
+/* ---------- Core grid: 9 columns x 5 rows, fixed forever ---------- */
+#board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: var(--gap);
+  min-height: 0; min-width: 0;
+}
+.cell {
+  position: relative; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  border-radius: var(--radius); border: 0.25vmin solid rgba(0,0,0,0.18);
+  padding: 0; overflow: hidden; color: #111; cursor: pointer;
+}
+/* Hidden word: occupies its cell but is blank, gray and inert */
+.cell.hidden {
+  background: var(--c-hidden); border-color: transparent;
+  pointer-events: none; cursor: default;
+}
+.cell.hidden * { display: none; }
+
+.type-people     { background: var(--c-people); }
+.type-action     { background: var(--c-action); }
+.type-describing { background: var(--c-describing); }
+.type-question   { background: var(--c-question); }
+.type-social     { background: var(--c-social); }
+.type-category   { background: var(--c-category); }
+.type-place      { background: var(--c-place); }
+
+/* Press feedback: brief darken */
+.cell.pressed { filter: brightness(0.78); }
+
+/* Image area: FIXED proportion (66% of cell) so real images can replace
+   the placeholder later without changing the layout. */
+.cell-image {
+  flex: 0 0 66%; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.cell-image .placeholder { font-size: min(5.2vw, 8dvh); line-height: 1; }
+.cell-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.cell-label {
+  flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 1.7vw; font-weight: 800; letter-spacing: -0.01em;
+  white-space: nowrap; pointer-events: none;
+}
+
+/* ---------- Portrait: show only the rotate message ---------- */
+#rotate-message {
+  display: none; position: fixed; inset: 0; z-index: 10;
+  background: #1e6ec8; color: #fff; text-align: center;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 6vmin;
+}
+#rotate-message .rotate-icon { font-size: 18vmin; margin-bottom: 4vmin; }
+#rotate-message p { font-size: 6vmin; font-weight: 800; margin: 0; }
+@media (orientation: portrait) {
+  #rotate-message { display: flex; }
+  #app { display: none; }
+}
