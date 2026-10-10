@@ -1,21 +1,24 @@
 // App entry point. Ties everything together:
 //   - loads the word map and the current learner's profile
-//   - draws the main board or a category page
+//   - draws the main board (45 or 84 locations) or a category / adult-made page
 //   - handles taps (speak / navigate), the adult lock, Edit mode and Model mode
 import { speak, initSpeech, setVoiceSettings } from "./speech.js";
-import { renderBoard, attachPressHandling, resolvePage, cellKey } from "./board.js";
+import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js";
+import { buildModel, getPage, pathToCore, resolvePage, posKey, MAX_DEPTH } from "./boardmodel.js";
+import { loadBoardData } from "./boarddata.js";
 import {
-  initProfiles, getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto,
+  initProfiles, getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto, newPageId, deleteAdultPage,
 } from "./profiles.js";
 import { attachHold } from "./hold.js";
 import { requestAdultAccess } from "./lock.js";
 import { openAdultMenu } from "./adult.js";
+import { askConfirm } from "./ui.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
-const MODEL_RETURN_DELAY_MS = 600;   // model mode: pause on the category page
+const MODEL_RETURN_DELAY_MS = 600;   // model mode: pause on each page while stepping back out
 let returning = false;                // true during that pause
 
 // ---------- Touch supports (adult menu > Touch), per learner ----------
@@ -36,7 +39,7 @@ function tapsBlocked() {
 
 const state = {
   board: null,        // the word map (data/core-board.json)
-  page: "core",       // "core" or a category id such as "food"
+  page: "core",       // "core", a category id such as "food", or an adult-made page id
   editing: false,     // Edit mode
   modeling: false,    // Model mode
   sentence: [],       // words in the message bar: {label, spoken}
@@ -46,23 +49,29 @@ const state = {
 const $ = (id) => document.getElementById(id);
 
 // ---------- Which page is showing ----------
+// The layout for the current learner's grid size (45 or 84).
+const modelNow = () => buildModel(state.board, getCurrent().gridSize);
+
 function currentPageDef() {
-  const { board, page } = state;
-  if (page === "core") return { id: "core", name: "", buttons: board.buttons, homeAt: null };
-  const def = board.pages[page];
-  // The Back cell sits where this category's button sits on the main board.
-  const catButton = board.buttons.find((b) => b.loadBoard === page);
-  return { id: page, name: def.name, buttons: def.buttons, homeAt: { row: catButton.row, col: catButton.col } };
+  const profile = getCurrent();
+  const model = modelNow();
+  let page = getPage(model, profile, state.page);
+  if (!page) { state.page = "core"; page = getPage(model, profile, "core"); }   // e.g. after switching board size
+  return page;
 }
 
 // Redraw everything that depends on page / learner / mode.
 function renderAll() {
   const profile = getCurrent();
+  const model = modelNow();
   const page = currentPageDef();
-  const cells = resolvePage(page, profile);
+  const cells = resolvePage(page, profile, model);
   state.cells = new Map(cells.map((d) => [d.key, d]));
 
-  renderBoard($("board"), cells, { editing: state.editing, photoUrl: getPhotoUrl, backImage: state.board.backImage });
+  renderBoard($("board"), cells, {
+    editing: state.editing, photoUrl: getPhotoUrl, backImage: state.board.backImage,
+    cols: model.cols, rows: model.rows, size: model.size,
+  });
 
   // Visual cue that the page changed: tinted background + page title.
   const onCategory = state.page !== "core";
@@ -118,34 +127,40 @@ function onCellTap(cellEl) {
   const d = state.cells.get(cellEl.dataset.key);
   if (!d || returning) return;
 
-  // Back button: back to the main board (never speaks).
-  if (d.kind === "home") { goTo("core"); return; }
+  // Back button: up ONE level (a page opened from another page goes back to that
+  // page; a page opened from the main board goes back to the main board). Never speaks.
+  if (d.kind === "home") { goTo(currentPageDef().parent || "core"); return; }
 
   if (state.editing) { editCell(d); return; }
 
-  // Category button on the main board: open its page. No speech, nothing added.
+  // Category / page button: open its page. No speech, nothing added.
   if (d.loadBoard) { goTo(d.loadBoard); return; }
 
   // A normal word: speak immediately, add to the message bar.
   lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on
   speak(d.spoken);
-  state.sentence.push({ label: d.label, spoken: d.spoken });
+  state.sentence.push({ label: d.sentence ? d.spoken : d.label, spoken: d.spoken });
   drawMessage();
   logWord(d.label, state.modeling ? "model" : "learner");
 
   if (state.page !== "core") {
-    // Category item: go back to the main board automatically.
-    const fromPage = currentPageDef();
+    // Item on any page: go back to the main board automatically.
+    const profile = getCurrent();
+    const model = modelNow();
+    const path = pathToCore(model, profile, state.page);       // [this page, its parent, ..., "core"]
     if (state.modeling) {
-      // Model mode: keep the page visible briefly so the item's ring is seen,
-      // then return and ring the category button (the path).
+      // Model mode: keep the page visible briefly so the item's ring is seen, then
+      // step back out one page at a time, ringing the button that was used to open
+      // each page (so the whole path is shown: item, sub-page button, category button).
       ringCell(d.key, 1200);
-      returning = true;                    // ignore taps during the pause
-      setTimeout(() => {
-        returning = false;
-        goTo("core");
-        ringCell(cellKey("core", fromPage.homeAt.row, fromPage.homeAt.col), 800);
+      returning = true;                    // ignore taps during the pauses
+      const stepOut = (i) => setTimeout(() => {
+        const child = getPage(model, profile, path[i]);
+        goTo(path[i + 1]);
+        ringCell(posKey(model.size, path[i + 1], child.at.row, child.at.col), 800);
+        if (i + 2 < path.length) stepOut(i + 1); else returning = false;
       }, MODEL_RETURN_DELAY_MS);
+      stepOut(0);
     } else {
       goTo("core");                        // learner taps return immediately
     }
@@ -155,36 +170,62 @@ function onCellTap(cellEl) {
 }
 
 // ---------- Edit mode ----------
+// Everything an adult changes is stored in one of two places (see js/profiles.js):
+//   built-in word  -> profile.words[wordId]   (follows the word to either board)
+//   added by adult -> profile.cells[position] (belongs to that cell on that board)
 async function editCell(d) {
-  const result = await openCellEditor(d, getPhotoUrl(d.key), { onOpenPage: goTo });
-  if (!result) return;
   const profile = getCurrent();
+  const page = currentPageDef();
+  const canMakePage = d.kind === "empty" && page.depth < MAX_DEPTH;
+  const result = await openCellEditor(d, getPhotoUrl(d.photoKey), { onOpenPage: goTo, canMakePage });
+  if (!result) return;
 
-  if (result.removeWord) {
+  if (result.deletePage) {
+    const sure = await askConfirm(
+      `Delete the page "${d.label}" and everything on it? The words and photos on it will be erased from this iPad. This cannot be undone.`,
+      "Delete page");
+    if (!sure) return;
+    await deleteAdultPage(profile, d.opens);
     delete profile.cells[d.key];
-    await removePhoto(d.key);
-  } else {
-    const ov = { ...(profile.cells[d.key] || {}) };
-    if (d.kind === "empty") {
-      ov.custom = true;
-      ov.label = result.label;
-      if (result.spoken !== result.label) ov.spoken = result.spoken; else delete ov.spoken;
-    } else {
-      // Store only what differs from the built-in word.
-      if (result.show === "auto") delete ov.show; else ov.show = result.show;
-      if (d.custom) {
-        ov.label = result.label;
-        if (result.spoken !== result.label) ov.spoken = result.spoken; else delete ov.spoken;
-      } else {
-        const baseSpoken = d.base.spokenText || d.base.label;
-        if (result.label !== d.base.label) ov.label = result.label; else delete ov.label;
-        if (result.spoken !== baseSpoken) ov.spoken = result.spoken; else delete ov.spoken;
-      }
+    await removePhoto(d.photoKey);
+  } else if (result.removeWord) {
+    delete profile.cells[d.key];
+    await removePhoto(d.photoKey);
+  } else if (d.kind === "empty") {
+    // A new button in an empty cell: a word, or a page.
+    const cell = { custom: true, label: result.label };
+    if (result.makePage) {
+      const id = newPageId();
+      profile.pages[id] = { size: profile.gridSize, name: result.label, parent: page.id,
+                            at: { row: d.row, col: d.col }, depth: page.depth + 1 };
+      cell.opens = id;
+    } else if (result.spoken !== result.label) {
+      cell.spoken = result.spoken;
     }
-    if (Object.keys(ov).length) profile.cells[d.key] = ov; else delete profile.cells[d.key];
-
-    if (result.photo instanceof Blob) await setPhoto(d.key, result.photo);
-    else if (result.photo === null) await removePhoto(d.key);
+    profile.cells[d.key] = cell;
+  } else if (d.custom) {
+    // An adult-added word or page button: edit it in place.
+    const cell = { ...profile.cells[d.key], label: result.label };
+    if (result.show === "auto") delete cell.show; else cell.show = result.show;
+    if (!d.opens) { if (result.spoken !== result.label) cell.spoken = result.spoken; else delete cell.spoken; }
+    else { profile.pages[d.opens].name = result.label; }
+    profile.cells[d.key] = cell;
+  } else {
+    // A built-in word: store only what differs from the built-in version.
+    const ov = { ...(profile.words[d.wordId] || {}) };
+    if (d.sentence && d.blank) {
+      if (result.fill) ov.fill = result.fill; else delete ov.fill;
+    } else {
+      if (result.show === "auto") delete ov.show; else ov.show = result.show;
+      const baseSpoken = d.base.template || d.base.spokenText || d.base.label;
+      if (result.label !== d.base.label) ov.label = result.label; else delete ov.label;
+      if (result.spoken !== baseSpoken) ov.spoken = result.spoken; else delete ov.spoken;
+    }
+    if (Object.keys(ov).length) profile.words[d.wordId] = ov; else delete profile.words[d.wordId];
+  }
+  if (!result.deletePage && !result.removeWord && result.photo !== undefined) {
+    if (result.photo instanceof Blob) await setPhoto(d.photoKey, result.photo);
+    else if (result.photo === null) await removePhoto(d.photoKey);
   }
   await saveProfile(profile);
   renderAll();
@@ -212,6 +253,13 @@ async function openAdult() {
         renderAll();
       },
       onVocabChanged: renderAll,
+      onBoardSizeChanged: () => {
+        // Different grid: word locations changed, so start clean on the main board.
+        state.sentence.length = 0;
+        drawMessage();
+        state.page = "core";
+        renderAll();
+      },
       onEdit: startEditing,
       onModel: startModeling,
     });
@@ -223,8 +271,8 @@ async function openAdult() {
 // ---------- Start ----------
 async function start() {
   initSpeech();
-  await initProfiles();
-  state.board = await (await fetch("data/core-board.json")).json();
+  state.board = await loadBoardData();
+  await initProfiles(state.board);
 
   attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked });
 
@@ -235,6 +283,7 @@ async function start() {
     else if (el.id === "clear-btn") { state.sentence.length = 0; drawMessage(); }
   }, "#message-text, .bar-btn");
 
+  fitLabelsOnResize($("board"));
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
   attachHold($("model-end"), HOLD_TO_END_MODEL_MS, stopModeling);
   $("edit-done").addEventListener("click", stopEditing);

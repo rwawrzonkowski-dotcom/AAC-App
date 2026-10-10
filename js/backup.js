@@ -2,23 +2,30 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 1, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 2, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
-//       { name, stage, cells, voice, touch,
-//         photos: [ { key: "core:1,0", dataUrl: "data:image/jpeg;base64,..." } ] }
+//       { name, stage, gridSize, words, cells, pages, pins, voice, touch,
+//         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
 //     ]
 //   }
+// `words` = changes to built-in words (by word id), `cells` = things added to empty
+// cells (by position), `pages` = pages the adult made. See js/profiles.js.
+// Version 1 backups (made before Phase 1.5A, keyed only by position) are still
+// readable: they are upgraded on the way in (see js/migrate.js).
 // Photos are stored inside the file as text (base64 "data URLs"), each with the
-// cell key it belongs to. The passcode is NEVER saved in a backup and never
+// photo key it belongs to. The passcode is NEVER saved in a backup and never
 // restored from one. Nothing here uses the network: the file stays on this iPad
 // until you move it yourself.
 import { h, openOverlay, askConfirm } from "./ui.js";
 import {
   listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, CHILD_VOICE,
 } from "./profiles.js";
+import { getBoardData } from "./boarddata.js";
+import { SIZES, MAX_DEPTH } from "./boardmodel.js";
+import { migrateCells, mapLegacyKey } from "./migrate.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 2;
 
 // ---------------------------------------------------------------- saving
 
@@ -42,7 +49,11 @@ export async function buildBackup(learners) {
     out.push({
       name: p.name,
       stage: p.stage,
+      gridSize: p.gridSize,
+      words: p.words,
       cells: p.cells,
+      pages: p.pages,
+      pins: p.pins,
       voice: p.voice,
       touch: p.touch,
       photos,
@@ -93,12 +104,19 @@ const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 const num = (v, fallback) => (typeof v === "number" && isFinite(v) ? v : fallback);
 const str = (v, max) => (typeof v === "string" ? v.slice(0, max) : "");
-const CELL_KEY = /^[A-Za-z0-9_-]{1,40}:(\d{1,2}),(\d{1,2})$/;
+const CELL_KEY = /^[A-Za-z0-9_-]{1,40}:(\d{1,2}),(\d{1,2})(@84)?$/;
+const WORD_KEY = /^w:[A-Za-z0-9_-]{1,40}$/;
+const ID = /^[A-Za-z0-9_-]{1,40}$/;
 
-function validKey(key) {
+// A position key such as "food:0,3" or "food:0,3@84" that lies inside its grid.
+function validCellKey(key) {
   const m = CELL_KEY.exec(key);
-  return !!m && +m[1] < 5 && +m[2] < 9;      // the grid is 5 rows x 9 columns
+  if (!m) return false;
+  const g = SIZES[m[3] ? 84 : 45];
+  return +m[1] < g.rows && +m[2] < g.cols;
 }
+// A photo key: a built-in word ("w:want") or a cell.
+const validKey = (key) => typeof key === "string" && (WORD_KEY.test(key) || validCellKey(key));
 
 // Turn base64 text into a Blob (works offline, no network).
 function dataUrlToBlob(dataUrl) {
@@ -112,27 +130,71 @@ function dataUrlToBlob(dataUrl) {
   } catch (e) { return null; }
 }
 
+// Keep only the fields we know in one button's changes.
+function cleanOverride(ov) {
+  const c = {};
+  if (ov.show === true || ov.show === false) c.show = ov.show;
+  if (typeof ov.label === "string") c.label = str(ov.label, 30);
+  if (typeof ov.spoken === "string") c.spoken = str(ov.spoken, 60);
+  if (typeof ov.fill === "string") c.fill = str(ov.fill, 60);
+  return c;
+}
+
 // Check one learner from the file and rebuild a CLEAN copy that contains only
 // the things we expect (nothing else from the file is kept).
-function cleanLearner(raw, index) {
+function cleanLearner(raw, index, version) {
   if (!isObj(raw)) bad(`Learner ${index + 1} in the file is not readable.`);
   const name = str(raw.name, 40).trim();
   if (!name) bad(`Learner ${index + 1} in the file has no name.`);
+  const board = getBoardData();
 
   const stage = Math.round(num(raw.stage, 1));
   if (stage < 1 || stage > 4) bad(`${name}: the vocabulary stage is not valid.`);
 
-  // The adult's changes to buttons.
-  const cells = {};
   if (raw.cells !== undefined && !isObj(raw.cells)) bad(`${name}: the button changes are not readable.`);
-  for (const [key, ov] of Object.entries(raw.cells || {})) {
-    if (!validKey(key) || !isObj(ov)) bad(`${name}: a button entry is not valid.`);
-    const c = {};
-    if (ov.show === true || ov.show === false) c.show = ov.show;
-    if (typeof ov.label === "string") c.label = str(ov.label, 30);
-    if (typeof ov.spoken === "string") c.spoken = str(ov.spoken, 60);
-    if (ov.custom === true) c.custom = true;
-    cells[key] = c;
+  if (raw.photos !== undefined && !Array.isArray(raw.photos)) bad(`${name}: the photos are not readable.`);
+
+  let gridSize = 45, words = {}, cells = {}, pages = {}, pins = {};
+  let photoKey = (k) => k;
+
+  if (version < 2) {
+    // Made before Phase 1.5A: only position-keyed changes. Upgrade them.
+    const old = {};
+    for (const [key, ov] of Object.entries(raw.cells || {})) {
+      if (!validCellKey(key) || !isObj(ov)) bad(`${name}: a button entry is not valid.`);
+      const c = cleanOverride(ov);
+      if (ov.custom === true) c.custom = true;
+      old[key] = c;
+    }
+    ({ words, cells, pins } = migrateCells(board, old));
+    photoKey = (k) => mapLegacyKey(board, k);
+  } else {
+    gridSize = Number(raw.gridSize) === 84 ? 84 : 45;
+    for (const [id, ov] of Object.entries(isObj(raw.words) ? raw.words : {})) {
+      if (!ID.test(id) || !isObj(ov)) bad(`${name}: a word entry is not valid.`);
+      if (board.words[id]) words[id] = cleanOverride(ov);        // unknown words are ignored
+    }
+    for (const [key, ov] of Object.entries(raw.cells || {})) {
+      if (!validCellKey(key) || !isObj(ov)) bad(`${name}: a button entry is not valid.`);
+      const c = cleanOverride(ov);
+      if (ov.custom === true) c.custom = true;
+      if (typeof ov.opens === "string" && ID.test(ov.opens)) c.opens = ov.opens;
+      delete c.fill;
+      cells[key] = c;
+    }
+    for (const [id, pg] of Object.entries(isObj(raw.pages) ? raw.pages : {})) {
+      if (!ID.test(id) || !isObj(pg) || !isObj(pg.at)) bad(`${name}: an adult-made page is not valid.`);
+      const size = Number(pg.size) === 84 ? 84 : 45;
+      const depth = Math.round(num(pg.depth, 0));
+      const row = Math.round(num(pg.at.row, -1)), col = Math.round(num(pg.at.col, -1));
+      if (depth < 1 || depth > MAX_DEPTH || row < 0 || col < 0 || row >= SIZES[size].rows || col >= SIZES[size].cols ||
+          typeof pg.parent !== "string" || !ID.test(pg.parent)) bad(`${name}: an adult-made page is not valid.`);
+      pages[id] = { size, name: str(pg.name, 30), parent: pg.parent, at: { row, col }, depth };
+    }
+    for (const [key, p] of Object.entries(isObj(raw.pins) ? raw.pins : {})) {
+      if (/^(45|84):[A-Za-z0-9_-]{1,40}:[A-Za-z0-9_-]{1,40}$/.test(key) && Array.isArray(p) && p.length === 2 &&
+          p.every((n) => Number.isInteger(n) && n >= 0 && n < 12)) pins[key] = p;
+    }
   }
 
   const v = isObj(raw.voice) ? raw.voice : {};
@@ -150,15 +212,14 @@ function cleanLearner(raw, index) {
     ignoreSec: clamp(num(t.ignoreSec, DEFAULT_TOUCH.ignoreSec), 0.25, 3),
   };
 
-  if (raw.photos !== undefined && !Array.isArray(raw.photos)) bad(`${name}: the photos are not readable.`);
   const photos = [];
   for (const ph of raw.photos || []) {
     if (!isObj(ph) || !validKey(ph.key) || typeof ph.dataUrl !== "string") bad(`${name}: a photo entry is not valid.`);
     const blob = dataUrlToBlob(ph.dataUrl);
     if (!blob) bad(`${name}: a photo could not be read.`);
-    photos.push({ key: ph.key, blob });
+    photos.push({ key: version < 2 ? photoKey(ph.key) : ph.key, blob });
   }
-  return { name, stage, cells, voice, touch, photos };
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
@@ -172,7 +233,7 @@ export async function readBackupFile(file) {
   if (data.version > BACKUP_VERSION) bad("This backup was made by a newer version of the app. Please update the app first.");
   if (!Array.isArray(data.learners) || data.learners.length === 0) bad("This backup does not contain any learners.");
   if (data.learners.length > 50) bad("This backup has too many learners.");
-  const learners = data.learners.map(cleanLearner);
+  const learners = data.learners.map((l, i) => cleanLearner(l, i, data.version));
   return { exportedAt: typeof data.exportedAt === "string" ? data.exportedAt : "", learners };
 }
 

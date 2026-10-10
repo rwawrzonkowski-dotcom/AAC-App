@@ -1,4 +1,4 @@
-// The adult menu: a large overlay for learners, vocabulary stage, edit mode,
+// The adult menu: a large overlay for learners, board size, vocabulary stage, edit mode,
 // voice settings, touch supports, backup and model mode. Adult-styled so it looks different from the
 // child's board.
 import { h, openOverlay, askText, askConfirm } from "./ui.js";
@@ -8,6 +8,7 @@ import {
 } from "./profiles.js";
 import { setVoiceSettings, speak, listVoices, onVoicesChanged } from "./speech.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
+import { buildModel } from "./boardmodel.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";
 
@@ -15,8 +16,9 @@ const PREVIEW_TEXT = "I want more bubbles please";
 //   board            the loaded word map (to list the words in each stage)
 //   onLearnerChanged()  a different learner is now current (board must redraw)
 //   onVocabChanged()    stage changed (board must redraw)
+//   onBoardSizeChanged()  this learner's board size changed (45 <-> 84)
 //   onEdit(), onModel() start those modes (the menu closes first)
-export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onEdit, onModel }) {
+export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel }) {
   const body = h("div", { class: "menu-body" });
   let stopVoiceListener = () => {};
   let backupMessage = "";   // result of the last save / restore, shown in the Backup section
@@ -37,7 +39,7 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onEdit,
   function refresh() {
     const top = body.scrollTop;
     stopVoiceListener();
-    body.replaceChildren(learnerSection(), stageSection(), actionSection(), voiceSection(),
+    body.replaceChildren(learnerSection(), sizeSection(), stageSection(), actionSection(), voiceSection(),
       touchSection(), backupSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close }));
     body.scrollTop = top;
@@ -87,10 +89,40 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onEdit,
       list.length <= 1 ? h("p", { class: "muted", text: "The last learner cannot be deleted." }) : null);
   }
 
+  // ---------- Board size (per learner) ----------
+  // Switching the grid moves every word, so it is a RELEARNING event for the child.
+  // The adult must confirm. The learner's stage is kept.
+  function sizeSection() {
+    const cur = getCurrent();
+    const btn = (n, text) => h("button", {
+      type: "button", class: "seg" + (cur.gridSize === n ? " on" : ""), id: `size-${n}`, "data-size": n, text,
+      onclick: async () => {
+        if (cur.gridSize === n) return;
+        const sure = await askConfirm(
+          `Switch ${cur.name} to the ${n}-location board? Word locations will change, so ${cur.name} will have to learn where ` +
+          `words are again. This is a relearning event: only switch when ${cur.name} is ready. ` +
+          `The stage (${cur.stage}) is kept. Photos, renamed labels and show/hide choices for built-in words move with each word. ` +
+          `Words and pages you added to empty buttons stay with the ${cur.gridSize}-location board and come back if you switch back.`,
+          `Switch to ${n}`);
+        if (!sure) return;
+        cur.gridSize = n;
+        await saveProfile(cur);
+        onBoardSizeChanged();
+        refresh();
+      },
+    });
+    return h("section", { class: "panel", id: "sec-size" },
+      h("h2", { text: "Board size (for this learner)" }),
+      h("p", { class: "muted", text: "45 locations (9 x 5) is the starting board. 84 locations (12 x 7) is a larger board with more words. " +
+        "The first four rows are the same on both; the bottom row of the 45 board moves down to the bottom row of the 84 board." }),
+      h("div", { class: "seg-row size-seg" }, btn(45, "45 locations"), btn(84, "84 locations")));
+  }
+
   // ---------- Vocabulary stage ----------
   function stageSection() {
     const cur = getCurrent();
-    const wordsFor = (n) => board.buttons.filter((b) => b.stage === n).map((b) => b.label).join(", ");
+    const model = buildModel(board, cur.gridSize);
+    const wordsFor = (n) => model.main.filter((b) => b.stage === n).map((b) => b.label).join(", ");
     const note = { 1: "Starting words", 2: "Adds", 3: "Adds", 4: "Adds" };
     return h("section", { class: "panel", id: "sec-stage" },
       h("h2", { text: "Vocabulary stage" }),
@@ -239,7 +271,7 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onEdit,
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
-        "A backup is one file with a learner's stage, button changes, voice, touch settings and photos. " +
+        "A backup is one file with a learner's board size, stage, button changes, pages you made, voice, touch settings and photos. " +
         "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included." }),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",

@@ -94,7 +94,8 @@ button { font: inherit; touch-action: manipulation; }
   color: #9aa3ad; pointer-events: none;
 }
 
-/* ---------- Core grid: 9 columns x 5 rows, fixed forever ---------- */
+/* ---------- Core grid: 9 x 5 (45 cells) or 12 x 7 (84 cells), fixed forever ----------
+   js/board.js sets the column/row counts; these are the 45-board defaults. */
 #board {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -148,8 +149,22 @@ button { font: inherit; touch-action: manipulation; }
 .cell-label {
   flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
   font-size: 1.7vw; font-weight: 800; letter-spacing: -0.01em;
-  white-space: nowrap; overflow: hidden; pointer-events: none;
+  overflow: hidden; pointer-events: none;
 }
+/* The label text. js/board.js (fitLabels) wraps a long label onto two lines or
+   shrinks its letters so it always fits the button. The button never changes. */
+.cell-label .lbl {
+  display: inline-block; min-width: 0; max-width: 100%; white-space: nowrap; text-align: center;
+}
+.cell-label .lbl.two-lines { white-space: normal; line-height: 1.05; }
+.cell-label .lbl.break-word { overflow-wrap: anywhere; }
+
+/* 84-location board: more, smaller buttons, so smaller letters (and emoji fallback) */
+#board[data-size="84"] { --radius: 0.9vmin; }
+#board[data-size="84"] .cell { border-radius: 0.9vmin; border-width: 0.2vmin; }
+#board[data-size="84"] .cell-label { font-size: 1.3vw; letter-spacing: -0.02em; padding: 0 0.15vw; }
+#board[data-size="84"] .cell-image .placeholder { font-size: min(3.6vw, 5.4dvh); }
+#board[data-size="84"] .cell.empty-slot .plus { font-size: 3.4vmin; }
 
 /* ---------- Hold to select: filling ring on the pressed button ----------
    A layer on top of the button (absolute, so nothing is resized or moved). */
@@ -317,3 +332,7 @@ button { font: inherit; touch-action: manipulation; }
 
 /* Never show adult screens when the iPad is upright (rotate message instead) */
 @media (orientation: portrait) { .overlay { display: none; } }
+
+/* Editor: privacy reminder for the emergency-contact button */
+.privacy-note { margin: 4px 0 12px; padding: 10px 14px; border-radius: 10px; background: #fef3c7; border: 2px solid #d97706; color: #78350f; font-weight: 700; }
+.size-seg { max-width: 460px; }

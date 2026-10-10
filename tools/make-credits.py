@@ -12,13 +12,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sources = json.load(open(os.path.join(ROOT, "data", "image-sources.json"), encoding="utf-8"))
 board = json.load(open(os.path.join(ROOT, "data", "core-board.json"), encoding="utf-8"))
 
-# word id -> label, for readable tables
+# word id -> label, for readable tables ("words" lists every button on every page)
 labels = {"back": "Back"}
-for b in board["buttons"]:
-    labels[b["id"]] = b["label"]
-for page in board["pages"].values():
-    for b in page["buttons"]:
-        labels[b["id"]] = b["label"]
+for wid, w in board["words"].items():
+    labels[wid] = w["label"]
 
 head = """# Credits
 

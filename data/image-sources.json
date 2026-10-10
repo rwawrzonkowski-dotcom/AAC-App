@@ -460,5 +460,419 @@
   "source": "OpenMoji",
   "originalName": "1F467 girl",
   "license": "CC BY-SA 4.0"
+ },
+ "how": {
+  "file": "images/symbols/how.svg",
+  "source": "Mulberry",
+  "originalName": "how",
+  "license": "CC BY-SA 4.0"
+ },
+ "need": {
+  "file": "images/symbols/need.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAF4 palm up hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "have": {
+  "file": "images/symbols/have.svg",
+  "source": "Mulberry",
+  "originalName": "hold_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "try": {
+  "file": "images/symbols/try.svg",
+  "source": "Mulberry",
+  "originalName": "cross_fingers_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "give": {
+  "file": "images/symbols/give.svg",
+  "source": "Mulberry",
+  "originalName": "give_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "come": {
+  "file": "images/symbols/come.svg",
+  "source": "Mulberry",
+  "originalName": "come_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "sleep": {
+  "file": "images/symbols/sleep.svg",
+  "source": "OpenMoji",
+  "originalName": "1F634 sleeping face",
+  "license": "CC BY-SA 4.0"
+ },
+ "feel": {
+  "file": "images/symbols/feel.svg",
+  "source": "Mulberry",
+  "originalName": "touch_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "see": {
+  "file": "images/symbols/see.svg",
+  "source": "Mulberry",
+  "originalName": "eye",
+  "license": "CC BY-SA 4.0"
+ },
+ "read": {
+  "file": "images/symbols/read.svg",
+  "source": "Mulberry",
+  "originalName": "read_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "love": {
+  "file": "images/symbols/love.svg",
+  "source": "OpenMoji",
+  "originalName": "1F970 smiling face with hearts",
+  "license": "CC BY-SA 4.0"
+ },
+ "hurt": {
+  "file": "images/symbols/hurt.svg",
+  "source": "OpenMoji",
+  "originalName": "1F915 face with head-bandage",
+  "license": "CC BY-SA 4.0"
+ },
+ "me": {
+  "file": "images/symbols/me.svg",
+  "source": "OpenMoji",
+  "originalName": "1F64B person raising hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "my": {
+  "file": "images/symbols/my.svg",
+  "source": "OpenMoji",
+  "originalName": "1F91A raised back of hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "we": {
+  "file": "images/symbols/we.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAC2 people hugging",
+  "license": "CC BY-SA 4.0"
+ },
+ "they": {
+  "file": "images/symbols/they.svg",
+  "source": "OpenMoji",
+  "originalName": "1F465 busts in silhouette",
+  "license": "CC BY-SA 4.0"
+ },
+ "this": {
+  "file": "images/symbols/this.svg",
+  "source": "OpenMoji",
+  "originalName": "1F447 backhand index pointing down",
+  "license": "CC BY-SA 4.0"
+ },
+ "big": {
+  "file": "images/symbols/big.svg",
+  "source": "Mulberry",
+  "originalName": "large",
+  "license": "CC BY-SA 4.0"
+ },
+ "little": {
+  "file": "images/symbols/little.svg",
+  "source": "Mulberry",
+  "originalName": "little",
+  "license": "CC BY-SA 4.0"
+ },
+ "hot": {
+  "file": "images/symbols/hot.svg",
+  "source": "OpenMoji",
+  "originalName": "1F975 hot face",
+  "license": "CC BY-SA 4.0"
+ },
+ "cold": {
+  "file": "images/symbols/cold.svg",
+  "source": "OpenMoji",
+  "originalName": "1F976 cold face",
+  "license": "CC BY-SA 4.0"
+ },
+ "fast": {
+  "file": "images/symbols/fast.svg",
+  "source": "Mulberry",
+  "originalName": "fast_2",
+  "license": "CC BY-SA 4.0"
+ },
+ "slow": {
+  "file": "images/symbols/slow.svg",
+  "source": "Mulberry",
+  "originalName": "snail",
+  "license": "CC BY-SA 4.0"
+ },
+ "again": {
+  "file": "images/symbols/again.svg",
+  "source": "OpenMoji",
+  "originalName": "1F501 repeat button",
+  "license": "CC BY-SA 4.0"
+ },
+ "break": {
+  "file": "images/symbols/break.svg",
+  "source": "OpenMoji",
+  "originalName": "23F8 pause button",
+  "license": "CC BY-SA 4.0"
+ },
+ "hi": {
+  "file": "images/symbols/hi.svg",
+  "source": "Mulberry",
+  "originalName": "hello",
+  "license": "CC BY-SA 4.0"
+ },
+ "bye": {
+  "file": "images/symbols/bye.svg",
+  "source": "OpenMoji",
+  "originalName": "1F44B waving hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "please": {
+  "file": "images/symbols/please.svg",
+  "source": "OpenMoji",
+  "originalName": "1F97A pleading face",
+  "license": "CC BY-SA 4.0"
+ },
+ "thank-you": {
+  "file": "images/symbols/thank-you.svg",
+  "source": "OpenMoji",
+  "originalName": "1F64F folded hands",
+  "license": "CC BY-SA 4.0"
+ },
+ "sorry": {
+  "file": "images/symbols/sorry.svg",
+  "source": "OpenMoji",
+  "originalName": "1F614 pensive face",
+  "license": "CC BY-SA 4.0"
+ },
+ "wait": {
+  "file": "images/symbols/wait.svg",
+  "source": "OpenMoji",
+  "originalName": "23F3 hourglass not done",
+  "license": "CC BY-SA 4.0"
+ },
+ "off": {
+  "file": "images/symbols/off.svg",
+  "source": "Mulberry",
+  "originalName": "off",
+  "license": "CC BY-SA 4.0"
+ },
+ "out": {
+  "file": "images/symbols/out.svg",
+  "source": "Mulberry",
+  "originalName": "out",
+  "license": "CC BY-SA 4.0"
+ },
+ "down": {
+  "file": "images/symbols/down.svg",
+  "source": "Mulberry",
+  "originalName": "down",
+  "license": "CC BY-SA 4.0"
+ },
+ "chat": {
+  "file": "images/symbols/chat.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4AC speech balloon",
+  "license": "CC BY-SA 4.0"
+ },
+ "aboutme": {
+  "file": "images/symbols/aboutme.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAAA identification card",
+  "license": "CC BY-SA 4.0"
+ },
+ "feelings": {
+  "file": "images/symbols/feelings.svg",
+  "source": "OpenMoji",
+  "originalName": "1F642 slightly smiling face",
+  "license": "CC BY-SA 4.0"
+ },
+ "animals": {
+  "file": "images/symbols/animals.svg",
+  "source": "OpenMoji",
+  "originalName": "1F43E paw prints",
+  "license": "CC BY-SA 4.0"
+ },
+ "my-turn": {
+  "file": "images/symbols/my-turn.svg",
+  "source": "Mulberry",
+  "originalName": "I",
+  "license": "CC BY-SA 4.0"
+ },
+ "your-turn": {
+  "file": "images/symbols/your-turn.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAF5 index pointing at the viewer",
+  "license": "CC BY-SA 4.0"
+ },
+ "how-are-you": {
+  "file": "images/symbols/how-are-you.svg",
+  "source": "Mulberry",
+  "originalName": "how",
+  "license": "CC BY-SA 4.0"
+ },
+ "need-break": {
+  "file": "images/symbols/need-break.svg",
+  "source": "Mulberry",
+  "originalName": "take_a_work_break_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "look-at-me": {
+  "file": "images/symbols/look-at-me.svg",
+  "source": "OpenMoji",
+  "originalName": "1F440 eyes",
+  "license": "CC BY-SA 4.0"
+ },
+ "good-morning": {
+  "file": "images/symbols/good-morning.svg",
+  "source": "Mulberry",
+  "originalName": "morning",
+  "license": "CC BY-SA 4.0"
+ },
+ "good-job": {
+  "file": "images/symbols/good-job.svg",
+  "source": "OpenMoji",
+  "originalName": "1F44F clapping hands",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-name": {
+  "file": "images/symbols/about-name.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4DB name badge",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-age": {
+  "file": "images/symbols/about-age.svg",
+  "source": "Mulberry",
+  "originalName": "birthday_cake",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-school": {
+  "file": "images/symbols/about-school.svg",
+  "source": "Mulberry",
+  "originalName": "school",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-mom": {
+  "file": "images/symbols/about-mom.svg",
+  "source": "Mulberry",
+  "originalName": "mum_parent",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-dad": {
+  "file": "images/symbols/about-dad.svg",
+  "source": "Mulberry",
+  "originalName": "dad_parent",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-talk": {
+  "file": "images/symbols/about-talk.svg",
+  "source": "Mulberry",
+  "originalName": "communication_aid_chat_2",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-allergies": {
+  "file": "images/symbols/about-allergies.svg",
+  "source": "OpenMoji",
+  "originalName": "26A0 warning",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-emergency": {
+  "file": "images/symbols/about-emergency.svg",
+  "source": "Mulberry",
+  "originalName": "ambulance",
+  "license": "CC BY-SA 4.0"
+ },
+ "happy": {
+  "file": "images/symbols/happy.svg",
+  "source": "OpenMoji",
+  "originalName": "1F600 grinning face",
+  "license": "CC BY-SA 4.0"
+ },
+ "sad": {
+  "file": "images/symbols/sad.svg",
+  "source": "OpenMoji",
+  "originalName": "1F622 crying face",
+  "license": "CC BY-SA 4.0"
+ },
+ "mad": {
+  "file": "images/symbols/mad.svg",
+  "source": "OpenMoji",
+  "originalName": "1F620 angry face",
+  "license": "CC BY-SA 4.0"
+ },
+ "scared": {
+  "file": "images/symbols/scared.svg",
+  "source": "OpenMoji",
+  "originalName": "1F628 fearful face",
+  "license": "CC BY-SA 4.0"
+ },
+ "tired": {
+  "file": "images/symbols/tired.svg",
+  "source": "OpenMoji",
+  "originalName": "1F62B tired face",
+  "license": "CC BY-SA 4.0"
+ },
+ "sick": {
+  "file": "images/symbols/sick.svg",
+  "source": "OpenMoji",
+  "originalName": "1F912 face with thermometer",
+  "license": "CC BY-SA 4.0"
+ },
+ "silly": {
+  "file": "images/symbols/silly.svg",
+  "source": "OpenMoji",
+  "originalName": "1F92A zany face",
+  "license": "CC BY-SA 4.0"
+ },
+ "calm": {
+  "file": "images/symbols/calm.svg",
+  "source": "OpenMoji",
+  "originalName": "1F60C relieved face",
+  "license": "CC BY-SA 4.0"
+ },
+ "dog": {
+  "file": "images/symbols/dog.svg",
+  "source": "Mulberry",
+  "originalName": "dog",
+  "license": "CC BY-SA 4.0"
+ },
+ "cat": {
+  "file": "images/symbols/cat.svg",
+  "source": "Mulberry",
+  "originalName": "cat",
+  "license": "CC BY-SA 4.0"
+ },
+ "fish": {
+  "file": "images/symbols/fish.svg",
+  "source": "Mulberry",
+  "originalName": "fish",
+  "license": "CC BY-SA 4.0"
+ },
+ "bird": {
+  "file": "images/symbols/bird.svg",
+  "source": "Mulberry",
+  "originalName": "bird",
+  "license": "CC BY-SA 4.0"
+ },
+ "horse": {
+  "file": "images/symbols/horse.svg",
+  "source": "Mulberry",
+  "originalName": "horse",
+  "license": "CC BY-SA 4.0"
+ },
+ "cow": {
+  "file": "images/symbols/cow.svg",
+  "source": "Mulberry",
+  "originalName": "cow",
+  "license": "CC BY-SA 4.0"
+ },
+ "duck": {
+  "file": "images/symbols/duck.svg",
+  "source": "Mulberry",
+  "originalName": "duck",
+  "license": "CC BY-SA 4.0"
+ },
+ "bunny": {
+  "file": "images/symbols/bunny.svg",
+  "source": "Mulberry",
+  "originalName": "rabbit",
+  "license": "CC BY-SA 4.0"
  }
 }

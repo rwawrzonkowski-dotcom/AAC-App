@@ -1,809 +1,184 @@
 {
- "format": "aac-board-v1",
- "_note": "A word's row/col is PERMANENT, on this board and on every category page. Never reorder or move entries. On the main board, 'stage' only controls when a word is revealed (shown if stage <= current stage). Category page items have no stage: they are visible whenever their category button is visible. The Home cell of each page is NOT listed here; it is always the cell at the same row/col as that category's button on the main board.",
+ "format": "aac-board-v2",
+ "_note": "A word is placed by its row in 'layouts' (the main grid) or by its order in a page's 'items'. Never reorder or move an entry: a word's location is permanent on each grid size. Rows 1-4 of the 84 board are identical to the 45 board; the 45 board's bottom row (yes, no, Chat, categories) is the 84 board's bottom row in the same columns. 'stage' only controls when a main-board word is revealed (shown if stage <= the learner's stage). Page items have no stage: they are visible whenever their page can be opened. Page items fill the page left to right, top to bottom from the top-left, skipping the Back cell (which sits where the opening button sits). 'sizes' limits an item or a page to one grid size. A word with a 'template' speaks that sentence; ___ is a blank an adult fills in.",
  "id": "core",
  "name": "Core Board",
- "columns": 9,
- "rows": 5,
- "buttons": [
-  {
-   "id": "i",
-   "label": "I",
-   "spokenText": "i",
-   "row": 0,
-   "col": 0,
-   "wordType": "people",
-   "stage": 3,
-   "image": "images/symbols/i.svg"
-  },
-  {
-   "id": "you",
-   "label": "you",
-   "spokenText": "you",
-   "row": 0,
-   "col": 1,
-   "wordType": "people",
-   "stage": 3,
-   "image": "images/symbols/you.svg"
-  },
-  {
-   "id": "it",
-   "label": "it",
-   "spokenText": "it",
-   "row": 0,
-   "col": 2,
-   "wordType": "people",
-   "stage": 4,
-   "image": "images/symbols/it.svg"
-  },
-  {
-   "id": "that",
-   "label": "that",
-   "spokenText": "that",
-   "row": 0,
-   "col": 3,
-   "wordType": "people",
-   "stage": 4,
-   "image": "images/symbols/that.svg"
-  },
-  {
-   "id": "what",
-   "label": "what",
-   "spokenText": "what",
-   "row": 0,
-   "col": 4,
-   "wordType": "question",
-   "stage": 4,
-   "image": "images/symbols/what.svg"
-  },
-  {
-   "id": "where",
-   "label": "where",
-   "spokenText": "where",
-   "row": 0,
-   "col": 5,
-   "wordType": "question",
-   "stage": 4,
-   "image": "images/symbols/where.svg"
-  },
-  {
-   "id": "who",
-   "label": "who",
-   "spokenText": "who",
-   "row": 0,
-   "col": 6,
-   "wordType": "question",
-   "stage": 4,
-   "image": "images/symbols/who.svg"
-  },
-  {
-   "id": "when",
-   "label": "when",
-   "spokenText": "when",
-   "row": 0,
-   "col": 7,
-   "wordType": "question",
-   "stage": 4,
-   "image": "images/symbols/when.svg"
-  },
-  {
-   "id": "why",
-   "label": "why",
-   "spokenText": "why",
-   "row": 0,
-   "col": 8,
-   "wordType": "question",
-   "stage": 4,
-   "image": "images/symbols/why.svg"
-  },
-  {
-   "id": "want",
-   "label": "want",
-   "spokenText": "want",
-   "row": 1,
-   "col": 0,
-   "wordType": "action",
-   "stage": 2,
-   "image": "images/symbols/want.svg"
-  },
-  {
-   "id": "like",
-   "label": "like",
-   "spokenText": "like",
-   "row": 1,
-   "col": 1,
-   "wordType": "action",
-   "stage": 3,
-   "image": "images/symbols/like.svg"
-  },
-  {
-   "id": "get",
-   "label": "get",
-   "spokenText": "get",
-   "row": 1,
-   "col": 2,
-   "wordType": "action",
-   "stage": 3,
-   "image": "images/symbols/get.svg"
-  },
-  {
-   "id": "go",
-   "label": "go",
-   "spokenText": "go",
-   "row": 1,
-   "col": 3,
-   "wordType": "action",
-   "stage": 2,
-   "image": "images/symbols/go.svg"
-  },
-  {
-   "id": "stop",
-   "label": "stop",
-   "spokenText": "stop",
-   "row": 1,
-   "col": 4,
-   "wordType": "social",
-   "stage": 1,
-   "image": "images/symbols/stop.svg"
-  },
-  {
-   "id": "help",
-   "label": "help",
-   "spokenText": "help",
-   "row": 1,
-   "col": 5,
-   "wordType": "social",
-   "stage": 1,
-   "image": "images/symbols/help.svg"
-  },
-  {
-   "id": "more",
-   "label": "more",
-   "spokenText": "more",
-   "row": 1,
-   "col": 6,
-   "wordType": "social",
-   "stage": 1,
-   "image": "images/symbols/more.svg"
-  },
-  {
-   "id": "all",
-   "label": "all",
-   "spokenText": "all",
-   "row": 1,
-   "col": 7,
-   "wordType": "describing",
-   "stage": 3,
-   "image": "images/symbols/all.svg"
-  },
-  {
-   "id": "some",
-   "label": "some",
-   "spokenText": "some",
-   "row": 1,
-   "col": 8,
-   "wordType": "describing",
-   "stage": 3,
-   "image": "images/symbols/some.svg"
-  },
-  {
-   "id": "do",
-   "label": "do",
-   "spokenText": "do",
-   "row": 2,
-   "col": 0,
-   "wordType": "action",
-   "stage": 4,
-   "image": "images/symbols/do.svg"
-  },
-  {
-   "id": "make",
-   "label": "make",
-   "spokenText": "make",
-   "row": 2,
-   "col": 1,
-   "wordType": "action",
-   "stage": 4,
-   "image": "images/symbols/make.svg"
-  },
-  {
-   "id": "put",
-   "label": "put",
-   "spokenText": "put",
-   "row": 2,
-   "col": 2,
-   "wordType": "action",
-   "stage": 3,
-   "image": "images/symbols/put.svg"
-  },
-  {
-   "id": "turn",
-   "label": "turn",
-   "spokenText": "turn",
-   "row": 2,
-   "col": 3,
-   "wordType": "action",
-   "stage": 4,
-   "image": "images/symbols/turn.svg"
-  },
-  {
-   "id": "look",
-   "label": "look",
-   "spokenText": "look",
-   "row": 2,
-   "col": 4,
-   "wordType": "action",
-   "stage": 4,
-   "image": "images/symbols/look.svg"
-  },
-  {
-   "id": "open",
-   "label": "open",
-   "spokenText": "open",
-   "row": 2,
-   "col": 5,
-   "wordType": "action",
-   "stage": 2,
-   "image": "images/symbols/open.svg"
-  },
-  {
-   "id": "eat",
-   "label": "eat",
-   "spokenText": "eat",
-   "row": 2,
-   "col": 6,
-   "wordType": "action",
-   "stage": 1,
-   "image": "images/symbols/eat.svg"
-  },
-  {
-   "id": "drink",
-   "label": "drink",
-   "spokenText": "drink",
-   "row": 2,
-   "col": 7,
-   "wordType": "action",
-   "stage": 1,
-   "image": "images/symbols/drink.svg"
-  },
-  {
-   "id": "bathroom",
-   "label": "bathroom",
-   "spokenText": "bathroom",
-   "row": 2,
-   "col": 8,
-   "wordType": "place",
-   "stage": 1,
-   "image": "images/symbols/bathroom.svg"
-  },
-  {
-   "id": "can",
-   "label": "can",
-   "spokenText": "can",
-   "row": 3,
-   "col": 0,
-   "wordType": "action",
-   "stage": 4,
-   "image": "images/symbols/can.svg"
-  },
-  {
-   "id": "not",
-   "label": "not",
-   "spokenText": "not",
-   "row": 3,
-   "col": 1,
-   "wordType": "describing",
-   "stage": 4,
-   "image": "images/symbols/not.svg"
-  },
-  {
-   "id": "finished",
-   "label": "finished",
-   "spokenText": "finished",
-   "row": 3,
-   "col": 2,
-   "wordType": "describing",
-   "stage": 2,
-   "image": "images/symbols/finished.svg"
-  },
-  {
-   "id": "good",
-   "label": "good",
-   "spokenText": "good",
-   "row": 3,
-   "col": 3,
-   "wordType": "describing",
-   "stage": 4,
-   "image": "images/symbols/good.svg"
-  },
-  {
-   "id": "different",
-   "label": "different",
-   "spokenText": "different",
-   "row": 3,
-   "col": 4,
-   "wordType": "describing",
-   "stage": 4,
-   "image": "images/symbols/different.svg"
-  },
-  {
-   "id": "same",
-   "label": "same",
-   "spokenText": "same",
-   "row": 3,
-   "col": 5,
-   "wordType": "describing",
-   "stage": 4,
-   "image": "images/symbols/same.svg"
-  },
-  {
-   "id": "up",
-   "label": "up",
-   "spokenText": "up",
-   "row": 3,
-   "col": 6,
-   "wordType": "place",
-   "stage": 3,
-   "image": "images/symbols/up.svg"
-  },
-  {
-   "id": "in",
-   "label": "in",
-   "spokenText": "in",
-   "row": 3,
-   "col": 7,
-   "wordType": "place",
-   "stage": 3,
-   "image": "images/symbols/in.svg"
-  },
-  {
-   "id": "on",
-   "label": "on",
-   "spokenText": "on",
-   "row": 3,
-   "col": 8,
-   "wordType": "place",
-   "stage": 3,
-   "image": "images/symbols/on.svg"
-  },
-  {
-   "id": "yes",
-   "label": "yes",
-   "spokenText": "yes",
-   "row": 4,
-   "col": 0,
-   "wordType": "social",
-   "stage": 2,
-   "image": "images/symbols/yes.svg"
-  },
-  {
-   "id": "no",
-   "label": "no",
-   "spokenText": "no",
-   "row": 4,
-   "col": 1,
-   "wordType": "social",
-   "stage": 2,
-   "image": "images/symbols/no.svg"
-  },
-  {
-   "id": "here",
-   "label": "here",
-   "spokenText": "here",
-   "row": 4,
-   "col": 2,
-   "wordType": "social",
-   "stage": 4,
-   "image": "images/symbols/here.svg"
-  },
-  {
-   "id": "play",
-   "label": "Play",
-   "spokenText": "Play",
-   "row": 4,
-   "col": 3,
-   "wordType": "category",
-   "stage": 4,
-   "loadBoard": "play",
-   "image": "images/symbols/play.svg"
-  },
-  {
-   "id": "people",
-   "label": "People",
-   "spokenText": "People",
-   "row": 4,
-   "col": 4,
-   "wordType": "category",
-   "stage": 4,
-   "loadBoard": "people",
-   "image": "images/symbols/people.svg"
-  },
-  {
-   "id": "favorites",
-   "label": "Favorites",
-   "spokenText": "Favorites",
-   "row": 4,
-   "col": 5,
-   "wordType": "category",
-   "stage": 4,
-   "loadBoard": "favorites",
-   "image": "images/symbols/favorites.svg"
-  },
-  {
-   "id": "food",
-   "label": "Food",
-   "spokenText": "Food",
-   "row": 4,
-   "col": 6,
-   "wordType": "category",
-   "stage": 2,
-   "loadBoard": "food",
-   "image": "images/symbols/food.svg"
-  },
-  {
-   "id": "drinks",
-   "label": "Drinks",
-   "spokenText": "Drinks",
-   "row": 4,
-   "col": 7,
-   "wordType": "category",
-   "stage": 2,
-   "loadBoard": "drinks",
-   "image": "images/symbols/drinks.svg"
-  },
-  {
-   "id": "places",
-   "label": "Places",
-   "spokenText": "Places",
-   "row": 4,
-   "col": 8,
-   "wordType": "category",
-   "stage": 4,
-   "loadBoard": "places",
-   "image": "images/symbols/places.svg"
-  }
- ],
- "categoryBoards": [
-  {
-   "id": "food",
-   "name": "Food",
-   "buttons": []
-  },
-  {
-   "id": "drinks",
-   "name": "Drinks",
-   "buttons": []
-  },
-  {
-   "id": "play",
-   "name": "Play",
-   "buttons": []
-  },
-  {
-   "id": "places",
-   "name": "Places",
-   "buttons": []
-  },
-  {
-   "id": "people",
-   "name": "People",
-   "buttons": []
-  },
-  {
-   "id": "favorites",
-   "name": "Favorites",
-   "buttons": []
-  }
- ],
- "pages": {
-  "food": {
-   "name": "Food",
-   "buttons": [
-    {
-     "id": "cracker",
-     "label": "cracker",
-     "spokenText": "cracker",
-     "row": 0,
-     "col": 0,
-     "wordType": "noun",
-     "image": "images/symbols/cracker.svg"
-    },
-    {
-     "id": "apple",
-     "label": "apple",
-     "spokenText": "apple",
-     "row": 0,
-     "col": 1,
-     "wordType": "noun",
-     "image": "images/symbols/apple.svg"
-    },
-    {
-     "id": "banana",
-     "label": "banana",
-     "spokenText": "banana",
-     "row": 0,
-     "col": 2,
-     "wordType": "noun",
-     "image": "images/symbols/banana.svg"
-    },
-    {
-     "id": "chips",
-     "label": "chips",
-     "spokenText": "chips",
-     "row": 0,
-     "col": 3,
-     "wordType": "noun",
-     "image": "images/symbols/chips.svg"
-    },
-    {
-     "id": "cheese",
-     "label": "cheese",
-     "spokenText": "cheese",
-     "row": 0,
-     "col": 4,
-     "wordType": "noun",
-     "image": "images/symbols/cheese.svg"
-    },
-    {
-     "id": "sandwich",
-     "label": "sandwich",
-     "spokenText": "sandwich",
-     "row": 0,
-     "col": 5,
-     "wordType": "noun",
-     "image": "images/symbols/sandwich.svg"
-    },
-    {
-     "id": "pizza",
-     "label": "pizza",
-     "spokenText": "pizza",
-     "row": 0,
-     "col": 6,
-     "wordType": "noun",
-     "image": "images/symbols/pizza.svg"
-    },
-    {
-     "id": "cookie",
-     "label": "cookie",
-     "spokenText": "cookie",
-     "row": 0,
-     "col": 7,
-     "wordType": "noun",
-     "image": "images/symbols/cookie.svg"
-    }
-   ]
-  },
-  "drinks": {
-   "name": "Drinks",
-   "buttons": [
-    {
-     "id": "water",
-     "label": "water",
-     "spokenText": "water",
-     "row": 0,
-     "col": 0,
-     "wordType": "noun",
-     "image": "images/symbols/water.svg"
-    },
-    {
-     "id": "juice",
-     "label": "juice",
-     "spokenText": "juice",
-     "row": 0,
-     "col": 1,
-     "wordType": "noun",
-     "image": "images/symbols/juice.svg"
-    },
-    {
-     "id": "milk",
-     "label": "milk",
-     "spokenText": "milk",
-     "row": 0,
-     "col": 2,
-     "wordType": "noun",
-     "image": "images/symbols/milk.svg"
-    }
-   ]
-  },
-  "play": {
-   "name": "Play",
-   "buttons": [
-    {
-     "id": "ball",
-     "label": "ball",
-     "spokenText": "ball",
-     "row": 0,
-     "col": 0,
-     "wordType": "noun",
-     "image": "images/symbols/ball.svg"
-    },
-    {
-     "id": "bubbles",
-     "label": "bubbles",
-     "spokenText": "bubbles",
-     "row": 0,
-     "col": 1,
-     "wordType": "noun",
-     "image": "images/symbols/bubbles.svg"
-    },
-    {
-     "id": "blocks",
-     "label": "blocks",
-     "spokenText": "blocks",
-     "row": 0,
-     "col": 2,
-     "wordType": "noun",
-     "image": "images/symbols/blocks.svg"
-    },
-    {
-     "id": "swing",
-     "label": "swing",
-     "spokenText": "swing",
-     "row": 0,
-     "col": 3,
-     "wordType": "noun",
-     "image": "images/symbols/swing.svg"
-    },
-    {
-     "id": "slide",
-     "label": "slide",
-     "spokenText": "slide",
-     "row": 0,
-     "col": 4,
-     "wordType": "noun",
-     "image": "images/symbols/slide.svg"
-    },
-    {
-     "id": "tablet",
-     "label": "tablet",
-     "spokenText": "tablet",
-     "row": 0,
-     "col": 5,
-     "wordType": "noun",
-     "image": "images/symbols/tablet.svg"
-    },
-    {
-     "id": "music",
-     "label": "music",
-     "spokenText": "music",
-     "row": 0,
-     "col": 6,
-     "wordType": "noun",
-     "image": "images/symbols/music.svg"
-    },
-    {
-     "id": "book",
-     "label": "book",
-     "spokenText": "book",
-     "row": 0,
-     "col": 7,
-     "wordType": "noun",
-     "image": "images/symbols/book.svg"
-    }
-   ]
-  },
-  "places": {
-   "name": "Places",
-   "buttons": [
-    {
-     "id": "outside",
-     "label": "outside",
-     "spokenText": "outside",
-     "row": 0,
-     "col": 0,
-     "wordType": "place",
-     "image": "images/symbols/outside.svg"
-    },
-    {
-     "id": "home",
-     "label": "home",
-     "spokenText": "home",
-     "row": 0,
-     "col": 1,
-     "wordType": "place",
-     "image": "images/symbols/home.svg"
-    },
-    {
-     "id": "school",
-     "label": "school",
-     "spokenText": "school",
-     "row": 0,
-     "col": 2,
-     "wordType": "place",
-     "image": "images/symbols/school.svg"
-    },
-    {
-     "id": "car",
-     "label": "car",
-     "spokenText": "car",
-     "row": 0,
-     "col": 3,
-     "wordType": "place",
-     "image": "images/symbols/car.svg"
-    },
-    {
-     "id": "park",
-     "label": "park",
-     "spokenText": "park",
-     "row": 0,
-     "col": 4,
-     "wordType": "place",
-     "image": "images/symbols/park.svg"
-    },
-    {
-     "id": "bed",
-     "label": "bed",
-     "spokenText": "bed",
-     "row": 0,
-     "col": 5,
-     "wordType": "place",
-     "image": "images/symbols/bed.svg"
-    }
-   ]
-  },
-  "people": {
-   "name": "People",
-   "buttons": [
-    {
-     "id": "mom",
-     "label": "mom",
-     "spokenText": "mom",
-     "row": 0,
-     "col": 0,
-     "wordType": "people",
-     "image": "images/symbols/mom.svg"
-    },
-    {
-     "id": "dad",
-     "label": "dad",
-     "spokenText": "dad",
-     "row": 0,
-     "col": 1,
-     "wordType": "people",
-     "image": "images/symbols/dad.svg"
-    },
-    {
-     "id": "teacher",
-     "label": "teacher",
-     "spokenText": "teacher",
-     "row": 0,
-     "col": 2,
-     "wordType": "people",
-     "image": "images/symbols/teacher.svg"
-    },
-    {
-     "id": "friend",
-     "label": "friend",
-     "spokenText": "friend",
-     "row": 0,
-     "col": 3,
-     "wordType": "people",
-     "image": "images/symbols/friend.svg"
-    },
-    {
-     "id": "he",
-     "label": "he",
-     "spokenText": "he",
-     "row": 0,
-     "col": 4,
-     "wordType": "people",
-     "image": "images/symbols/he.svg"
-    },
-    {
-     "id": "she",
-     "label": "she",
-     "spokenText": "she",
-     "row": 0,
-     "col": 5,
-     "wordType": "people",
-     "image": "images/symbols/she.svg"
-    }
-   ]
-  },
-  "favorites": {
-   "name": "Favorites",
-   "buttons": []
-  }
+ "backImage": "images/symbols/back.svg",
+ "words": {
+  "i": {"label": "I", "spokenText": "i", "wordType": "people", "stage": 3, "image": "images/symbols/i.svg"},
+  "you": {"label": "you", "spokenText": "you", "wordType": "people", "stage": 3, "image": "images/symbols/you.svg"},
+  "it": {"label": "it", "spokenText": "it", "wordType": "people", "stage": 4, "image": "images/symbols/it.svg"},
+  "that": {"label": "that", "spokenText": "that", "wordType": "people", "stage": 4, "image": "images/symbols/that.svg"},
+  "what": {"label": "what", "spokenText": "what", "wordType": "question", "stage": 4, "image": "images/symbols/what.svg"},
+  "where": {"label": "where", "spokenText": "where", "wordType": "question", "stage": 4, "image": "images/symbols/where.svg"},
+  "who": {"label": "who", "spokenText": "who", "wordType": "question", "stage": 4, "image": "images/symbols/who.svg"},
+  "when": {"label": "when", "spokenText": "when", "wordType": "question", "stage": 4, "image": "images/symbols/when.svg"},
+  "why": {"label": "why", "spokenText": "why", "wordType": "question", "stage": 4, "image": "images/symbols/why.svg"},
+  "want": {"label": "want", "spokenText": "want", "wordType": "action", "stage": 2, "image": "images/symbols/want.svg"},
+  "like": {"label": "like", "spokenText": "like", "wordType": "action", "stage": 3, "image": "images/symbols/like.svg"},
+  "get": {"label": "get", "spokenText": "get", "wordType": "action", "stage": 3, "image": "images/symbols/get.svg"},
+  "go": {"label": "go", "spokenText": "go", "wordType": "action", "stage": 2, "image": "images/symbols/go.svg"},
+  "stop": {"label": "stop", "spokenText": "stop", "wordType": "social", "stage": 1, "image": "images/symbols/stop.svg"},
+  "help": {"label": "help", "spokenText": "help", "wordType": "social", "stage": 1, "image": "images/symbols/help.svg"},
+  "more": {"label": "more", "spokenText": "more", "wordType": "social", "stage": 1, "image": "images/symbols/more.svg"},
+  "all": {"label": "all", "spokenText": "all", "wordType": "describing", "stage": 3, "image": "images/symbols/all.svg"},
+  "some": {"label": "some", "spokenText": "some", "wordType": "describing", "stage": 3, "image": "images/symbols/some.svg"},
+  "do": {"label": "do", "spokenText": "do", "wordType": "action", "stage": 4, "image": "images/symbols/do.svg"},
+  "make": {"label": "make", "spokenText": "make", "wordType": "action", "stage": 4, "image": "images/symbols/make.svg"},
+  "put": {"label": "put", "spokenText": "put", "wordType": "action", "stage": 3, "image": "images/symbols/put.svg"},
+  "turn": {"label": "turn", "spokenText": "turn", "wordType": "action", "stage": 4, "image": "images/symbols/turn.svg"},
+  "look": {"label": "look", "spokenText": "look", "wordType": "action", "stage": 4, "image": "images/symbols/look.svg"},
+  "open": {"label": "open", "spokenText": "open", "wordType": "action", "stage": 2, "image": "images/symbols/open.svg"},
+  "eat": {"label": "eat", "spokenText": "eat", "wordType": "action", "stage": 1, "image": "images/symbols/eat.svg"},
+  "drink": {"label": "drink", "spokenText": "drink", "wordType": "action", "stage": 1, "image": "images/symbols/drink.svg"},
+  "bathroom": {"label": "bathroom", "spokenText": "bathroom", "wordType": "place", "stage": 1, "image": "images/symbols/bathroom.svg"},
+  "can": {"label": "can", "spokenText": "can", "wordType": "action", "stage": 4, "image": "images/symbols/can.svg"},
+  "not": {"label": "not", "spokenText": "not", "wordType": "describing", "stage": 4, "image": "images/symbols/not.svg"},
+  "finished": {"label": "finished", "spokenText": "finished", "wordType": "describing", "stage": 2, "image": "images/symbols/finished.svg"},
+  "good": {"label": "good", "spokenText": "good", "wordType": "describing", "stage": 4, "image": "images/symbols/good.svg"},
+  "different": {"label": "different", "spokenText": "different", "wordType": "describing", "stage": 4, "image": "images/symbols/different.svg"},
+  "same": {"label": "same", "spokenText": "same", "wordType": "describing", "stage": 4, "image": "images/symbols/same.svg"},
+  "up": {"label": "up", "spokenText": "up", "wordType": "place", "stage": 3, "image": "images/symbols/up.svg"},
+  "in": {"label": "in", "spokenText": "in", "wordType": "place", "stage": 3, "image": "images/symbols/in.svg"},
+  "on": {"label": "on", "spokenText": "on", "wordType": "place", "stage": 3, "image": "images/symbols/on.svg"},
+  "yes": {"label": "yes", "spokenText": "yes", "wordType": "social", "stage": 2, "image": "images/symbols/yes.svg"},
+  "no": {"label": "no", "spokenText": "no", "wordType": "social", "stage": 2, "image": "images/symbols/no.svg"},
+  "here": {"label": "here", "spokenText": "here", "wordType": "place", "image": "images/symbols/here.svg"},
+  "play": {"label": "Play", "spokenText": "Play", "wordType": "category", "stage": 4, "loadBoard": "play", "image": "images/symbols/play.svg"},
+  "people": {"label": "People", "spokenText": "People", "wordType": "category", "stage": 4, "loadBoard": "people", "image": "images/symbols/people.svg"},
+  "favorites": {"label": "Favorites", "spokenText": "Favorites", "wordType": "category", "stage": 4, "loadBoard": "favorites", "image": "images/symbols/favorites.svg"},
+  "food": {"label": "Food", "spokenText": "Food", "wordType": "category", "stage": 2, "loadBoard": "food", "image": "images/symbols/food.svg"},
+  "drinks": {"label": "Drinks", "spokenText": "Drinks", "wordType": "category", "stage": 2, "loadBoard": "drinks", "image": "images/symbols/drinks.svg"},
+  "places": {"label": "Places", "spokenText": "Places", "wordType": "category", "stage": 4, "loadBoard": "places", "image": "images/symbols/places.svg"},
+  "cracker": {"label": "cracker", "spokenText": "cracker", "wordType": "noun", "image": "images/symbols/cracker.svg"},
+  "apple": {"label": "apple", "spokenText": "apple", "wordType": "noun", "image": "images/symbols/apple.svg"},
+  "banana": {"label": "banana", "spokenText": "banana", "wordType": "noun", "image": "images/symbols/banana.svg"},
+  "chips": {"label": "chips", "spokenText": "chips", "wordType": "noun", "image": "images/symbols/chips.svg"},
+  "cheese": {"label": "cheese", "spokenText": "cheese", "wordType": "noun", "image": "images/symbols/cheese.svg"},
+  "sandwich": {"label": "sandwich", "spokenText": "sandwich", "wordType": "noun", "image": "images/symbols/sandwich.svg"},
+  "pizza": {"label": "pizza", "spokenText": "pizza", "wordType": "noun", "image": "images/symbols/pizza.svg"},
+  "cookie": {"label": "cookie", "spokenText": "cookie", "wordType": "noun", "image": "images/symbols/cookie.svg"},
+  "water": {"label": "water", "spokenText": "water", "wordType": "noun", "image": "images/symbols/water.svg"},
+  "juice": {"label": "juice", "spokenText": "juice", "wordType": "noun", "image": "images/symbols/juice.svg"},
+  "milk": {"label": "milk", "spokenText": "milk", "wordType": "noun", "image": "images/symbols/milk.svg"},
+  "ball": {"label": "ball", "spokenText": "ball", "wordType": "noun", "image": "images/symbols/ball.svg"},
+  "bubbles": {"label": "bubbles", "spokenText": "bubbles", "wordType": "noun", "image": "images/symbols/bubbles.svg"},
+  "blocks": {"label": "blocks", "spokenText": "blocks", "wordType": "noun", "image": "images/symbols/blocks.svg"},
+  "swing": {"label": "swing", "spokenText": "swing", "wordType": "noun", "image": "images/symbols/swing.svg"},
+  "slide": {"label": "slide", "spokenText": "slide", "wordType": "noun", "image": "images/symbols/slide.svg"},
+  "tablet": {"label": "tablet", "spokenText": "tablet", "wordType": "noun", "image": "images/symbols/tablet.svg"},
+  "music": {"label": "music", "spokenText": "music", "wordType": "noun", "image": "images/symbols/music.svg"},
+  "book": {"label": "book", "spokenText": "book", "wordType": "noun", "image": "images/symbols/book.svg"},
+  "outside": {"label": "outside", "spokenText": "outside", "wordType": "place", "image": "images/symbols/outside.svg"},
+  "home": {"label": "home", "spokenText": "home", "wordType": "place", "image": "images/symbols/home.svg"},
+  "school": {"label": "school", "spokenText": "school", "wordType": "place", "image": "images/symbols/school.svg"},
+  "car": {"label": "car", "spokenText": "car", "wordType": "place", "image": "images/symbols/car.svg"},
+  "park": {"label": "park", "spokenText": "park", "wordType": "place", "image": "images/symbols/park.svg"},
+  "bed": {"label": "bed", "spokenText": "bed", "wordType": "place", "image": "images/symbols/bed.svg"},
+  "mom": {"label": "mom", "spokenText": "mom", "wordType": "people", "image": "images/symbols/mom.svg"},
+  "dad": {"label": "dad", "spokenText": "dad", "wordType": "people", "image": "images/symbols/dad.svg"},
+  "teacher": {"label": "teacher", "spokenText": "teacher", "wordType": "people", "image": "images/symbols/teacher.svg"},
+  "friend": {"label": "friend", "spokenText": "friend", "wordType": "people", "image": "images/symbols/friend.svg"},
+  "he": {"label": "he", "spokenText": "he", "wordType": "people", "image": "images/symbols/he.svg", "stage": 3},
+  "she": {"label": "she", "spokenText": "she", "wordType": "people", "image": "images/symbols/she.svg", "stage": 3},
+  "how": {"label": "how", "spokenText": "how", "wordType": "question", "stage": 4, "image": "images/symbols/how.svg"},
+  "need": {"label": "need", "spokenText": "need", "wordType": "action", "stage": 2, "image": "images/symbols/need.svg"},
+  "have": {"label": "have", "spokenText": "have", "wordType": "action", "stage": 4, "image": "images/symbols/have.svg"},
+  "try": {"label": "try", "spokenText": "try", "wordType": "action", "stage": 4, "image": "images/symbols/try.svg"},
+  "give": {"label": "give", "spokenText": "give", "wordType": "action", "stage": 4, "image": "images/symbols/give.svg"},
+  "come": {"label": "come", "spokenText": "come", "wordType": "action", "stage": 4, "image": "images/symbols/come.svg"},
+  "sleep": {"label": "sleep", "spokenText": "sleep", "wordType": "action", "stage": 4, "image": "images/symbols/sleep.svg"},
+  "feel": {"label": "feel", "spokenText": "feel", "wordType": "action", "stage": 4, "image": "images/symbols/feel.svg"},
+  "see": {"label": "see", "spokenText": "see", "wordType": "action", "stage": 4, "image": "images/symbols/see.svg"},
+  "read": {"label": "read", "spokenText": "read", "wordType": "action", "stage": 4, "image": "images/symbols/read.svg"},
+  "love": {"label": "love", "spokenText": "love", "wordType": "action", "stage": 4, "image": "images/symbols/love.svg"},
+  "hurt": {"label": "hurt", "spokenText": "hurt", "wordType": "action", "stage": 3, "image": "images/symbols/hurt.svg"},
+  "me": {"label": "me", "spokenText": "me", "wordType": "people", "stage": 3, "image": "images/symbols/me.svg"},
+  "my": {"label": "my", "spokenText": "my", "wordType": "people", "stage": 3, "image": "images/symbols/my.svg"},
+  "we": {"label": "we", "spokenText": "we", "wordType": "people", "stage": 4, "image": "images/symbols/we.svg"},
+  "they": {"label": "they", "spokenText": "they", "wordType": "people", "stage": 4, "image": "images/symbols/they.svg"},
+  "this": {"label": "this", "spokenText": "this", "wordType": "people", "stage": 4, "image": "images/symbols/this.svg"},
+  "big": {"label": "big", "spokenText": "big", "wordType": "describing", "stage": 3, "image": "images/symbols/big.svg"},
+  "little": {"label": "little", "spokenText": "little", "wordType": "describing", "stage": 3, "image": "images/symbols/little.svg"},
+  "hot": {"label": "hot", "spokenText": "hot", "wordType": "describing", "stage": 3, "image": "images/symbols/hot.svg"},
+  "cold": {"label": "cold", "spokenText": "cold", "wordType": "describing", "stage": 3, "image": "images/symbols/cold.svg"},
+  "fast": {"label": "fast", "spokenText": "fast", "wordType": "describing", "stage": 4, "image": "images/symbols/fast.svg"},
+  "slow": {"label": "slow", "spokenText": "slow", "wordType": "describing", "stage": 4, "image": "images/symbols/slow.svg"},
+  "again": {"label": "again", "spokenText": "again", "wordType": "social", "stage": 3, "image": "images/symbols/again.svg"},
+  "break": {"label": "break", "spokenText": "break", "wordType": "social", "stage": 2, "image": "images/symbols/break.svg"},
+  "hi": {"label": "hi", "spokenText": "hi", "wordType": "social", "stage": 2, "image": "images/symbols/hi.svg"},
+  "bye": {"label": "bye", "spokenText": "bye", "wordType": "social", "stage": 2, "image": "images/symbols/bye.svg"},
+  "please": {"label": "please", "spokenText": "please", "wordType": "social", "stage": 4, "image": "images/symbols/please.svg"},
+  "thank-you": {"label": "thank you", "spokenText": "thank you", "wordType": "social", "stage": 4, "image": "images/symbols/thank-you.svg"},
+  "sorry": {"label": "sorry", "spokenText": "sorry", "wordType": "social", "stage": 4, "image": "images/symbols/sorry.svg"},
+  "wait": {"label": "wait", "spokenText": "wait", "wordType": "social", "stage": 3, "image": "images/symbols/wait.svg"},
+  "off": {"label": "off", "spokenText": "off", "wordType": "place", "stage": 3, "image": "images/symbols/off.svg"},
+  "out": {"label": "out", "spokenText": "out", "wordType": "place", "stage": 3, "image": "images/symbols/out.svg"},
+  "down": {"label": "down", "spokenText": "down", "wordType": "place", "stage": 3, "image": "images/symbols/down.svg"},
+  "chat": {"label": "Chat", "spokenText": "Chat", "wordType": "category", "stage": 2, "loadBoard": "chat", "image": "images/symbols/chat.svg"},
+  "aboutme": {"label": "About me", "spokenText": "About me", "wordType": "category", "stage": 4, "loadBoard": "aboutme", "image": "images/symbols/aboutme.svg"},
+  "feelings": {"label": "Feelings", "spokenText": "Feelings", "wordType": "category", "stage": 4, "loadBoard": "feelings", "image": "images/symbols/feelings.svg"},
+  "animals": {"label": "Animals", "spokenText": "Animals", "wordType": "category", "stage": 4, "loadBoard": "animals", "image": "images/symbols/animals.svg"},
+  "my-turn": {"label": "my turn", "spokenText": "my turn", "wordType": "social", "image": "images/symbols/my-turn.svg"},
+  "your-turn": {"label": "your turn", "spokenText": "your turn", "wordType": "social", "image": "images/symbols/your-turn.svg"},
+  "how-are-you": {"label": "how are you?", "spokenText": "how are you?", "wordType": "social", "image": "images/symbols/how-are-you.svg"},
+  "need-break": {"label": "I need a break", "spokenText": "I need a break", "wordType": "social", "image": "images/symbols/need-break.svg"},
+  "look-at-me": {"label": "look at me", "spokenText": "look at me", "wordType": "social", "image": "images/symbols/look-at-me.svg"},
+  "good-morning": {"label": "good morning", "spokenText": "good morning", "wordType": "social", "image": "images/symbols/good-morning.svg"},
+  "good-job": {"label": "good job", "spokenText": "good job", "wordType": "social", "image": "images/symbols/good-job.svg"},
+  "about-name": {"label": "name", "spokenText": "My name is ___", "wordType": "people", "template": "My name is ___", "blank": true, "fillHint": "name", "image": "images/symbols/about-name.svg"},
+  "about-age": {"label": "age", "spokenText": "I am ___ years old", "wordType": "people", "template": "I am ___ years old", "blank": true, "fillHint": "age", "image": "images/symbols/about-age.svg"},
+  "about-school": {"label": "school", "spokenText": "I go to ___", "wordType": "people", "template": "I go to ___", "blank": true, "fillHint": "school", "image": "images/symbols/about-school.svg"},
+  "about-mom": {"label": "mom", "spokenText": "My mom is ___", "wordType": "people", "template": "My mom is ___", "blank": true, "fillHint": "mom's name", "image": "images/symbols/about-mom.svg"},
+  "about-dad": {"label": "dad", "spokenText": "My dad is ___", "wordType": "people", "template": "My dad is ___", "blank": true, "fillHint": "dad's name", "image": "images/symbols/about-dad.svg"},
+  "about-talk": {"label": "I talk with this", "spokenText": "I use this device to talk", "wordType": "people", "template": "I use this device to talk", "image": "images/symbols/about-talk.svg"},
+  "about-allergies": {"label": "allergies", "spokenText": "I am allergic to ___", "wordType": "people", "template": "I am allergic to ___", "blank": true, "fillHint": "what I am allergic to", "image": "images/symbols/about-allergies.svg"},
+  "about-emergency": {"label": "emergency", "spokenText": "Emergency contact: ___", "wordType": "people", "template": "Emergency contact: ___", "blank": true, "fillHint": "emergency contact", "privacy": true, "image": "images/symbols/about-emergency.svg"},
+  "happy": {"label": "happy", "spokenText": "happy", "wordType": "describing", "image": "images/symbols/happy.svg"},
+  "sad": {"label": "sad", "spokenText": "sad", "wordType": "describing", "image": "images/symbols/sad.svg"},
+  "mad": {"label": "mad", "spokenText": "mad", "wordType": "describing", "image": "images/symbols/mad.svg"},
+  "scared": {"label": "scared", "spokenText": "scared", "wordType": "describing", "image": "images/symbols/scared.svg"},
+  "tired": {"label": "tired", "spokenText": "tired", "wordType": "describing", "image": "images/symbols/tired.svg"},
+  "sick": {"label": "sick", "spokenText": "sick", "wordType": "describing", "image": "images/symbols/sick.svg"},
+  "silly": {"label": "silly", "spokenText": "silly", "wordType": "describing", "image": "images/symbols/silly.svg"},
+  "calm": {"label": "calm", "spokenText": "calm", "wordType": "describing", "image": "images/symbols/calm.svg"},
+  "dog": {"label": "dog", "spokenText": "dog", "wordType": "noun", "image": "images/symbols/dog.svg"},
+  "cat": {"label": "cat", "spokenText": "cat", "wordType": "noun", "image": "images/symbols/cat.svg"},
+  "fish": {"label": "fish", "spokenText": "fish", "wordType": "noun", "image": "images/symbols/fish.svg"},
+  "bird": {"label": "bird", "spokenText": "bird", "wordType": "noun", "image": "images/symbols/bird.svg"},
+  "horse": {"label": "horse", "spokenText": "horse", "wordType": "noun", "image": "images/symbols/horse.svg"},
+  "cow": {"label": "cow", "spokenText": "cow", "wordType": "noun", "image": "images/symbols/cow.svg"},
+  "duck": {"label": "duck", "spokenText": "duck", "wordType": "noun", "image": "images/symbols/duck.svg"},
+  "bunny": {"label": "bunny", "spokenText": "bunny", "wordType": "noun", "image": "images/symbols/bunny.svg"}
  },
- "backImage": "images/symbols/back.svg"
+ "layouts": {
+  "45": {"columns": 9, "rows": 5, "main": [
+   ["i", "you", "it", "that", "what", "where", "who", "when", "why"],
+   ["want", "like", "get", "go", "stop", "help", "more", "all", "some"],
+   ["do", "make", "put", "turn", "look", "open", "eat", "drink", "bathroom"],
+   ["can", "not", "finished", "good", "different", "same", "up", "in", "on"],
+   ["yes", "no", "chat", "play", "people", "favorites", "food", "drinks", "places"]
+  ]},
+  "84": {"columns": 12, "rows": 7, "main": [
+   ["i", "you", "it", "that", "what", "where", "who", "when", "why", "how", "he", "she"],
+   ["want", "like", "get", "go", "stop", "help", "more", "all", "some", "need", "have", "try"],
+   ["do", "make", "put", "turn", "look", "open", "eat", "drink", "bathroom", "come", "give", "sleep"],
+   ["can", "not", "finished", "good", "different", "same", "up", "in", "on", "off", "out", "down"],
+   ["me", "my", "we", "they", "this", "big", "little", "hot", "cold", "fast", "slow", "again"],
+   ["hi", "bye", "please", "thank-you", "sorry", "wait", "hurt", "feel", "see", "read", "love", "break"],
+   ["yes", "no", "chat", "play", "people", "favorites", "food", "drinks", "places", "aboutme", "feelings", "animals"]
+  ]}
+ },
+ "pages": {
+  "chat": {"name": "Chat", "items": ["hi", "bye", "my-turn", "your-turn", "sorry", "how-are-you", "need-break", "look-at-me", "please", "thank-you", "good-morning", "good-job"]},
+  "play": {"name": "Play", "items": ["ball", "bubbles", "blocks", "swing", "slide", "tablet", "music", "book"]},
+  "people": {"name": "People", "items": ["mom", "dad", "teacher", "friend", "he", "she", {"id": "aboutme", "sizes": [45]}]},
+  "favorites": {"name": "Favorites", "items": []},
+  "food": {"name": "Food", "items": ["cracker", "apple", "banana", "chips", "cheese", "sandwich", "pizza", "cookie"]},
+  "drinks": {"name": "Drinks", "items": ["water", "juice", "milk"]},
+  "places": {"name": "Places", "items": ["outside", "home", "school", "car", "park", "bed", "here"]},
+  "aboutme": {"name": "About me", "items": ["about-name", "about-age", "about-school", "about-mom", "about-dad", "about-talk", "about-allergies", "about-emergency"]},
+  "feelings": {"name": "Feelings", "sizes": [84], "items": ["happy", "sad", "mad", "scared", "tired", "sick", "silly", "calm"]},
+  "animals": {"name": "Animals", "sizes": [84], "items": ["dog", "cat", "fish", "bird", "horse", "cow", "duck", "bunny"]}
+ }
 }

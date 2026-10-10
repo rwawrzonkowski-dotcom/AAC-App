@@ -1,4 +1,4 @@
-// Builds the 9 x 5 core grid from data/core-board.json.
+// Draws the core grid (9 x 5 = 45 cells, or 12 x 7 = 84) and handles presses.
 //
 // MOTOR PLANNING RULE: every word has a permanent (row, col). This file never
 // sorts, filters-out, or reflows buttons. Words not yet revealed are drawn as
@@ -32,87 +32,42 @@ const PLACEHOLDERS = {
   friend: "\u{1F9D2}", he: "\u{1F466}", she: "\u{1F467}",
 };
 
-export const ROWS = 5;
-export const COLS = 9;
-
-// Every cell has a permanent key: "<page>:<row>,<col>".
-export const cellKey = (pageId, row, col) => `${pageId}:${row},${col}`;
-
-// Work out what is in each of the 45 cells of one page, for one learner.
-//   page    = { id, buttons: [...], homeAt: {row, col} | null }
-//   profile = the learner (stage + the adult's changes)
-// Returns 45 descriptions in row-by-row order. Nothing is ever moved: a cell is
-// always at its own (row, col), whether it is visible, hidden, or empty.
-export function resolvePage(page, profile) {
-  const byPos = new Map(page.buttons.map((b) => [b.row + "," + b.col, b]));
-  const cells = [];
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      const key = cellKey(page.id, row, col);
-      const ov = profile.cells[key] || {};          // the adult's changes, if any
-      const base = byPos.get(row + "," + col) || null;
-      const d = { key, row, col, base, ov };
-
-      if (page.homeAt && page.homeAt.row === row && page.homeAt.col === col) {
-        d.kind = "home";                             // Back button: not editable
-        d.visible = true;
-      } else if (base) {
-        d.kind = "word";
-        d.label = ov.label ?? base.label;
-        d.spoken = ov.spoken ?? base.spokenText ?? d.label;
-        d.wordType = base.wordType;
-        d.loadBoard = base.loadBoard || null;        // set for category buttons
-        // Main board: stage rule. Category pages: always visible (the page can
-        // only be opened when its category button is visible).
-        d.defaultVisible = page.id === "core" ? base.stage <= profile.stage : true;
-        d.visible = ov.show ?? d.defaultVisible;     // adult override wins
-      } else if (ov.custom && ov.label) {
-        d.kind = "word";                             // a word the adult added
-        d.custom = true;
-        d.label = ov.label;
-        d.spoken = ov.spoken ?? ov.label;
-        d.wordType = "noun";
-        d.loadBoard = null;
-        d.defaultVisible = true;
-        d.visible = ov.show ?? true;
-      } else {
-        d.kind = "empty";
-        d.visible = false;
-      }
-      cells.push(d);
-    }
-  }
-  return cells;
-}
-
-// Draw the 45 cells. Cells are placed by CSS grid row/column, so changing what
-// is inside a cell can never change its size or position.
+// Draw one page's cells (45 or 84 of them). Cells are placed by CSS grid
+// row/column, so changing what is inside a cell can never change its size or
+// position.
+//   cells    = the descriptions from resolvePage() (js/boardmodel.js)
 //   editing  = true shows hidden words (faded, dashed) and empty cells too.
-//   photoUrl = function(cellKey) -> picture URL or null
+//   photoUrl = function(photoKey) -> picture URL or null
 //   backImage = symbol file for the Back button
+//   cols, rows, size = the grid (9x5 = 45, 12x7 = 84)
 // The picture always goes inside the same fixed-size ".cell-image" box, so a
 // symbol, a photo or the emoji fallback can never change a cell's layout.
-export function renderBoard(boardEl, cells, { editing, photoUrl, backImage }) {
+export function renderBoard(boardEl, cells, { editing, photoUrl, backImage, cols, rows, size }) {
   boardEl.innerHTML = "";
+  boardEl.dataset.size = String(size);
+  boardEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  boardEl.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
   for (const d of cells) {
     const cell = document.createElement("div");
     cell.dataset.key = d.key;
     cell.style.gridRow = String(d.row + 1);
     cell.style.gridColumn = String(d.col + 1);
+    // The word is named on the cell so a test (or a curious adult) can see which word sits where.
+    if (d.wordId) cell.dataset.word = d.wordId;
 
     if (d.kind === "home") {
       cell.className = "cell tap type-home";
       cell.setAttribute("role", "button");
       cell.setAttribute("aria-label", "Back");
-      cell.innerHTML = '<div class="cell-image"></div><div class="cell-label">Back</div>';
+      cell.innerHTML = '<div class="cell-image"></div><div class="cell-label"><span class="lbl">Back</span></div>';
       showSymbol(cell.querySelector(".cell-image"), backImage, "\u2B05\uFE0F");
     } else if (d.kind === "word" && (d.visible || editing)) {
       cell.className = "cell tap type-" + d.wordType + (d.visible ? "" : " ghost");
       cell.setAttribute("role", "button");
       cell.setAttribute("aria-label", d.label);
       cell.innerHTML = '<div class="cell-image"><span class="placeholder"></span></div>' +
-        '<div class="cell-label"></div>';
-      const url = photoUrl(d.key);
+        '<div class="cell-label"><span class="lbl"></span></div>';
+      const url = photoUrl(d.photoKey);
       const area = cell.querySelector(".cell-image");
       const letter = PLACEHOLDERS[d.base ? d.base.id : ""] || d.label.charAt(0).toUpperCase();
       if (url) {
@@ -127,7 +82,7 @@ export function renderBoard(boardEl, cells, { editing, photoUrl, backImage }) {
       } else {
         area.querySelector(".placeholder").textContent = letter;   // adult-added word, no picture yet
       }
-      cell.querySelector(".cell-label").textContent = d.label;
+      cell.querySelector(".lbl").textContent = d.label;
     } else if (editing) {
       cell.className = "cell tap ghost empty-slot";   // empty cell, editable
       cell.setAttribute("role", "button");
@@ -139,6 +94,46 @@ export function renderBoard(boardEl, cells, { editing, photoUrl, backImage }) {
     }
     boardEl.appendChild(cell);
   }
+  fitLabels(boardEl);
+}
+
+// Make every label fit inside its button, whatever the screen size or grid.
+// A label with a space may wrap onto two lines; otherwise (or after that) the
+// letters shrink a little at a time. As a last resort a very long single word
+// is broken across two lines. Only the TEXT changes size: the button and its
+// picture area never move or resize.
+export function fitLabels(boardEl) {
+  for (const label of boardEl.querySelectorAll(".cell-label")) {
+    const span = label.firstElementChild;
+    if (!span) continue;
+    span.style.fontSize = "";
+    span.classList.remove("two-lines", "break-word");
+    const overflows = () => span.scrollWidth > span.clientWidth + 0.5 || span.scrollHeight > label.clientHeight + 0.5;
+    if (!overflows()) continue;
+    const spaced = /\s/.test(span.textContent);
+    if (spaced) {
+      span.classList.add("two-lines");
+      if (!overflows()) continue;
+    }
+    const base = parseFloat(getComputedStyle(span).fontSize);
+    let px = base;
+    // A single long word may shrink to 70% of its size; after that it may break in two.
+    const floor = spaced ? 7 : base * 0.7;
+    while (px > floor && overflows()) { px -= 0.5; span.style.fontSize = px + "px"; }
+    if (!spaced && overflows()) {
+      span.classList.add("two-lines", "break-word");
+      while (px > 7 && overflows()) { px -= 0.5; span.style.fontSize = px + "px"; }
+    }
+  }
+}
+
+let fitTimer = null;
+// Re-fit the labels when the window changes size (e.g. the iPad is rotated).
+export function fitLabelsOnResize(boardEl) {
+  window.addEventListener("resize", () => {
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(() => fitLabels(boardEl), 120);
+  });
 }
 
 // Put a built-in symbol in an image area. If the file cannot be loaded, show the
