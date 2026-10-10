@@ -15,11 +15,15 @@ import { openAdultMenu } from "./adult.js";
 import { askConfirm } from "./ui.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
+import { runPrompt, clearCritter, stepPauseMs, usesCritter, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS } from "./modelprompt.js";
+import { preloadCritterArt } from "./critters.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
-const MODEL_RETURN_DELAY_MS = 600;   // model mode: pause on each page while stepping back out
-let returning = false;                // true during that pause
+// Model mode: how long to pause on each page while stepping back out (ring only: 600 ms;
+// with the critter it is longer, so the critter has time to arrive, stay and fade: see js/modelprompt.js).
+let returning = false;                // true during those pauses
+let previewing = false;               // true while "Preview on board" runs (taps are ignored)
 
 // ---------- Touch supports (adult menu > Touch), per learner ----------
 // Only the child's board uses these, and not in Edit mode.
@@ -112,20 +116,37 @@ function drawMessage() {
   box.scrollLeft = box.scrollWidth;   // keep the newest word in view
 }
 
-// ---------- Model mode highlight ----------
-function ringCell(key, ms) {
+// ---------- Model mode prompt ----------
+// Shows the learner's chosen prompt (ring, critter or both, at their opacity) on the
+// button with this key. The ring/critter never take part in the layout: see js/modelprompt.js.
+function promptCell(key, ringMs) {
   const el = document.querySelector(`#board .cell[data-key="${key}"]`);
-  if (!el) return;
-  el.classList.remove("model-ring");
-  void el.offsetWidth;
-  el.classList.add("model-ring");
-  setTimeout(() => el.classList.remove("model-ring"), ms);
+  runPrompt(el, getCurrent().model, getPhotoUrl("critter"), ringMs);
+}
+
+// What to remember about the prompt in the event list (for Phase 2 data).
+function promptInfo() {
+  const m = getCurrent().model;
+  return { style: m.style, ringOpacity: m.ringOpacity, critterOpacity: m.critterOpacity };
+}
+
+// "Preview on board" (adult menu > Model prompt): run the prompt once on the "more"
+// button (or the first visible button) without speaking or touching the message bar.
+function previewPrompt() {
+  const cell = document.querySelector('#board .cell[data-word="more"].tap:not(.ghost)') ||
+               document.querySelector("#board .cell.tap:not(.ghost):not(.type-home)");
+  if (!cell) return Promise.resolve();
+  previewing = true;
+  clearCritter();
+  runPrompt(cell, getCurrent().model, getPhotoUrl("critter"), RING_MS);
+  return new Promise((resolve) => setTimeout(() => { previewing = false; resolve(); },
+    (usesCritter(getCurrent().model) ? CRITTER_TOTAL_MS : RING_MS) + 300));
 }
 
 // ---------- Taps on the board ----------
 function onCellTap(cellEl) {
   const d = state.cells.get(cellEl.dataset.key);
-  if (!d || returning) return;
+  if (!d || returning || previewing) return;
 
   // Back button: up ONE level (a page opened from another page goes back to that
   // page; a page opened from the main board goes back to the main board). Never speaks.
@@ -141,7 +162,7 @@ function onCellTap(cellEl) {
   speak(d.spoken);
   state.sentence.push({ label: d.sentence ? d.spoken : d.label, spoken: d.spoken });
   drawMessage();
-  logWord(d.label, state.modeling ? "model" : "learner");
+  logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined);
 
   if (state.page !== "core") {
     // Item on any page: go back to the main board automatically.
@@ -152,20 +173,21 @@ function onCellTap(cellEl) {
       // Model mode: keep the page visible briefly so the item's ring is seen, then
       // step back out one page at a time, ringing the button that was used to open
       // each page (so the whole path is shown: item, sub-page button, category button).
-      ringCell(d.key, 1200);
+      promptCell(d.key, RING_MS);
       returning = true;                    // ignore taps during the pauses
+      const pause = stepPauseMs(profile.model);
       const stepOut = (i) => setTimeout(() => {
         const child = getPage(model, profile, path[i]);
         goTo(path[i + 1]);
-        ringCell(posKey(model.size, path[i + 1], child.at.row, child.at.col), 800);
+        promptCell(posKey(model.size, path[i + 1], child.at.row, child.at.col), RING_PATH_MS);
         if (i + 2 < path.length) stepOut(i + 1); else returning = false;
-      }, MODEL_RETURN_DELAY_MS);
+      }, pause);
       stepOut(0);
     } else {
       goTo("core");                        // learner taps return immediately
     }
   } else if (state.modeling) {
-    ringCell(d.key, 1200);
+    promptCell(d.key, RING_MS);
   }
 }
 
@@ -234,35 +256,49 @@ async function editCell(d) {
 function startEditing() { state.modeling = false; state.editing = true; renderAll(); }
 function stopEditing() { state.editing = false; renderAll(); }
 function startModeling() { state.editing = false; state.modeling = true; renderAll(); }
-function stopModeling() { state.modeling = false; renderAll(); }
+function stopModeling() { state.modeling = false; clearCritter(); renderAll(); }
 
 // ---------- Adult lock ----------
 let adultBusy = false;
+
+// Show the adult menu (the passcode has already been entered). `startAt` is the id of a
+// section to scroll to, used when the menu reopens after "Preview on board".
+function showAdultMenu(startAt) {
+  openAdultMenu({
+    board: state.board,
+    startAt,
+    onLearnerChanged: () => {
+      // A different learner: start clean on the main board.
+      state.sentence.length = 0;
+      drawMessage();
+      state.page = "core";
+      clearCritter();
+      renderAll();
+    },
+    onVocabChanged: renderAll,
+    onBoardSizeChanged: () => {
+      // Different grid: word locations changed, so start clean on the main board.
+      state.sentence.length = 0;
+      drawMessage();
+      state.page = "core";
+      renderAll();
+    },
+    onEdit: startEditing,
+    onModel: startModeling,
+    // The menu has closed itself; run the prompt on the board, then bring the menu back.
+    onPreviewPrompt: async () => {
+      await previewPrompt();
+      showAdultMenu("sec-model");
+    },
+  });
+}
+
 async function openAdult() {
   if (adultBusy) return;
   adultBusy = true;
   try {
     if (!(await requestAdultAccess())) return;
-    openAdultMenu({
-      board: state.board,
-      onLearnerChanged: () => {
-        // A different learner: start clean on the main board.
-        state.sentence.length = 0;
-        drawMessage();
-        state.page = "core";
-        renderAll();
-      },
-      onVocabChanged: renderAll,
-      onBoardSizeChanged: () => {
-        // Different grid: word locations changed, so start clean on the main board.
-        state.sentence.length = 0;
-        drawMessage();
-        state.page = "core";
-        renderAll();
-      },
-      onEdit: startEditing,
-      onModel: startModeling,
-    });
+    showAdultMenu();
   } finally {
     adultBusy = false;
   }
@@ -273,6 +309,7 @@ async function start() {
   initSpeech();
   state.board = await loadBoardData();
   await initProfiles(state.board);
+  preloadCritterArt();      // so the critter can appear instantly the first time
 
   attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked });
 

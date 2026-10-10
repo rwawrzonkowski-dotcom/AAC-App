@@ -733,8 +733,8 @@
  },
  "about-name": {
   "file": "images/symbols/about-name.svg",
-  "source": "OpenMoji",
-  "originalName": "1F4DB name badge",
+  "source": "This project",
+  "originalName": "drawn for this project (name tag)",
   "license": "CC BY-SA 4.0"
  },
  "about-age": {

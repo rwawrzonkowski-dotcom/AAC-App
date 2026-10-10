@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 -45 60 50">
+  <!-- Party hat. Origin (0,0) = middle of the brim, sitting on the head. -->
+  <g stroke="#5b3b2a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M-15 0 L0 -34 L15 0 Q0 5 -15 0Z" fill="#6c63ff"/>
+    <path d="M-9.500 -12.500 L9.500 -12.500M-5 -23 L5 -23" fill="none" stroke="#fff" stroke-width="3.200"/>
+    <circle cx="0" cy="-35" r="5" fill="#ffd93d"/>
+  </g>
+</svg>

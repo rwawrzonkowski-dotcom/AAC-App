@@ -33,6 +33,9 @@ button { font: inherit; touch-action: manipulation; }
 #app {
   height: 100vh; height: 100dvh; width: 100vw;
   display: grid;
+  /* minmax(0, 1fr): a long message in the message bar must never make the column (and so the
+     whole board) wider than the screen. The words just scroll inside the bar. */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 12fr 10fr 78fr;
   gap: var(--gap);
   padding: var(--gap);
@@ -41,7 +44,7 @@ button { font: inherit; touch-action: manipulation; }
 #app.on-category { background: var(--c-tint); }
 
 /* ---------- Message bar ---------- */
-#message-bar { display: flex; gap: var(--gap); min-height: 0; }
+#message-bar { display: flex; gap: var(--gap); min-height: 0; min-width: 0; }
 #message-text {
   flex: 1; min-width: 0; background: #fff; border: 0.3vmin solid #9aa5b1;
   border-radius: var(--radius); display: flex; align-items: center;
@@ -227,14 +230,32 @@ button { font: inherit; touch-action: manipulation; }
 }
 .hold-bar.holding::after { animation: fill-bar var(--hold-ms) linear forwards; }
 @keyframes fill-bar { from { width: 0; } to { width: 100%; } }
-.cell.model-ring {
+/* The ring is a glow around the button: it takes no room. --ring-a (0 to 1) is the
+   learner's "ring opacity" setting; js/modelprompt.js sets it on the button. */
+.cell.model-ring, .mp-mock.ring-on {
   z-index: 5;
   animation: model-pulse 0.5s ease-in-out infinite alternate;
-  box-shadow: 0 0 0 0.7vmin #fff, 0 0 0 1.6vmin #7c3aed;
+  box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
 }
 @keyframes model-pulse {
-  from { box-shadow: 0 0 0 0.6vmin #fff, 0 0 0 1.2vmin #7c3aed; }
-  to   { box-shadow: 0 0 0 0.9vmin #fff, 0 0 0 2.2vmin #7c3aed, 0 0 3vmin 2vmin rgba(124,58,237,0.5); }
+  from { box-shadow: 0 0 0 0.6vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.2vmin rgba(124, 58, 237, var(--ring-a, 1)); }
+  to   { box-shadow: 0 0 0 0.9vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 2.2vmin rgba(124, 58, 237, var(--ring-a, 1)),
+                     0 0 3vmin 2vmin rgba(124, 58, 237, calc(var(--ring-a, 1) * 0.5)); }
+}
+
+/* ---------- Model critter ----------
+   A see-through layer over the whole screen. It never catches a tap (pointer-events: none)
+   and is not part of the board's grid, so nothing on the board can move because of it. */
+#critter-layer { position: fixed; inset: 0; z-index: 25; pointer-events: none; overflow: hidden; }
+.critter-slot { position: absolute; pointer-events: none; }
+.critter { position: absolute; pointer-events: none; transform-origin: 50% 100%; }
+.critter * { pointer-events: none; }
+.critter-art, .critter-art svg { display: block; width: 100%; height: 100%; }
+/* The animal's main body color (the "body" parts of each drawing) comes from --body. */
+.critter-art .body, .critter-art.body { fill: var(--body, #f5a04a); }
+.critter-photo {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  border-radius: 22%; border: 0.5vmin solid #fff; box-shadow: 0 0.6vmin 1.6vmin rgba(0, 0, 0, 0.35);
 }
 
 /* ---------- Adult screens (overlays): plain, adult-styled, separate from the child board ---------- */
@@ -336,3 +357,24 @@ button { font: inherit; touch-action: manipulation; }
 /* Editor: privacy reminder for the emergency-contact button */
 .privacy-note { margin: 4px 0 12px; padding: 10px 14px; border-radius: 10px; background: #fef3c7; border: 2px solid #d97706; color: #78350f; font-weight: 700; }
 .size-seg { max-width: 460px; }
+
+/* Model prompt section of the adult menu */
+.sheet.adult h3 { margin: 4px 0 8px; font-size: 1.05em; }
+.mp-critter { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+.mp-seg { flex-wrap: wrap; }
+.mp-seg .seg { min-width: 120px; }
+.mp-slider { grid-template-columns: 150px 1fr 60px; }
+.mp-slider.off { opacity: 0.4; }
+.mp-animals .animal-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 96px; padding: 8px 6px; }
+.mp-thumb { display: block; width: 56px; height: 56px; }
+.mp-thumb svg { display: block; width: 100%; height: 100%; }
+.mp-thumb .body { fill: var(--body, #f5a04a); }
+.seg[disabled], .swatch[disabled] { opacity: 0.4; cursor: default; }
+.mp-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+.swatch { width: 52px; height: 52px; border-radius: 50%; border: 3px solid #94a3b8; cursor: pointer; padding: 0; }
+.swatch.on { border-color: #1f2937; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1d4ed8; }
+.mp-preview-row { display: flex; gap: 20px; align-items: flex-start; margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; }
+.mp-preview-title { display: block; font-weight: 700; margin-bottom: 8px; }
+.mp-mock { position: relative; border-radius: 12px; background: #ffe6d4; border: 2px solid rgba(0, 0, 0, 0.18); overflow: visible; margin: 8px; }
+.mp-mock .critter { transform-origin: 50% 100%; }
+.mp-preview-side { flex: 1; min-width: 220px; }

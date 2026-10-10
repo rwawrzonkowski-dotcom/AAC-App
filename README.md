@@ -1,4 +1,4 @@
-# AAC Board (Phase 1.5A)
+# AAC Board (Phase 1.5B)
 
 A free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
@@ -82,7 +82,7 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   - To delete an adult-made page, edit its button and choose **Delete this page**
     (asks first). The page and everything on it are removed.
   - Tapping a word on any page returns to the main board. In model mode the pages are
-    stepped back out one at a time, ringing the button that opened each page, so the
+    stepped back out one at a time, showing the Model prompt on the button that opened each page, so the
     whole path (word, page button, category button) is shown.
 - **Voice:** pick a voice, set pitch and speed, tap **Preview**, or reset to the
   child or adult default. Saved per learner.
@@ -94,15 +94,40 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   - *Ignore repeated taps* (0.25 to 3.0 s): after a word is spoken, taps on any board
     button are ignored for that long. Opening a category does not start the wait.
 - **Backup:** *Save backup of this learner* or *of all learners* makes one .json file
-  (board size, stage, button changes, pages you made, voice, touch settings and photos;
-  never the passcode). Backups made by earlier versions still restore (they are upgraded). On the
+  (board size, stage, button changes, pages you made, voice, touch settings, Model prompt
+  settings and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded). On the
   iPad a save sheet opens: choose **Save to Files**. *Restore from backup* reads a file,
   shows the learners and photo count inside, and for each learner asks whether to **add
   as a new learner** (default) or **replace** a learner with the same name (asks again
   before replacing). Nothing changes until you tap Restore.
 - **Start modeling:** a purple "Modeling" bar appears. Your taps work normally and the
-  tapped button gets a bright pulsing ring; after a category item, the page stays up briefly so the item's ring is seen, then
-  the category button is highlighted to show the path. Hold **End** for 2 seconds to stop.
+  tapped button gets the learner's *Model prompt* (see below); after a category item, the
+  page stays up briefly so the prompt on the item is seen, then each button that opened a
+  page gets the prompt in turn, so the whole path is shown. Hold **End** for 2 seconds to stop.
+- **Model prompt (for this learner):** what Model mode shows on each modeled button.
+  - *Prompt style:* **Ring only** (the default), **Critter only**, or **Critter and ring**.
+  - *Ring opacity* and *Critter opacity*, 0 to 100% in steps of 5 (default 100%). At 0% that
+    prompt is off, but the model is still recorded.
+  - *Critter:* choose the animal (puppy, kitten, bunny, frog, owl), its color (8 swatches),
+    an accessory (none, hat, bow, glasses), its size (small, medium or large: about 45%, 65%
+    or 85% of a button's shorter side) and how it arrives: **hop** (arcs in from just off the
+    bottom left of the screen), **peek** (slides up from the button's bottom edge) or
+    **appear** (fades in). It stays about 1.2 seconds, then fades out. If the iPad is set to
+    Reduce Motion, it always simply appears.
+  - *Use my own picture:* a photo (shrunk to 512 px, kept only on this iPad) replaces the
+    drawn animal. Pick something the child loves, like a favorite toy. *Remove picture* goes
+    back to the animal. The animal, color and accessory choices do not apply to your own picture.
+  - *Preview* shows the critter at the chosen opacity. *Preview on board* closes the menu for a
+    moment, runs the prompt on the "more" button, and reopens the menu. Nothing is spoken,
+    nothing is added to the message bar, and nothing is recorded.
+  - **Why opacity fading helps:** a model prompt that stays just as bright forever can become
+    the thing the child watches. Lowering the ring or critter opacity a little at a time makes
+    the prompt less and less noticeable as the child succeeds, which is a built-in way to fade
+    the prompt (for example 100%, 80%, 60% ... 0%) while you keep modeling the word's location.
+  - **Caution:** if the child watches the critter more than the button, fade it faster (lower the
+    opacity sooner) or switch to the ring. The critter is only meant to point at the button.
+  - The ring and critter are drawn on top of the board and never block a tap, and they never move,
+    resize or reflow any button.
 
 ## Where your changes are stored (rules)
 Every change is kept in one of two places, so nothing lands on the wrong word:
@@ -141,11 +166,15 @@ Make sure the iPad is not on silent mode and the volume is up.
   `js/boarddata.js` loads the word map; `js/migrate.js` upgrades older learner data.
 - `js/app.js` ties it together (pages, taps, edit and model modes).
 - `js/board.js` draws the grid (and fits labels into buttons); `js/speech.js` speaks.
+- `js/critters.js` the critter's settings, checks and drawing; `js/modelprompt.js` shows the ring
+  and critter in Model mode; `js/modelsettings.js` is the Model prompt part of the adult menu.
 - `js/profiles.js` + `js/db.js` learner profiles and photos (IndexedDB);
   `js/storage.js` small settings (current learner, passcode) in localStorage.
 - `js/lock.js` passcode keypad; `js/adult.js` adult menu; `js/editor.js` button editor;
   `js/hold.js` press-and-hold; `js/ui.js` small dialog helpers;
   `js/events.js` in-memory tap list for a later phase.
+- `images/critters/` the five drawn animals and three accessories (original drawings; the body
+  color is the CSS variable `--body`, so recoloring needs no extra files).
 - `images/symbols/` the built-in symbols (one SVG per word); `data/image-sources.json`
   says where each came from. `js/backup.js` saves and restores backups.
 - `tools/make-credits.py` rewrites CREDITS.md from image-sources.json;

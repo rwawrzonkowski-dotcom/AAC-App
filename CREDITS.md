@@ -12,9 +12,10 @@
 
 ## Pictures (symbols)
 
-Every button shows an open-licensed symbol from the two sources below. The
-files in `images/symbols/` are unmodified copies, renamed to the word they
-show. The symbols for objects and food are **temporary stand-ins** until real
+Every button shows an open-licensed symbol from the sources below. The
+files in `images/symbols/` are unmodified copies of Mulberry and OpenMoji
+files, renamed to the word they show, plus a few pictures drawn for this
+project (listed last). The symbols for objects and food are **temporary stand-ins** until real
 photos of the child's own things are added by an adult (Edit board > photo).
 No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
 
@@ -25,6 +26,16 @@ No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
   open-source emoji and icon project. Licensed under
   [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
   Source: https://openmoji.org (color SVGs from the `openmoji` npm package).
+
+- **Drawn for this project** - simple pictures made for this app (for example
+  the name tag on the About me page), shared under the same CC BY-SA 4.0 license.
+
+## Model critters
+
+The five animals (puppy, kitten, bunny, frog, owl) and the three accessories
+(hat, bow, glasses) in `images/critters/` were drawn for this project as
+original shapes. They are not based on any existing character, mascot or
+brand. Shared under CC BY-SA 4.0.
 
 **License summary (CC BY-SA 4.0).** You may copy, share and adapt these
 pictures, including commercially, if you (1) give credit to the creators, as
@@ -130,7 +141,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | who | `images/symbols/who.svg` | who | CC BY-SA 4.0 |
 | why | `images/symbols/why.svg` | why | CC BY-SA 4.0 |
 
-### OpenMoji (55 pictures)
+### OpenMoji (54 pictures)
 
 | Word | File | Original name | License |
 |---|---|---|---|
@@ -163,7 +174,6 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | mad | `images/symbols/mad.svg` | 1F620 angry face | CC BY-SA 4.0 |
 | me | `images/symbols/me.svg` | 1F64B person raising hand | CC BY-SA 4.0 |
 | my | `images/symbols/my.svg` | 1F91A raised back of hand | CC BY-SA 4.0 |
-| name | `images/symbols/about-name.svg` | 1F4DB name badge | CC BY-SA 4.0 |
 | need | `images/symbols/need.svg` | 1FAF4 palm up hand | CC BY-SA 4.0 |
 | no | `images/symbols/no.svg` | 274C cross mark | CC BY-SA 4.0 |
 | not | `images/symbols/not.svg` | 1F6AB prohibited | CC BY-SA 4.0 |
@@ -189,3 +199,9 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | yes | `images/symbols/yes.svg` | 2705 check mark button | CC BY-SA 4.0 |
 | you | `images/symbols/you.svg` | 1FAF5 index pointing at the viewer | CC BY-SA 4.0 |
 | your turn | `images/symbols/your-turn.svg` | 1FAF5 index pointing at the viewer | CC BY-SA 4.0 |
+
+### This project (1 picture)
+
+| Word | File | Original name | License |
+|---|---|---|---|
+| name | `images/symbols/about-name.svg` | drawn for this project (name tag) | CC BY-SA 4.0 |

@@ -1,5 +1,5 @@
 // The adult menu: a large overlay for learners, board size, vocabulary stage, edit mode,
-// voice settings, touch supports, backup and model mode. Adult-styled so it looks different from the
+// model prompt (ring / critter), voice settings, touch supports, backup and model mode. Adult-styled so it looks different from the
 // child's board.
 import { h, openOverlay, askText, askConfirm } from "./ui.js";
 import {
@@ -9,6 +9,7 @@ import {
 import { setVoiceSettings, speak, listVoices, onVoicesChanged } from "./speech.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
 import { buildModel } from "./boardmodel.js";
+import { modelSection } from "./modelsettings.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";
 
@@ -18,7 +19,11 @@ const PREVIEW_TEXT = "I want more bubbles please";
 //   onVocabChanged()    stage changed (board must redraw)
 //   onBoardSizeChanged()  this learner's board size changed (45 <-> 84)
 //   onEdit(), onModel() start those modes (the menu closes first)
-export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel }) {
+//   onPreviewPrompt()   "Preview on board" in the Model prompt section (the menu closes first;
+//                       the app runs the prompt and then opens the menu again)
+//   startAt             id of a section to scroll to when the menu opens (optional)
+export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel,
+  onPreviewPrompt }) {
   const body = h("div", { class: "menu-body" });
   let stopVoiceListener = () => {};
   let backupMessage = "";   // result of the last save / restore, shown in the Backup section
@@ -39,7 +44,8 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onBoard
   function refresh() {
     const top = body.scrollTop;
     stopVoiceListener();
-    body.replaceChildren(learnerSection(), sizeSection(), stageSection(), actionSection(), voiceSection(),
+    body.replaceChildren(learnerSection(), sizeSection(), stageSection(), actionSection(),
+      modelSection({ refresh, closeMenu: close, onPreviewPrompt }), voiceSection(),
       touchSection(), backupSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close }));
     body.scrollTop = top;
@@ -271,7 +277,7 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onBoard
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
-        "A backup is one file with a learner's board size, stage, button changes, pages you made, voice, touch settings and photos. " +
+        "A backup is one file with a learner's board size, stage, button changes, pages you made, voice, touch settings, Model prompt settings and photos. " +
         "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included." }),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
@@ -284,4 +290,8 @@ export function openAdultMenu({ board, onLearnerChanged, onVocabChanged, onBoard
   }
 
   refresh();
+  if (startAt) {
+    const sec = body.querySelector("#" + startAt);
+    if (sec) body.scrollTop = sec.offsetTop - body.offsetTop - 8;
+  }
 }

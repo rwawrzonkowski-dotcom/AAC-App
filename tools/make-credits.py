@@ -31,9 +31,10 @@ head = """# Credits
 
 ## Pictures (symbols)
 
-Every button shows an open-licensed symbol from the two sources below. The
-files in `images/symbols/` are unmodified copies, renamed to the word they
-show. The symbols for objects and food are **temporary stand-ins** until real
+Every button shows an open-licensed symbol from the sources below. The
+files in `images/symbols/` are unmodified copies of Mulberry and OpenMoji
+files, renamed to the word they show, plus a few pictures drawn for this
+project (listed last). The symbols for objects and food are **temporary stand-ins** until real
 photos of the child's own things are added by an adult (Edit board > photo).
 No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
 
@@ -45,6 +46,16 @@ No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
   [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
   Source: https://openmoji.org (color SVGs from the `openmoji` npm package).
 
+- **Drawn for this project** - simple pictures made for this app (for example
+  the name tag on the About me page), shared under the same CC BY-SA 4.0 license.
+
+## Model critters
+
+The five animals (puppy, kitten, bunny, frog, owl) and the three accessories
+(hat, bow, glasses) in `images/critters/` were drawn for this project as
+original shapes. They are not based on any existing character, mascot or
+brand. Shared under CC BY-SA 4.0.
+
 **License summary (CC BY-SA 4.0).** You may copy, share and adapt these
 pictures, including commercially, if you (1) give credit to the creators, as
 in this file, (2) say if you changed them, and (3) share anything you make from
@@ -55,11 +66,12 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 def table(source):
     rows = [(w, e) for w, e in sources.items() if e["source"] == source]
-    out = [f"### {source} ({len(rows)} pictures)", "", "| Word | File | Original name | License |", "|---|---|---|---|"]
+    out = [f"### {source} ({len(rows)} picture{"" if len(rows) == 1 else "s"})", "", "| Word | File | Original name | License |", "|---|---|---|---|"]
     for w, e in sorted(rows, key=lambda r: labels.get(r[0], r[0]).lower()):
         out.append(f"| {labels.get(w, w)} | `{e['file']}` | {e['originalName']} | {e['license']} |")
     return "\n".join(out) + "\n"
 
-text = head + "## Where each picture comes from\n\n" + table("Mulberry") + "\n" + table("OpenMoji")
+text = (head + "## Where each picture comes from\n\n" + table("Mulberry") + "\n" + table("OpenMoji") +
+        "\n" + table("This project"))
 open(os.path.join(ROOT, "CREDITS.md"), "w", encoding="utf-8").write(text)
 print("CREDITS.md written:", len(sources), "pictures")

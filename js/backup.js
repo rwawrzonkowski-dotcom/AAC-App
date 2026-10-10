@@ -2,16 +2,19 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 2, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 3, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
-//       { name, stage, gridSize, words, cells, pages, pins, voice, touch,
+//       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model,
 //         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
 //     ]
 //   }
 // `words` = changes to built-in words (by word id), `cells` = things added to empty
 // cells (by position), `pages` = pages the adult made. See js/profiles.js.
-// Version 1 backups (made before Phase 1.5A, keyed only by position) are still
-// readable: they are upgraded on the way in (see js/migrate.js).
+// `model` = the Model prompt settings (js/critters.js). A learner's own critter picture
+// is one of the photos, with the key "critter".
+// Version 1 backups (made before Phase 1.5A, keyed only by position) and version 2
+// backups (made before the model critter) are still readable: they are upgraded on
+// the way in (see js/migrate.js; missing Model prompt settings become the defaults).
 // Photos are stored inside the file as text (base64 "data URLs"), each with the
 // photo key it belongs to. The passcode is NEVER saved in a backup and never
 // restored from one. Nothing here uses the network: the file stays on this iPad
@@ -23,9 +26,10 @@ import {
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey } from "./migrate.js";
+import { cleanModel } from "./critters.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 2;
+export const BACKUP_VERSION = 3;
 
 // ---------------------------------------------------------------- saving
 
@@ -56,6 +60,7 @@ export async function buildBackup(learners) {
       pins: p.pins,
       voice: p.voice,
       touch: p.touch,
+      model: p.model,
       photos,
     });
   }
@@ -115,8 +120,8 @@ function validCellKey(key) {
   const g = SIZES[m[3] ? 84 : 45];
   return +m[1] < g.rows && +m[2] < g.cols;
 }
-// A photo key: a built-in word ("w:want") or a cell.
-const validKey = (key) => typeof key === "string" && (WORD_KEY.test(key) || validCellKey(key));
+// A photo key: a built-in word ("w:want"), a cell, or the learner's own critter picture.
+const validKey = (key) => typeof key === "string" && (key === "critter" || WORD_KEY.test(key) || validCellKey(key));
 
 // Turn base64 text into a Blob (works offline, no network).
 function dataUrlToBlob(dataUrl) {
@@ -212,6 +217,9 @@ function cleanLearner(raw, index, version) {
     ignoreSec: clamp(num(t.ignoreSec, DEFAULT_TOUCH.ignoreSec), 0.25, 3),
   };
 
+  // Backups older than version 3 have no Model prompt settings: use the defaults.
+  const model = cleanModel(version >= 3 ? raw.model : null);
+
   const photos = [];
   for (const ph of raw.photos || []) {
     if (!isObj(ph) || !validKey(ph.key) || typeof ph.dataUrl !== "string") bad(`${name}: a photo entry is not valid.`);
@@ -219,7 +227,7 @@ function cleanLearner(raw, index, version) {
     if (!blob) bad(`${name}: a photo could not be read.`);
     photos.push({ key: version < 2 ? photoKey(ph.key) : ph.key, blob });
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, photos };
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

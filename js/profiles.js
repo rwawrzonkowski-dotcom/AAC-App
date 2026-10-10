@@ -21,6 +21,10 @@
 //     touch: {                          // touch supports (adult menu > Touch)
 //       holdOn: false, holdSec: 0.5,    // hold to select
 //       ignoreOn: false, ignoreSec: 1,  // ignore repeated taps
+//     },
+//     model: {                          // what Model mode shows (adult menu > Model prompt)
+//       style: "ring", ringOpacity: 100, critterOpacity: 100,   // see js/critters.js
+//       animal, color, accessory, size, arrival
 //     }
 //   }
 // Cell keys are "<page>:<row>,<col>" (+ "@84" on the 84 board). Positions are
@@ -29,11 +33,13 @@
 //
 // Profiles live in IndexedDB; photos are stored as Blobs. A photo's key is either
 // "w:<word id>" (a built-in word's photo, follows the word) or a cell key (a photo on
-// something the adult added).
+// something the adult added). The one other key is "critter": the learner's own picture
+// for the model critter (adult menu > Model prompt).
 // Only tiny things (which learner is current) go in localStorage.
 import * as db from "./db.js";
 import { load, save, remove } from "./storage.js";
 import { migrateCells, mapLegacyKey } from "./migrate.js";
+import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05 };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0 };
@@ -50,7 +56,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE) {
   return {
     id: newId(), name, created: Date.now(), v: 2, stage, gridSize: 45,
     words: {}, cells: {}, pages: {}, pins: {},
-    voice: { ...voice }, touch: { ...DEFAULT_TOUCH },
+    voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
   };
 }
 
@@ -82,6 +88,8 @@ export async function initProfiles(board) {
   profiles.push(...stored.sort((a, b) => a.created - b.created));
   // Learners saved before touch supports existed get the (all off) defaults.
   for (const p of profiles) p.touch = { ...DEFAULT_TOUCH, ...(p.touch || {}) };
+  // Learners saved before the model critter existed get the defaults (ring only, 100%).
+  for (const p of profiles) p.model = cleanModel(p.model);
   for (const p of profiles) await upgradeProfile(p, board);
 
   if (profiles.length === 0) {
@@ -201,7 +209,7 @@ export async function getPhotoBlobs(profileId) {
 
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
-// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, photos: [{ key, blob }] }
+// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, photos: [{ key, blob }] }
 // Returns the saved profile.
 export async function importLearner(data, replaceId = null) {
   let p = replaceId ? profiles.find((x) => x.id === replaceId) : null;
@@ -212,12 +220,14 @@ export async function importLearner(data, replaceId = null) {
     p.words = data.words; p.cells = data.cells; p.pages = data.pages; p.pins = data.pins;
     p.voice = data.voice;
     p.touch = data.touch;
+    p.model = data.model;
     await db.delPrefix("photos", p.id + "|");
   } else {
     p = makeProfile(data.name, data.stage, data.voice);
     p.gridSize = data.gridSize;
     p.words = data.words; p.cells = data.cells; p.pages = data.pages; p.pins = data.pins;
     p.touch = data.touch;
+    p.model = data.model;
     profiles.push(p);
   }
   await saveProfile(p);
