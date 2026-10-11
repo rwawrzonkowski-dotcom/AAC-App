@@ -6,7 +6,7 @@
 //     ABC button (the keyboard overlay; the number pad opens from the Numbers page or the keyboard's 123 key)
 //   - playing the message bar (one utterance, or chip by chip with pauses: js/speech.js)
 import {
-  speak, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isSequencePlaying, pauseMs,
+  speak, speakMessage, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isMessagePlaying, pauseMs,
 } from "./speech.js";
 import { createTyping } from "./keyboard.js";
 import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js";
@@ -173,18 +173,19 @@ function drawMessage() {
 
 // ---------- Playing the message bar ----------
 // Pause between words OFF: the whole sentence is one utterance at the learner's Sentence speed.
-// Pause ON: each chip is its own utterance (a chip of several words is one chunk) with a gap between;
-// tapping the bar again while it plays stops it. Typed drafts are not part of the sentence.
+// Pause ON: each chip is its own utterance (a chip of several words is one chunk) with a gap between.
+// Either way, tapping the bar while the sentence is playing STOPS it; a tap when nothing is playing
+// starts it. Typed drafts are not part of the sentence.
 function highlightChip(i) {
   document.querySelectorAll("#message-chips .chip:not(.draft)").forEach((c, n) => c.classList.toggle("speaking", n === i));
 }
 function playMessage() {
   const chunks = state.sentence.map((w) => w.spoken).filter(Boolean);
   if (!chunks.length) return;
-  if (isSequencePlaying()) { stopSpeech(); return; }
+  if (isMessagePlaying()) { stopSpeech(); return; }
   const gap = pauseMs();
   if (gap > 0) speakSequence(chunks, gap, { onChunk: highlightChip, onEnd: () => highlightChip(-1) });
-  else speak(chunks.join(" "), "sentence");
+  else speakMessage(chunks.join(" "));
 }
 
 // ---------- Keyboard and number pad ----------

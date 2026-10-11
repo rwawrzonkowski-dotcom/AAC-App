@@ -29,10 +29,11 @@ export const MAX_LETTERS = 30;     // same limit as a button's label
 export const LETTER_NAMES = {
   a: "ay", b: "bee", c: "see", d: "dee", e: "ee", f: "eff", g: "gee", h: "aitch", i: "eye", j: "jay",
   k: "kay", l: "el", m: "em", n: "en", o: "oh", p: "pee", q: "cue", r: "are", s: "ess", t: "tee",
-  u: "you", v: "vee", w: "double you", x: "ex", y: "why", z: "zee",
+  u: "you", v: "vee", w: "double you", x: "ex", y: "why", z: "zee", "'": "apostrophe",
 };
 
 // Keyboard rows. The grid has 20 columns so the rows can be staggered like a real keyboard.
+// (The apostrophe key, for "don't" and "I'm", sits in the bottom row next to Space: see buildLetters.)
 const LETTER_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
 function key(k, label, cls, span, col, extra = {}) {
@@ -98,10 +99,13 @@ export function createTyping(opts) {
     const back = key("back", "⌫", "kb-back", 4, 17, { aria: "Backspace" });
     back.style.gridRow = "3";
     const num = key("num", "123", "kb-switch", 4, 1, { aria: "Number pad" });
-    const space = key("space", "space", "kb-space", 12, 5);
+    // Bottom row: 123 | apostrophe | Space | Done. The apostrophe is two columns wide (the same as a letter key)
+    // and Space is narrower by the same amount, so the letter keys above never change.
+    const apos = key("'", "'", "kb-letter kb-apos", 2, 5, { aria: "Apostrophe" });
+    const space = key("space", "space", "kb-space", 10, 7);
     const done = key("done", "Done", "kb-done", 4, 17);
-    for (const b of [num, space, done]) b.style.gridRow = "4";
-    wrap.append(back, num, space, done);
+    for (const b of [num, apos, space, done]) b.style.gridRow = "4";
+    wrap.append(back, num, apos, space, done);
     return wrap;
   }
 

@@ -102,10 +102,34 @@ export function speak(text, kind = "auto") {
   if (!synth || !text) return;
   try {
     stopSequence();
+    msgUtt = null;                    // anything spoken now replaces a message-bar playback
     synth.cancel();
     refreshVoices();
     const asSentence = kind === "sentence" || (kind === "auto" && isPhrase(text));
     synth.speak(makeUtterance(text, asSentence ? sentenceRate() : settings.rate));
+  } catch (e) {
+    console.warn("Speech failed:", e);
+  }
+}
+
+// The message bar with "Pause between words" OFF: the whole sentence is ONE utterance at Sentence speed.
+// We remember that utterance so a second tap on the bar can tell the sentence is still playing and stop it
+// (see isMessagePlaying). Everything else about it is the same as speak(text, "sentence").
+let msgUtt = null;        // the message-bar utterance that is playing, or null
+let msgStart = 0;
+export function speakMessage(text) {
+  if (!synth || !text) return;
+  try {
+    stopSequence();
+    synth.cancel();
+    refreshVoices();
+    const u = makeUtterance(text, sentenceRate());
+    const done = () => { if (msgUtt === u) msgUtt = null; };
+    u.onend = done;
+    u.onerror = done;
+    msgUtt = u;
+    msgStart = performance.now();
+    synth.speak(u);
   } catch (e) {
     console.warn("Speech failed:", e);
   }
@@ -120,6 +144,16 @@ let seqId = 0;
 
 export const isSequencePlaying = () => !!seq;
 
+// True while the message bar is being played, with pauses ON (a chip-by-chip sequence) or OFF (one
+// utterance). The single utterance is trusted for as long as the speech engine also says it is busy;
+// that way a voice that never reports "ended" cannot leave the bar stuck in "playing".
+export function isMessagePlaying() {
+  if (seq) return true;
+  if (!msgUtt) return false;
+  if (performance.now() - msgStart < 400) return true;           // some engines report "speaking" a moment late
+  return !synth || synth.speaking || synth.pending;
+}
+
 function stopSequence() {
   if (!seq) return;
   const old = seq;
@@ -132,6 +166,7 @@ function stopSequence() {
 // Stop everything that is being said, right now.
 export function stopSpeech() {
   stopSequence();
+  msgUtt = null;
   if (synth) { try { synth.cancel(); } catch (e) { /* ignore */ } }
 }
 

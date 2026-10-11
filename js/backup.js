@@ -2,7 +2,7 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 6, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 7, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
 //         keyboardButton, speakLetters,
@@ -17,7 +17,8 @@
 // (Phase 1.6B, the Words pages); an older backup restores with Auto and pictures on.
 // `voice` holds voiceURI, pitch, rate (word speed), sentenceRate and pause; `keyboardButton` ("auto" | "always" |
 // "never") and `speakLetters` came with version 6 (Phase 1.7, the keyboard and speech pacing). An older backup
-// restores with Auto, letters not spoken, Sentence speed 0.9 and no pauses.
+// restores with Auto, letters not spoken, Sentence speed 0.9 and no pauses. Version 7 (Phase 1.7B) only changed the
+// layout (toy and animal folders): a backup older than 7 has its adult-added words checked against the new folder buttons.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -38,7 +39,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 6;
+export const BACKUP_VERSION = 7;
 
 // ---------------------------------------------------------------- saving
 
@@ -237,12 +238,12 @@ function cleanLearner(raw, index, version) {
   const speakLetters = version >= 6 && raw.speakLetters === true;
 
   // Backups older than version 4 were made before the row-group category pages (Phase 1.6), and backups
-  // older than version 6 before the Number pad button (Phase 1.7): move any word the adult added to a
-  // cell that a built-in word now needs. (Pins are obsolete. Running this on a backup that is already
+  // older than version 7 before the Number pad button and the toy and animal folder buttons (Phase 1.7): move any
+  // word the adult added to a cell that a built-in word now needs. (Pins are obsolete. Running this on a backup that is already
   // tidy moves nothing.)
   let notices = [];
   let moved = {};
-  if (version < 6) {
+  if (version < 7) {
     const r = relocateAdultWords(board, cells, pages);
     cells = r.cells; pages = r.pages; pins = {};
     moved = moveMap(r.moves);

@@ -110,9 +110,10 @@ async function upgradeProfile(p, board) {
     p.gridSize = 45; p.v = 2;
     await saveProfile(p);
   }
-  if (p.v < 4) {
-    // Version 2 -> 3 (Phase 1.6): category pages were reorganized into row groups. Version 3 -> 4 (Phase 1.7):
-    // the Numbers page gained the Number pad button. Words the adult ADDED to a cell that a built-in word
+  if (p.v < 5) {
+    // Version 2 -> 3 (Phase 1.6): category pages were reorganized into row groups. Version 3 -> 4 (Phase 1.7A):
+    // the Numbers page gained the Number pad button. Version 4 -> 5 (Phase 1.7B): the Play page gained six
+    // toy folder buttons and the Animals page eight animal folder buttons. Words the adult ADDED to a cell that a built-in word
     // now needs are kept and moved (see js/migrate.js; running it again is harmless).
     const r = relocateAdultWords(board, p.cells, p.pages);
     p.cells = r.cells; p.pages = r.pages; p.pins = {};

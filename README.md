@@ -1,4 +1,4 @@
-# AAC Board (Phase 1.7 part A)
+# AAC Board (Phase 1.7 part B)
 
 A free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
@@ -38,6 +38,26 @@ A free, offline communication board for children who are new to AAC
     small, more) are main-grid buttons on the 84 board. On the 45 board they are reached from
     a page: Chat > Feelings and Play > Animals (three taps to a word; the Back button goes up
     one level; "Make this a page" is not offered there).
+  - **Toy folders and animal folders (Phase 1.7B).** Everything that was on the Play and Animals pages
+    is exactly where it was; a row of **folder buttons** was added in the empty row 5 of each page.
+    - **Play** has six toy folders in row 5, columns 2, 3, 5, 6, 7 and 8 (the same columns on both board sizes;
+      column 1 is Animals and column 4 is Back on the 45 board): **Sensory, Pretend, Building, Vehicles, Art, Music**.
+    - **Animals** has eight animal folders in row 5, columns 2-9 (column 1 is Back on the 45 board): **Pets, Farm, Zoo,
+      Ocean, Bugs, Birds, Dinosaurs, Forest**.
+    - A folder is a page with one row of words: nine in columns 1-9 (the 45 board), and three more in columns 10-12 on
+      the 84 board. Its Back button sits where the folder button is. The words are new "newer words" (they show from
+      stage 3, like the other words on pages, and the folder buttons do too). A word that is in several folders
+      (dog in Pets, bear in Zoo and Forest) is one word with one photo, one rename and one show/hide setting.
+    - **Depth exception (built-in animal folders only).** On the 45 board a folder is opened from Animals, which is
+      opened from Play: Play > Animals > Farm > cow is **four taps**, and Back goes up one level at a time. On the
+      84 board Animals is on the main grid, so it is Animals > Farm > cow (three taps). Every other page stays within
+      three taps, and an adult's "Make this a page" is still offered only on a page at depth 1 (never at depth 2 or
+      more, so never on a folder page). In Model mode the ring shows the whole path in order after a word is chosen:
+      the word, the folder button, the Animals button, the Play button (up to four steps).
+    - Some symbols are weaker stand-ins (see CREDITS.md for each picture's source): fourteen simple pictures
+      were drawn for this project because no open symbol exists (digger, spinner, slime, stamps, shaker, tambourine,
+      triceratops, stegosaurus, pterodactyl, raptor, ankylosaurus, spinosaurus, dino egg, fossil). An adult can
+      replace any of them with a real photo (Edit board > photo).
   - **About me**: sentence buttons with a blank an adult fills in ("My name is ___",
     "I am ___ years old", "I go to ___", "My mom is ___", "My dad is ___", "I love ___",
     "My birthday is ___", "My pet is ___", "My brother is ___", "My sister is ___", "My teacher is ___",
@@ -75,7 +95,8 @@ A free, offline communication board for children who are new to AAC
   and the grid underneath does not move or change size (the keyboard is simply drawn on top). Keys are lower
   case and at least 64 px tall on an iPad. The keys: letters, a wide **space**, **Backspace** (deletes one typed
   letter; with nothing typed it does nothing, and the top-bar **Delete** is still what removes a whole chip),
-  **123** (switches to the number pad), **Done** and **Close**.
+  **123** (switches to the number pad), an **apostrophe** (') key between 123 and Space, so "don't" and "I'm" can be
+  typed (the letter keys did not change size or place), **Done** and **Close**.
   - Typing builds a **draft chip** (dashed outline) at the end of the message bar. **Space** turns it into a
     normal chip (whose spoken text is the typed word) and says it; the keyboard stays open for the next word.
     **Done** does the same and closes the keyboard. **Close** (or tapping ABC again) with a non-empty draft also
@@ -108,7 +129,7 @@ A free, offline communication board for children who are new to AAC
     several words, a typed number such as "one hundred five", and the Hear it buttons in the editor. Sentences sound
     faster than the same words said one at a time, so they get their own, slower setting.
   - **Pause between words**: Off (default), Short 0.25 s, Medium 0.5 s or Long 0.8 s. Off: tapping the message bar says
-    the whole sentence as one utterance at Sentence speed (tapping again says it again from the start). On: each chip is
+    the whole sentence as one utterance at Sentence speed (tapping again while it plays stops it). On: each chip is
     its own utterance, in order, with the gap after each (a chip of several words, such as "thank you" or a custom phrase,
     is said as one piece, still at Sentence speed). The chip being said is highlighted. **Tapping the bar again while it
     plays stops it**; tapping a word, Delete or Clear also stops it.
@@ -254,6 +275,10 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
 - **Phase 1.7 added the Number pad button** to the Numbers page (row 2, column 5). If an adult had added a word to that empty
   cell, the word is kept and moved to the next free cell of the page, with the same kind of note. Backups made before this
   version get the same check when restored.
+- **Phase 1.7B added the folder buttons** (Play row 5, columns 2, 3, 5-8; Animals row 5, columns 2-9). An adult-added word in one of
+  those previously empty cells is kept and moved to the next free cell of the same page (on the 84 board the two bottom rows
+  first), with a note in the adult menu; a page button you made moves with its page, and photos move too. Learner data is now
+  version 5 and backups version 7 (older backups get the same check when restored). Code: `js/migrate.js`.
 
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.

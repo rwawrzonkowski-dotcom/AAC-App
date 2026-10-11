@@ -75,11 +75,12 @@ export function migrateCells(board, oldCells) {
 // Built-in words moved to new places, and some cells that used to be free now belong to
 // a built-in word. Anything an adult ADDED to such a cell is KEPT and moved to the first
 // free cell on the same page (on the 84 board rows 6-7 first, which the layout leaves
-// free for adults). If a page has no free cell left (the 45-board Food page is full), the
+// free for adults). (Phase 1.7B did the same for the toy folder buttons on the Play page and the animal folder
+// buttons on the Animals page, both in row 5.) If a page has no free cell left (the 45-board Food page is full), the
 // word goes to the first free cell on the Favorites page. Everything about built-in words
 // (renamed label, photo, show/hide) is stored by word id, so it follows its word by itself.
 // ---------------------------------------------------------------------------------
-export const CURRENT_PROFILE_VERSION = 4;   // 3 = row-group category pages; 4 = Number pad on the Numbers page
+export const CURRENT_PROFILE_VERSION = 5;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders
 
 const KEY_ANY = /^([A-Za-z0-9_-]{1,40}):(\d{1,2}),(\d{1,2})(@84)?$/;
 function parseKey(key) {

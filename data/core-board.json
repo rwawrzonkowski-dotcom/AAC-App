@@ -1,6 +1,6 @@
 {
  "format": "aac-board-v3",
- "_note": "A word is placed by its row in 'layouts' (the main grid) or, on a category page, by its row group in 'groups'. Never move an entry: a word's location is permanent on each grid size. Rows 1-4 of the 84 board are identical to the 45 board; the 45 board's bottom row (yes, no, Chat, categories) is the 84 board's bottom row in the same columns. On the main board 'stage' controls when a word is revealed (shown if stage <= the learner's stage). CATEGORY PAGES are organized by ROW GROUPS: each group is one row (the same row index on both sizes). Its 'words' go in columns 0-8 in order (these are the 45-board words, and the first nine words of the 84 board); its 'adds' go in columns 9-11 and appear on the 84 board only. If the page's Back button sits in that row on the 45 board, the Back column is skipped on BOTH sizes. A word given as {\"id\": ..., \"sizes\": [45]} is on the 45 board only. On the 84 board rows 5 and 6 of every page are left empty for the adult's own words. 'starter' lists the original items of a page: they show whenever the page is open. Every other item on a page is a newer word that shows at stage 'pageNewWordStage' and up (an adult can force-show it). A page without groups (Favorites) fills its 'items' left to right, top to bottom, skipping the Back cell. A word with a 'template' speaks that sentence; ___ is a blank an adult fills in. THE WORDS PAGES (Phase 1.6B) use the same row groups. The menu page 'words' has \"fromBar\": true: it is opened by the Words button in the top bar (not by a grid button), has no Back cell, and its buttons (ids starting w-) open the word pages (depth 2, Back where the button is). 'starter': 'all' means every word on the page always shows. A word with no 'image' is a text-first button (the word is drawn large; the picture area stays, empty). Several words reuse an existing id (for example in, on, he, she, me, my, big, hot): one id is one word, wherever it appears. Every Dolch word must be reachable in 3 taps on both sizes: run tools/dolch-coverage.py after changing a page.",
+ "_note": "A word is placed by its row in 'layouts' (the main grid) or, on a category page, by its row group in 'groups'. Never move an entry: a word's location is permanent on each grid size. Rows 1-4 of the 84 board are identical to the 45 board; the 45 board's bottom row (yes, no, Chat, categories) is the 84 board's bottom row in the same columns. On the main board 'stage' controls when a word is revealed (shown if stage <= the learner's stage). CATEGORY PAGES are organized by ROW GROUPS: each group is one row (the same row index on both sizes). Its 'words' go in columns 0-8 in order (these are the 45-board words, and the first nine words of the 84 board); its 'adds' go in columns 9-11 and appear on the 84 board only. If the page's Back button sits in that row on the 45 board, the Back column is skipped on BOTH sizes. A word given as {\"id\": ..., \"sizes\": [45]} is on the 45 board only. On the 84 board rows 5 and 6 of every page are left empty for the adult's own words. 'starter' lists the original items of a page: they show whenever the page is open. Every other item on a page is a newer word that shows at stage 'pageNewWordStage' and up (an adult can force-show it). A page without groups (Favorites) fills its 'items' left to right, top to bottom, skipping the Back cell. A word with a 'template' speaks that sentence; ___ is a blank an adult fills in. THE WORDS PAGES (Phase 1.6B) use the same row groups. The menu page 'words' has \"fromBar\": true: it is opened by the Words button in the top bar (not by a grid button), has no Back cell, and its buttons (ids starting w-) open the word pages (depth 2, Back where the button is). 'starter': 'all' means every word on the page always shows. A word with no 'image' is a text-first button (the word is drawn large; the picture area stays, empty). Several words reuse an existing id (for example in, on, he, she, me, my, big, hot): one id is one word, wherever it appears. Every Dolch word must be reachable in 3 taps on both sizes: run tools/dolch-coverage.py after changing a page. TOY AND ANIMAL FOLDERS (Phase 1.7B): row 4 of the Play page holds six toy folder buttons (columns 1, 2, 4, 5, 6, 7: column 0 is Animals on the 45 board, column 3 is Back there) and row 4 of the Animals page holds eight animal folder buttons (columns 1-8: column 0 is Back on the 45 board). Each folder is a page of one row group (9 words, plus 3 adds on the 84 board). On the 45 board an animal folder is depth 3 (Play > Animals > Farm > cow = 4 taps): a built-in exception, see js/boardmodel.js.",
  "id": "core",
  "name": "Core Board",
  "backImage": "images/symbols/back.svg",
@@ -678,7 +678,131 @@
   "eye": {"label": "eye", "spokenText": "eye", "wordType": "noun", "image": "images/symbols/eye.svg"},
   "feet": {"label": "feet", "spokenText": "feet", "wordType": "noun", "image": "images/symbols/feet.svg"},
   "bread": {"label": "bread", "spokenText": "bread", "wordType": "noun", "image": "images/symbols/bread.svg"},
-  "egg": {"label": "egg", "spokenText": "egg", "wordType": "noun", "image": "images/symbols/egg.svg"}
+  "egg": {"label": "egg", "spokenText": "egg", "wordType": "noun", "image": "images/symbols/egg.svg"},
+  "fidget": {"label": "fidget", "spokenText": "fidget", "wordType": "noun", "image": "images/symbols/fidget.svg"},
+  "spinner": {"label": "spinner", "spokenText": "spinner", "wordType": "noun", "image": "images/symbols/spinner.svg"},
+  "squishy": {"label": "squishy", "spokenText": "squishy", "wordType": "noun", "image": "images/symbols/squishy.svg"},
+  "slime": {"label": "slime", "spokenText": "slime", "wordType": "noun", "image": "images/symbols/slime.svg"},
+  "kinetic-sand": {"label": "kinetic sand", "spokenText": "kinetic sand", "wordType": "noun", "image": "images/symbols/kinetic-sand.svg"},
+  "light-up-toy": {"label": "light-up toy", "spokenText": "light up toy", "wordType": "noun", "image": "images/symbols/light-up-toy.svg"},
+  "sensory-bottle": {"label": "sensory bottle", "spokenText": "sensory bottle", "wordType": "noun", "image": "images/symbols/sensory-bottle.svg"},
+  "popper": {"label": "popper", "spokenText": "popper", "wordType": "noun", "image": "images/symbols/popper.svg"},
+  "stress-ball": {"label": "stress ball", "spokenText": "stress ball", "wordType": "noun", "image": "images/symbols/stress-ball.svg"},
+  "chewy": {"label": "chewy", "spokenText": "chewy", "wordType": "noun", "image": "images/symbols/chewy.svg"},
+  "rice-bin": {"label": "rice bin", "spokenText": "rice bin", "wordType": "noun", "image": "images/symbols/rice-bin.svg"},
+  "vibrating-toy": {"label": "vibrating toy", "spokenText": "vibrating toy", "wordType": "noun", "image": "images/symbols/vibrating-toy.svg"},
+  "play-food": {"label": "play food", "spokenText": "play food", "wordType": "noun", "image": "images/symbols/play-food.svg"},
+  "tea-party": {"label": "tea party", "spokenText": "tea party", "wordType": "noun", "image": "images/symbols/tea-party.svg"},
+  "dress-up": {"label": "dress up", "spokenText": "dress up", "wordType": "action", "image": "images/symbols/dress-up.svg"},
+  "doctor-kit": {"label": "doctor kit", "spokenText": "doctor kit", "wordType": "noun", "image": "images/symbols/doctor-kit.svg"},
+  "puppets": {"label": "puppets", "spokenText": "puppets", "wordType": "noun", "image": "images/symbols/puppets.svg"},
+  "dollhouse": {"label": "dollhouse", "spokenText": "dollhouse", "wordType": "noun", "image": "images/symbols/dollhouse.svg"},
+  "cash-register": {"label": "cash register", "spokenText": "cash register", "wordType": "noun", "image": "images/symbols/cash-register.svg"},
+  "tools": {"label": "tools", "spokenText": "tools", "wordType": "noun", "image": "images/symbols/tools.svg"},
+  "phone": {"label": "phone", "spokenText": "phone", "wordType": "noun", "image": "images/symbols/phone.svg"},
+  "baby-doll": {"label": "baby doll", "spokenText": "baby doll", "wordType": "noun", "image": "images/symbols/baby-doll.svg"},
+  "superhero": {"label": "superhero", "spokenText": "superhero", "wordType": "noun", "image": "images/symbols/superhero.svg"},
+  "building-bricks": {"label": "building bricks", "spokenText": "building bricks", "wordType": "noun", "image": "images/symbols/building-bricks.svg"},
+  "magnet-tiles": {"label": "magnet tiles", "spokenText": "magnet tiles", "wordType": "noun", "image": "images/symbols/magnet-tiles.svg"},
+  "train-tracks": {"label": "train tracks", "spokenText": "train tracks", "wordType": "noun", "image": "images/symbols/train-tracks.svg"},
+  "marble-run": {"label": "marble run", "spokenText": "marble run", "wordType": "noun", "image": "images/symbols/marble-run.svg"},
+  "stacking-cups": {"label": "stacking cups", "spokenText": "stacking cups", "wordType": "noun", "image": "images/symbols/stacking-cups.svg"},
+  "shape-sorter": {"label": "shape sorter", "spokenText": "shape sorter", "wordType": "noun", "image": "images/symbols/shape-sorter.svg"},
+  "tower": {"label": "tower", "spokenText": "tower", "wordType": "noun", "image": "images/symbols/tower.svg"},
+  "dominoes": {"label": "dominoes", "spokenText": "dominoes", "wordType": "noun", "image": "images/symbols/dominoes.svg"},
+  "gears": {"label": "gears", "spokenText": "gears", "wordType": "noun", "image": "images/symbols/gears.svg"},
+  "knock-it-down": {"label": "knock it down", "spokenText": "knock it down", "wordType": "action", "image": "images/symbols/knock-it-down.svg"},
+  "truck": {"label": "truck", "spokenText": "truck", "wordType": "noun", "image": "images/symbols/truck.svg"},
+  "toy-airplane": {"label": "toy airplane", "spokenText": "toy airplane", "wordType": "noun", "image": "images/symbols/toy-airplane.svg"},
+  "toy-boat": {"label": "toy boat", "spokenText": "toy boat", "wordType": "noun", "image": "images/symbols/toy-boat.svg"},
+  "fire-truck": {"label": "fire truck", "spokenText": "fire truck", "wordType": "noun", "image": "images/symbols/fire-truck.svg"},
+  "police-car": {"label": "police car", "spokenText": "police car", "wordType": "noun", "image": "images/symbols/police-car.svg"},
+  "toy-bus": {"label": "toy bus", "spokenText": "toy bus", "wordType": "noun", "image": "images/symbols/toy-bus.svg"},
+  "race-track": {"label": "race track", "spokenText": "race track", "wordType": "noun", "image": "images/symbols/race-track.svg"},
+  "tractor": {"label": "tractor", "spokenText": "tractor", "wordType": "noun", "image": "images/symbols/tractor.svg"},
+  "helicopter": {"label": "helicopter", "spokenText": "helicopter", "wordType": "noun", "image": "images/symbols/helicopter.svg"},
+  "digger": {"label": "digger", "spokenText": "digger", "wordType": "noun", "image": "images/symbols/digger.svg"},
+  "markers": {"label": "markers", "spokenText": "markers", "wordType": "noun", "image": "images/symbols/markers.svg"},
+  "scissors": {"label": "scissors", "spokenText": "scissors", "wordType": "noun", "image": "images/symbols/scissors.svg"},
+  "glue": {"label": "glue", "spokenText": "glue", "wordType": "noun", "image": "images/symbols/glue.svg"},
+  "coloring-book": {"label": "coloring book", "spokenText": "coloring book", "wordType": "noun", "image": "images/symbols/coloring-book.svg"},
+  "stamps": {"label": "stamps", "spokenText": "stamps", "wordType": "noun", "image": "images/symbols/stamps.svg"},
+  "clay": {"label": "clay", "spokenText": "clay", "wordType": "noun", "image": "images/symbols/clay.svg"},
+  "beads": {"label": "beads", "spokenText": "beads", "wordType": "noun", "image": "images/symbols/beads.svg"},
+  "shaker": {"label": "shaker", "spokenText": "shaker", "wordType": "noun", "image": "images/symbols/shaker.svg"},
+  "tambourine": {"label": "tambourine", "spokenText": "tambourine", "wordType": "noun", "image": "images/symbols/tambourine.svg"},
+  "xylophone": {"label": "xylophone", "spokenText": "xylophone", "wordType": "noun", "image": "images/symbols/xylophone.svg"},
+  "microphone": {"label": "microphone", "spokenText": "microphone", "wordType": "noun", "image": "images/symbols/microphone.svg"},
+  "horn": {"label": "horn", "spokenText": "horn", "wordType": "noun", "image": "images/symbols/horn.svg"},
+  "maracas": {"label": "maracas", "spokenText": "maracas", "wordType": "noun", "image": "images/symbols/maracas.svg"},
+  "dance-party": {"label": "dance party", "spokenText": "dance party", "wordType": "noun", "image": "images/symbols/dance-party.svg"},
+  "hamster": {"label": "hamster", "spokenText": "hamster", "wordType": "noun", "image": "images/symbols/hamster.svg"},
+  "guinea-pig": {"label": "guinea pig", "spokenText": "guinea pig", "wordType": "noun", "image": "images/symbols/guinea-pig.svg"},
+  "puppy": {"label": "puppy", "spokenText": "puppy", "wordType": "noun", "image": "images/symbols/puppy.svg"},
+  "lizard": {"label": "lizard", "spokenText": "lizard", "wordType": "noun", "image": "images/symbols/lizard.svg"},
+  "gerbil": {"label": "gerbil", "spokenText": "gerbil", "wordType": "noun", "image": "images/symbols/gerbil.svg"},
+  "donkey": {"label": "donkey", "spokenText": "donkey", "wordType": "noun", "image": "images/symbols/donkey.svg"},
+  "rooster": {"label": "rooster", "spokenText": "rooster", "wordType": "noun", "image": "images/symbols/rooster.svg"},
+  "turkey": {"label": "turkey", "spokenText": "turkey", "wordType": "noun", "image": "images/symbols/turkey.svg"},
+  "llama": {"label": "llama", "spokenText": "llama", "wordType": "noun", "image": "images/symbols/llama.svg"},
+  "goose": {"label": "goose", "spokenText": "goose", "wordType": "noun", "image": "images/symbols/goose.svg"},
+  "hippo": {"label": "hippo", "spokenText": "hippo", "wordType": "noun", "image": "images/symbols/hippo.svg"},
+  "kangaroo": {"label": "kangaroo", "spokenText": "kangaroo", "wordType": "noun", "image": "images/symbols/kangaroo.svg"},
+  "gorilla": {"label": "gorilla", "spokenText": "gorilla", "wordType": "noun", "image": "images/symbols/gorilla.svg"},
+  "panda": {"label": "panda", "spokenText": "panda", "wordType": "noun", "image": "images/symbols/panda.svg"},
+  "rhino": {"label": "rhino", "spokenText": "rhino", "wordType": "noun", "image": "images/symbols/rhino.svg"},
+  "dolphin": {"label": "dolphin", "spokenText": "dolphin", "wordType": "noun", "image": "images/symbols/dolphin.svg"},
+  "crab": {"label": "crab", "spokenText": "crab", "wordType": "noun", "image": "images/symbols/crab.svg"},
+  "starfish": {"label": "starfish", "spokenText": "starfish", "wordType": "noun", "image": "images/symbols/starfish.svg"},
+  "jellyfish": {"label": "jellyfish", "spokenText": "jellyfish", "wordType": "noun", "image": "images/symbols/jellyfish.svg"},
+  "seal": {"label": "seal", "spokenText": "seal", "wordType": "noun", "image": "images/symbols/seal.svg"},
+  "sea-turtle": {"label": "sea turtle", "spokenText": "sea turtle", "wordType": "noun", "image": "images/symbols/sea-turtle.svg"},
+  "seahorse": {"label": "seahorse", "spokenText": "seahorse", "wordType": "noun", "image": "images/symbols/seahorse.svg"},
+  "lobster": {"label": "lobster", "spokenText": "lobster", "wordType": "noun", "image": "images/symbols/lobster.svg"},
+  "ant": {"label": "ant", "spokenText": "ant", "wordType": "noun", "image": "images/symbols/ant.svg"},
+  "worm": {"label": "worm", "spokenText": "worm", "wordType": "noun", "image": "images/symbols/worm.svg"},
+  "caterpillar": {"label": "caterpillar", "spokenText": "caterpillar", "wordType": "noun", "image": "images/symbols/caterpillar.svg"},
+  "fly-insect": {"label": "fly", "spokenText": "fly", "wordType": "noun", "image": "images/symbols/fly-insect.svg"},
+  "grasshopper": {"label": "grasshopper", "spokenText": "grasshopper", "wordType": "noun", "image": "images/symbols/grasshopper.svg"},
+  "dragonfly": {"label": "dragonfly", "spokenText": "dragonfly", "wordType": "noun", "image": "images/symbols/dragonfly.svg"},
+  "parrot": {"label": "parrot", "spokenText": "parrot", "wordType": "noun", "image": "images/symbols/parrot.svg"},
+  "eagle": {"label": "eagle", "spokenText": "eagle", "wordType": "noun", "image": "images/symbols/eagle.svg"},
+  "flamingo": {"label": "flamingo", "spokenText": "flamingo", "wordType": "noun", "image": "images/symbols/flamingo.svg"},
+  "swan": {"label": "swan", "spokenText": "swan", "wordType": "noun", "image": "images/symbols/swan.svg"},
+  "peacock": {"label": "peacock", "spokenText": "peacock", "wordType": "noun", "image": "images/symbols/peacock.svg"},
+  "crow": {"label": "crow", "spokenText": "crow", "wordType": "noun", "image": "images/symbols/crow.svg"},
+  "t-rex": {"label": "T. rex", "spokenText": "T rex", "wordType": "noun", "image": "images/symbols/t-rex.svg"},
+  "triceratops": {"label": "triceratops", "spokenText": "triceratops", "wordType": "noun", "image": "images/symbols/triceratops.svg"},
+  "stegosaurus": {"label": "stegosaurus", "spokenText": "stegosaurus", "wordType": "noun", "image": "images/symbols/stegosaurus.svg"},
+  "long-neck": {"label": "long neck", "spokenText": "long neck", "wordType": "noun", "image": "images/symbols/long-neck.svg"},
+  "pterodactyl": {"label": "pterodactyl", "spokenText": "pterodactyl", "wordType": "noun", "image": "images/symbols/pterodactyl.svg"},
+  "raptor": {"label": "raptor", "spokenText": "raptor", "wordType": "noun", "image": "images/symbols/raptor.svg"},
+  "dino-egg": {"label": "dino egg", "spokenText": "dino egg", "wordType": "noun", "image": "images/symbols/dino-egg.svg"},
+  "fossil": {"label": "fossil", "spokenText": "fossil", "wordType": "noun", "image": "images/symbols/fossil.svg"},
+  "ankylosaurus": {"label": "ankylosaurus", "spokenText": "ankylosaurus", "wordType": "noun", "image": "images/symbols/ankylosaurus.svg"},
+  "spinosaurus": {"label": "spinosaurus", "spokenText": "spinosaurus", "wordType": "noun", "image": "images/symbols/spinosaurus.svg"},
+  "volcano": {"label": "volcano", "spokenText": "volcano", "wordType": "noun", "image": "images/symbols/volcano.svg"},
+  "fox": {"label": "fox", "spokenText": "fox", "wordType": "noun", "image": "images/symbols/fox.svg"},
+  "raccoon": {"label": "raccoon", "spokenText": "raccoon", "wordType": "noun", "image": "images/symbols/raccoon.svg"},
+  "skunk": {"label": "skunk", "spokenText": "skunk", "wordType": "noun", "image": "images/symbols/skunk.svg"},
+  "wolf": {"label": "wolf", "spokenText": "wolf", "wordType": "noun", "image": "images/symbols/wolf.svg"},
+  "moose": {"label": "moose", "spokenText": "moose", "wordType": "noun", "image": "images/symbols/moose.svg"},
+  "beaver": {"label": "beaver", "spokenText": "beaver", "wordType": "noun", "image": "images/symbols/beaver.svg"},
+  "porcupine": {"label": "porcupine", "spokenText": "porcupine", "wordType": "noun", "image": "images/symbols/porcupine.svg"},
+  "t-sensory": {"label": "Sensory", "spokenText": "Sensory", "wordType": "category", "loadBoard": "t-sensory", "image": "images/symbols/t-sensory.svg"},
+  "t-pretend": {"label": "Pretend", "spokenText": "Pretend", "wordType": "category", "loadBoard": "t-pretend", "image": "images/symbols/t-pretend.svg"},
+  "t-building": {"label": "Building", "spokenText": "Building", "wordType": "category", "loadBoard": "t-building", "image": "images/symbols/t-building.svg"},
+  "t-vehicles": {"label": "Vehicles", "spokenText": "Vehicles", "wordType": "category", "loadBoard": "t-vehicles", "image": "images/symbols/t-vehicles.svg"},
+  "t-art": {"label": "Art", "spokenText": "Art", "wordType": "category", "loadBoard": "t-art", "image": "images/symbols/t-art.svg"},
+  "t-music": {"label": "Music", "spokenText": "Music", "wordType": "category", "loadBoard": "t-music", "image": "images/symbols/t-music.svg"},
+  "a-pets": {"label": "Pets", "spokenText": "Pets", "wordType": "category", "loadBoard": "a-pets", "image": "images/symbols/a-pets.svg"},
+  "a-farm": {"label": "Farm", "spokenText": "Farm", "wordType": "category", "loadBoard": "a-farm", "image": "images/symbols/a-farm.svg"},
+  "a-zoo": {"label": "Zoo", "spokenText": "Zoo", "wordType": "category", "loadBoard": "a-zoo", "image": "images/symbols/a-zoo.svg"},
+  "a-ocean": {"label": "Ocean", "spokenText": "Ocean", "wordType": "category", "loadBoard": "a-ocean", "image": "images/symbols/a-ocean.svg"},
+  "a-bugs": {"label": "Bugs", "spokenText": "Bugs", "wordType": "category", "loadBoard": "a-bugs", "image": "images/symbols/a-bugs.svg"},
+  "a-birds": {"label": "Birds", "spokenText": "Birds", "wordType": "category", "loadBoard": "a-birds", "image": "images/symbols/a-birds.svg"},
+  "a-dinos": {"label": "Dinosaurs", "spokenText": "Dinosaurs", "wordType": "category", "loadBoard": "a-dinos", "image": "images/symbols/a-dinos.svg"},
+  "a-forest": {"label": "Forest", "spokenText": "Forest", "wordType": "category", "loadBoard": "a-forest", "image": "images/symbols/a-forest.svg"}
  },
  "layouts": {
   "45": {"columns": 9, "rows": 5, "main": [
@@ -715,7 +839,7 @@
     {"row": 1, "name": "Quiet and screens", "words": ["book", "crayons", "paint", "stickers", "music", "tablet", "tv", "movie", "game"], "adds": ["piano", "drum", "guitar"]},
     {"row": 2, "name": "Outside", "words": ["swing", "slide", "trampoline", "bike", "sandbox", "chalk", "water-table", "scooter", "ball-pit"], "adds": ["pool", "sprinkler", "wagon"]},
     {"row": 3, "name": "People games", "words": ["tickle", "chase", "peekaboo", "hide-and-seek", "sing", "dance", "spin", "bounce", "push"], "adds": ["piggyback", "high-five", "race"]},
-    {"row": 4, "name": "Animals", "words": [{"id": "animals", "sizes": [45]}]}
+    {"row": 4, "name": "Animals and toy folders", "words": [{"id": "animals", "sizes": [45]}, "t-sensory", "t-pretend", "t-building", "t-vehicles", "t-art", "t-music"]}
   ]},
   "places": {"name": "Places", "starter": ["outside", "home", "school", "car", "park", "bed", "here"], "groups": [
     {"row": 0, "name": "Home", "words": ["home", "bedroom", "kitchen", "living-room", "bathroom", "bed", "outside", "backyard", "here"], "adds": ["garage", "upstairs", "downstairs"]},
@@ -745,7 +869,8 @@
     {"row": 0, "name": "Pets and farm", "words": ["dog", "cat", "fish", "bird", "horse", "cow", "duck", "bunny", "pig"], "adds": ["sheep", "chicken", "frog"]},
     {"row": 1, "name": "Wild", "words": ["bear", "lion", "tiger", "elephant", "monkey", "giraffe", "zebra", "snake", "turtle"], "adds": ["dinosaur", "shark", "whale"]},
     {"row": 2, "name": "Small", "words": ["butterfly", "bug", "spider", "bee", "ladybug", "snail", "owl", "mouse", "squirrel"], "adds": ["octopus", "penguin", "deer"]},
-    {"row": 3, "name": "More", "words": ["goat", "robin", "nest", "kitty"]}
+    {"row": 3, "name": "More", "words": ["goat", "robin", "nest", "kitty"]},
+    {"row": 4, "name": "Animal folders", "words": ["a-pets", "a-farm", "a-zoo", "a-ocean", "a-bugs", "a-birds", "a-dinos", "a-forest"]}
   ]},
   "aboutme": {"name": "About me", "starter": ["about-name", "about-age", "about-school", "about-mom", "about-dad", "about-talk", "about-allergies", "about-emergency"], "groups": [
     {"row": 0, "name": "About me", "words": ["about-name", "about-age", "about-school", "about-mom", "about-dad", "about-talk", "about-allergies", "about-emergency", "about-favorite"], "adds": ["about-birthday", "about-pet", "about-brother"]},
@@ -811,6 +936,48 @@
     {"row": 0, "name": "Stuff", "words": ["toy", "ring", "top", "thing", "way", "song", "game", "name", "money"]},
     {"row": 1, "name": "Body", "words": ["eye", "leg", "feet", "body-back"]},
     {"row": 2, "name": "More things", "words": ["boy", "girl", "bread", "cake", "egg", "chicken", "sheep", "bell", "watch"]}
+  ]},
+  "t-sensory": {"name": "Sensory", "groups": [
+    {"row": 0, "name": "Sensory", "words": ["fidget", "spinner", "squishy", "slime", "kinetic-sand", "light-up-toy", "sensory-bottle", "popper", "stress-ball"], "adds": ["chewy", "rice-bin", "vibrating-toy"]}
+  ]},
+  "t-pretend": {"name": "Pretend", "groups": [
+    {"row": 0, "name": "Pretend", "words": ["kitchen-set", "play-food", "tea-party", "dress-up", "doctor-kit", "puppets", "dollhouse", "cash-register", "tools"], "adds": ["phone", "baby-doll", "superhero"]}
+  ]},
+  "t-building": {"name": "Building", "groups": [
+    {"row": 0, "name": "Building", "words": ["blocks", "building-bricks", "magnet-tiles", "train-tracks", "puzzle", "marble-run", "stacking-cups", "shape-sorter", "tower"], "adds": ["dominoes", "gears", "knock-it-down"]}
+  ]},
+  "t-vehicles": {"name": "Vehicles", "groups": [
+    {"row": 0, "name": "Vehicles", "words": ["cars", "truck", "train", "toy-airplane", "toy-boat", "fire-truck", "police-car", "toy-bus", "race-track"], "adds": ["tractor", "helicopter", "digger"]}
+  ]},
+  "t-art": {"name": "Art", "groups": [
+    {"row": 0, "name": "Art", "words": ["crayons", "markers", "paint", "stickers", "paper", "scissors", "glue", "chalk", "coloring-book"], "adds": ["stamps", "clay", "beads"]}
+  ]},
+  "t-music": {"name": "Music", "groups": [
+    {"row": 0, "name": "Music", "words": ["music", "drum", "piano", "guitar", "shaker", "tambourine", "xylophone", "song", "microphone"], "adds": ["horn", "maracas", "dance-party"]}
+  ]},
+  "a-pets": {"name": "Pets", "groups": [
+    {"row": 0, "name": "Pets", "words": ["dog", "cat", "fish", "bird", "bunny", "hamster", "turtle", "guinea-pig", "kitty"], "adds": ["puppy", "lizard", "gerbil"]}
+  ]},
+  "a-farm": {"name": "Farm", "groups": [
+    {"row": 0, "name": "Farm", "words": ["cow", "pig", "horse", "sheep", "goat", "chicken", "duck", "donkey", "rooster"], "adds": ["turkey", "llama", "goose"]}
+  ]},
+  "a-zoo": {"name": "Zoo", "groups": [
+    {"row": 0, "name": "Zoo", "words": ["lion", "tiger", "elephant", "monkey", "giraffe", "zebra", "bear", "hippo", "kangaroo"], "adds": ["gorilla", "panda", "rhino"]}
+  ]},
+  "a-ocean": {"name": "Ocean", "groups": [
+    {"row": 0, "name": "Ocean", "words": ["fish", "shark", "whale", "octopus", "dolphin", "crab", "starfish", "jellyfish", "seal"], "adds": ["sea-turtle", "seahorse", "lobster"]}
+  ]},
+  "a-bugs": {"name": "Bugs", "groups": [
+    {"row": 0, "name": "Bugs", "words": ["bug", "butterfly", "bee", "ladybug", "spider", "ant", "worm", "caterpillar", "snail"], "adds": ["fly-insect", "grasshopper", "dragonfly"]}
+  ]},
+  "a-birds": {"name": "Birds", "groups": [
+    {"row": 0, "name": "Birds", "words": ["bird", "owl", "duck", "robin", "penguin", "parrot", "eagle", "flamingo", "chicken"], "adds": ["swan", "peacock", "crow"]}
+  ]},
+  "a-dinos": {"name": "Dinosaurs", "groups": [
+    {"row": 0, "name": "Dinosaurs", "words": ["dinosaur", "t-rex", "triceratops", "stegosaurus", "long-neck", "pterodactyl", "raptor", "dino-egg", "fossil"], "adds": ["ankylosaurus", "spinosaurus", "volcano"]}
+  ]},
+  "a-forest": {"name": "Forest", "groups": [
+    {"row": 0, "name": "Forest", "words": ["bear", "deer", "squirrel", "fox", "owl", "raccoon", "mouse", "skunk", "wolf"], "adds": ["moose", "beaver", "porcupine"]}
   ]},
   "favorites": {"name": "Favorites", "items": []}
  }

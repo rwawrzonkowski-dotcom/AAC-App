@@ -20,7 +20,16 @@
 // Two grid sizes exist: 45 (9 columns x 5 rows) and 84 (12 x 7). Each learner uses one.
 
 export const SIZES = { 45: { cols: 9, rows: 5 }, 84: { cols: 12, rows: 7 } };
-export const MAX_DEPTH = 2;   // main board = 0, a page from it = 1, a page from that = 2 (3 taps to a word)
+// How deep a page an ADULT may make is limited: main board = 0, a page from it = 1, a page from that = 2
+// (3 taps to a word). "Make this a page" is never offered at depth 2 or more.
+//
+// DEPTH EXCEPTION (Phase 1.7B), built-in pages only: the eight ANIMAL FOLDER pages (Pets, Farm, Zoo, Ocean,
+// Bugs, Birds, Dinosaurs, Forest) are opened from the Animals page. On the 45 board the Animals page is itself
+// opened from Play, so a folder is depth 3 (Play > Animals > Farm > cow = 4 taps). On the 84 board Animals is a
+// main-grid button, so a folder is depth 2 (3 taps). Nothing in the code special-cases this: depth is simply
+// counted from where each page is opened (see layout() below). The limit above applies only to pages an adult
+// makes, so the extra level exists ONLY for these built-in pages. Back always goes up exactly one level.
+export const MAX_DEPTH = 2;
 
 // Every cell has a permanent key that is used to store things an adult adds there.
 //   45 board: "<page>:<row>,<col>"        e.g. "favorites:0,0"
