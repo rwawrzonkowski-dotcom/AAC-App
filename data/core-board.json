@@ -1,6 +1,6 @@
 {
  "format": "aac-board-v3",
- "_note": "A word is placed by its row in 'layouts' (the main grid) or, on a category page, by its row group in 'groups'. Never move an entry: a word's location is permanent on each grid size. Rows 1-4 of the 84 board are identical to the 45 board; the 45 board's bottom row (yes, no, Chat, categories) is the 84 board's bottom row in the same columns. On the main board 'stage' controls when a word is revealed (shown if stage <= the learner's stage). CATEGORY PAGES are organized by ROW GROUPS: each group is one row (the same row index on both sizes). Its 'words' go in columns 0-8 in order (these are the 45-board words, and the first nine words of the 84 board); its 'adds' go in columns 9-11 and appear on the 84 board only. If the page's Back button sits in that row on the 45 board, the Back column is skipped on BOTH sizes. A word given as {\"id\": ..., \"sizes\": [45]} is on the 45 board only. On the 84 board rows 5 and 6 of every page are left empty for the adult's own words. 'starter' lists the original items of a page: they show whenever the page is open. Every other item on a page is a newer word that shows at stage 'pageNewWordStage' and up (an adult can force-show it). A page without groups (Favorites) fills its 'items' left to right, top to bottom, skipping the Back cell. A word with a 'template' speaks that sentence; ___ is a blank an adult fills in. THE WORDS PAGES (Phase 1.6B) use the same row groups. The menu page 'words' has \"fromBar\": true: it is opened by the Words button in the top bar (not by a grid button), has no Back cell, and its buttons (ids starting w-) open the word pages (depth 2, Back where the button is). 'starter': 'all' means every word on the page always shows. A word with no 'image' is a text-first button (the word is drawn large; the picture area stays, empty). Several words reuse an existing id (for example in, on, he, she, me, my, big, hot): one id is one word, wherever it appears. Every Dolch word must be reachable in 3 taps on both sizes: run tools/dolch-coverage.py after changing a page. TOY AND ANIMAL FOLDERS (Phase 1.7B): row 4 of the Play page holds six toy folder buttons (columns 1, 2, 4, 5, 6, 7: column 0 is Animals on the 45 board, column 3 is Back there) and row 4 of the Animals page holds eight animal folder buttons (columns 1-8: column 0 is Back on the 45 board). Each folder is a page of one row group (9 words, plus 3 adds on the 84 board). On the 45 board an animal folder is depth 3 (Play > Animals > Farm > cow = 4 taps): a built-in exception, see js/boardmodel.js. FOLDERS ON THE CATEGORY PAGES (Phase 1.8A): the same folder format is used on Places (row 5, columns 1-8; 8 folders), People (row 5, columns 1-4 and 6; Friends is an EMPTY folder the adult fills), Chat (row 5, columns 6-9), Feelings (row 4, columns 1-6) and Drinks (row 4, columns 1-6), and on Food: the 'ranch' button (Food row 5, column 9) became 'More food', a folder of eight folder buttons (row 5, columns 1-8; Back at row 5, column 9 on both sizes), and ranch (same word id) moved into the Sauces and spreads folder. Why row 5 and not row 1 on More food: a folder's Back button sits where its folder button is, so folder buttons in row 1 would put Back in the row of the folder's nine words (nine words plus Back do not fit in nine columns). General depth rule: a built-in folder page may sit one level below a category page or a Words page, so a word can be 4 taps deep (Food > More food > Desserts > cake on both sizes; 45 Chat > Feelings > Calm down > deep breath); the adult 'Make this a page' limit is unchanged and is never offered on a built-in folder page. New words are stage 3.",
+ "_note": "A word is placed by its row in 'layouts' (the main grid) or, on a category page, by its row group in 'groups'. Never move an entry: a word's location is permanent on each grid size. Rows 1-4 of the 84 board are identical to the 45 board; the 45 board's bottom row (yes, no, Chat, categories) is the 84 board's bottom row in the same columns. On the main board 'stage' controls when a word is revealed (shown if stage <= the learner's stage). CATEGORY PAGES are organized by ROW GROUPS: each group is one row (the same row index on both sizes). Its 'words' go in columns 0-8 in order (these are the 45-board words, and the first nine words of the 84 board); its 'adds' go in columns 9-11 and appear on the 84 board only. If the page's Back button sits in that row on the 45 board, the Back column is skipped on BOTH sizes. A word given as {\"id\": ..., \"sizes\": [45]} is on the 45 board only. On the 84 board rows 5 and 6 of every page are left empty for the adult's own words. 'starter' lists the original items of a page: they show whenever the page is open. Every other item on a page is a newer word that shows at stage 'pageNewWordStage' and up (an adult can force-show it). A page without groups (Favorites) fills its 'items' left to right, top to bottom, skipping the Back cell. A word with a 'template' speaks that sentence; ___ is a blank an adult fills in. THE WORDS PAGES (Phase 1.6B) use the same row groups. The menu page 'words' has \"fromBar\": true: it is opened by the Words button in the top bar (not by a grid button), has no Back cell, and its buttons (ids starting w-) open the word pages (depth 2, Back where the button is). 'starter': 'all' means every word on the page always shows. A word with no 'image' is a text-first button (the word is drawn large; the picture area stays, empty). Several words reuse an existing id (for example in, on, he, she, me, my, big, hot): one id is one word, wherever it appears. Every Dolch word must be reachable in 3 taps on both sizes: run tools/dolch-coverage.py after changing a page. TOY AND ANIMAL FOLDERS (Phase 1.7B): row 4 of the Play page holds six toy folder buttons (columns 1, 2, 4, 5, 6, 7: column 0 is Animals on the 45 board, column 3 is Back there) and row 4 of the Animals page holds eight animal folder buttons (columns 1-8: column 0 is Back on the 45 board). Each folder is a page of one row group (9 words, plus 3 adds on the 84 board). On the 45 board an animal folder is depth 3 (Play > Animals > Farm > cow = 4 taps): a built-in exception, see js/boardmodel.js. FOLDERS ON THE CATEGORY PAGES (Phase 1.8A): the same folder format is used on Places (row 5, columns 1-8; 8 folders), People (row 5, columns 1-4 and 6; Friends is an EMPTY folder the adult fills), Chat (row 5, columns 6-9), Feelings (row 4, columns 1-6) and Drinks (row 4, columns 1-6), and on Food: the 'ranch' button (Food row 5, column 9) became 'More food', a folder of eight folder buttons (row 5, columns 1-8; Back at row 5, column 9 on both sizes), and ranch (same word id) moved into the Sauces and spreads folder. Why row 5 and not row 1 on More food: a folder's Back button sits where its folder button is, so folder buttons in row 1 would put Back in the row of the folder's nine words (nine words plus Back do not fit in nine columns). General depth rule: a built-in folder page may sit one level below a category page or a Words page, so a word can be 4 taps deep (Food > More food > Desserts > cake on both sizes; 45 Chat > Feelings > Calm down > deep breath); the adult 'Make this a page' limit is unchanged and is never offered on a built-in folder page. FOLDERS ON THE WORDS PAGES (Phase 1.8B): the same folder format on six Words pages, in cells that were EMPTY on both sizes (45 Back cell checked on each page): Describing (row 4, columns 1-5: Opposites, Shapes, Textures, Taste and smell, Sizes and amounts), Time (row 2, columns 5-9: Days, Months, Seasons and holidays, Routine times, Clock words), Numbers (row 2, columns 6-8: Math words, Money, Big numbers), Clothes (row 2, columns 6-8: Accessories, Weather clothes, Getting dressed), Outside (row 2, columns 7-9: Weather, Space, Plants) and Things (row 4, columns 1-5: School supplies, Tech, Household, Bathroom things, Bedroom). The Actions page has no room (its only free cell is one cell in row 5), so it has no folders yet. A Words page says \"starter\": \"all\", which shows every word, so its folder buttons are listed in \"newWords\": those show from stage 3 like the words inside the folders. A word on a Words-page folder is a normal word (Words > Time > Days > Monday = 4 taps). The month May (id may-month) and the season fall (id fall-season) are separate words from the Dolch word may and the verb fall; they carry \"noForms\": true so the Forms button does not offer fell or fallen for the season. The Places folder button \"Home\" (pl-home) is now labeled \"In the house\" with a different picture, so it no longer looks like the word home. New words are stage 3.",
  "id": "core",
  "name": "Core Board",
  "backImage": "images/symbols/back.svg",
@@ -1134,7 +1134,7 @@
   "cottage-cheese": {"label": "cottage cheese", "spokenText": "cottage cheese", "wordType": "noun", "image": "images/symbols/cottage-cheese.svg"},
   "whipped-cream": {"label": "whipped cream", "spokenText": "whipped cream", "wordType": "noun", "image": "images/symbols/whipped-cream.svg"},
   "chocolate-pudding": {"label": "chocolate pudding", "spokenText": "chocolate pudding", "wordType": "noun", "image": "images/symbols/chocolate-pudding.svg"},
-  "pl-home": {"label": "Home", "spokenText": "Home", "wordType": "category", "loadBoard": "pl-home", "image": "images/symbols/pl-home.svg"},
+  "pl-home": {"label": "In the house", "spokenText": "In the house", "wordType": "category", "loadBoard": "pl-home", "image": "images/symbols/pl-home.svg"},
   "pl-school": {"label": "School", "spokenText": "School", "wordType": "category", "loadBoard": "pl-school", "image": "images/symbols/pl-school.svg"},
   "pl-stores": {"label": "Stores", "spokenText": "Stores", "wordType": "category", "loadBoard": "pl-stores", "image": "images/symbols/pl-stores.svg"},
   "pl-food": {"label": "Food places", "spokenText": "Food places", "wordType": "category", "loadBoard": "pl-food", "image": "images/symbols/pl-food.svg"},
@@ -1171,7 +1171,251 @@
   "mf-fruit": {"label": "More fruit", "spokenText": "More fruit", "wordType": "category", "loadBoard": "mf-fruit", "image": "images/symbols/mf-fruit.svg"},
   "mf-veg": {"label": "More veggies", "spokenText": "More veggies", "wordType": "category", "loadBoard": "mf-veg", "image": "images/symbols/mf-veg.svg"},
   "mf-dairy": {"label": "Dairy", "spokenText": "Dairy", "wordType": "category", "loadBoard": "mf-dairy", "image": "images/symbols/mf-dairy.svg"},
-  "more-food": {"label": "More food", "spokenText": "More food", "wordType": "category", "loadBoard": "more-food", "image": "images/symbols/more-food.svg"}
+  "more-food": {"label": "More food", "spokenText": "More food", "wordType": "category", "loadBoard": "more-food", "image": "images/symbols/more-food.svg"},
+  "closed": {"label": "closed", "spokenText": "closed", "wordType": "describing", "image": "images/symbols/closed.svg"},
+  "circle": {"label": "circle", "spokenText": "circle", "wordType": "noun", "image": "images/symbols/circle.svg"},
+  "square": {"label": "square", "spokenText": "square", "wordType": "noun", "image": "images/symbols/square.svg"},
+  "triangle": {"label": "triangle", "spokenText": "triangle", "wordType": "noun", "image": "images/symbols/triangle.svg"},
+  "rectangle": {"label": "rectangle", "spokenText": "rectangle", "wordType": "noun", "image": "images/symbols/rectangle.svg"},
+  "heart": {"label": "heart", "spokenText": "heart", "wordType": "noun", "image": "images/symbols/heart.svg"},
+  "oval": {"label": "oval", "spokenText": "oval", "wordType": "noun", "image": "images/symbols/oval.svg"},
+  "diamond": {"label": "diamond", "spokenText": "diamond", "wordType": "noun", "image": "images/symbols/diamond.svg"},
+  "line": {"label": "line", "spokenText": "line", "wordType": "noun", "image": "images/symbols/line.svg"},
+  "cube": {"label": "cube", "spokenText": "cube", "wordType": "noun", "image": "images/symbols/cube.svg"},
+  "cone": {"label": "cone", "spokenText": "cone", "wordType": "noun", "image": "images/symbols/cone.svg"},
+  "sphere": {"label": "sphere", "spokenText": "sphere", "wordType": "noun", "image": "images/symbols/sphere.svg"},
+  "smooth": {"label": "smooth", "spokenText": "smooth", "wordType": "describing", "image": "images/symbols/smooth.svg"},
+  "bumpy": {"label": "bumpy", "spokenText": "bumpy", "wordType": "describing", "image": "images/symbols/bumpy.svg"},
+  "fuzzy": {"label": "fuzzy", "spokenText": "fuzzy", "wordType": "describing", "image": "images/symbols/fuzzy.svg"},
+  "rough": {"label": "rough", "spokenText": "rough", "wordType": "describing", "image": "images/symbols/rough.svg"},
+  "slimy": {"label": "slimy", "spokenText": "slimy", "wordType": "describing", "image": "images/symbols/slimy.svg"},
+  "crunchy": {"label": "crunchy", "spokenText": "crunchy", "wordType": "describing", "image": "images/symbols/crunchy.svg"},
+  "shiny": {"label": "shiny", "spokenText": "shiny", "wordType": "describing", "image": "images/symbols/shiny.svg"},
+  "prickly": {"label": "prickly", "spokenText": "prickly", "wordType": "describing", "image": "images/symbols/prickly.svg"},
+  "yummy": {"label": "yummy", "spokenText": "yummy", "wordType": "describing", "image": "images/symbols/yummy.svg"},
+  "yucky": {"label": "yucky", "spokenText": "yucky", "wordType": "describing", "image": "images/symbols/yucky.svg"},
+  "sweet": {"label": "sweet", "spokenText": "sweet", "wordType": "describing", "image": "images/symbols/sweet.svg"},
+  "sour": {"label": "sour", "spokenText": "sour", "wordType": "describing", "image": "images/symbols/sour.svg"},
+  "salty": {"label": "salty", "spokenText": "salty", "wordType": "describing", "image": "images/symbols/salty.svg"},
+  "spicy": {"label": "spicy", "spokenText": "spicy", "wordType": "describing", "image": "images/symbols/spicy.svg"},
+  "bitter": {"label": "bitter", "spokenText": "bitter", "wordType": "describing", "image": "images/symbols/bitter.svg"},
+  "stinky": {"label": "stinky", "spokenText": "stinky", "wordType": "describing", "image": "images/symbols/stinky.svg"},
+  "smells-good": {"label": "smells good", "spokenText": "smells good", "wordType": "describing", "image": "images/symbols/smells-good.svg"},
+  "juicy": {"label": "juicy", "spokenText": "juicy", "wordType": "describing", "image": "images/symbols/juicy.svg"},
+  "bland": {"label": "bland", "spokenText": "bland", "wordType": "describing", "image": "images/symbols/bland.svg"},
+  "tiny": {"label": "tiny", "spokenText": "tiny", "wordType": "describing", "image": "images/symbols/tiny.svg"},
+  "huge": {"label": "huge", "spokenText": "huge", "wordType": "describing", "image": "images/symbols/huge.svg"},
+  "less": {"label": "less", "spokenText": "less", "wordType": "describing", "image": "images/symbols/less.svg"},
+  "half": {"label": "half", "spokenText": "half", "wordType": "describing", "image": "images/symbols/half.svg"},
+  "whole": {"label": "whole", "spokenText": "whole", "wordType": "describing", "image": "images/symbols/whole.svg"},
+  "a-lot": {"label": "a lot", "spokenText": "a lot", "wordType": "describing", "image": "images/symbols/a-lot.svg"},
+  "a-little": {"label": "a little", "spokenText": "a little", "wordType": "describing", "image": "images/symbols/a-little.svg"},
+  "enough": {"label": "enough", "spokenText": "enough", "wordType": "describing", "image": "images/symbols/enough.svg"},
+  "none": {"label": "none", "spokenText": "none", "wordType": "describing", "image": "images/symbols/none.svg"},
+  "monday": {"label": "Monday", "spokenText": "Monday", "wordType": "describing", "image": "images/symbols/monday.svg"},
+  "tuesday": {"label": "Tuesday", "spokenText": "Tuesday", "wordType": "describing", "image": "images/symbols/tuesday.svg"},
+  "wednesday": {"label": "Wednesday", "spokenText": "Wednesday", "wordType": "describing", "image": "images/symbols/wednesday.svg"},
+  "thursday": {"label": "Thursday", "spokenText": "Thursday", "wordType": "describing", "image": "images/symbols/thursday.svg"},
+  "friday": {"label": "Friday", "spokenText": "Friday", "wordType": "describing", "image": "images/symbols/friday.svg"},
+  "saturday": {"label": "Saturday", "spokenText": "Saturday", "wordType": "describing", "image": "images/symbols/saturday.svg"},
+  "sunday": {"label": "Sunday", "spokenText": "Sunday", "wordType": "describing", "image": "images/symbols/sunday.svg"},
+  "weekend": {"label": "weekend", "spokenText": "weekend", "wordType": "describing", "image": "images/symbols/weekend.svg"},
+  "january": {"label": "January", "spokenText": "January", "wordType": "describing", "image": "images/symbols/january.svg"},
+  "february": {"label": "February", "spokenText": "February", "wordType": "describing", "image": "images/symbols/february.svg"},
+  "march": {"label": "March", "spokenText": "March", "wordType": "describing", "image": "images/symbols/march.svg"},
+  "april": {"label": "April", "spokenText": "April", "wordType": "describing", "image": "images/symbols/april.svg"},
+  "may-month": {"label": "May", "spokenText": "May", "wordType": "describing", "noForms": true, "image": "images/symbols/may-month.svg"},
+  "june": {"label": "June", "spokenText": "June", "wordType": "describing", "image": "images/symbols/june.svg"},
+  "july": {"label": "July", "spokenText": "July", "wordType": "describing", "image": "images/symbols/july.svg"},
+  "august": {"label": "August", "spokenText": "August", "wordType": "describing", "image": "images/symbols/august.svg"},
+  "september": {"label": "September", "spokenText": "September", "wordType": "describing", "image": "images/symbols/september.svg"},
+  "october": {"label": "October", "spokenText": "October", "wordType": "describing", "image": "images/symbols/october.svg"},
+  "november": {"label": "November", "spokenText": "November", "wordType": "describing", "image": "images/symbols/november.svg"},
+  "december": {"label": "December", "spokenText": "December", "wordType": "describing", "image": "images/symbols/december.svg"},
+  "spring": {"label": "spring", "spokenText": "spring", "wordType": "describing", "image": "images/symbols/spring.svg"},
+  "summer": {"label": "summer", "spokenText": "summer", "wordType": "describing", "image": "images/symbols/summer.svg"},
+  "fall-season": {"label": "fall", "spokenText": "fall", "wordType": "describing", "noForms": true, "image": "images/symbols/fall-season.svg"},
+  "winter": {"label": "winter", "spokenText": "winter", "wordType": "describing", "image": "images/symbols/winter.svg"},
+  "halloween": {"label": "Halloween", "spokenText": "Halloween", "wordType": "describing", "image": "images/symbols/halloween.svg"},
+  "thanksgiving": {"label": "Thanksgiving", "spokenText": "Thanksgiving", "wordType": "describing", "image": "images/symbols/thanksgiving.svg"},
+  "easter": {"label": "Easter", "spokenText": "Easter", "wordType": "describing", "image": "images/symbols/easter.svg"},
+  "valentines-day": {"label": "Valentine's Day", "spokenText": "Valentine's Day", "wordType": "describing", "image": "images/symbols/valentines-day.svg"},
+  "new-year": {"label": "New Year", "spokenText": "New Year", "wordType": "describing", "image": "images/symbols/new-year.svg"},
+  "fourth-of-july": {"label": "Fourth of July", "spokenText": "Fourth of July", "wordType": "describing", "image": "images/symbols/fourth-of-july.svg"},
+  "lunch-time": {"label": "lunch time", "spokenText": "lunch time", "wordType": "describing", "image": "images/symbols/lunch-time.svg"},
+  "snack-time": {"label": "snack time", "spokenText": "snack time", "wordType": "describing", "image": "images/symbols/snack-time.svg"},
+  "nap-time": {"label": "nap time", "spokenText": "nap time", "wordType": "describing", "image": "images/symbols/nap-time.svg"},
+  "play-time": {"label": "play time", "spokenText": "play time", "wordType": "describing", "image": "images/symbols/play-time.svg"},
+  "dinner-time": {"label": "dinner time", "spokenText": "dinner time", "wordType": "describing", "image": "images/symbols/dinner-time.svg"},
+  "bath-time": {"label": "bath time", "spokenText": "bath time", "wordType": "describing", "image": "images/symbols/bath-time.svg"},
+  "bedtime": {"label": "bedtime", "spokenText": "bedtime", "wordType": "describing", "image": "images/symbols/bedtime.svg"},
+  "school-time": {"label": "school time", "spokenText": "school time", "wordType": "describing", "image": "images/symbols/school-time.svg"},
+  "therapy-time": {"label": "therapy time", "spokenText": "therapy time", "wordType": "describing", "image": "images/symbols/therapy-time.svg"},
+  "circle-time": {"label": "circle time", "spokenText": "circle time", "wordType": "describing", "image": "images/symbols/circle-time.svg"},
+  "free-time": {"label": "free time", "spokenText": "free time", "wordType": "describing", "image": "images/symbols/free-time.svg"},
+  "minute": {"label": "minute", "spokenText": "minute", "wordType": "noun", "image": "images/symbols/minute.svg"},
+  "hour": {"label": "hour", "spokenText": "hour", "wordType": "noun", "image": "images/symbols/hour.svg"},
+  "oclock": {"label": "o'clock", "spokenText": "o'clock", "wordType": "describing", "image": "images/symbols/oclock.svg"},
+  "early": {"label": "early", "spokenText": "early", "wordType": "describing", "image": "images/symbols/early.svg"},
+  "late": {"label": "late", "spokenText": "late", "wordType": "describing", "image": "images/symbols/late.svg"},
+  "next": {"label": "next", "spokenText": "next", "wordType": "describing", "image": "images/symbols/next.svg"},
+  "last": {"label": "last", "spokenText": "last", "wordType": "describing", "image": "images/symbols/last.svg"},
+  "later": {"label": "later", "spokenText": "later", "wordType": "describing", "image": "images/symbols/later.svg"},
+  "timer": {"label": "timer", "spokenText": "timer", "wordType": "noun", "image": "images/symbols/timer.svg"},
+  "plus": {"label": "plus", "spokenText": "plus", "wordType": "describing", "image": "images/symbols/plus.svg"},
+  "minus": {"label": "minus", "spokenText": "minus", "wordType": "describing", "image": "images/symbols/minus.svg"},
+  "equals": {"label": "equals", "spokenText": "equals", "wordType": "describing", "image": "images/symbols/equals.svg"},
+  "count": {"label": "count", "spokenText": "count", "wordType": "action", "image": "images/symbols/count.svg"},
+  "add": {"label": "add", "spokenText": "add", "wordType": "action", "image": "images/symbols/add.svg"},
+  "take-away": {"label": "take away", "spokenText": "take away", "wordType": "action", "image": "images/symbols/take-away.svg"},
+  "more-than": {"label": "more than", "spokenText": "more than", "wordType": "describing", "image": "images/symbols/more-than.svg"},
+  "less-than": {"label": "less than", "spokenText": "less than", "wordType": "describing", "image": "images/symbols/less-than.svg"},
+  "total": {"label": "total", "spokenText": "total", "wordType": "describing", "image": "images/symbols/total.svg"},
+  "how-many": {"label": "how many", "spokenText": "how many", "wordType": "question", "image": "images/symbols/how-many.svg"},
+  "penny": {"label": "penny", "spokenText": "penny", "wordType": "noun", "image": "images/symbols/penny.svg"},
+  "nickel": {"label": "nickel", "spokenText": "nickel", "wordType": "noun", "image": "images/symbols/nickel.svg"},
+  "dime": {"label": "dime", "spokenText": "dime", "wordType": "noun", "image": "images/symbols/dime.svg"},
+  "quarter": {"label": "quarter", "spokenText": "quarter", "wordType": "noun", "image": "images/symbols/quarter.svg"},
+  "dollar": {"label": "dollar", "spokenText": "dollar", "wordType": "noun", "image": "images/symbols/dollar.svg"},
+  "pay": {"label": "pay", "spokenText": "pay", "wordType": "action", "image": "images/symbols/pay.svg"},
+  "cost": {"label": "cost", "spokenText": "cost", "wordType": "action", "image": "images/symbols/cost.svg"},
+  "change": {"label": "change", "spokenText": "change", "wordType": "noun", "image": "images/symbols/change.svg"},
+  "wallet": {"label": "wallet", "spokenText": "wallet", "wordType": "noun", "image": "images/symbols/wallet.svg"},
+  "coins": {"label": "coins", "spokenText": "coins", "wordType": "noun", "image": "images/symbols/coins.svg"},
+  "twenty": {"label": "twenty", "spokenText": "twenty", "wordType": "describing", "image": "images/symbols/twenty.svg"},
+  "thirty": {"label": "thirty", "spokenText": "thirty", "wordType": "describing", "image": "images/symbols/thirty.svg"},
+  "forty": {"label": "forty", "spokenText": "forty", "wordType": "describing", "image": "images/symbols/forty.svg"},
+  "fifty": {"label": "fifty", "spokenText": "fifty", "wordType": "describing", "image": "images/symbols/fifty.svg"},
+  "hundred": {"label": "hundred", "spokenText": "hundred", "wordType": "describing", "image": "images/symbols/hundred.svg"},
+  "thousand": {"label": "thousand", "spokenText": "thousand", "wordType": "describing", "image": "images/symbols/thousand.svg"},
+  "million": {"label": "million", "spokenText": "million", "wordType": "describing", "image": "images/symbols/million.svg"},
+  "thirteen": {"label": "thirteen", "spokenText": "thirteen", "wordType": "describing", "image": "images/symbols/thirteen.svg"},
+  "fifteen": {"label": "fifteen", "spokenText": "fifteen", "wordType": "describing", "image": "images/symbols/fifteen.svg"},
+  "one-hundred": {"label": "one hundred", "spokenText": "one hundred", "wordType": "describing", "image": "images/symbols/one-hundred.svg"},
+  "glasses": {"label": "glasses", "spokenText": "glasses", "wordType": "noun", "image": "images/symbols/glasses.svg"},
+  "backpack": {"label": "backpack", "spokenText": "backpack", "wordType": "noun", "image": "images/symbols/backpack.svg"},
+  "necklace": {"label": "necklace", "spokenText": "necklace", "wordType": "noun", "image": "images/symbols/necklace.svg"},
+  "bracelet": {"label": "bracelet", "spokenText": "bracelet", "wordType": "noun", "image": "images/symbols/bracelet.svg"},
+  "hair-bow": {"label": "hair bow", "spokenText": "hair bow", "wordType": "noun", "image": "images/symbols/hair-bow.svg"},
+  "belt": {"label": "belt", "spokenText": "belt", "wordType": "noun", "image": "images/symbols/belt.svg"},
+  "purse": {"label": "purse", "spokenText": "purse", "wordType": "noun", "image": "images/symbols/purse.svg"},
+  "earrings": {"label": "earrings", "spokenText": "earrings", "wordType": "noun", "image": "images/symbols/earrings.svg"},
+  "hair-tie": {"label": "hair tie", "spokenText": "hair tie", "wordType": "noun", "image": "images/symbols/hair-tie.svg"},
+  "sunglasses": {"label": "sunglasses", "spokenText": "sunglasses", "wordType": "noun", "image": "images/symbols/sunglasses.svg"},
+  "crown": {"label": "crown", "spokenText": "crown", "wordType": "noun", "image": "images/symbols/crown.svg"},
+  "raincoat": {"label": "raincoat", "spokenText": "raincoat", "wordType": "noun", "image": "images/symbols/raincoat.svg"},
+  "umbrella": {"label": "umbrella", "spokenText": "umbrella", "wordType": "noun", "image": "images/symbols/umbrella.svg"},
+  "swimsuit": {"label": "swimsuit", "spokenText": "swimsuit", "wordType": "noun", "image": "images/symbols/swimsuit.svg"},
+  "snow-boots": {"label": "snow boots", "spokenText": "snow boots", "wordType": "noun", "image": "images/symbols/snow-boots.svg"},
+  "sandals": {"label": "sandals", "spokenText": "sandals", "wordType": "noun", "image": "images/symbols/sandals.svg"},
+  "sweatshirt": {"label": "sweatshirt", "spokenText": "sweatshirt", "wordType": "noun", "image": "images/symbols/sweatshirt.svg"},
+  "flip-flops": {"label": "flip flops", "spokenText": "flip flops", "wordType": "noun", "image": "images/symbols/flip-flops.svg"},
+  "rain-boots": {"label": "rain boots", "spokenText": "rain boots", "wordType": "noun", "image": "images/symbols/rain-boots.svg"},
+  "hood": {"label": "hood", "spokenText": "hood", "wordType": "noun", "image": "images/symbols/hood.svg"},
+  "zip": {"label": "zip", "spokenText": "zip", "wordType": "action", "image": "images/symbols/zip.svg"},
+  "button": {"label": "button", "spokenText": "button", "wordType": "action", "image": "images/symbols/button.svg"},
+  "tie": {"label": "tie", "spokenText": "tie", "wordType": "action", "image": "images/symbols/tie.svg"},
+  "snap": {"label": "snap", "spokenText": "snap", "wordType": "action", "image": "images/symbols/snap.svg"},
+  "put-on": {"label": "put on", "spokenText": "put on", "wordType": "action", "image": "images/symbols/put-on.svg"},
+  "take-off": {"label": "take off", "spokenText": "take off", "wordType": "action", "image": "images/symbols/take-off.svg"},
+  "too-big": {"label": "too big", "spokenText": "too big", "wordType": "describing", "image": "images/symbols/too-big.svg"},
+  "too-small": {"label": "too small", "spokenText": "too small", "wordType": "describing", "image": "images/symbols/too-small.svg"},
+  "inside-out": {"label": "inside out", "spokenText": "inside out", "wordType": "describing", "image": "images/symbols/inside-out.svg"},
+  "backwards": {"label": "backwards", "spokenText": "backwards", "wordType": "describing", "image": "images/symbols/backwards.svg"},
+  "buckle": {"label": "buckle", "spokenText": "buckle", "wordType": "action", "image": "images/symbols/buckle.svg"},
+  "velcro": {"label": "velcro", "spokenText": "velcro", "wordType": "noun", "image": "images/symbols/velcro.svg"},
+  "sunny": {"label": "sunny", "spokenText": "sunny", "wordType": "describing", "image": "images/symbols/sunny.svg"},
+  "cloudy": {"label": "cloudy", "spokenText": "cloudy", "wordType": "describing", "image": "images/symbols/cloudy.svg"},
+  "rainy": {"label": "rainy", "spokenText": "rainy", "wordType": "describing", "image": "images/symbols/rainy.svg"},
+  "windy": {"label": "windy", "spokenText": "windy", "wordType": "describing", "image": "images/symbols/windy.svg"},
+  "stormy": {"label": "stormy", "spokenText": "stormy", "wordType": "describing", "image": "images/symbols/stormy.svg"},
+  "thunder": {"label": "thunder", "spokenText": "thunder", "wordType": "noun", "image": "images/symbols/thunder.svg"},
+  "foggy": {"label": "foggy", "spokenText": "foggy", "wordType": "describing", "image": "images/symbols/foggy.svg"},
+  "hot-outside": {"label": "hot outside", "spokenText": "hot outside", "wordType": "describing", "image": "images/symbols/hot-outside.svg"},
+  "cold-outside": {"label": "cold outside", "spokenText": "cold outside", "wordType": "describing", "image": "images/symbols/cold-outside.svg"},
+  "snowy": {"label": "snowy", "spokenText": "snowy", "wordType": "describing", "image": "images/symbols/snowy.svg"},
+  "stars": {"label": "stars", "spokenText": "stars", "wordType": "noun", "image": "images/symbols/stars.svg"},
+  "planet": {"label": "planet", "spokenText": "planet", "wordType": "noun", "image": "images/symbols/planet.svg"},
+  "earth": {"label": "earth", "spokenText": "earth", "wordType": "noun", "image": "images/symbols/earth.svg"},
+  "alien": {"label": "alien", "spokenText": "alien", "wordType": "people", "image": "images/symbols/alien.svg"},
+  "comet": {"label": "comet", "spokenText": "comet", "wordType": "noun", "image": "images/symbols/comet.svg"},
+  "mars": {"label": "Mars", "spokenText": "Mars", "wordType": "noun", "image": "images/symbols/mars.svg"},
+  "galaxy": {"label": "galaxy", "spokenText": "galaxy", "wordType": "noun", "image": "images/symbols/galaxy.svg"},
+  "telescope": {"label": "telescope", "spokenText": "telescope", "wordType": "noun", "image": "images/symbols/telescope.svg"},
+  "bush": {"label": "bush", "spokenText": "bush", "wordType": "noun", "image": "images/symbols/bush.svg"},
+  "vine": {"label": "vine", "spokenText": "vine", "wordType": "noun", "image": "images/symbols/vine.svg"},
+  "cactus": {"label": "cactus", "spokenText": "cactus", "wordType": "noun", "image": "images/symbols/cactus.svg"},
+  "pumpkin": {"label": "pumpkin", "spokenText": "pumpkin", "wordType": "noun", "image": "images/symbols/pumpkin.svg"},
+  "mushroom": {"label": "mushroom", "spokenText": "mushroom", "wordType": "noun", "image": "images/symbols/mushroom.svg"},
+  "roots": {"label": "roots", "spokenText": "roots", "wordType": "noun", "image": "images/symbols/roots.svg"},
+  "acorn": {"label": "acorn", "spokenText": "acorn", "wordType": "noun", "image": "images/symbols/acorn.svg"},
+  "pencil": {"label": "pencil", "spokenText": "pencil", "wordType": "noun", "image": "images/symbols/pencil.svg"},
+  "crayon": {"label": "crayon", "spokenText": "crayon", "wordType": "noun", "image": "images/symbols/crayon.svg"},
+  "marker": {"label": "marker", "spokenText": "marker", "wordType": "noun", "image": "images/symbols/marker.svg"},
+  "glue-stick": {"label": "glue stick", "spokenText": "glue stick", "wordType": "noun", "image": "images/symbols/glue-stick.svg"},
+  "folder": {"label": "folder", "spokenText": "folder", "wordType": "noun", "image": "images/symbols/folder.svg"},
+  "lunchbox": {"label": "lunchbox", "spokenText": "lunchbox", "wordType": "noun", "image": "images/symbols/lunchbox.svg"},
+  "notebook": {"label": "notebook", "spokenText": "notebook", "wordType": "noun", "image": "images/symbols/notebook.svg"},
+  "eraser": {"label": "eraser", "spokenText": "eraser", "wordType": "noun", "image": "images/symbols/eraser.svg"},
+  "ruler": {"label": "ruler", "spokenText": "ruler", "wordType": "noun", "image": "images/symbols/ruler.svg"},
+  "computer": {"label": "computer", "spokenText": "computer", "wordType": "noun", "image": "images/symbols/computer.svg"},
+  "charger": {"label": "charger", "spokenText": "charger", "wordType": "noun", "image": "images/symbols/charger.svg"},
+  "video": {"label": "video", "spokenText": "video", "wordType": "noun", "image": "images/symbols/video.svg"},
+  "camera": {"label": "camera", "spokenText": "camera", "wordType": "noun", "image": "images/symbols/camera.svg"},
+  "remote": {"label": "remote", "spokenText": "remote", "wordType": "noun", "image": "images/symbols/remote.svg"},
+  "game-console": {"label": "game console", "spokenText": "game console", "wordType": "noun", "image": "images/symbols/game-console.svg"},
+  "speaker": {"label": "speaker", "spokenText": "speaker", "wordType": "noun", "image": "images/symbols/speaker.svg"},
+  "battery": {"label": "battery", "spokenText": "battery", "wordType": "noun", "image": "images/symbols/battery.svg"},
+  "lamp": {"label": "lamp", "spokenText": "lamp", "wordType": "noun", "image": "images/symbols/lamp.svg"},
+  "pillow": {"label": "pillow", "spokenText": "pillow", "wordType": "noun", "image": "images/symbols/pillow.svg"},
+  "fan": {"label": "fan", "spokenText": "fan", "wordType": "noun", "image": "images/symbols/fan.svg"},
+  "trash-can": {"label": "trash can", "spokenText": "trash can", "wordType": "noun", "image": "images/symbols/trash-can.svg"},
+  "clock": {"label": "clock", "spokenText": "clock", "wordType": "noun", "image": "images/symbols/clock.svg"},
+  "key": {"label": "key", "spokenText": "key", "wordType": "noun", "image": "images/symbols/key.svg"},
+  "vacuum": {"label": "vacuum", "spokenText": "vacuum", "wordType": "noun", "image": "images/symbols/vacuum.svg"},
+  "rug": {"label": "rug", "spokenText": "rug", "wordType": "noun", "image": "images/symbols/rug.svg"},
+  "soap": {"label": "soap", "spokenText": "soap", "wordType": "noun", "image": "images/symbols/soap.svg"},
+  "towel": {"label": "towel", "spokenText": "towel", "wordType": "noun", "image": "images/symbols/towel.svg"},
+  "toothbrush": {"label": "toothbrush", "spokenText": "toothbrush", "wordType": "noun", "image": "images/symbols/toothbrush.svg"},
+  "toothpaste": {"label": "toothpaste", "spokenText": "toothpaste", "wordType": "noun", "image": "images/symbols/toothpaste.svg"},
+  "toilet-paper": {"label": "toilet paper", "spokenText": "toilet paper", "wordType": "noun", "image": "images/symbols/toilet-paper.svg"},
+  "tissue": {"label": "tissue", "spokenText": "tissue", "wordType": "noun", "image": "images/symbols/tissue.svg"},
+  "bathtub": {"label": "bathtub", "spokenText": "bathtub", "wordType": "noun", "image": "images/symbols/bathtub.svg"},
+  "sink": {"label": "sink", "spokenText": "sink", "wordType": "noun", "image": "images/symbols/sink.svg"},
+  "comb": {"label": "comb", "spokenText": "comb", "wordType": "noun", "image": "images/symbols/comb.svg"},
+  "shampoo": {"label": "shampoo", "spokenText": "shampoo", "wordType": "noun", "image": "images/symbols/shampoo.svg"},
+  "hairbrush": {"label": "hairbrush", "spokenText": "hairbrush", "wordType": "noun", "image": "images/symbols/hairbrush.svg"},
+  "bandage": {"label": "bandage", "spokenText": "bandage", "wordType": "noun", "image": "images/symbols/bandage.svg"},
+  "nightlight": {"label": "nightlight", "spokenText": "nightlight", "wordType": "noun", "image": "images/symbols/nightlight.svg"},
+  "dresser": {"label": "dresser", "spokenText": "dresser", "wordType": "noun", "image": "images/symbols/dresser.svg"},
+  "toy-box": {"label": "toy box", "spokenText": "toy box", "wordType": "noun", "image": "images/symbols/toy-box.svg"},
+  "alarm": {"label": "alarm", "spokenText": "alarm", "wordType": "noun", "image": "images/symbols/alarm.svg"},
+  "curtains": {"label": "curtains", "spokenText": "curtains", "wordType": "noun", "image": "images/symbols/curtains.svg"},
+  "bunk-bed": {"label": "bunk bed", "spokenText": "bunk bed", "wordType": "noun", "image": "images/symbols/bunk-bed.svg"},
+  "ds-opposites": {"label": "Opposites", "spokenText": "Opposites", "wordType": "category", "loadBoard": "ds-opposites", "image": "images/symbols/ds-opposites.svg"},
+  "ds-shapes": {"label": "Shapes", "spokenText": "Shapes", "wordType": "category", "loadBoard": "ds-shapes", "image": "images/symbols/ds-shapes.svg"},
+  "ds-textures": {"label": "Textures", "spokenText": "Textures", "wordType": "category", "loadBoard": "ds-textures", "image": "images/symbols/ds-textures.svg"},
+  "ds-taste": {"label": "Taste and smell", "spokenText": "Taste and smell", "wordType": "category", "loadBoard": "ds-taste", "image": "images/symbols/ds-taste.svg"},
+  "ds-sizes": {"label": "Sizes and amounts", "spokenText": "Sizes and amounts", "wordType": "category", "loadBoard": "ds-sizes", "image": "images/symbols/ds-sizes.svg"},
+  "ti-days": {"label": "Days", "spokenText": "Days", "wordType": "category", "loadBoard": "ti-days", "image": "images/symbols/ti-days.svg"},
+  "ti-months": {"label": "Months", "spokenText": "Months", "wordType": "category", "loadBoard": "ti-months", "image": "images/symbols/ti-months.svg"},
+  "ti-seasons": {"label": "Seasons and holidays", "spokenText": "Seasons and holidays", "wordType": "category", "loadBoard": "ti-seasons", "image": "images/symbols/ti-seasons.svg"},
+  "ti-routine": {"label": "Routine times", "spokenText": "Routine times", "wordType": "category", "loadBoard": "ti-routine", "image": "images/symbols/ti-routine.svg"},
+  "ti-clock": {"label": "Clock words", "spokenText": "Clock words", "wordType": "category", "loadBoard": "ti-clock", "image": "images/symbols/ti-clock.svg"},
+  "nu-math": {"label": "Math words", "spokenText": "Math words", "wordType": "category", "loadBoard": "nu-math", "image": "images/symbols/nu-math.svg"},
+  "nu-money": {"label": "Money", "spokenText": "Money", "wordType": "category", "loadBoard": "nu-money", "image": "images/symbols/nu-money.svg"},
+  "nu-big": {"label": "Big numbers", "spokenText": "Big numbers", "wordType": "category", "loadBoard": "nu-big", "image": "images/symbols/nu-big.svg"},
+  "cl-accessories": {"label": "Accessories", "spokenText": "Accessories", "wordType": "category", "loadBoard": "cl-accessories", "image": "images/symbols/cl-accessories.svg"},
+  "cl-weather": {"label": "Weather clothes", "spokenText": "Weather clothes", "wordType": "category", "loadBoard": "cl-weather", "image": "images/symbols/cl-weather.svg"},
+  "cl-dressing": {"label": "Getting dressed", "spokenText": "Getting dressed", "wordType": "category", "loadBoard": "cl-dressing", "image": "images/symbols/cl-dressing.svg"},
+  "ou-weather": {"label": "Weather", "spokenText": "Weather", "wordType": "category", "loadBoard": "ou-weather", "image": "images/symbols/ou-weather.svg"},
+  "ou-space": {"label": "Space", "spokenText": "Space", "wordType": "category", "loadBoard": "ou-space", "image": "images/symbols/ou-space.svg"},
+  "ou-plants": {"label": "Plants", "spokenText": "Plants", "wordType": "category", "loadBoard": "ou-plants", "image": "images/symbols/ou-plants.svg"},
+  "th-school": {"label": "School supplies", "spokenText": "School supplies", "wordType": "category", "loadBoard": "th-school", "image": "images/symbols/th-school.svg"},
+  "th-tech": {"label": "Tech", "spokenText": "Tech", "wordType": "category", "loadBoard": "th-tech", "image": "images/symbols/th-tech.svg"},
+  "th-household": {"label": "Household", "spokenText": "Household", "wordType": "category", "loadBoard": "th-household", "image": "images/symbols/th-household.svg"},
+  "th-bathroom": {"label": "Bathroom things", "spokenText": "Bathroom things", "wordType": "category", "loadBoard": "th-bathroom", "image": "images/symbols/th-bathroom.svg"},
+  "th-bedroom": {"label": "Bedroom", "spokenText": "Bedroom", "wordType": "category", "loadBoard": "th-bedroom", "image": "images/symbols/th-bedroom.svg"}
  },
  "layouts": {
   "45": {"columns": 9, "rows": 5, "main": [
@@ -1277,14 +1521,15 @@
   "w-past": {"name": "Past tense", "starter": "all", "groups": [
     {"row": 0, "name": "Already happened", "words": ["ran", "saw", "said", "came", "gave", "found"]}
   ]},
-  "w-describing": {"name": "Describing", "starter": "all", "groups": [
+  "w-describing": {"name": "Describing", "starter": "all", "newWords": ["ds-opposites", "ds-shapes", "ds-textures", "ds-taste", "ds-sizes"], "groups": [
     {"row": 0, "name": "Describing", "words": ["funny", "pretty", "new", "old", "best", "better", "small", "long"], "adds": ["tall", "short", "soft"]},
     {"row": 1, "name": "More describing", "words": ["full", "kind", "right", "left", "first", "far", "light", "own", "round"], "adds": ["hard", "wet", "dry"]},
-    {"row": 2, "name": "Size, heat, speed", "words": ["well", "done", "big", "little", "hot", "cold", "warm", "fast"], "adds": ["empty", "dirty", "clean"]}
+    {"row": 2, "name": "Size, heat, speed", "words": ["well", "done", "big", "little", "hot", "cold", "warm", "fast"], "adds": ["empty", "dirty", "clean"]},
+    {"row": 3, "name": "Describing folders", "words": ["ds-opposites", "ds-shapes", "ds-textures", "ds-taste", "ds-sizes"]}
   ]},
-  "w-time": {"name": "Time", "starter": "all", "groups": [
+  "w-time": {"name": "Time", "starter": "all", "newWords": ["ti-days", "ti-months", "ti-seasons", "ti-routine", "ti-clock"], "groups": [
     {"row": 0, "name": "Now and later", "words": ["now", "soon", "today", "after", "before", "then", "always", "never"], "adds": ["yesterday", "tomorrow", "week"]},
-    {"row": 1, "name": "Again", "words": ["once", "together", "first", "again"]},
+    {"row": 1, "name": "Again and time folders", "words": ["once", "together", "first", "again", "ti-days", "ti-months", "ti-seasons", "ti-routine", "ti-clock"]},
     {"row": 2, "name": "Day", "words": ["day", "night", "morning", "time"], "adds": ["afternoon"]},
     {"row": 3, "name": "Special days", "words": ["birthday", "christmas", "santa-claus"]}
   ]},
@@ -1292,23 +1537,24 @@
     {"row": 0, "name": "Colors", "words": ["red", "blue", "yellow", "green", "black", "white", "brown", "orange-color", "purple"]},
     {"row": 1, "name": "More colors", "words": ["pink", "gray", "rainbow"]}
   ]},
-  "w-numbers": {"name": "Numbers", "starter": "all", "groups": [
+  "w-numbers": {"name": "Numbers", "starter": "all", "newWords": ["nu-math", "nu-money", "nu-big"], "groups": [
     {"row": 0, "name": "Numbers", "words": ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], "adds": ["eleven", "twelve"]},
-    {"row": 1, "name": "More numbers", "words": ["ten", "zero", "number", "number-pad"]}
+    {"row": 1, "name": "More numbers", "words": ["ten", "zero", "number", "number-pad", "nu-math", "nu-money", "nu-big"]}
   ]},
-  "w-clothes": {"name": "Clothes", "starter": "all", "groups": [
+  "w-clothes": {"name": "Clothes", "starter": "all", "newWords": ["cl-accessories", "cl-weather", "cl-dressing"], "groups": [
     {"row": 0, "name": "Clothes", "words": ["shirt", "pants", "shoes", "socks", "coat", "jacket", "hat", "pajamas", "dress"], "adds": ["sweater", "mittens", "scarf"]},
-    {"row": 1, "name": "More clothes", "words": ["shorts", "boots", "gloves", "shoe"], "adds": ["hoodie", "underwear"]}
+    {"row": 1, "name": "More clothes", "words": ["shorts", "boots", "gloves", "shoe", "cl-accessories", "cl-weather", "cl-dressing"], "adds": ["hoodie", "underwear"]}
   ]},
-  "w-outside": {"name": "Outside", "starter": "all", "groups": [
+  "w-outside": {"name": "Outside", "starter": "all", "newWords": ["ou-weather", "ou-space", "ou-plants"], "groups": [
     {"row": 0, "name": "Weather and sky", "words": ["sun", "rain", "snow", "wind", "cloud", "sky", "moon", "star"], "adds": ["lightning"]},
-    {"row": 1, "name": "Plants", "words": ["tree", "flower", "grass", "garden", "seed"], "adds": ["leaf"]},
+    {"row": 1, "name": "Plants", "words": ["tree", "flower", "grass", "garden", "seed", "ou-weather", "ou-space", "ou-plants"], "adds": ["leaf"]},
     {"row": 2, "name": "On the ground", "words": ["hill", "rock", "ground", "stick", "wood", "fire", "street", "boat", "nest"]}
   ]},
-  "w-things": {"name": "Things", "starter": "all", "groups": [
+  "w-things": {"name": "Things", "starter": "all", "newWords": ["th-school", "th-tech", "th-household", "th-bathroom", "th-bedroom"], "groups": [
     {"row": 0, "name": "Stuff", "words": ["toy", "ring", "top", "thing", "way", "song", "game", "name", "money"]},
     {"row": 1, "name": "Body", "words": ["eye", "leg", "feet", "body-back"]},
-    {"row": 2, "name": "More things", "words": ["boy", "girl", "bread", "cake", "egg", "chicken", "sheep", "bell", "watch"]}
+    {"row": 2, "name": "More things", "words": ["boy", "girl", "bread", "cake", "egg", "chicken", "sheep", "bell", "watch"]},
+    {"row": 3, "name": "Things folders", "words": ["th-school", "th-tech", "th-household", "th-bathroom", "th-bedroom"]}
   ]},
   "t-sensory": {"name": "Sensory", "groups": [
     {"row": 0, "name": "Sensory", "words": ["fidget", "spinner", "squishy", "slime", "kinetic-sand", "light-up-toy", "sensory-bottle", "popper", "stress-ball"], "adds": ["chewy", "rice-bin", "vibrating-toy"]}
@@ -1352,8 +1598,8 @@
   "a-forest": {"name": "Forest", "groups": [
     {"row": 0, "name": "Forest", "words": ["bear", "deer", "squirrel", "fox", "owl", "raccoon", "mouse", "skunk", "wolf"], "adds": ["moose", "beaver", "porcupine"]}
   ]},
-  "pl-home": {"name": "Home", "groups": [
-    {"row": 0, "name": "Home", "words": ["couch", "bath", "shower", "closet", "stairs", "table", "chair", "tv", "toilet"], "adds": ["yard", "porch", "laundry-room"]}
+  "pl-home": {"name": "In the house", "groups": [
+    {"row": 0, "name": "In the house", "words": ["couch", "bath", "shower", "closet", "stairs", "table", "chair", "tv", "toilet"], "adds": ["yard", "porch", "laundry-room"]}
   ]},
   "pl-school": {"name": "School", "groups": [
     {"row": 0, "name": "School", "words": ["classroom", "gym", "cafeteria", "recess", "library", "music-room", "art-room", "office", "school-bus"], "adds": ["hallway", "nurses-office", "sensory-room"]}
@@ -1463,6 +1709,78 @@
   ]},
   "mf-dairy": {"name": "Dairy", "groups": [
     {"row": 0, "name": "Dairy", "words": ["milk", "cheese", "yogurt", "butter", "cream-cheese", "sour-cream", "cottage-cheese", "string-cheese", "eggs"], "adds": ["whipped-cream", "chocolate-pudding", "ice-cream"]}
+  ]},
+  "ds-opposites": {"name": "Opposites", "groups": [
+    {"row": 0, "name": "Opposites", "words": ["big", "little", "hot", "cold", "fast", "slow", "up", "down", "open"], "adds": ["closed", "wet", "dry"]}
+  ]},
+  "ds-shapes": {"name": "Shapes", "groups": [
+    {"row": 0, "name": "Shapes", "words": ["circle", "square", "triangle", "rectangle", "star", "heart", "oval", "diamond", "line"], "adds": ["cube", "cone", "sphere"]}
+  ]},
+  "ds-textures": {"name": "Textures", "groups": [
+    {"row": 0, "name": "Textures", "words": ["soft", "hard", "smooth", "bumpy", "sticky", "fuzzy", "rough", "squishy", "slimy"], "adds": ["crunchy", "shiny", "prickly"]}
+  ]},
+  "ds-taste": {"name": "Taste and smell", "groups": [
+    {"row": 0, "name": "Taste and smell", "words": ["yummy", "yucky", "sweet", "sour", "salty", "spicy", "bitter", "stinky", "smells-good"], "adds": ["crunchy", "juicy", "bland"]}
+  ]},
+  "ds-sizes": {"name": "Sizes and amounts", "groups": [
+    {"row": 0, "name": "Sizes and amounts", "words": ["tiny", "huge", "more", "less", "half", "whole", "empty", "full", "a-lot"], "adds": ["a-little", "enough", "none"]}
+  ]},
+  "ti-days": {"name": "Days", "groups": [
+    {"row": 0, "name": "Days", "words": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "weekend", "today"], "adds": ["yesterday", "tomorrow", "week"]}
+  ]},
+  "ti-months": {"name": "Months", "groups": [
+    {"row": 0, "name": "Months", "words": ["january", "february", "march", "april", "may-month", "june", "july", "august", "september"], "adds": ["october", "november", "december"]}
+  ]},
+  "ti-seasons": {"name": "Seasons and holidays", "groups": [
+    {"row": 0, "name": "Seasons and holidays", "words": ["spring", "summer", "fall-season", "winter", "birthday", "halloween", "thanksgiving", "christmas", "easter"], "adds": ["valentines-day", "new-year", "fourth-of-july"]}
+  ]},
+  "ti-routine": {"name": "Routine times", "groups": [
+    {"row": 0, "name": "Routine times", "words": ["morning", "lunch-time", "snack-time", "nap-time", "play-time", "dinner-time", "bath-time", "bedtime", "school-time"], "adds": ["therapy-time", "circle-time", "free-time"]}
+  ]},
+  "ti-clock": {"name": "Clock words", "groups": [
+    {"row": 0, "name": "Clock words", "words": ["minute", "hour", "oclock", "early", "late", "first", "next", "last", "later"], "adds": ["soon", "wait", "timer"]}
+  ]},
+  "nu-math": {"name": "Math words", "groups": [
+    {"row": 0, "name": "Math words", "words": ["plus", "minus", "equals", "count", "add", "take-away", "more-than", "less-than", "same"], "adds": ["number", "total", "how-many"]}
+  ]},
+  "nu-money": {"name": "Money", "groups": [
+    {"row": 0, "name": "Money", "words": ["penny", "nickel", "dime", "quarter", "dollar", "money", "pay", "buy", "cost"], "adds": ["change", "wallet", "coins"]}
+  ]},
+  "nu-big": {"name": "Big numbers", "groups": [
+    {"row": 0, "name": "Big numbers", "words": ["eleven", "twelve", "twenty", "thirty", "forty", "fifty", "hundred", "thousand", "million"], "adds": ["thirteen", "fifteen", "one-hundred"]}
+  ]},
+  "cl-accessories": {"name": "Accessories", "groups": [
+    {"row": 0, "name": "Accessories", "words": ["glasses", "watch", "backpack", "necklace", "bracelet", "hair-bow", "belt", "purse", "earrings"], "adds": ["hair-tie", "sunglasses", "crown"]}
+  ]},
+  "cl-weather": {"name": "Weather clothes", "groups": [
+    {"row": 0, "name": "Weather clothes", "words": ["raincoat", "umbrella", "mittens", "scarf", "swimsuit", "snow-boots", "sandals", "sweatshirt", "hat"], "adds": ["flip-flops", "rain-boots", "hood"]}
+  ]},
+  "cl-dressing": {"name": "Getting dressed", "groups": [
+    {"row": 0, "name": "Getting dressed", "words": ["zip", "button", "tie", "snap", "put-on", "take-off", "too-big", "too-small", "inside-out"], "adds": ["backwards", "buckle", "velcro"]}
+  ]},
+  "ou-weather": {"name": "Weather", "groups": [
+    {"row": 0, "name": "Weather", "words": ["sunny", "cloudy", "rainy", "windy", "stormy", "thunder", "lightning", "rainbow", "foggy"], "adds": ["hot-outside", "cold-outside", "snowy"]}
+  ]},
+  "ou-space": {"name": "Space", "groups": [
+    {"row": 0, "name": "Space", "words": ["moon", "stars", "planet", "rocket", "sun", "earth", "astronaut", "alien", "comet"], "adds": ["mars", "galaxy", "telescope"]}
+  ]},
+  "ou-plants": {"name": "Plants", "groups": [
+    {"row": 0, "name": "Plants", "words": ["leaf", "flower", "seed", "tree", "bush", "grass", "vine", "cactus", "pumpkin"], "adds": ["mushroom", "roots", "acorn"]}
+  ]},
+  "th-school": {"name": "School supplies", "groups": [
+    {"row": 0, "name": "School supplies", "words": ["pencil", "crayon", "marker", "scissors", "glue-stick", "paper", "folder", "backpack", "lunchbox"], "adds": ["notebook", "eraser", "ruler"]}
+  ]},
+  "th-tech": {"name": "Tech", "groups": [
+    {"row": 0, "name": "Tech", "words": ["tablet", "phone", "computer", "tv", "charger", "headphones", "video", "camera", "remote"], "adds": ["game-console", "speaker", "battery"]}
+  ]},
+  "th-household": {"name": "Household", "groups": [
+    {"row": 0, "name": "Household", "words": ["lamp", "blanket", "pillow", "couch", "remote", "light", "fan", "trash-can", "clock"], "adds": ["key", "vacuum", "rug"]}
+  ]},
+  "th-bathroom": {"name": "Bathroom things", "groups": [
+    {"row": 0, "name": "Bathroom things", "words": ["soap", "towel", "toothbrush", "toothpaste", "toilet-paper", "tissue", "bathtub", "sink", "comb"], "adds": ["shampoo", "hairbrush", "bandage"]}
+  ]},
+  "th-bedroom": {"name": "Bedroom", "groups": [
+    {"row": 0, "name": "Bedroom", "words": ["bed", "blanket", "pillow", "nightlight", "stuffed-animal", "dresser", "closet", "toy-box", "alarm"], "adds": ["curtains", "bunk-bed", "lamp"]}
   ]},
   "favorites": {"name": "Favorites", "items": []}
  }

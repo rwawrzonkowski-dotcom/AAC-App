@@ -2,7 +2,7 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 8, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 9, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
 //         keyboardButton, speakLetters,
@@ -20,7 +20,8 @@
 // restores with Auto, letters not spoken, Sentence speed 0.9 and no pauses. Version 7 (Phase 1.7B) only changed the
 // layout (toy and animal folders): a backup older than 7 has its adult-added words checked against the new folder buttons.
 // Version 8 (Phase 1.8A) is the same kind of change (folders on Places, People, Chat, Feelings, Drinks and Food): a backup
-// older than 8 is checked again, and gets a note that "ranch" moved into More food.
+// older than 8 is checked again, and gets a note that "ranch" moved into More food. Version 9 (Phase 1.8B) is the same kind of
+// change again (folders on the Describing, Time, Numbers, Clothes, Outside and Things Words pages): a backup older than 9 is checked.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -41,7 +42,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 8;
+export const BACKUP_VERSION = 9;
 
 // ---------------------------------------------------------------- saving
 
@@ -240,18 +241,18 @@ function cleanLearner(raw, index, version) {
   const speakLetters = version >= 6 && raw.speakLetters === true;
 
   // Backups older than version 4 were made before the row-group category pages (Phase 1.6), and backups
-  // older than version 8 before the Number pad button, the toy and animal folder buttons (Phase 1.7) and the folder
-  // buttons on Places, People, Chat, Feelings, Drinks and Food (Phase 1.8A): move any
+  // older than version 9 before the Number pad button, the toy and animal folder buttons (Phase 1.7), the folder
+  // buttons on Places, People, Chat, Feelings, Drinks and Food (Phase 1.8A) and on the Words pages (Phase 1.8B): move any
   // word the adult added to a cell that a built-in word now needs. (Pins are obsolete. Running this on a backup that is already
   // tidy moves nothing.)
   let notices = [];
   let moved = {};
-  if (version < 8) {
+  if (version < 9) {
     const r = relocateAdultWords(board, cells, pages);
     cells = r.cells; pages = r.pages; pins = {};
     moved = moveMap(r.moves);
     notices = describeMoves(r.moves);
-    notices.push(RANCH_NOTE);                    // (Phase 1.8A: ranch moved into More food)
+    if (version < 8) notices.push(RANCH_NOTE);   // (Phase 1.8A: ranch moved into More food; version 8 backups already know)
   }
 
   const photos = [];

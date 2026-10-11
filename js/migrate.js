@@ -77,12 +77,13 @@ export function migrateCells(board, oldCells) {
 // free cell on the same page (on the 84 board rows 6-7 first, which the layout leaves
 // free for adults). (Phase 1.7B did the same for the toy folder buttons on the Play page and the animal folder
 // buttons on the Animals page, both in row 5. Phase 1.8A did the same for the folder buttons on the Places, People, Chat,
-// Feelings and Drinks pages.) If a page has no free cell left (the 45-board Food and Places pages are full), the
+// Feelings and Drinks pages, and Phase 1.8B for the folder buttons on the Words pages.) If a page has no free cell left (the 45-board Food and Places pages are full), the
 // word goes to the first free cell on the Favorites page. Everything about built-in words
 // (renamed label, photo, show/hide) is stored by word id, so it follows its word by itself.
 // ---------------------------------------------------------------------------------
-export const CURRENT_PROFILE_VERSION = 6;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders;
-                                            // 6 = folders on Places, People, Chat, Feelings, Drinks and the More food folder on Food
+export const CURRENT_PROFILE_VERSION = 7;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders;
+                                            // 6 = folders on Places, People, Chat, Feelings, Drinks and the More food folder on Food;
+                                            // 7 = folders on the Words pages (Describing, Time, Numbers, Clothes, Outside, Things)
 
 // Phase 1.8A: the "ranch" button (Food page, row 5, column 9) became the "More food" folder button. The word itself
 // (same id, so a renamed label, photo or show/hide choice follows it) now lives in More food > Sauces and spreads.

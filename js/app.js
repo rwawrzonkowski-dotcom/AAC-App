@@ -224,7 +224,8 @@ function onTyped({ label, spoken, kind, speak: say, context }) {
 // On only when the last word in the message bar has other forms (go: went, going...).
 function lastWordForms() {
   const last = state.sentence[state.sentence.length - 1];
-  return last ? formsFor(last.label) || formsFor(last.spoken) : null;
+  // (noForms: the season "fall" and the month "May" are not the verb "fall" or the word "may": no Forms for them)
+  return last && !last.noForms ? formsFor(last.label) || formsFor(last.spoken) : null;
 }
 function updateFormsButton() {
   $("forms-btn").disabled = !lastWordForms();
@@ -316,7 +317,7 @@ function onCellTap(cellEl) {
   lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on
   speak(d.spoken);
   const shown = d.sentence ? d.spoken : d.label;
-  state.sentence.push({ label: shown, spoken: d.spoken, base: shown });
+  state.sentence.push({ label: shown, spoken: d.spoken, base: shown, noForms: d.noForms });
   drawMessage();
   logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined);
 

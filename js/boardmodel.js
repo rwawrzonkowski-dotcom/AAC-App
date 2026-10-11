@@ -78,7 +78,7 @@ export function buildModel(board, size) {
       ? p.groups.flatMap((g) => [...g.words.map(asEntry).filter(onSize), ...(size === 84 ? (g.adds || []).map(asEntry) : [])]).map((e) => e.id)
       : (p.items || []).map(asEntry).filter(onSize).map((e) => e.id);
     defs[pid] = { id: pid, name: p.name, groups: p.groups || null, starter: p.starter || [], items: p.items || [], itemIds: ids,
-                  fromBar: !!p.fromBar };
+                  fromBar: !!p.fromBar, newWords: new Set(p.newWords || []) };
   }
 
   // Where is each page opened from? (the main grid, the top bar, or an item on another page)
@@ -117,7 +117,9 @@ export function buildModel(board, size) {
     if (d.groups) {
       // The 45 board's Back cell decides which column a group row skips, on BOTH sizes.
       const back45 = size === 45 ? at : ((buildModel(board, 45).pages[pid] || {}).at || null);
-      const starter = d.starter === "all" ? { has: () => true } : new Set(d.starter);
+      // "starter": "all" shows every word, except the ones the page lists in "newWords" (Phase 1.8B: the folder buttons
+      // on the Words pages are new stage-3 words even though the Words pages otherwise show everything).
+      const starter = d.starter === "all" ? { has: (id) => !d.newWords.has(id) } : new Set(d.starter);
       const NEW_STAGE = board.pageNewWordStage || 3;
       // pageStage: from which stage the word shows on this page (original items: always)
       const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: starter.has(e.id) ? 1 : NEW_STAGE });
@@ -218,6 +220,7 @@ export function resolvePage(page, profile, model) {
         d.wordType = base.wordType;
         d.loadBoard = base.loadBoard || null;
         d.action = base.action || null;               // e.g. "numberpad": opens the number pad (no speech)
+        d.noForms = !!base.noForms;                   // the season "fall" and the month "May": the Forms button never offers verb forms for them
         d.stageGated = stageGated;
         // Sentence buttons ("My name is ___"): speak the sentence with the blank filled in.
         if (base.template) {

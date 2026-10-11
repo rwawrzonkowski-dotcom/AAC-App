@@ -1,4 +1,4 @@
-# AAC Board (Phase 1.8 part A)
+# AAC Board (Phase 1.8 part B)
 
 A free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
@@ -62,7 +62,7 @@ A free, offline communication board for children who are new to AAC
   - **Folders on the category pages (Phase 1.8A).** The same folder format (nine words in row 1, three more on the 84 board, Back where the folder
     button is, rows 6-7 left empty on the 84 board) now exists on six more pages. Nothing that was there moved; each folder button
     sits in a cell that was empty, in the same columns on both board sizes:
-    - **Places** (row 5, columns 1-8): Home, School, Stores, Food places, Fun places, Outdoors, Travel, Health.
+    - **Places** (row 5, columns 1-8): In the house (was Home), School, Stores, Food places, Fun places, Outdoors, Travel, Health.
     - **People** (row 5, columns 1-4 and 6): Family, School people, Helpers, Pretend characters (generic only, no named
       characters), and **Friends**, an empty folder an adult fills with the learner's own friends (Edit board > tap a cell > Add a word).
     - **Chat** (row 5, columns 6-9): Questions, Requests, Play talk, Compliments. **Feelings** (row 4, columns 1-6): More feelings,
@@ -77,6 +77,8 @@ A free, offline communication board for children who are new to AAC
     - A word that is in several folders (toilet in Home and Body care, milkshake in Milk and shakes and Fast food) is one word. New
       words and the new folder buttons show from stage 3. Sixty-one more simple pictures were drawn for this project where no
       open symbol exists; see CREDITS.md for every picture's source and the weak stand-ins (for example "mango juice" shows a mango).
+  - **Places > "In the house" (Phase 1.8B).** The folder that was labeled "Home" is now **In the house** with a room picture, so it
+    no longer looks like the word "home" on the same page. It is the same folder (same place, same words).
   - **About me**: sentence buttons with a blank an adult fills in ("My name is ___",
     "I am ___ years old", "I go to ___", "My mom is ___", "My dad is ___", "I love ___",
     "My birthday is ___", "My pet is ___", "My brother is ___", "My sister is ___", "My teacher is ___",
@@ -87,6 +89,21 @@ A free, offline communication board for children who are new to AAC
     main-grid button (two taps). There is no home-address button, and the emergency-contact
     field shows a privacy reminder.
   - **Places** includes "here" (it used to be on the main board).
+- **Folders on the Words pages (Phase 1.8B).** The same folder format (nine words, three more on the 84 board, Back where the folder
+  button is) now exists on six Words pages, in cells that were empty on both board sizes (rows and columns below start at 1):
+  - **Describing** (row 4, columns 1-5): Opposites, Shapes, Textures, Taste and smell, Sizes and amounts.
+  - **Time** (row 2, columns 5-9): Days, Months, Seasons and holidays, Routine times, Clock words.
+  - **Numbers** (row 2, columns 6-8): Math words, Money, Big numbers. **Clothes** (row 2, columns 6-8): Accessories, Weather clothes,
+    Getting dressed. **Outside** (row 2, columns 7-9): Weather, Space, Plants.
+  - **Things** (row 4, columns 1-5): School supplies, Tech, Household, Bathroom things, Bedroom.
+  - **Actions has no folders yet:** its page has no empty row for them (one free cell only), and nothing may move. See the planning doc.
+  - A word is up to four taps deep (Words > Time > Days > Monday). The folder buttons and the new words show from stage 3. The month
+    **May** and the season **fall** are separate words from the Dolch word "may" and the verb "fall" (the Forms button does not offer
+    "fell" or "fallen" after the season). The days and months are small calendar pictures drawn for this project (the day or month is
+    highlighted); see CREDITS.md for every picture's source. In all, 220 new words and 24 folder buttons were added: 128 Mulberry
+    pictures, 49 OpenMoji pictures and 68 simple pictures drawn for this project (including the "In the house" folder picture). The
+    weaker stand-ins are the abstract words: bland (a neutral face), later (an hourglass), none, less, a little, a lot, tiny and huge
+    (drawn dots and circles), closed (a closed door), and count and total (counters and an abacus). Real photos can replace any of them.
 - **Words pages (three taps).** The **Words** button in the top bar (between the message text and Delete)
   opens the Words menu: Little words, More little words, Actions, Past tense, Describing, Time (first row)
   and Colors, Numbers, Clothes, Outside, Things (second row). Tap a page, then a word: that is
@@ -303,6 +320,9 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
   previously empty cells is kept and moved the same way (the 45 Places page is now full, so such a word goes to Favorites). Every
   learner saved before this version gets a note that **ranch moved into More food > Sauces and spreads**. Learner data is now version 6
   and backups version 8 (older backups get the same check, and the note, when restored). Code: `js/migrate.js`.
+- **Phase 1.8B added folder buttons** on the Describing, Time, Numbers, Clothes, Outside and Things Words pages (see above). An
+  adult-added word in one of those previously empty cells is kept and moved the same way, with a note. Learner data is now version 7
+  and backups version 9 (older backups get the same check when restored). Code: `js/migrate.js`.
 
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.
