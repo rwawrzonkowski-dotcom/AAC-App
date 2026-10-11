@@ -51,7 +51,7 @@
 // Only tiny things (which learner is current) go in localStorage.
 import * as db from "./db.js";
 import { load, save, remove } from "./storage.js";
-import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION } from "./migrate.js";
+import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION, RANCH_NOTE } from "./migrate.js";
 import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 import { PAUSE_CHOICES } from "./speech.js";
 
@@ -110,10 +110,12 @@ async function upgradeProfile(p, board) {
     p.gridSize = 45; p.v = 2;
     await saveProfile(p);
   }
-  if (p.v < 5) {
+  if (p.v < 6) {
     // Version 2 -> 3 (Phase 1.6): category pages were reorganized into row groups. Version 3 -> 4 (Phase 1.7A):
     // the Numbers page gained the Number pad button. Version 4 -> 5 (Phase 1.7B): the Play page gained six
-    // toy folder buttons and the Animals page eight animal folder buttons. Words the adult ADDED to a cell that a built-in word
+    // toy folder buttons and the Animals page eight animal folder buttons. Version 5 -> 6 (Phase 1.8A): folder buttons
+    // on the Places, People, Chat, Feelings and Drinks pages, and "ranch" on the Food page became the More food folder
+    // (the adult gets a note about ranch). Words the adult ADDED to a cell that a built-in word
     // now needs are kept and moved (see js/migrate.js; running it again is harmless).
     const r = relocateAdultWords(board, p.cells, p.pages);
     p.cells = r.cells; p.pages = r.pages; p.pins = {};
@@ -126,6 +128,7 @@ async function upgradeProfile(p, board) {
       }
     }
     p.notices = [...(p.notices || []), ...describeMoves(r.moves)];
+    if (!p.notices.includes(RANCH_NOTE)) p.notices.push(RANCH_NOTE);
     p.v = CURRENT_PROFILE_VERSION;
     await saveProfile(p);
   }

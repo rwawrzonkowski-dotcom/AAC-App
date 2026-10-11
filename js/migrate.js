@@ -76,11 +76,19 @@ export function migrateCells(board, oldCells) {
 // a built-in word. Anything an adult ADDED to such a cell is KEPT and moved to the first
 // free cell on the same page (on the 84 board rows 6-7 first, which the layout leaves
 // free for adults). (Phase 1.7B did the same for the toy folder buttons on the Play page and the animal folder
-// buttons on the Animals page, both in row 5.) If a page has no free cell left (the 45-board Food page is full), the
+// buttons on the Animals page, both in row 5. Phase 1.8A did the same for the folder buttons on the Places, People, Chat,
+// Feelings and Drinks pages.) If a page has no free cell left (the 45-board Food and Places pages are full), the
 // word goes to the first free cell on the Favorites page. Everything about built-in words
 // (renamed label, photo, show/hide) is stored by word id, so it follows its word by itself.
 // ---------------------------------------------------------------------------------
-export const CURRENT_PROFILE_VERSION = 5;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders
+export const CURRENT_PROFILE_VERSION = 6;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders;
+                                            // 6 = folders on Places, People, Chat, Feelings, Drinks and the More food folder on Food
+
+// Phase 1.8A: the "ranch" button (Food page, row 5, column 9) became the "More food" folder button. The word itself
+// (same id, so a renamed label, photo or show/hide choice follows it) now lives in More food > Sauces and spreads.
+// Every learner saved before this version gets this note once.
+export const RANCH_NOTE = "ranch moved into More food \u2192 Sauces and spreads (the Food page's last button in row 5 is now More food). " +
+  "Anything you changed on ranch, such as its picture or name, moved with it.";
 
 const KEY_ANY = /^([A-Za-z0-9_-]{1,40}):(\d{1,2}),(\d{1,2})(@84)?$/;
 function parseKey(key) {

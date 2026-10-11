@@ -1,4 +1,4 @@
-# AAC Board (Phase 1.7 part B)
+# AAC Board (Phase 1.8 part A)
 
 A free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
@@ -48,16 +48,35 @@ A free, offline communication board for children who are new to AAC
       the 84 board. Its Back button sits where the folder button is. The words are new "newer words" (they show from
       stage 3, like the other words on pages, and the folder buttons do too). A word that is in several folders
       (dog in Pets, bear in Zoo and Forest) is one word with one photo, one rename and one show/hide setting.
-    - **Depth exception (built-in animal folders only).** On the 45 board a folder is opened from Animals, which is
-      opened from Play: Play > Animals > Farm > cow is **four taps**, and Back goes up one level at a time. On the
-      84 board Animals is on the main grid, so it is Animals > Farm > cow (three taps). Every other page stays within
-      three taps, and an adult's "Make this a page" is still offered only on a page at depth 1 (never at depth 2 or
-      more, so never on a folder page). In Model mode the ring shows the whole path in order after a word is chosen:
-      the word, the folder button, the Animals button, the Play button (up to four steps).
+    - **Depth rule for built-in folders (generalized in Phase 1.8A).** A built-in folder page may sit one level below a
+      category page or a Words page, so a folder word can be **four taps** deep: Play > Animals > Farm > cow on the 45 board
+      (Animals is opened from Play there), and Food > More food > Desserts > cake on both sizes. On the 84 board a folder
+      under a main-grid category is three taps (Animals > Farm > cow). Back always goes up one level at a time. An adult's
+      "Make this a page" limit is unchanged (offered only on a page at depth 1) and is **never offered on a built-in folder
+      page** (an adult can still add a word to an empty cell there). In Model mode the ring shows the whole path in order
+      after a word is chosen (up to four steps).
     - Some symbols are weaker stand-ins (see CREDITS.md for each picture's source): fourteen simple pictures
       were drawn for this project because no open symbol exists (digger, spinner, slime, stamps, shaker, tambourine,
       triceratops, stegosaurus, pterodactyl, raptor, ankylosaurus, spinosaurus, dino egg, fossil). An adult can
       replace any of them with a real photo (Edit board > photo).
+  - **Folders on the category pages (Phase 1.8A).** The same folder format (nine words in row 1, three more on the 84 board, Back where the folder
+    button is, rows 6-7 left empty on the 84 board) now exists on six more pages. Nothing that was there moved; each folder button
+    sits in a cell that was empty, in the same columns on both board sizes:
+    - **Places** (row 5, columns 1-8): Home, School, Stores, Food places, Fun places, Outdoors, Travel, Health.
+    - **People** (row 5, columns 1-4 and 6): Family, School people, Helpers, Pretend characters (generic only, no named
+      characters), and **Friends**, an empty folder an adult fills with the learner's own friends (Edit board > tap a cell > Add a word).
+    - **Chat** (row 5, columns 6-9): Questions, Requests, Play talk, Compliments. **Feelings** (row 4, columns 1-6): More feelings,
+      Sick and hurt, Calm down, Sensory, Body care, Body parts. **Drinks** (row 4, columns 1-6): Juice, Milk and shakes, Hot drinks,
+      Water and sports, Party drinks, Drink things.
+    - **Food:** the last button of row 5 (it was "ranch") is now **More food**, a folder of eight folders: Desserts, Sauces and
+      spreads, Fast food, Lunch and dinner, More snacks, More fruit, More veggies, Dairy. It is the only existing cell that changed:
+      **ranch** (same word, so its renamed label, photo and show/hide choice moved with it) is now in More food > Sauces and spreads,
+      and the adult menu shows a note about it. More food's eight folder buttons are in **row 5** (columns 1-8, Back at column 9 on both
+      sizes), not row 1, because a folder's Back button sits where its folder button is: buttons in row 1 would put Back in the row
+      of the folder's own nine words.
+    - A word that is in several folders (toilet in Home and Body care, milkshake in Milk and shakes and Fast food) is one word. New
+      words and the new folder buttons show from stage 3. Sixty-one more simple pictures were drawn for this project where no
+      open symbol exists; see CREDITS.md for every picture's source and the weak stand-ins (for example "mango juice" shows a mango).
   - **About me**: sentence buttons with a blank an adult fills in ("My name is ___",
     "I am ___ years old", "I go to ___", "My mom is ___", "My dad is ___", "I love ___",
     "My birthday is ___", "My pet is ___", "My brother is ___", "My sister is ___", "My teacher is ___",
@@ -279,6 +298,11 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
   those previously empty cells is kept and moved to the next free cell of the same page (on the 84 board the two bottom rows
   first), with a note in the adult menu; a page button you made moves with its page, and photos move too. Learner data is now
   version 5 and backups version 7 (older backups get the same check when restored). Code: `js/migrate.js`.
+- **Phase 1.8A added folder buttons** on Places (row 5, columns 1-8), People (row 5, columns 1-4 and 6), Chat (row 5, columns 6-9),
+  Feelings and Drinks (row 4, columns 1-6), and the More food button on Food (replacing ranch). An adult-added word in one of those
+  previously empty cells is kept and moved the same way (the 45 Places page is now full, so such a word goes to Favorites). Every
+  learner saved before this version gets a note that **ranch moved into More food > Sauces and spreads**. Learner data is now version 6
+  and backups version 8 (older backups get the same check, and the note, when restored). Code: `js/migrate.js`.
 
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.

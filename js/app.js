@@ -356,7 +356,8 @@ function onCellTap(cellEl) {
 async function editCell(d) {
   const profile = getCurrent();
   const page = currentPageDef();
-  const canMakePage = d.kind === "empty" && page.depth < MAX_DEPTH;
+  // (Never on a built-in folder page: those may sit deeper than the limit, see js/boardmodel.js.)
+  const canMakePage = d.kind === "empty" && page.depth < MAX_DEPTH && !page.folder;
   const result = await openCellEditor(d, getPhotoUrl(d.photoKey), { onOpenPage: goTo, canMakePage });
   if (!result) return;
 

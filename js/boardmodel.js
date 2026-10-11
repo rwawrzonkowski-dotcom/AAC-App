@@ -23,12 +23,19 @@ export const SIZES = { 45: { cols: 9, rows: 5 }, 84: { cols: 12, rows: 7 } };
 // How deep a page an ADULT may make is limited: main board = 0, a page from it = 1, a page from that = 2
 // (3 taps to a word). "Make this a page" is never offered at depth 2 or more.
 //
-// DEPTH EXCEPTION (Phase 1.7B), built-in pages only: the eight ANIMAL FOLDER pages (Pets, Farm, Zoo, Ocean,
-// Bugs, Birds, Dinosaurs, Forest) are opened from the Animals page. On the 45 board the Animals page is itself
-// opened from Play, so a folder is depth 3 (Play > Animals > Farm > cow = 4 taps). On the 84 board Animals is a
-// main-grid button, so a folder is depth 2 (3 taps). Nothing in the code special-cases this: depth is simply
-// counted from where each page is opened (see layout() below). The limit above applies only to pages an adult
-// makes, so the extra level exists ONLY for these built-in pages. Back always goes up exactly one level.
+// DEPTH RULE FOR BUILT-IN FOLDER PAGES (generalized in Phase 1.8A; Phase 1.7B had it for the animal folders only):
+// a built-in FOLDER page may sit one level below a category page or a Words page, even if that makes a word on it
+// four taps deep. A folder is opened by a button on another built-in page, so its depth is the opener's depth + 1.
+//   - 84 board: the category pages (Food, Drinks, Places, People, Chat, Feelings, Play, Animals) are main-grid buttons
+//     (depth 1), so a folder is depth 2 (3 taps to a word: Places > Home > couch).
+//   - 45 board: Feelings is opened from Chat and Animals from Play (depth 2), so their folders are depth 3
+//     (Chat > Feelings > Calm down > deep breath = 4 taps). Food > More food > Desserts > cake is depth 3 on BOTH
+//     sizes (4 taps), because More food is itself a folder of Food.
+// Nothing in the code special-cases this: depth is simply counted from where each page is opened (see layout() below).
+// The limit above applies only to pages an ADULT makes, so the extra level exists ONLY for built-in pages. Such a page
+// carries folder: true (its parent is another built-in page, not the main board); "Make this a page" is never offered
+// there (the adult can still add a WORD to an empty cell, for example on the Friends folder). Back always goes up
+// exactly one level, and Model mode rings every step of the path.
 export const MAX_DEPTH = 2;
 
 // Every cell has a permanent key that is used to store things an adult adds there.
@@ -135,7 +142,8 @@ export function buildModel(board, size) {
         }
       }
     }
-    pages[pid] = { id: pid, name: d.name, parent, at, depth, items, builtin: true };
+    // folder: a built-in page opened from another built-in page (not from the main board and not from the top bar)
+    pages[pid] = { id: pid, name: d.name, parent, at, depth, items, builtin: true, folder: !!parent && parent !== "core" };
     return pages[pid];
   }
   for (const pid of Object.keys(defs)) if (openerOf[pid]) layout(pid);   // pages nobody opens are not reachable
@@ -146,7 +154,7 @@ export function buildModel(board, size) {
 }
 
 // Any page by id for this learner: "core", a built-in page, or an adult-made page.
-// Returns { id, name, parent, at, depth, items, builtin } or null.
+// Returns { id, name, parent, at, depth, items, builtin, folder } or null.
 export function getPage(model, profile, pageId) {
   if (pageId === "core") return { id: "core", name: "", parent: null, at: null, depth: 0, items: model.main, builtin: true };
   if (model.pages[pageId]) return model.pages[pageId];

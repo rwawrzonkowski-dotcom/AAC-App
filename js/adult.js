@@ -60,9 +60,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     if (!cur.notices || !cur.notices.length) return null;
     return h("section", { class: "panel notice", id: "sec-notice" },
       h("h2", { text: "Notes about " + cur.name + "'s board" }),
-      h("p", { class: "muted", text: "Some built-in words now use spots where you had added words (the category pages were reorganized " +
-        "into rows of related words, or a new button was added to a page). These words that you added " +
-        "sat where a built-in word now lives, so they were kept and moved to a free spot:" }),
+      h("p", { class: "muted", text: "The board was updated. A built-in word now uses a spot where you had added a word " +
+        "(a new folder button was added, or the category pages were reorganized into rows of related words): that word was " +
+        "kept and moved to a free spot. Some built-in words also moved into a folder. Here is what changed:" }),
       h("ul", { class: "notice-list" }, cur.notices.map((t) => h("li", { text: t }))),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn", id: "notice-ok", text: "Got it", onclick: async () => {
