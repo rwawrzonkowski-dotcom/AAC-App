@@ -200,6 +200,7 @@ export function resolvePage(page, profile, model) {
         d.label = ov.label ?? base.label;
         d.wordType = base.wordType;
         d.loadBoard = base.loadBoard || null;
+        d.action = base.action || null;               // e.g. "numberpad": opens the number pad (no speech)
         d.stageGated = stageGated;
         // Sentence buttons ("My name is ___"): speak the sentence with the blank filled in.
         if (base.template) {

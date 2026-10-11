@@ -61,6 +61,10 @@ button { font: inherit; touch-action: manipulation; }
   border-radius: 1vmin; padding: 0.4vmin 1.6vmin;
   font-size: min(4vmin, 5.5dvh); font-weight: 700; color: #222;
 }
+/* A chip still being typed on the keyboard / number pad: dashed outline, white */
+.chip.draft { background: #fff; border: 0.35vmin dashed #1d4ed8; color: #1e3a8a; }
+/* The chip being said while the message bar plays with pauses between words */
+.chip.speaking { background: #fde68a; border-color: #b45309; }
 .bar-btn {
   flex: 0 0 13vw; border: 0.3vmin solid #6b7480; border-radius: var(--radius);
   font-size: min(2.4vw, 4dvh); font-weight: 800; color: #222; cursor: pointer;
@@ -74,6 +78,9 @@ button { font: inherit; touch-action: manipulation; }
 #words-btn, #forms-btn { flex: 0 0 11vw; }
 #words-btn { background: #b9e6d6; }
 #forms-btn { background: #d9c6f0; }
+#abc-btn { flex: 0 0 11vw; background: #ffe08a; }
+#app.typing #abc-btn { background: #f5b82e; box-shadow: inset 0 0 0 0.5vmin #7a4b00; }   /* ABC is "on" while typing; tap it to close */
+#app.typing #words-btn, #app.typing #forms-btn { opacity: 0.38; }                            /* not usable behind the keyboard */
 .bar-btn[hidden] { display: none; }
 .bar-btn:disabled { opacity: 0.38; cursor: default; }
 .bar-btn:disabled.pressed { filter: none; }
@@ -257,7 +264,7 @@ button { font: inherit; touch-action: manipulation; }
 @keyframes fill-bar { from { width: 0; } to { width: 100%; } }
 /* The ring is a glow around the button: it takes no room. --ring-a (0 to 1) is the
    learner's "ring opacity" setting; js/modelprompt.js sets it on the button. */
-.cell.model-ring, .mp-mock.ring-on, .bar-btn.model-ring {
+.cell.model-ring, .mp-mock.ring-on, .bar-btn.model-ring, .kb-key.model-ring {
   z-index: 5;
   animation: model-pulse 0.5s ease-in-out infinite alternate;
   box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
@@ -434,3 +441,32 @@ button { font: inherit; touch-action: manipulation; }
 .form-btn.current { background: #d9c6f0; border-color: #4c1d95; border-width: 0.8vmin; }
 .form-btn.pressed { filter: brightness(0.78); }
 @media (orientation: portrait) { #forms-backdrop { display: none; } }
+
+/* ---------- Keyboard and number pad (Phase 1.7) ----------
+   One overlay laid over the grid's row (an absolutely positioned child of #app, so it takes no room and no
+   grid cell moves or resizes). The message bar above stays visible and shows the dashed draft chip. */
+#typing-overlay {
+  position: absolute; grid-row: 3 / 4; grid-column: 1 / 2; inset: 0; z-index: 35;
+  background: #dfe5ec; border: 0.4vmin solid #6b7480; border-radius: var(--radius);
+  padding: 1.2vmin; display: flex; flex-direction: column; gap: 1.2vmin;
+}
+.kb-head { flex: 0 0 auto; height: max(9dvh, 64px); display: flex; align-items: stretch; gap: 1.2vmin; }
+.kb-title { flex: 1; align-self: center; text-align: center; font-size: min(3.6vmin, 5dvh); font-weight: 800; color: #334155; }
+.kb-keys { flex: 1; min-height: 0; display: grid; gap: 1vmin; }
+.kb-letters { grid-template-columns: repeat(20, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); }
+.kb-pad { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); width: min(100%, 92vmin); margin: 0 auto; }
+.kb-key {
+  min-height: 64px; min-width: 0; padding: 0; border: 0.35vmin solid #4b5563; border-radius: 1.4vmin;
+  background: #fff; color: #111; font-weight: 800; font-size: min(7.5vmin, 10dvh); line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; text-transform: none;
+}
+.kb-key.pressed { filter: brightness(0.78); }
+.kb-key.refused { background: #fecaca; border-color: #b91c1c; }
+.kb-pad .kb-key { font-size: min(11vmin, 14dvh); }
+.kb-space { background: #dbeafe; font-size: min(4.4vmin, 6dvh); letter-spacing: 0.05em; }
+.kb-back { background: #fdba74; }
+.kb-done { background: #22c55e; font-size: min(5.2vmin, 7dvh); }
+.kb-switch { background: #ddd6fe; font-size: min(5.2vmin, 7dvh); }
+.kb-head .kb-key { flex: 0 0 auto; padding: 0 3.5vmin; font-size: min(3.8vmin, 5.4dvh); min-height: 0; }
+.kb-close { background: #e5e7eb; }
+.kb-pad .kb-done { font-size: min(6vmin, 8dvh); }

@@ -2,9 +2,10 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 5, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 6, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
+//         keyboardButton, speakLetters,
 //         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
 //     ]
 //   }
@@ -14,6 +15,9 @@
 // is one of the photos, with the key "critter".
 // `wordsButton` ("auto" | "always" | "never") and `wordsOnly` (the reading stage) came with version 5
 // (Phase 1.6B, the Words pages); an older backup restores with Auto and pictures on.
+// `voice` holds voiceURI, pitch, rate (word speed), sentenceRate and pause; `keyboardButton` ("auto" | "always" |
+// "never") and `speakLetters` came with version 6 (Phase 1.7, the keyboard and speech pacing). An older backup
+// restores with Auto, letters not spoken, Sentence speed 0.9 and no pauses.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -25,7 +29,7 @@
 // until you move it yourself.
 import { h, openOverlay, askConfirm } from "./ui.js";
 import {
-  listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, CHILD_VOICE,
+  listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES,
 } from "./profiles.js";
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
@@ -34,7 +38,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 5;
+export const BACKUP_VERSION = 6;
 
 // ---------------------------------------------------------------- saving
 
@@ -68,6 +72,8 @@ export async function buildBackup(learners) {
       model: p.model,
       wordsButton: p.wordsButton,
       wordsOnly: p.wordsOnly,
+      keyboardButton: p.keyboardButton,
+      speakLetters: p.speakLetters,
       photos,
     });
   }
@@ -209,12 +215,8 @@ function cleanLearner(raw, index, version) {
     }
   }
 
-  const v = isObj(raw.voice) ? raw.voice : {};
-  const voice = {
-    voiceURI: str(v.voiceURI, 200),
-    pitch: clamp(num(v.pitch, CHILD_VOICE.pitch), 0.5, 2),
-    rate: clamp(num(v.rate, CHILD_VOICE.rate), 0.5, 1.5),
-  };
+  // Voice. Sentence speed and the pause only count in version 6+ backups (older ones get 0.9 and Off).
+  const voice = cleanVoice(isObj(raw.voice) ? (version >= 6 ? raw.voice : { ...raw.voice, sentenceRate: undefined, pause: undefined }) : null);
 
   const t = isObj(raw.touch) ? raw.touch : {};
   const touch = {
@@ -230,12 +232,17 @@ function cleanLearner(raw, index, version) {
   // Backups older than version 5 were made before the Words pages: Auto, and pictures on.
   const wordsButton = version >= 5 && WORDS_BUTTON_CHOICES.includes(raw.wordsButton) ? raw.wordsButton : "auto";
   const wordsOnly = version >= 5 && raw.wordsOnly === true;
+  // Backups older than version 6 were made before the keyboard: ABC on Auto, letters not spoken.
+  const keyboardButton = version >= 6 && KEYBOARD_BUTTON_CHOICES.includes(raw.keyboardButton) ? raw.keyboardButton : "auto";
+  const speakLetters = version >= 6 && raw.speakLetters === true;
 
-  // Backups older than version 4 were made before the row-group category pages (Phase 1.6):
-  // move any word the adult added to a cell that a built-in word now needs. (Pins are obsolete.)
+  // Backups older than version 4 were made before the row-group category pages (Phase 1.6), and backups
+  // older than version 6 before the Number pad button (Phase 1.7): move any word the adult added to a
+  // cell that a built-in word now needs. (Pins are obsolete. Running this on a backup that is already
+  // tidy moves nothing.)
   let notices = [];
   let moved = {};
-  if (version < 4) {
+  if (version < 6) {
     const r = relocateAdultWords(board, cells, pages);
     cells = r.cells; pages = r.pages; pins = {};
     moved = moveMap(r.moves);
@@ -250,7 +257,7 @@ function cleanLearner(raw, index, version) {
     const key = version < 2 ? photoKey(ph.key) : ph.key;
     photos.push({ key: moved[key] || key, blob });          // a moved word's photo moves with it
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, notices, photos };
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, notices, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

@@ -6,12 +6,13 @@ import {
   listProfiles, getCurrent, switchTo, addProfile, renameProfile, deleteProfile,
   saveProfile, CHILD_VOICE, ADULT_VOICE,
 } from "./profiles.js";
-import { setVoiceSettings, speak, listVoices, onVoicesChanged } from "./speech.js";
+import { setVoiceSettings, speak, speakSequence, stopSpeech, listVoices, onVoicesChanged, pauseMs, PAUSE_MS } from "./speech.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 
-const PREVIEW_TEXT = "I want more bubbles please";
+const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
+const PREVIEW_WORD = "bubbles";                      // "Preview a word"
 
 // callbacks:
 //   board            the loaded word map (to list the words in each stage)
@@ -37,6 +38,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
 
   function close() {
     stopVoiceListener();
+    stopSpeech();
     o.close();
   }
 
@@ -58,7 +60,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     if (!cur.notices || !cur.notices.length) return null;
     return h("section", { class: "panel notice", id: "sec-notice" },
       h("h2", { text: "Notes about " + cur.name + "'s board" }),
-      h("p", { class: "muted", text: "The category pages were reorganized into rows of related words. These words that you added " +
+      h("p", { class: "muted", text: "Some built-in words now use spots where you had added words (the category pages were reorganized " +
+        "into rows of related words, or a new button was added to a page). These words that you added " +
         "sat where a built-in word now lives, so they were kept and moved to a free spot:" }),
       h("ul", { class: "notice-list" }, cur.notices.map((t) => h("li", { text: t }))),
       h("div", { class: "btn-row left" },
@@ -166,6 +169,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("span", { class: "stage-note", text: note[n] + ":" }),
         h("span", { class: "stage-words", text: wordsFor(n) })))),
       wordsButtonSetting(cur),
+      keyboardButtonSetting(cur),
+      speakLettersSetting(cur),
       wordsOnlySetting(cur));
   }
 
@@ -182,6 +187,32 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "numbers, clothes, outside words and things (every Dolch sight word is on them, at most 3 taps away). " +
         "The Forms button next to it shows other forms of the last word (go: went, going...). " +
         "Both follow this setting. Words on these pages never move." }));
+  }
+
+  // The top-bar ABC button (keyboard overlay): Auto shows it from stage 3, like the Words button.
+  function keyboardButtonSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (cur.keyboardButton === value ? " on" : ""), id: `kbbtn-${value}`, text,
+      onclick: async () => { cur.keyboardButton = value; await saveProfile(cur); onVocabChanged(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-keyboard-button" },
+      h("label", { text: "Show keyboard button (ABC)" }),
+      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("p", { class: "muted", text: "The ABC button in the top bar opens a large keyboard over the board. The child types a word; Space or Done " +
+        "turns it into a chip and says it. The keyboard has a 123 key for the number pad (the Numbers page has its own Number pad button). " +
+        "The keyboard uses ordinary taps: Hold to select and Ignore repeated taps do not apply to it." }));
+  }
+
+  // Say each letter's name as it is typed (default off).
+  function speakLettersSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (cur.speakLetters === value ? " on" : ""), id: `speakletters-${value ? "on" : "off"}`, text,
+      onclick: async () => { cur.speakLetters = value; await saveProfile(cur); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-speak-letters" },
+      h("label", { text: "Speak each letter while typing" }),
+      h("div", { class: "seg-row touch-seg" }, btn(false, "Off"), btn(true, "On")),
+      h("p", { class: "muted", text: "On: every key says its letter name (\"bee\", \"oh\"...) as it is tapped." }));
   }
 
   // Reading stage: take away every picture so the learner reads the words.
@@ -248,13 +279,40 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("div", { class: "field" }, h("label", { for: "voice-select", text: "Voice" }), select),
       slider("pitch", "Pitch", 0.5, 2, 0.1, "pitch", 1),
       slider("rate", "Speed", 0.5, 1.5, 0.05, "rate", 2),
+      h("p", { class: "muted", text: "Speed is for a single word. Anything of two or more words (a phrase button, a phrase you added, " +
+        "\"thank you\", a typed number) and the message bar use Sentence speed. Sentences sound faster than the same words said one at a time, " +
+        "so Sentence speed is its own, slower setting (0.9 to start)." }),
+      slider("sentence-rate", "Sentence speed", 0.5, 1.5, 0.05, "sentenceRate", 2),
+      pauseSetting(v, persist),
       h("div", { class: "btn-row left" },
-        h("button", { type: "button", class: "btn primary", id: "voice-preview", text: "Preview",
-          onclick: () => speak(PREVIEW_TEXT) }),
+        h("button", { type: "button", class: "btn primary", id: "voice-preview", text: "Preview a word",
+          onclick: () => speak(PREVIEW_WORD) }),
+        h("button", { type: "button", class: "btn primary", id: "voice-sample", text: "Hear a sample sentence",
+          onclick: () => playSample() }),
         h("button", { type: "button", class: "btn", id: "voice-child", text: "Reset to child default",
           onclick: resetTo(CHILD_VOICE) }),
         h("button", { type: "button", class: "btn", id: "voice-adult", text: "Reset to adult default",
           onclick: resetTo(ADULT_VOICE) })));
+  }
+
+  // "Pause between words": Off plays the message bar as one sentence; otherwise chip by chip with a gap.
+  function pauseSetting(v, persist) {
+    const names = { off: "Off", short: "Short 0.25 s", medium: "Medium 0.5 s", long: "Long 0.8 s" };
+    return h("div", { class: "field touch-setting", id: "setting-pause" },
+      h("label", { text: "Pause between words" }),
+      h("div", { class: "seg-row" }, Object.keys(PAUSE_MS).map((k) => h("button", {
+        type: "button", class: "seg" + ((v.pause || "off") === k ? " on" : ""), id: `pause-${k}`, text: names[k],
+        onclick: () => { v.pause = k; persist(); refresh(); },
+      }))),
+      h("p", { class: "muted", text: "Off: tapping the message bar says the whole sentence in one go. Short, Medium or Long: each chip is " +
+        "said on its own with a pause after it (a chip such as \"thank you\" is said as one piece). Tap the message bar again to stop." }));
+  }
+
+  // The sample sentence is played exactly the way the message bar plays it, with the current settings.
+  function playSample() {
+    const gap = pauseMs();
+    if (gap > 0) speakSequence(PREVIEW_TEXT.split(" "), gap);
+    else speak(PREVIEW_TEXT, "sentence");
   }
 
   // ---------- Touch supports ----------
@@ -325,7 +383,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
-        "A backup is one file with a learner's board size, stage, button changes, pages you made, voice, touch settings, Model prompt settings and photos. " +
+        "A backup is one file with a learner's board size, stage, button changes, pages you made, voice and speech pacing, keyboard settings, touch settings, Model prompt settings and photos. " +
         "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included." }),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",

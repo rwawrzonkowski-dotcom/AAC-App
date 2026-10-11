@@ -624,6 +624,7 @@
   "ten": {"label": "ten", "spokenText": "ten", "wordType": "describing", "image": "images/symbols/ten.svg"},
   "zero": {"label": "zero", "spokenText": "zero", "wordType": "describing", "image": "images/symbols/zero.svg"},
   "number": {"label": "number", "spokenText": "number", "wordType": "describing"},
+  "number-pad": {"label": "Number pad", "spokenText": "Number pad", "wordType": "category", "action": "numberpad"},
   "eleven": {"label": "eleven", "spokenText": "eleven", "wordType": "describing", "image": "images/symbols/eleven.svg"},
   "twelve": {"label": "twelve", "spokenText": "twelve", "wordType": "describing", "image": "images/symbols/twelve.svg"},
   "shirt": {"label": "shirt", "spokenText": "shirt", "wordType": "noun", "image": "images/symbols/shirt.svg"},
@@ -795,7 +796,7 @@
   ]},
   "w-numbers": {"name": "Numbers", "starter": "all", "groups": [
     {"row": 0, "name": "Numbers", "words": ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], "adds": ["eleven", "twelve"]},
-    {"row": 1, "name": "More numbers", "words": ["ten", "zero", "number"]}
+    {"row": 1, "name": "More numbers", "words": ["ten", "zero", "number", "number-pad"]}
   ]},
   "w-clothes": {"name": "Clothes", "starter": "all", "groups": [
     {"row": 0, "name": "Clothes", "words": ["shirt", "pants", "shoes", "socks", "coat", "jacket", "hat", "pajamas", "dress"], "adds": ["sweater", "mittens", "scarf"]},

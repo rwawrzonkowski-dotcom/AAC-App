@@ -1,14 +1,34 @@
 // Text-to-speech using the browser's built-in Web Speech API.
 // No audio files and no network are used.
 //
-// Voice settings (voice, pitch, speed) belong to each learner's profile.
-// app.js hands the current learner's settings to setVoiceSettings().
+// Voice settings belong to each learner's profile (adult menu > Voice). app.js hands the
+// current learner's settings to setVoiceSettings():
+//   voiceURI, pitch       which voice and how high
+//   rate                  "Speed" for a SINGLE WORD (a word button, a letter, a form)
+//   sentenceRate          "Sentence speed": anything of more than one word (a phrase button, a custom
+//                         phrase, "thank you", a typed number like "one hundred five") and the
+//                         message bar. Slower on purpose: one stream of words sounds much faster
+//                         than the same words said one at a time.
+//   pause                 "off" | "short" | "medium" | "long": the gap between chips when the
+//                         message bar is played (see speakSequence below)
+// EVERY spoken sound in the app goes through speak() or speakSequence() in this file, so every path
+// uses the learner's voice and pitch, and the right speed.
 
 const synth = "speechSynthesis" in window ? window.speechSynthesis : null;
 let voices = [];
-let settings = { voiceURI: "", pitch: 1.5, rate: 1.05 };
+let settings = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 
 export function setVoiceSettings(s) { settings = s; }
+
+export const DEFAULT_SENTENCE_RATE = 0.9;
+// Gap between chips (milliseconds) for each "Pause between words" choice.
+export const PAUSE_MS = { off: 0, short: 250, medium: 500, long: 800 };
+export const PAUSE_CHOICES = Object.keys(PAUSE_MS);
+export const pauseMs = () => PAUSE_MS[settings.pause] || 0;
+const sentenceRate = () => (typeof settings.sentenceRate === "number" ? settings.sentenceRate : DEFAULT_SENTENCE_RATE);
+
+// More than one word? ("thank you", "I want juice", "one hundred five")
+export const isPhrase = (text) => String(text).trim().split(/\s+/).length > 1;
 
 // Voices load asynchronously on iOS/Chrome, so refresh when they arrive.
 function refreshVoices() {
@@ -63,18 +83,96 @@ export function initSpeech() {
   window.addEventListener("pointerdown", unlock, true);
 }
 
-// Speak text right now, interrupting anything already being spoken.
-export function speak(text) {
+// ---------- Speaking ----------
+// Build one utterance with the learner's voice and pitch at the given speed.
+function makeUtterance(text, rate) {
+  const u = new SpeechSynthesisUtterance(text);
+  const voice = pickVoice();
+  if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = "en-US"; }
+  u.pitch = settings.pitch;
+  u.rate = rate;
+  return u;
+}
+
+// Speak text right now, interrupting anything already being spoken (including a message-bar playback).
+//   kind "word"      -> the learner's Speed
+//   kind "sentence"  -> Sentence speed
+//   kind "auto" (default): one word -> Speed; more than one word -> Sentence speed
+export function speak(text, kind = "auto") {
   if (!synth || !text) return;
   try {
+    stopSequence();
     synth.cancel();
     refreshVoices();
-    const u = new SpeechSynthesisUtterance(text);
-    const voice = pickVoice();
-    if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = "en-US"; }
-    u.pitch = settings.pitch;
-    u.rate = settings.rate;
-    synth.speak(u);
+    const asSentence = kind === "sentence" || (kind === "auto" && isPhrase(text));
+    synth.speak(makeUtterance(text, asSentence ? sentenceRate() : settings.rate));
+  } catch (e) {
+    console.warn("Speech failed:", e);
+  }
+}
+
+// ---------- Playing the message bar one chip at a time ----------
+// With "Pause between words" on, each chip is its own utterance (a chip of several words, such as
+// "thank you", is one chunk) and the next starts after the chosen gap. All at Sentence speed.
+// Tapping the message bar again stops it (app.js calls stopSpeech()).
+let seq = null;   // the playback in progress: { id, polls }
+let seqId = 0;
+
+export const isSequencePlaying = () => !!seq;
+
+function stopSequence() {
+  if (!seq) return;
+  const old = seq;
+  seq = null;                       // events from the old utterances are now ignored
+  clearInterval(old.poll);
+  clearTimeout(old.timer);
+  if (old.onEnd) old.onEnd(false);
+}
+
+// Stop everything that is being said, right now.
+export function stopSpeech() {
+  stopSequence();
+  if (synth) { try { synth.cancel(); } catch (e) { /* ignore */ } }
+}
+
+// chunks = the texts to say, in order. gapMs = pause between them.
+//   onChunk(i)   called as chunk i begins (the message bar highlights that chip)
+//   onEnd(done)  called when it is over: done = true if it played to the end, false if it was stopped
+export function speakSequence(chunks, gapMs, { onChunk, onEnd } = {}) {
+  const list = chunks.filter(Boolean);
+  if (!synth || !list.length) return;
+  try {
+    stopSequence();
+    synth.cancel();
+    refreshVoices();
+    const me = { id: ++seqId, poll: null, timer: null, onEnd };
+    seq = me;
+    let i = 0;
+    const next = () => {
+      if (seq !== me) return;
+      if (i >= list.length) { seq = null; if (onEnd) onEnd(true); return; }
+      const idx = i++;
+      if (onChunk) onChunk(idx);
+      const u = makeUtterance(list[idx], sentenceRate());
+      let advanced = false;
+      const advance = () => {
+        if (advanced || seq !== me) return;
+        advanced = true;
+        clearInterval(me.poll);
+        if (i >= list.length) next();                     // that was the last one
+        else me.timer = setTimeout(next, gapMs);          // the gap, then the next chip
+      };
+      u.onend = advance;
+      u.onerror = advance;
+      synth.speak(u);
+      // Safety net: if the browser never reports the end of an utterance (it happens with some voices),
+      // move on once the speech engine says it is idle.
+      const started = performance.now();
+      me.poll = setInterval(() => {
+        if (performance.now() - started > 500 && !synth.speaking && !synth.pending) advance();
+      }, 100);
+    };
+    next();
   } catch (e) {
     console.warn("Speech failed:", e);
   }

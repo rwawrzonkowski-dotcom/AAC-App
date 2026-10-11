@@ -19,7 +19,12 @@
 //     pins: {},                         // no longer used (always empty; kept so old backups still read)
 //     notices: ["..."],                 // plain-language notes for the adult (shown in the adult
 //                                       // menu until dismissed), e.g. a word that was moved by an upgrade
-//     voice: { voiceURI: "", pitch: 1.5, rate: 1.05 },
+//     voice: {                          // adult menu > Voice (see js/speech.js)
+//       voiceURI: "", pitch: 1.5,
+//       rate: 1.05,                     // "Speed": a single word
+//       sentenceRate: 0.9,              // "Sentence speed": the message bar and any phrase of 2+ words
+//       pause: "off",                   // "Pause between words": off | short | medium | long
+//     },
 //     touch: {                          // touch supports (adult menu > Touch)
 //       holdOn: false, holdSec: 0.5,    // hold to select
 //       ignoreOn: false, ignoreSec: 1,  // ignore repeated taps
@@ -31,6 +36,9 @@
 //     wordsButton: "auto",              // the top-bar Words (and Forms) buttons: "auto" (from stage 3),
 //                                       // "always" or "never"  (adult menu > Vocabulary stage)
 //     wordsOnly: false,                 // reading stage: no pictures at all, only large words
+//     keyboardButton: "auto",           // the top-bar ABC (keyboard) button: "auto" (from stage 3),
+//                                       // "always" or "never"  (adult menu > Vocabulary stage)
+//     speakLetters: false,              // the keyboard says each letter's name as it is typed
 //   }
 // Cell keys are "<page>:<row>,<col>" (+ "@84" on the 84 board). Positions are
 // permanent, so a key always means the same place on the board. See js/migrate.js
@@ -45,9 +53,10 @@ import * as db from "./db.js";
 import { load, save, remove } from "./storage.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION } from "./migrate.js";
 import { DEFAULT_MODEL, cleanModel } from "./critters.js";
+import { PAUSE_CHOICES } from "./speech.js";
 
-export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05 };
-export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0 };
+export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
+export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
 
 const profiles = [];
 let currentId = null;
@@ -56,6 +65,7 @@ const photos = new Map(); // photoKey -> { blob, url } for the CURRENT learner o
 function newId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
 export const WORDS_BUTTON_CHOICES = ["auto", "always", "never"];
+export const KEYBOARD_BUTTON_CHOICES = ["auto", "always", "never"];   // same three choices for the ABC button
 
 export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1 };
 
@@ -64,7 +74,21 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE) {
     id: newId(), name, created: Date.now(), v: CURRENT_PROFILE_VERSION, stage, gridSize: 45,
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
-    wordsButton: "auto", wordsOnly: false,
+    wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
+  };
+}
+
+// A voice object with every field present: anything missing gets the child default
+// (Sentence speed 0.9, pause Off). Used for old learners and when reading backups.
+export function cleanVoice(v) {
+  const o = v && typeof v === "object" ? v : {};
+  const num = (x, d, lo, hi) => (typeof x === "number" && isFinite(x) ? Math.min(hi, Math.max(lo, x)) : d);
+  return {
+    voiceURI: typeof o.voiceURI === "string" ? o.voiceURI.slice(0, 200) : "",
+    pitch: num(o.pitch, CHILD_VOICE.pitch, 0.5, 2),
+    rate: num(o.rate, CHILD_VOICE.rate, 0.5, 1.5),
+    sentenceRate: num(o.sentenceRate, CHILD_VOICE.sentenceRate, 0.5, 1.5),
+    pause: PAUSE_CHOICES.includes(o.pause) ? o.pause : "off",
   };
 }
 
@@ -86,9 +110,10 @@ async function upgradeProfile(p, board) {
     p.gridSize = 45; p.v = 2;
     await saveProfile(p);
   }
-  if (p.v < 3) {
-    // Version 2 -> 3 (Phase 1.6): category pages were reorganized into row groups. Words the adult
-    // ADDED to a cell that a built-in word now needs are kept and moved (see js/migrate.js).
+  if (p.v < 4) {
+    // Version 2 -> 3 (Phase 1.6): category pages were reorganized into row groups. Version 3 -> 4 (Phase 1.7):
+    // the Numbers page gained the Number pad button. Words the adult ADDED to a cell that a built-in word
+    // now needs are kept and moved (see js/migrate.js; running it again is harmless).
     const r = relocateAdultWords(board, p.cells, p.pages);
     p.cells = r.cells; p.pages = r.pages; p.pins = {};
     const map = moveMap(r.moves);
@@ -120,6 +145,13 @@ export async function initProfiles(board) {
   for (const p of profiles) {
     if (!WORDS_BUTTON_CHOICES.includes(p.wordsButton)) p.wordsButton = "auto";
     p.wordsOnly = p.wordsOnly === true;
+  }
+  // Learners saved before the keyboard and speech pacing (Phase 1.7): ABC on Auto, letters not spoken,
+  // Sentence speed 0.9 and no pauses.
+  for (const p of profiles) {
+    if (!KEYBOARD_BUTTON_CHOICES.includes(p.keyboardButton)) p.keyboardButton = "auto";
+    p.speakLetters = p.speakLetters === true;
+    p.voice = cleanVoice(p.voice);
   }
   for (const p of profiles) await upgradeProfile(p, board);
 
@@ -240,7 +272,7 @@ export async function getPhotoBlobs(profileId) {
 
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
-// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
+// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters,
 //            notices, photos: [{ key, blob }] }
 // Returns the saved profile.
 export async function importLearner(data, replaceId = null) {
@@ -256,6 +288,7 @@ export async function importLearner(data, replaceId = null) {
     p.touch = data.touch;
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
+    p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
     await db.delPrefix("photos", p.id + "|");
   } else {
     p = makeProfile(data.name, data.stage, data.voice);
@@ -265,6 +298,7 @@ export async function importLearner(data, replaceId = null) {
     p.touch = data.touch;
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
+    p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
     profiles.push(p);
   }
   await saveProfile(p);

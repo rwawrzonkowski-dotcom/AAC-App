@@ -2,8 +2,13 @@
 //   - loads the word map and the current learner's profile
 //   - draws the main board (45 or 84 locations) or a category / adult-made page
 //   - handles taps (speak / navigate), the adult lock, Edit mode and Model mode
-//   - the top-bar Words button (Words pages) and Forms button (other forms of the last word)
-import { speak, initSpeech, setVoiceSettings } from "./speech.js";
+//   - the top-bar Words button (Words pages), Forms button (other forms of the last word) and
+//     ABC button (the keyboard overlay; the number pad opens from the Numbers page or the keyboard's 123 key)
+//   - playing the message bar (one utterance, or chip by chip with pauses: js/speech.js)
+import {
+  speak, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isSequencePlaying, pauseMs,
+} from "./speech.js";
+import { createTyping } from "./keyboard.js";
 import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js";
 import { buildModel, getPage, pathToCore, resolvePage, posKey, MAX_DEPTH } from "./boardmodel.js";
 import { loadBoardData } from "./boarddata.js";
@@ -16,7 +21,9 @@ import { openAdultMenu } from "./adult.js";
 import { askConfirm } from "./ui.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
-import { runPrompt, clearCritter, stepPauseMs, usesCritter, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS } from "./modelprompt.js";
+import {
+  runPrompt, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
+} from "./modelprompt.js";
 import { preloadCritterArt } from "./critters.js";
 import { loadForms, formsFor, openFormsPopover } from "./forms.js";
 
@@ -51,11 +58,15 @@ const state = {
   sentence: [],       // words in the message bar: {label, spoken, base} (base = the word tapped on the board)
   cells: new Map(),   // key -> description of each cell currently drawn
   forms: null,        // the open Forms popover, if any
+  draft: null,        // what is being typed on the keyboard / number pad: { text, kind } or null
 };
+let typing = null;    // the keyboard / number pad overlay (js/keyboard.js), created in start()
 
 // ---------- The Words button ----------
 // "auto" shows it from stage 3 up; "always" and "never" are the adult's choice (adult menu).
 const wordsButtonShown = (p) => p.wordsButton === "always" || (p.wordsButton !== "never" && p.stage >= 3);
+// The ABC (keyboard) button works the same way, with its own setting: Auto = from stage 3.
+const keyboardButtonShown = (p) => p.keyboardButton === "always" || (p.keyboardButton !== "never" && p.stage >= 3);
 // True while the Words menu or any page opened from it is showing.
 const onWordsPage = (pageId = state.page) => {
   const profile = getCurrent();
@@ -103,16 +114,19 @@ function renderAll() {
   $("learner-name").textContent = m ? m[0] : profile.name;
 
   setVoiceSettings(profile.voice);
+  // The adult turned the keyboard off while it was open (the adult menu closes it first, so this is a safety net).
+  if (typing && typing.isOpen() && typing.mode() === "letters" && !keyboardButtonShown(profile)) typing.close({ speak: false });
   updateBar();
 }
 
-// The Words and Forms buttons in the top bar. They only change themselves (and the message text's width):
+// The Words, Forms and ABC buttons in the top bar. They only change themselves (and the message text's width):
 // the grid below never moves.
 function updateBar() {
   const profile = getCurrent();
   const shown = wordsButtonShown(profile);
   $("words-btn").hidden = !shown;
   $("forms-btn").hidden = !shown;
+  $("abc-btn").hidden = !keyboardButtonShown(profile);
   $("words-btn").textContent = shown && onWordsPage() ? "Close" : "Words";
   const ew = $("edit-words");
   ew.hidden = !shown;
@@ -145,9 +159,64 @@ function drawMessage() {
     chip.textContent = w.label;
     chipsEl.appendChild(chip);
   }
+  // What is being typed right now: a dashed "draft" chip. It becomes a normal chip when it is finalized.
+  if (state.draft && state.draft.text) {
+    const chip = document.createElement("span");
+    chip.className = "chip draft";
+    chip.textContent = state.draft.text;
+    chipsEl.appendChild(chip);
+  }
   const box = $("message-text");
   box.scrollLeft = box.scrollWidth;   // keep the newest word in view
   updateFormsButton();
+}
+
+// ---------- Playing the message bar ----------
+// Pause between words OFF: the whole sentence is one utterance at the learner's Sentence speed.
+// Pause ON: each chip is its own utterance (a chip of several words is one chunk) with a gap between;
+// tapping the bar again while it plays stops it. Typed drafts are not part of the sentence.
+function highlightChip(i) {
+  document.querySelectorAll("#message-chips .chip:not(.draft)").forEach((c, n) => c.classList.toggle("speaking", n === i));
+}
+function playMessage() {
+  const chunks = state.sentence.map((w) => w.spoken).filter(Boolean);
+  if (!chunks.length) return;
+  if (isSequencePlaying()) { stopSpeech(); return; }
+  const gap = pauseMs();
+  if (gap > 0) speakSequence(chunks, gap, { onChunk: highlightChip, onEnd: () => highlightChip(-1) });
+  else speak(chunks.join(" "), "sentence");
+}
+
+// ---------- Keyboard and number pad ----------
+// ABC toggles the keyboard. The number pad opens from the keyboard's 123 key or from the Number pad
+// button on the Numbers page. See js/keyboard.js for how typing and finalizing work.
+function toggleKeyboard() {
+  if (returning || previewing) return;
+  if (typing.isOpen()) { typing.close(); return; }
+  closeForms();
+  if (state.modeling) runPrompt($("abc-btn"), getCurrent().model, getPhotoUrl("critter"), RING_MS);
+  typing.open("letters");
+}
+// The Number pad button on the Numbers page. In Model mode its ring is shown first, so the child can see
+// where the button is before the pad covers the grid.
+function openNumberPad(d) {
+  if (state.modeling) {
+    promptCell(d.key, RING_MS);
+    returning = true;                    // ignore taps for a moment
+    setTimeout(() => { returning = false; typing.open("number", { fromPage: true }); }, 900);
+  } else {
+    typing.open("number", { fromPage: true });
+  }
+}
+// A typed word or number is finalized: it becomes a normal chip, is spoken and (if it came from the
+// Numbers page) the board goes back to the main page, like any other word chosen on a page.
+function onTyped({ label, spoken, kind, speak: say, context }) {
+  state.sentence.push({ label, spoken, base: label });
+  drawMessage();
+  if (say) speak(spoken);
+  logWord(label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined,
+    kind === "number" ? { source: "numberpad", spoken } : { source: "keyboard" });
+  if (context && context.fromPage && kind === "number" && state.page !== "core") goTo("core");
 }
 
 // ---------- Forms ----------
@@ -238,6 +307,9 @@ function onCellTap(cellEl) {
 
   // Category / page button: open its page. No speech, nothing added.
   if (d.loadBoard) { goTo(d.loadBoard); return; }
+
+  // The Number pad button: opens the number pad. No speech, nothing added until a number is finalized.
+  if (d.action === "numberpad") { openNumberPad(d); return; }
 
   // A normal word: speak immediately, add to the message bar.
   lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on
@@ -338,9 +410,9 @@ async function editCell(d) {
   renderAll();
 }
 
-function startEditing() { closeForms(); state.modeling = false; state.editing = true; renderAll(); }
+function startEditing() { closeForms(); stopSpeech(); state.modeling = false; state.editing = true; renderAll(); }
 function stopEditing() { state.editing = false; renderAll(); }
-function startModeling() { closeForms(); state.editing = false; state.modeling = true; renderAll(); }
+function startModeling() { closeForms(); stopSpeech(); state.editing = false; state.modeling = true; renderAll(); }
 function stopModeling() { state.modeling = false; clearCritter(); renderAll(); }
 
 // ---------- Adult lock ----------
@@ -355,6 +427,7 @@ function showAdultMenu(startAt) {
     onLearnerChanged: () => {
       // A different learner: start clean on the main board.
       closeForms();
+      stopSpeech();
       state.sentence.length = 0;
       drawMessage();
       state.page = "core";
@@ -384,6 +457,7 @@ async function openAdult() {
   adultBusy = true;
   try {
     if (!(await requestAdultAccess())) return;
+    if (typing.isOpen()) typing.close({ speak: false });   // keep what was typed as a chip, but say nothing
     showAdultMenu();
   } finally {
     adultBusy = false;
@@ -398,16 +472,28 @@ async function start() {
   await initProfiles(state.board);
   preloadCritterArt();      // so the critter can appear instantly the first time
 
+  typing = createTyping({
+    host: $("app"),
+    speakLetters: () => getCurrent().speakLetters,
+    allowLetters: () => keyboardButtonShown(getCurrent()),
+    onDraft: (text, kind) => { state.draft = text ? { text, kind } : null; drawMessage(); },
+    onCommit: onTyped,
+    onLetter: (name) => speak(name, "word"),
+    onKeyPress: (el) => { if (state.modeling) ringBriefly(el, getCurrent().model); },
+    onOpenChange: (open) => { $("app").classList.toggle("typing", open); },
+  });
+
   attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked });
 
   // Message bar: tap text to speak the sentence; Delete / Clear
   attachPressHandling($("message-bar"), (el) => {
     if (el.disabled) return;
-    if (el.id === "message-text") speak(state.sentence.map((w) => w.spoken).join(" "));
-    else if (el.id === "delete-btn") { state.sentence.pop(); drawMessage(); }
-    else if (el.id === "clear-btn") { state.sentence.length = 0; drawMessage(); }
-    else if (el.id === "words-btn") { if (!returning && !previewing) toggleWords(); }
-    else if (el.id === "forms-btn") openForms();
+    if (el.id === "message-text") playMessage();
+    else if (el.id === "delete-btn") { stopSpeech(); state.sentence.pop(); drawMessage(); }   // removes a whole chip
+    else if (el.id === "clear-btn") { stopSpeech(); state.sentence.length = 0; typing.clearDraft(); drawMessage(); }
+    else if (el.id === "words-btn") { if (!returning && !previewing && !typing.isOpen()) toggleWords(); }
+    else if (el.id === "forms-btn") { if (!typing.isOpen()) openForms(); }
+    else if (el.id === "abc-btn") toggleKeyboard();
   }, "#message-text, .bar-btn");
 
   fitLabelsOnResize($("board"));

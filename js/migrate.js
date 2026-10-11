@@ -79,7 +79,7 @@ export function migrateCells(board, oldCells) {
 // word goes to the first free cell on the Favorites page. Everything about built-in words
 // (renamed label, photo, show/hide) is stored by word id, so it follows its word by itself.
 // ---------------------------------------------------------------------------------
-export const CURRENT_PROFILE_VERSION = 3;   // 3 = row-group category pages
+export const CURRENT_PROFILE_VERSION = 4;   // 3 = row-group category pages; 4 = Number pad on the Numbers page
 
 const KEY_ANY = /^([A-Za-z0-9_-]{1,40}):(\d{1,2}),(\d{1,2})(@84)?$/;
 function parseKey(key) {

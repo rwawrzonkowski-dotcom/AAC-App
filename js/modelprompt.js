@@ -142,3 +142,10 @@ export function runPrompt(cell, m, customUrl, ringMs) {
   if (usesRing(m)) showRing(cell, ringMs, m.ringOpacity);
   if (usesCritter(m)) showCritter(cell, m, customUrl);
 }
+
+// A short ring on a keyboard key or number-pad key in Model mode (the adult's key presses "ring briefly").
+// Uses the learner's ring settings; the critter is not used here (a key is too small and the layer
+// that carries the critter sits under the keyboard). Does nothing if the ring is off (opacity 0).
+export function ringBriefly(el, m, ms = 350) {
+  if (el && usesRing(m)) showRing(el, ms, m.ringOpacity);
+}

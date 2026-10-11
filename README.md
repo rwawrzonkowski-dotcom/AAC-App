@@ -1,4 +1,4 @@
-# AAC Board (Phase 1.6B)
+# AAC Board (Phase 1.7 part A)
 
 A free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
@@ -14,7 +14,8 @@ A free, offline communication board for children who are new to AAC
   hold the extra words. Switching size moves the bottom row down, so it is a
   relearning event (the adult must confirm).
 - Tap a word: it speaks immediately and appears in the message bar.
-  Tap the message bar to speak the whole sentence. Delete / Clear edit it.
+  Tap the message bar to speak the whole sentence (see **Speech pacing** below). Delete removes the last
+  chip; Clear removes everything.
 - **Category pages (two taps).** Tap Chat, Food, Drinks, Play, Places, People or
   Favorites (and, on the 84 board, About me, Feelings or Animals): the page opens
   (no speech) with an orange background and the page name at the top. Tap an item:
@@ -69,6 +70,51 @@ A free, offline communication board for children who are new to AAC
     little words and still leave room for the Back button.
   - The Words and Forms buttons are shown by the learner's **Show Words button** setting (adult menu >
     Vocabulary stage): Auto (from stage 3, the default), Always or Never.
+- **Keyboard (ABC).** The **ABC** button in the top bar (between Forms and Delete, in the same place on both
+  board sizes) opens a large QWERTY keyboard laid over the grid area. The message bar stays visible above it,
+  and the grid underneath does not move or change size (the keyboard is simply drawn on top). Keys are lower
+  case and at least 64 px tall on an iPad. The keys: letters, a wide **space**, **Backspace** (deletes one typed
+  letter; with nothing typed it does nothing, and the top-bar **Delete** is still what removes a whole chip),
+  **123** (switches to the number pad), **Done** and **Close**.
+  - Typing builds a **draft chip** (dashed outline) at the end of the message bar. **Space** turns it into a
+    normal chip (whose spoken text is the typed word) and says it; the keyboard stays open for the next word.
+    **Done** does the same and closes the keyboard. **Close** (or tapping ABC again) with a non-empty draft also
+    finalizes it, so typing is never lost. An empty draft is just thrown away. Switching with **123** finalizes
+    the draft first. Opening the adult menu keeps the draft as a chip but says nothing.
+  - **Touch:** the keyboard uses ordinary taps. Hold to select and Ignore repeated taps do not apply to it
+    (typing needs quick taps); instead each key ignores a second hit within 120 ms, which filters out
+    accidental double touches. The same letter twice ("book") works at normal typing speed.
+  - **Speak each letter while typing** (per learner, default Off): each key says its letter name ("ay", "bee",
+    "see"...). The names are spelled out in `LETTER_NAMES` in `js/keyboard.js` because a bare "a" is read as the word "a".
+  - **Show keyboard button** (adult menu > Vocabulary stage, next to Show Words button): Auto (from stage 3, the
+    default), Always or Never. When it is Never, the number pad has no ABC key either.
+  - **Model mode:** key presses ring briefly (the learner's ring settings), and each finalized typed word is logged
+    as `{ word, mode, source: "keyboard" }` (with the prompt info in Model mode like any model event).
+- **Number pad.** Digits 0-9 in a large 3 x 4 layout (1 2 3 / 4 5 6 / 7 8 9 / Backspace 0 Done) in the same overlay
+  frame, with **Close** and **ABC** (back to the keyboard). Opened from the keyboard's **123** key, or from the new
+  **Number pad** button on the **Numbers** page (Words > Numbers): it sits in row 2, column 5 of that page on both
+  board sizes, an empty cell before, so no other button moved.
+  - Digits build a draft chip ("2", "24"). **Done** finalizes it: the chip shows the digits ("24") and the spoken
+    text is the English words ("twenty-four"), and it is spoken. 0 to 999,999, with "one hundred five" and "two thousand
+    twenty-six" (no "and"). Leading zeros are dropped (0, 0, 7 gives 7). A 7th digit is refused (the key flashes red).
+    A number opened from the Numbers page returns the board to the main page when it is finalized, like any word chosen
+    on a page. The words come from `js/numberwords.js`; `node tools/test-numberwords.mjs` runs its tests.
+  - Model mode logs `{ word: "24", mode, source: "numberpad", spoken: "twenty-four" }`. The Number pad button shows the
+    ring first and the pad opens a moment later, so the child can see where the button is.
+- **Speech pacing.** Speed for single words and speed for sentences are separate (adult menu > Voice):
+  - **Speed** is for a single word (a word button, a letter, a form, a typed one-word chip).
+  - **Sentence speed** (0.5 to 1.5, default 0.9) is for the message bar and for anything of two or more words:
+    phrase buttons ("thank you", the Chat phrases, About me sentences), phrases an adult adds, edited spoken text of
+    several words, a typed number such as "one hundred five", and the Hear it buttons in the editor. Sentences sound
+    faster than the same words said one at a time, so they get their own, slower setting.
+  - **Pause between words**: Off (default), Short 0.25 s, Medium 0.5 s or Long 0.8 s. Off: tapping the message bar says
+    the whole sentence as one utterance at Sentence speed (tapping again says it again from the start). On: each chip is
+    its own utterance, in order, with the gap after each (a chip of several words, such as "thank you" or a custom phrase,
+    is said as one piece, still at Sentence speed). The chip being said is highlighted. **Tapping the bar again while it
+    plays stops it**; tapping a word, Delete or Clear also stops it.
+  - **Hear a sample sentence** says "I want more bubbles please" the way the message bar would (with the pauses if on).
+    **Preview a word** says "bubbles" at word speed.
+  - Reset to child / adult default changes only pitch and word speed; Sentence speed and the pause are left alone.
 - **Forms.** The **Forms** button (next to Words) is on only when the last word in the message bar has other
   forms: verbs (go: goes, going, went, gone), irregular verbs, adjectives (good, better, best), plurals
   (man, men), pronouns (I, me, my, mine, myself). It opens a large popover over the grid (the grid does not
@@ -131,8 +177,9 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   - Tapping a word on any page returns to the main board. In model mode the pages are
     stepped back out one at a time, showing the Model prompt on the button that opened each page, so the
     whole path (word, page button, category button) is shown.
-- **Voice:** pick a voice, set pitch and speed, tap **Preview**, or reset to the
-  child or adult default. Saved per learner.
+- **Voice:** pick a voice, set pitch, speed (single words), Sentence speed and Pause between words,
+  hear a word or a sample sentence, or reset pitch and speed to the child or adult default. Saved per learner.
+  See **Speech pacing** above.
 - **Touch (per learner):** two optional helps, both Off by default. They apply to the
   child's board (words, category buttons, Back) in normal and modeling mode, not to
   the message bar, Delete/Clear, adult screens or Edit mode.
@@ -141,8 +188,9 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   - *Ignore repeated taps* (0.25 to 3.0 s): after a word is spoken, taps on any board
     button are ignored for that long. Opening a category does not start the wait.
 - **Backup:** *Save backup of this learner* or *of all learners* makes one .json file
-  (board size, stage, button changes, pages you made, voice, touch settings, Model prompt
-  settings, the Words button and words-only settings, and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded). On the
+  (board size, stage, button changes, pages you made, voice including Sentence speed and the pause, touch settings, Model prompt
+  settings, the Words button, keyboard button and Speak-each-letter settings, the words-only setting, and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded: an older backup gets keyboard button Auto, letters not
+  spoken, Sentence speed 0.9 and no pauses). On the
   iPad a save sheet opens: choose **Save to Files**. *Restore from backup* reads a file,
   shows the learners and photo count inside, and for each learner asks whether to **add
   as a new learner** (default) or **replace** a learner with the same name (asks again
@@ -203,6 +251,9 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
   cell of Favorites instead. A page button you made moves with its page, and photos move too. A note listing
   every moved word appears at the top of the adult menu until you tap **Got it**. Backups made
   before this phase are upgraded the same way when restored. Code: `js/migrate.js`.
+- **Phase 1.7 added the Number pad button** to the Numbers page (row 2, column 5). If an adult had added a word to that empty
+  cell, the word is kept and moved to the next free cell of the page, with the same kind of note. Backups made before this
+  version get the same check when restored.
 
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.
@@ -218,8 +269,11 @@ Make sure the iPad is not on silent mode and the volume is up.
 - `js/boardmodel.js` works out which word is in which cell for a grid size and a learner;
   `js/boarddata.js` loads the word map; `js/migrate.js` upgrades older learner data.
 - `js/app.js` ties it together (pages, taps, edit and model modes, the Words and Forms buttons).
+- `js/keyboard.js` the keyboard and number pad overlay (draft, finalizing, debounce); `js/numberwords.js` turns a number into
+  English words (`tools/test-numberwords.mjs` tests it).
 - `js/forms.js` loads `data/word-forms.json` and shows the Forms popover.
-- `js/board.js` draws the grid (and fits labels into buttons); `js/speech.js` speaks.
+- `js/board.js` draws the grid (and fits labels into buttons); `js/speech.js` speaks (every sound in the app goes through it:
+  word speed vs Sentence speed, and the message-bar playback with pauses).
 - `js/critters.js` the critter's settings, checks and drawing; `js/modelprompt.js` shows the ring
   and critter in Model mode; `js/modelsettings.js` is the Model prompt part of the adult menu.
 - `js/profiles.js` + `js/db.js` learner profiles and photos (IndexedDB);
