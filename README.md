@@ -96,14 +96,14 @@ A free, offline communication board for children who are new to AAC
   - **Numbers** (row 2, columns 6-8): Math words, Money, Big numbers. **Clothes** (row 2, columns 6-8): Accessories, Weather clothes,
     Getting dressed. **Outside** (row 2, columns 7-9): Weather, Space, Plants.
   - **Things** (row 4, columns 1-5): School supplies, Tech, Household, Bathroom things, Bedroom.
-  - **Actions has no folders yet:** its page has no empty row for them (one free cell only), and nothing may move. See the planning doc.
+  - **Actions' five folders are on the Words menu** (row 3, columns 1-5; the menu has no Back cell): Daily routine, School actions, Play
+    actions, Body moves, Kitchen. The Actions page itself has no empty row for them (one free cell only) and nothing may move. Words >
+    Daily routine > wake up is three taps. The verb **march** is its own word (the month March is another).
   - A word is up to four taps deep (Words > Time > Days > Monday). The folder buttons and the new words show from stage 3. The month
     **May** and the season **fall** are separate words from the Dolch word "may" and the verb "fall" (the Forms button does not offer
     "fell" or "fallen" after the season). The days and months are small calendar pictures drawn for this project (the day or month is
-    highlighted); see CREDITS.md for every picture's source. In all, 220 new words and 24 folder buttons were added: 128 Mulberry
-    pictures, 49 OpenMoji pictures and 68 simple pictures drawn for this project (including the "In the house" folder picture). The
-    weaker stand-ins are the abstract words: bland (a neutral face), later (an hourglass), none, less, a little, a lot, tiny and huge
-    (drawn dots and circles), closed (a closed door), and count and total (counters and an abacus). Real photos can replace any of them.
+    highlighted); see CREDITS.md for every picture's source. In all, 267 new words and 29 folder buttons were added: 167 Mulberry pictures, 55 OpenMoji pictures and 75 simple pictures drawn for this project (including the "In the house" folder picture). The weaker stand-ins are the abstract words: bland (a neutral face), later (an hourglass), none, less, a little, a lot, tiny and huge
+    (drawn dots and circles), closed (a closed door), count and total (counters and an abacus), and the action pictures for get ready, wait my turn, share and tiptoe. Real photos can replace any of them.
 - **Words pages (three taps).** The **Words** button in the top bar (between the message text and Delete)
   opens the Words menu: Little words, More little words, Actions, Past tense, Describing, Time (first row)
   and Colors, Numbers, Clothes, Outside, Things (second row). Tap a page, then a word: that is

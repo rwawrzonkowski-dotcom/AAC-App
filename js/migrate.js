@@ -83,7 +83,7 @@ export function migrateCells(board, oldCells) {
 // ---------------------------------------------------------------------------------
 export const CURRENT_PROFILE_VERSION = 7;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders;
                                             // 6 = folders on Places, People, Chat, Feelings, Drinks and the More food folder on Food;
-                                            // 7 = folders on the Words pages (Describing, Time, Numbers, Clothes, Outside, Things)
+                                            // 7 = folders on the Words pages (Describing, Time, Numbers, Clothes, Outside, Things) and the five Actions folders on the Words menu
 
 // Phase 1.8A: the "ranch" button (Food page, row 5, column 9) became the "More food" folder button. The word itself
 // (same id, so a renamed label, photo or show/hide choice follows it) now lives in More food > Sauces and spreads.

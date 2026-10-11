@@ -250,9 +250,9 @@ function openForms() {
       lastSelectAt = performance.now();
       speak(form);
       const base = last.base || last.label;
-      state.sentence[state.sentence.length - 1] = { label: form, spoken: form, base };
+      state.sentence[state.sentence.length - 1] = { label: form, spoken: form, base, id: last.id };
       drawMessage();
-      logWord(base, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form });
+      logWord(base, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form, id: last.id });
       if (state.modeling) {
         // Let the adult's ring show on the chosen form for a moment, then close.
         const pop = state.forms;
@@ -317,9 +317,10 @@ function onCellTap(cellEl) {
   lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on
   speak(d.spoken);
   const shown = d.sentence ? d.spoken : d.label;
-  state.sentence.push({ label: shown, spoken: d.spoken, base: shown, noForms: d.noForms });
+  const id = d.wordId || d.key;           // a built-in word's id ("fall-season"), or the cell key of a word the adult added
+  state.sentence.push({ label: shown, spoken: d.spoken, base: shown, noForms: d.noForms, id });
   drawMessage();
-  logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined);
+  logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id });
 
   if (state.page !== "core") {
     // Item on any page: go back to the main board automatically.

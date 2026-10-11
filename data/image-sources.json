@@ -8002,5 +8002,317 @@
   "source": "Mulberry",
   "originalName": "double_bed",
   "license": "CC BY-SA 4.0"
+ },
+ "wake-up": {
+  "file": "images/symbols/wake-up.svg",
+  "source": "Mulberry",
+  "originalName": "wake_up_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "get-dressed": {
+  "file": "images/symbols/get-dressed.svg",
+  "source": "Mulberry",
+  "originalName": "get_dressed_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "eat-breakfast": {
+  "file": "images/symbols/eat-breakfast.svg",
+  "source": "Mulberry",
+  "originalName": "eat_1_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "go-to-school": {
+  "file": "images/symbols/go-to-school.svg",
+  "source": "Mulberry",
+  "originalName": "school_1",
+  "license": "CC BY-SA 4.0"
+ },
+ "come-home": {
+  "file": "images/symbols/come-home.svg",
+  "source": "This project",
+  "originalName": "drawn for this project (come home)",
+  "license": "CC BY-SA 4.0"
+ },
+ "take-a-bath": {
+  "file": "images/symbols/take-a-bath.svg",
+  "source": "Mulberry",
+  "originalName": "bathe_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "put-on-pajamas": {
+  "file": "images/symbols/put-on-pajamas.svg",
+  "source": "Mulberry",
+  "originalName": "pyjamas",
+  "license": "CC BY-SA 4.0"
+ },
+ "go-to-bed": {
+  "file": "images/symbols/go-to-bed.svg",
+  "source": "Mulberry",
+  "originalName": "sleep_on_side_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "nap": {
+  "file": "images/symbols/nap.svg",
+  "source": "OpenMoji",
+  "originalName": "1F634 sleeping face",
+  "license": "CC BY-SA 4.0"
+ },
+ "get-ready": {
+  "file": "images/symbols/get-ready.svg",
+  "source": "Mulberry",
+  "originalName": "ready",
+  "license": "CC BY-SA 4.0"
+ },
+ "clean-up": {
+  "file": "images/symbols/clean-up.svg",
+  "source": "Mulberry",
+  "originalName": "tidy_up_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "listen": {
+  "file": "images/symbols/listen.svg",
+  "source": "Mulberry",
+  "originalName": "hear_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "raise-hand": {
+  "file": "images/symbols/raise-hand.svg",
+  "source": "This project",
+  "originalName": "drawn for this project (raise hand)",
+  "license": "CC BY-SA 4.0"
+ },
+ "line-up": {
+  "file": "images/symbols/line-up.svg",
+  "source": "Mulberry",
+  "originalName": "queue_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "sit-down": {
+  "file": "images/symbols/sit-down.svg",
+  "source": "Mulberry",
+  "originalName": "sit_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "share": {
+  "file": "images/symbols/share.svg",
+  "source": "Mulberry",
+  "originalName": "share_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "wait-my-turn": {
+  "file": "images/symbols/wait-my-turn.svg",
+  "source": "Mulberry",
+  "originalName": "turn_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "color": {
+  "file": "images/symbols/color.svg",
+  "source": "Mulberry",
+  "originalName": "colouring_book",
+  "license": "CC BY-SA 4.0"
+ },
+ "erase": {
+  "file": "images/symbols/erase.svg",
+  "source": "Mulberry",
+  "originalName": "rub_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "spell": {
+  "file": "images/symbols/spell.svg",
+  "source": "Mulberry",
+  "originalName": "spell_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "hide": {
+  "file": "images/symbols/hide.svg",
+  "source": "This project",
+  "originalName": "drawn for this project (hide)",
+  "license": "CC BY-SA 4.0"
+ },
+ "build": {
+  "file": "images/symbols/build.svg",
+  "source": "Mulberry",
+  "originalName": "build_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "roll": {
+  "file": "images/symbols/roll.svg",
+  "source": "Mulberry",
+  "originalName": "roll_over_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "splash": {
+  "file": "images/symbols/splash.svg",
+  "source": "This project",
+  "originalName": "drawn for this project (splash)",
+  "license": "CC BY-SA 4.0"
+ },
+ "clap": {
+  "file": "images/symbols/clap.svg",
+  "source": "Mulberry",
+  "originalName": "clap_hands_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "stomp": {
+  "file": "images/symbols/stomp.svg",
+  "source": "This project",
+  "originalName": "drawn for this project (stomp)",
+  "license": "CC BY-SA 4.0"
+ },
+ "wave": {
+  "file": "images/symbols/wave.svg",
+  "source": "OpenMoji",
+  "originalName": "1F44B waving hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "hop": {
+  "file": "images/symbols/hop.svg",
+  "source": "Mulberry",
+  "originalName": "hop_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "march-verb": {
+  "file": "images/symbols/march-verb.svg",
+  "source": "This project",
+  "originalName": "drawn for this project (march)",
+  "license": "CC BY-SA 4.0"
+ },
+ "wiggle": {
+  "file": "images/symbols/wiggle.svg",
+  "source": "Mulberry",
+  "originalName": "wiggle_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "stretch": {
+  "file": "images/symbols/stretch.svg",
+  "source": "Mulberry",
+  "originalName": "stretch_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "shake": {
+  "file": "images/symbols/shake.svg",
+  "source": "Mulberry",
+  "originalName": "shake_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "nod": {
+  "file": "images/symbols/nod.svg",
+  "source": "Mulberry",
+  "originalName": "nod_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "point": {
+  "file": "images/symbols/point.svg",
+  "source": "Mulberry",
+  "originalName": "point_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "tiptoe": {
+  "file": "images/symbols/tiptoe.svg",
+  "source": "This project",
+  "originalName": "drawn for this project (tiptoe)",
+  "license": "CC BY-SA 4.0"
+ },
+ "crawl": {
+  "file": "images/symbols/crawl.svg",
+  "source": "Mulberry",
+  "originalName": "crawl_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "cook": {
+  "file": "images/symbols/cook.svg",
+  "source": "Mulberry",
+  "originalName": "cook_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "stir": {
+  "file": "images/symbols/stir.svg",
+  "source": "Mulberry",
+  "originalName": "stir_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "mix": {
+  "file": "images/symbols/mix.svg",
+  "source": "Mulberry",
+  "originalName": "stir_mix_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "bake": {
+  "file": "images/symbols/bake.svg",
+  "source": "Mulberry",
+  "originalName": "bake_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "wash-dishes": {
+  "file": "images/symbols/wash-dishes.svg",
+  "source": "Mulberry",
+  "originalName": "wash_up_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "set-the-table": {
+  "file": "images/symbols/set-the-table.svg",
+  "source": "Mulberry",
+  "originalName": "set_the_table_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "scoop": {
+  "file": "images/symbols/scoop.svg",
+  "source": "Mulberry",
+  "originalName": "scoop_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "spread": {
+  "file": "images/symbols/spread.svg",
+  "source": "Mulberry",
+  "originalName": "spread_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "peel": {
+  "file": "images/symbols/peel.svg",
+  "source": "Mulberry",
+  "originalName": "peel_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "chop": {
+  "file": "images/symbols/chop.svg",
+  "source": "Mulberry",
+  "originalName": "chop_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "taste": {
+  "file": "images/symbols/taste.svg",
+  "source": "Mulberry",
+  "originalName": "taste_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "ac-routine": {
+  "file": "images/symbols/ac-routine.svg",
+  "source": "OpenMoji",
+  "originalName": "1F305 sunrise",
+  "license": "CC BY-SA 4.0"
+ },
+ "ac-school": {
+  "file": "images/symbols/ac-school.svg",
+  "source": "Mulberry",
+  "originalName": "maths_class",
+  "license": "CC BY-SA 4.0"
+ },
+ "ac-play": {
+  "file": "images/symbols/ac-play.svg",
+  "source": "OpenMoji",
+  "originalName": "1F938 person cartwheeling",
+  "license": "CC BY-SA 4.0"
+ },
+ "ac-body": {
+  "file": "images/symbols/ac-body.svg",
+  "source": "OpenMoji",
+  "originalName": "1F483 woman dancing",
+  "license": "CC BY-SA 4.0"
+ },
+ "ac-kitchen": {
+  "file": "images/symbols/ac-kitchen.svg",
+  "source": "OpenMoji",
+  "originalName": "1F373 cooking",
+  "license": "CC BY-SA 4.0"
  }
 }

@@ -1,6 +1,6 @@
 {
  "format": "aac-board-v3",
- "_note": "A word is placed by its row in 'layouts' (the main grid) or, on a category page, by its row group in 'groups'. Never move an entry: a word's location is permanent on each grid size. Rows 1-4 of the 84 board are identical to the 45 board; the 45 board's bottom row (yes, no, Chat, categories) is the 84 board's bottom row in the same columns. On the main board 'stage' controls when a word is revealed (shown if stage <= the learner's stage). CATEGORY PAGES are organized by ROW GROUPS: each group is one row (the same row index on both sizes). Its 'words' go in columns 0-8 in order (these are the 45-board words, and the first nine words of the 84 board); its 'adds' go in columns 9-11 and appear on the 84 board only. If the page's Back button sits in that row on the 45 board, the Back column is skipped on BOTH sizes. A word given as {\"id\": ..., \"sizes\": [45]} is on the 45 board only. On the 84 board rows 5 and 6 of every page are left empty for the adult's own words. 'starter' lists the original items of a page: they show whenever the page is open. Every other item on a page is a newer word that shows at stage 'pageNewWordStage' and up (an adult can force-show it). A page without groups (Favorites) fills its 'items' left to right, top to bottom, skipping the Back cell. A word with a 'template' speaks that sentence; ___ is a blank an adult fills in. THE WORDS PAGES (Phase 1.6B) use the same row groups. The menu page 'words' has \"fromBar\": true: it is opened by the Words button in the top bar (not by a grid button), has no Back cell, and its buttons (ids starting w-) open the word pages (depth 2, Back where the button is). 'starter': 'all' means every word on the page always shows. A word with no 'image' is a text-first button (the word is drawn large; the picture area stays, empty). Several words reuse an existing id (for example in, on, he, she, me, my, big, hot): one id is one word, wherever it appears. Every Dolch word must be reachable in 3 taps on both sizes: run tools/dolch-coverage.py after changing a page. TOY AND ANIMAL FOLDERS (Phase 1.7B): row 4 of the Play page holds six toy folder buttons (columns 1, 2, 4, 5, 6, 7: column 0 is Animals on the 45 board, column 3 is Back there) and row 4 of the Animals page holds eight animal folder buttons (columns 1-8: column 0 is Back on the 45 board). Each folder is a page of one row group (9 words, plus 3 adds on the 84 board). On the 45 board an animal folder is depth 3 (Play > Animals > Farm > cow = 4 taps): a built-in exception, see js/boardmodel.js. FOLDERS ON THE CATEGORY PAGES (Phase 1.8A): the same folder format is used on Places (row 5, columns 1-8; 8 folders), People (row 5, columns 1-4 and 6; Friends is an EMPTY folder the adult fills), Chat (row 5, columns 6-9), Feelings (row 4, columns 1-6) and Drinks (row 4, columns 1-6), and on Food: the 'ranch' button (Food row 5, column 9) became 'More food', a folder of eight folder buttons (row 5, columns 1-8; Back at row 5, column 9 on both sizes), and ranch (same word id) moved into the Sauces and spreads folder. Why row 5 and not row 1 on More food: a folder's Back button sits where its folder button is, so folder buttons in row 1 would put Back in the row of the folder's nine words (nine words plus Back do not fit in nine columns). General depth rule: a built-in folder page may sit one level below a category page or a Words page, so a word can be 4 taps deep (Food > More food > Desserts > cake on both sizes; 45 Chat > Feelings > Calm down > deep breath); the adult 'Make this a page' limit is unchanged and is never offered on a built-in folder page. FOLDERS ON THE WORDS PAGES (Phase 1.8B): the same folder format on six Words pages, in cells that were EMPTY on both sizes (45 Back cell checked on each page): Describing (row 4, columns 1-5: Opposites, Shapes, Textures, Taste and smell, Sizes and amounts), Time (row 2, columns 5-9: Days, Months, Seasons and holidays, Routine times, Clock words), Numbers (row 2, columns 6-8: Math words, Money, Big numbers), Clothes (row 2, columns 6-8: Accessories, Weather clothes, Getting dressed), Outside (row 2, columns 7-9: Weather, Space, Plants) and Things (row 4, columns 1-5: School supplies, Tech, Household, Bathroom things, Bedroom). The Actions page has no room (its only free cell is one cell in row 5), so it has no folders yet. A Words page says \"starter\": \"all\", which shows every word, so its folder buttons are listed in \"newWords\": those show from stage 3 like the words inside the folders. A word on a Words-page folder is a normal word (Words > Time > Days > Monday = 4 taps). The month May (id may-month) and the season fall (id fall-season) are separate words from the Dolch word may and the verb fall; they carry \"noForms\": true so the Forms button does not offer fell or fallen for the season. The Places folder button \"Home\" (pl-home) is now labeled \"In the house\" with a different picture, so it no longer looks like the word home. New words are stage 3.",
+ "_note": "A word is placed by its row in 'layouts' (the main grid) or, on a category page, by its row group in 'groups'. Never move an entry: a word's location is permanent on each grid size. Rows 1-4 of the 84 board are identical to the 45 board; the 45 board's bottom row (yes, no, Chat, categories) is the 84 board's bottom row in the same columns. On the main board 'stage' controls when a word is revealed (shown if stage <= the learner's stage). CATEGORY PAGES are organized by ROW GROUPS: each group is one row (the same row index on both sizes). Its 'words' go in columns 0-8 in order (these are the 45-board words, and the first nine words of the 84 board); its 'adds' go in columns 9-11 and appear on the 84 board only. If the page's Back button sits in that row on the 45 board, the Back column is skipped on BOTH sizes. A word given as {\"id\": ..., \"sizes\": [45]} is on the 45 board only. On the 84 board rows 5 and 6 of every page are left empty for the adult's own words. 'starter' lists the original items of a page: they show whenever the page is open. Every other item on a page is a newer word that shows at stage 'pageNewWordStage' and up (an adult can force-show it). A page without groups (Favorites) fills its 'items' left to right, top to bottom, skipping the Back cell. A word with a 'template' speaks that sentence; ___ is a blank an adult fills in. THE WORDS PAGES (Phase 1.6B) use the same row groups. The menu page 'words' has \"fromBar\": true: it is opened by the Words button in the top bar (not by a grid button), has no Back cell, and its buttons (ids starting w-) open the word pages (depth 2, Back where the button is). 'starter': 'all' means every word on the page always shows. A word with no 'image' is a text-first button (the word is drawn large; the picture area stays, empty). Several words reuse an existing id (for example in, on, he, she, me, my, big, hot): one id is one word, wherever it appears. Every Dolch word must be reachable in 3 taps on both sizes: run tools/dolch-coverage.py after changing a page. TOY AND ANIMAL FOLDERS (Phase 1.7B): row 4 of the Play page holds six toy folder buttons (columns 1, 2, 4, 5, 6, 7: column 0 is Animals on the 45 board, column 3 is Back there) and row 4 of the Animals page holds eight animal folder buttons (columns 1-8: column 0 is Back on the 45 board). Each folder is a page of one row group (9 words, plus 3 adds on the 84 board). On the 45 board an animal folder is depth 3 (Play > Animals > Farm > cow = 4 taps): a built-in exception, see js/boardmodel.js. FOLDERS ON THE CATEGORY PAGES (Phase 1.8A): the same folder format is used on Places (row 5, columns 1-8; 8 folders), People (row 5, columns 1-4 and 6; Friends is an EMPTY folder the adult fills), Chat (row 5, columns 6-9), Feelings (row 4, columns 1-6) and Drinks (row 4, columns 1-6), and on Food: the 'ranch' button (Food row 5, column 9) became 'More food', a folder of eight folder buttons (row 5, columns 1-8; Back at row 5, column 9 on both sizes), and ranch (same word id) moved into the Sauces and spreads folder. Why row 5 and not row 1 on More food: a folder's Back button sits where its folder button is, so folder buttons in row 1 would put Back in the row of the folder's nine words (nine words plus Back do not fit in nine columns). General depth rule: a built-in folder page may sit one level below a category page or a Words page, so a word can be 4 taps deep (Food > More food > Desserts > cake on both sizes; 45 Chat > Feelings > Calm down > deep breath); the adult 'Make this a page' limit is unchanged and is never offered on a built-in folder page. FOLDERS ON THE WORDS PAGES (Phase 1.8B): the same folder format on six Words pages, in cells that were EMPTY on both sizes (45 Back cell checked on each page): Describing (row 4, columns 1-5: Opposites, Shapes, Textures, Taste and smell, Sizes and amounts), Time (row 2, columns 5-9: Days, Months, Seasons and holidays, Routine times, Clock words), Numbers (row 2, columns 6-8: Math words, Money, Big numbers), Clothes (row 2, columns 6-8: Accessories, Weather clothes, Getting dressed), Outside (row 2, columns 7-9: Weather, Space, Plants) and Things (row 4, columns 1-5: School supplies, Tech, Household, Bathroom things, Bedroom). The Actions page has no room (its only free cell is one cell in row 5), so its five folders (Daily routine, School actions, Play actions, Body moves, Kitchen) sit on the WORDS MENU page instead, in its first free row (row 3, columns 1-5; the menu is depth 1 and has no Back cell), so Words > Daily routine > wake up is 3 taps. Their Back button sits at the folder button on the menu. The verb march is its own word (march-verb); the month March keeps the id march. The Words menu and every Words page say \"starter\": \"all\", which shows every word, so its folder buttons are listed in \"newWords\": those show from stage 3 like the words inside the folders. A word on a Words-page folder is a normal word (Words > Time > Days > Monday = 4 taps). The month May (id may-month) and the season fall (id fall-season) are separate words from the Dolch word may and the verb fall; they carry \"noForms\": true so the Forms button does not offer fell or fallen for the season. The Places folder button \"Home\" (pl-home) is now labeled \"In the house\" with a different picture, so it no longer looks like the word home. New words are stage 3.",
  "id": "core",
  "name": "Core Board",
  "backImage": "images/symbols/back.svg",
@@ -1415,7 +1415,59 @@
   "th-tech": {"label": "Tech", "spokenText": "Tech", "wordType": "category", "loadBoard": "th-tech", "image": "images/symbols/th-tech.svg"},
   "th-household": {"label": "Household", "spokenText": "Household", "wordType": "category", "loadBoard": "th-household", "image": "images/symbols/th-household.svg"},
   "th-bathroom": {"label": "Bathroom things", "spokenText": "Bathroom things", "wordType": "category", "loadBoard": "th-bathroom", "image": "images/symbols/th-bathroom.svg"},
-  "th-bedroom": {"label": "Bedroom", "spokenText": "Bedroom", "wordType": "category", "loadBoard": "th-bedroom", "image": "images/symbols/th-bedroom.svg"}
+  "th-bedroom": {"label": "Bedroom", "spokenText": "Bedroom", "wordType": "category", "loadBoard": "th-bedroom", "image": "images/symbols/th-bedroom.svg"},
+  "wake-up": {"label": "wake up", "spokenText": "wake up", "wordType": "action", "image": "images/symbols/wake-up.svg"},
+  "get-dressed": {"label": "get dressed", "spokenText": "get dressed", "wordType": "action", "image": "images/symbols/get-dressed.svg"},
+  "eat-breakfast": {"label": "eat breakfast", "spokenText": "eat breakfast", "wordType": "action", "image": "images/symbols/eat-breakfast.svg"},
+  "go-to-school": {"label": "go to school", "spokenText": "go to school", "wordType": "action", "image": "images/symbols/go-to-school.svg"},
+  "come-home": {"label": "come home", "spokenText": "come home", "wordType": "action", "image": "images/symbols/come-home.svg"},
+  "take-a-bath": {"label": "take a bath", "spokenText": "take a bath", "wordType": "action", "image": "images/symbols/take-a-bath.svg"},
+  "put-on-pajamas": {"label": "put on pajamas", "spokenText": "put on pajamas", "wordType": "action", "image": "images/symbols/put-on-pajamas.svg"},
+  "go-to-bed": {"label": "go to bed", "spokenText": "go to bed", "wordType": "action", "image": "images/symbols/go-to-bed.svg"},
+  "nap": {"label": "nap", "spokenText": "nap", "wordType": "action", "image": "images/symbols/nap.svg"},
+  "get-ready": {"label": "get ready", "spokenText": "get ready", "wordType": "action", "image": "images/symbols/get-ready.svg"},
+  "clean-up": {"label": "clean up", "spokenText": "clean up", "wordType": "action", "image": "images/symbols/clean-up.svg"},
+  "listen": {"label": "listen", "spokenText": "listen", "wordType": "action", "image": "images/symbols/listen.svg"},
+  "raise-hand": {"label": "raise hand", "spokenText": "raise hand", "wordType": "action", "image": "images/symbols/raise-hand.svg"},
+  "line-up": {"label": "line up", "spokenText": "line up", "wordType": "action", "image": "images/symbols/line-up.svg"},
+  "sit-down": {"label": "sit down", "spokenText": "sit down", "wordType": "action", "image": "images/symbols/sit-down.svg"},
+  "share": {"label": "share", "spokenText": "share", "wordType": "action", "image": "images/symbols/share.svg"},
+  "wait-my-turn": {"label": "wait my turn", "spokenText": "wait my turn", "wordType": "action", "image": "images/symbols/wait-my-turn.svg"},
+  "color": {"label": "color", "spokenText": "color", "wordType": "action", "image": "images/symbols/color.svg"},
+  "erase": {"label": "erase", "spokenText": "erase", "wordType": "action", "image": "images/symbols/erase.svg"},
+  "spell": {"label": "spell", "spokenText": "spell", "wordType": "action", "image": "images/symbols/spell.svg"},
+  "hide": {"label": "hide", "spokenText": "hide", "wordType": "action", "image": "images/symbols/hide.svg"},
+  "build": {"label": "build", "spokenText": "build", "wordType": "action", "image": "images/symbols/build.svg"},
+  "roll": {"label": "roll", "spokenText": "roll", "wordType": "action", "image": "images/symbols/roll.svg"},
+  "splash": {"label": "splash", "spokenText": "splash", "wordType": "action", "image": "images/symbols/splash.svg"},
+  "clap": {"label": "clap", "spokenText": "clap", "wordType": "action", "image": "images/symbols/clap.svg"},
+  "stomp": {"label": "stomp", "spokenText": "stomp", "wordType": "action", "image": "images/symbols/stomp.svg"},
+  "wave": {"label": "wave", "spokenText": "wave", "wordType": "action", "image": "images/symbols/wave.svg"},
+  "hop": {"label": "hop", "spokenText": "hop", "wordType": "action", "image": "images/symbols/hop.svg"},
+  "march-verb": {"label": "march", "spokenText": "march", "wordType": "action", "image": "images/symbols/march-verb.svg"},
+  "wiggle": {"label": "wiggle", "spokenText": "wiggle", "wordType": "action", "image": "images/symbols/wiggle.svg"},
+  "stretch": {"label": "stretch", "spokenText": "stretch", "wordType": "action", "image": "images/symbols/stretch.svg"},
+  "shake": {"label": "shake", "spokenText": "shake", "wordType": "action", "image": "images/symbols/shake.svg"},
+  "nod": {"label": "nod", "spokenText": "nod", "wordType": "action", "image": "images/symbols/nod.svg"},
+  "point": {"label": "point", "spokenText": "point", "wordType": "action", "image": "images/symbols/point.svg"},
+  "tiptoe": {"label": "tiptoe", "spokenText": "tiptoe", "wordType": "action", "image": "images/symbols/tiptoe.svg"},
+  "crawl": {"label": "crawl", "spokenText": "crawl", "wordType": "action", "image": "images/symbols/crawl.svg"},
+  "cook": {"label": "cook", "spokenText": "cook", "wordType": "action", "image": "images/symbols/cook.svg"},
+  "stir": {"label": "stir", "spokenText": "stir", "wordType": "action", "image": "images/symbols/stir.svg"},
+  "mix": {"label": "mix", "spokenText": "mix", "wordType": "action", "image": "images/symbols/mix.svg"},
+  "bake": {"label": "bake", "spokenText": "bake", "wordType": "action", "image": "images/symbols/bake.svg"},
+  "wash-dishes": {"label": "wash dishes", "spokenText": "wash dishes", "wordType": "action", "image": "images/symbols/wash-dishes.svg"},
+  "set-the-table": {"label": "set the table", "spokenText": "set the table", "wordType": "action", "image": "images/symbols/set-the-table.svg"},
+  "scoop": {"label": "scoop", "spokenText": "scoop", "wordType": "action", "image": "images/symbols/scoop.svg"},
+  "spread": {"label": "spread", "spokenText": "spread", "wordType": "action", "image": "images/symbols/spread.svg"},
+  "peel": {"label": "peel", "spokenText": "peel", "wordType": "action", "image": "images/symbols/peel.svg"},
+  "chop": {"label": "chop", "spokenText": "chop", "wordType": "action", "image": "images/symbols/chop.svg"},
+  "taste": {"label": "taste", "spokenText": "taste", "wordType": "action", "image": "images/symbols/taste.svg"},
+  "ac-routine": {"label": "Daily routine", "spokenText": "Daily routine", "wordType": "category", "loadBoard": "ac-routine", "image": "images/symbols/ac-routine.svg"},
+  "ac-school": {"label": "School actions", "spokenText": "School actions", "wordType": "category", "loadBoard": "ac-school", "image": "images/symbols/ac-school.svg"},
+  "ac-play": {"label": "Play actions", "spokenText": "Play actions", "wordType": "category", "loadBoard": "ac-play", "image": "images/symbols/ac-play.svg"},
+  "ac-body": {"label": "Body moves", "spokenText": "Body moves", "wordType": "category", "loadBoard": "ac-body", "image": "images/symbols/ac-body.svg"},
+  "ac-kitchen": {"label": "Kitchen", "spokenText": "Kitchen", "wordType": "category", "loadBoard": "ac-kitchen", "image": "images/symbols/ac-kitchen.svg"}
  },
  "layouts": {
   "45": {"columns": 9, "rows": 5, "main": [
@@ -1493,9 +1545,10 @@
     {"row": 0, "name": "About me", "words": ["about-name", "about-age", "about-school", "about-mom", "about-dad", "about-talk", "about-allergies", "about-emergency", "about-favorite"], "adds": ["about-birthday", "about-pet", "about-brother"]},
     {"row": 1, "name": "More about me", "words": ["about-sister", "about-teacher", "about-wait"]}
   ]},
-  "words": {"name": "Words", "fromBar": true, "starter": "all", "groups": [
+  "words": {"name": "Words", "fromBar": true, "starter": "all", "newWords": ["ac-routine", "ac-school", "ac-play", "ac-body", "ac-kitchen"], "groups": [
     {"row": 0, "name": "Words that do things", "words": ["w-little", "w-more-little", "w-actions", "w-past", "w-describing", "w-time"]},
-    {"row": 1, "name": "Things you can name", "words": ["w-colors", "w-numbers", "w-clothes", "w-outside", "w-things"]}
+    {"row": 1, "name": "Things you can name", "words": ["w-colors", "w-numbers", "w-clothes", "w-outside", "w-things"]},
+    {"row": 2, "name": "Action folders", "words": ["ac-routine", "ac-school", "ac-play", "ac-body", "ac-kitchen"]}
   ]},
   "w-little": {"name": "Little words", "starter": "all", "groups": [
     {"row": 0, "name": "Joining", "words": ["a", "an", "the", "and", "but", "or", "so", "if"]},
@@ -1781,6 +1834,21 @@
   ]},
   "th-bedroom": {"name": "Bedroom", "groups": [
     {"row": 0, "name": "Bedroom", "words": ["bed", "blanket", "pillow", "nightlight", "stuffed-animal", "dresser", "closet", "toy-box", "alarm"], "adds": ["curtains", "bunk-bed", "lamp"]}
+  ]},
+  "ac-routine": {"name": "Daily routine", "groups": [
+    {"row": 0, "name": "Daily routine", "words": ["wake-up", "get-dressed", "eat-breakfast", "brush-teeth", "go-to-school", "come-home", "take-a-bath", "put-on-pajamas", "go-to-bed"], "adds": ["nap", "get-ready", "clean-up"]}
+  ]},
+  "ac-school": {"name": "School actions", "groups": [
+    {"row": 0, "name": "School actions", "words": ["listen", "raise-hand", "line-up", "sit-down", "share", "wait-my-turn", "color", "cut", "glue"], "adds": ["erase", "count", "spell"]}
+  ]},
+  "ac-play": {"name": "Play actions", "groups": [
+    {"row": 0, "name": "Play actions", "words": ["throw", "catch", "kick", "hide", "build", "chase", "climb", "slide", "swing"], "adds": ["roll", "bounce", "splash"]}
+  ]},
+  "ac-body": {"name": "Body moves", "groups": [
+    {"row": 0, "name": "Body moves", "words": ["clap", "stomp", "wave", "hop", "march-verb", "wiggle", "stretch", "shake", "nod"], "adds": ["point", "tiptoe", "crawl"]}
+  ]},
+  "ac-kitchen": {"name": "Kitchen", "groups": [
+    {"row": 0, "name": "Kitchen", "words": ["cook", "stir", "pour", "mix", "bake", "wash-dishes", "set-the-table", "scoop", "spread"], "adds": ["peel", "chop", "taste"]}
   ]},
   "favorites": {"name": "Favorites", "items": []}
  }
