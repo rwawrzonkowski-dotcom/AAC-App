@@ -1,4 +1,4 @@
-# AAC Board (Phase 1.6A)
+# AAC Board (Phase 1.6B)
 
 A free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
@@ -47,6 +47,37 @@ A free, offline communication board for children who are new to AAC
     main-grid button (two taps). There is no home-address button, and the emergency-contact
     field shows a privacy reminder.
   - **Places** includes "here" (it used to be on the main board).
+- **Words pages (three taps).** The **Words** button in the top bar (between the message text and Delete)
+  opens the Words menu: Little words, More little words, Actions, Past tense, Describing, Time (first row)
+  and Colors, Numbers, Clothes, Outside, Things (second row). Tap a page, then a word: that is
+  **Words, page, word = three taps**, and the board returns to the main page. While any Words page is
+  open the same button reads **Close** and goes straight back to the main board. A page's orange
+  **Back** button sits where its button on the Words menu sits and goes up one level (to the menu).
+  The pages use the same row-group layout as the category pages (45 board: columns 1-9; the 84 board adds
+  columns 10-12 of the same rows; rows 6-7 of the 84 board are left empty for your words), so a word has the
+  same row and column on both sizes and **never moves**.
+  - **Every one of the 318 Dolch sight words is reachable within 3 taps on both board sizes**
+    (`docs/dolch-coverage.md` shows exactly how each one is reached; `python3 tools/dolch-coverage.py` checks it
+    and fails if any word is not). Only four synonyms are allowed: father = dad, mother = mom,
+    rabbit = bunny, house = home. Six words (ate, goes, going, got, made, went) are reached through **Forms**.
+  - **Little words** are text first: the word is drawn large across the button, with a symbol only where one is
+    genuinely clear (over, under, around, away). The button and its picture area are exactly the same size as
+    any other button (the picture area is simply empty). **Pronouns** (he, she, we, they, me, him, her, us, them,
+    myself, my, your, his, our, their, its) are on *More little words*, in the rows after the helper words
+    (is, was, have, will...). *Past tense* holds ran, saw, said, came, gave and found. The extra pages
+    (More little words, Past tense) exist because 44 buttons per page on the 45 board were not enough for all the
+    little words and still leave room for the Back button.
+  - The Words and Forms buttons are shown by the learner's **Show Words button** setting (adult menu >
+    Vocabulary stage): Auto (from stage 3, the default), Always or Never.
+- **Forms.** The **Forms** button (next to Words) is on only when the last word in the message bar has other
+  forms: verbs (go: goes, going, went, gone), irregular verbs, adjectives (good, better, best), plurals
+  (man, men), pronouns (I, me, my, mine, myself). It opens a large popover over the grid (the grid does not
+  change); tap a form to replace the last word and speak it. Tap outside to close. The forms live in
+  `data/word-forms.json`; add a family there to add more. In Model mode, Forms counts as a model event
+  (`{ word, form, mode: "model" }`).
+- **Reading stage (words only).** Adult menu > Vocabulary stage > *Show words only (no pictures)*: hides every
+  symbol and photo on every page and shows the words large and centered in the same buttons (colors stay).
+  Saved per learner and included in backups.
 - Several learners can share one iPad. Each has their own stage, hidden/shown
   words, renamed words, photos, added words and voice settings.
 - Works offline. Nothing is sent anywhere: no accounts, no ads, no tracking.
@@ -73,7 +104,8 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   explains that word locations change (a relearning event). The learner keeps their stage.
   See "Where your changes are stored" below for what comes with them.
 - **Vocabulary stage:** tap Stage 1-4. Each stage lists the words it reveals on this
-  learner's board.
+  learner's board. Below the stages: **Show Words button** (Auto from stage 3 / Always / Never) and
+  **Show words only (no pictures)** (the reading stage: pictures are hidden so the learner reads the words).
 - **Edit board:** see every button (hidden ones faded with a dashed outline) on the
   page you are on. Tap any button to change it: Follow stage / Always show / Always hide,
   label, spoken text, and a photo (take or choose one; it is shrunk and kept on the
@@ -83,6 +115,8 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   recorded. Tap an **empty** cell to add a word there (this is how Favorites is filled);
   it keeps that spot forever. There is no way to move a word. Tap **Done** to leave.
   In Edit mode, tap a category button and choose "Open this page" to edit its page.
+  The Edit banner also has a **Words** button (when this learner's Words button is allowed) that opens the Words menu, so the
+  Words pages can be edited the same way (tap a page button, choose "Open this page"; the button then reads **Close Words**).
   - **Make this a page** (up to three taps deep). When you add a button to an empty cell
     on a page that is not already two levels down, choose **Make this a page**, give it a
     name (and optionally a photo). The new button looks like a category button and opens a
@@ -108,7 +142,7 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
     button are ignored for that long. Opening a category does not start the wait.
 - **Backup:** *Save backup of this learner* or *of all learners* makes one .json file
   (board size, stage, button changes, pages you made, voice, touch settings, Model prompt
-  settings and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded). On the
+  settings, the Words button and words-only settings, and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded). On the
   iPad a save sheet opens: choose **Save to Files**. *Restore from backup* reads a file,
   shows the learners and photo count inside, and for each learner asks whether to **add
   as a new learner** (default) or **replace** a learner with the same name (asks again
@@ -183,7 +217,8 @@ Make sure the iPad is not on silent mode and the volume is up.
   1-9, "adds" in columns 10-12 on the 84 board). Positions are permanent.
 - `js/boardmodel.js` works out which word is in which cell for a grid size and a learner;
   `js/boarddata.js` loads the word map; `js/migrate.js` upgrades older learner data.
-- `js/app.js` ties it together (pages, taps, edit and model modes).
+- `js/app.js` ties it together (pages, taps, edit and model modes, the Words and Forms buttons).
+- `js/forms.js` loads `data/word-forms.json` and shows the Forms popover.
 - `js/board.js` draws the grid (and fits labels into buttons); `js/speech.js` speaks.
 - `js/critters.js` the critter's settings, checks and drawing; `js/modelprompt.js` shows the ring
   and critter in Model mode; `js/modelsettings.js` is the Model prompt part of the adult menu.
@@ -196,6 +231,8 @@ Make sure the iPad is not on silent mode and the volume is up.
   color is the CSS variable `--body`, so recoloring needs no extra files).
 - `images/symbols/` the built-in symbols (one SVG per word); `data/image-sources.json`
   says where each came from. `js/backup.js` saves and restores backups.
+- `data/word-forms.json` the word families for the Forms button; `data/dolch.json` the 318 Dolch words
+  (only read by `tools/dolch-coverage.py`, which writes `docs/dolch-coverage.md`).
 - `tools/make-credits.py` rewrites CREDITS.md from image-sources.json;
   `tools/update-cache-list.py` rewrites the file list in sw.js (run both after changing
   pictures or files, then bump `CACHE_VERSION`).

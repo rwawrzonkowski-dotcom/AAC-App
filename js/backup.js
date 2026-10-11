@@ -2,9 +2,9 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 4, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 5, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
-//       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model,
+//       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
 //         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
 //     ]
 //   }
@@ -12,6 +12,8 @@
 // cells (by position), `pages` = pages the adult made. See js/profiles.js.
 // `model` = the Model prompt settings (js/critters.js). A learner's own critter picture
 // is one of the photos, with the key "critter".
+// `wordsButton` ("auto" | "always" | "never") and `wordsOnly` (the reading stage) came with version 5
+// (Phase 1.6B, the Words pages); an older backup restores with Auto and pictures on.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -29,9 +31,10 @@ import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves } from "./migrate.js";
 import { cleanModel } from "./critters.js";
+import { WORDS_BUTTON_CHOICES } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 4;
+export const BACKUP_VERSION = 5;
 
 // ---------------------------------------------------------------- saving
 
@@ -63,6 +66,8 @@ export async function buildBackup(learners) {
       voice: p.voice,
       touch: p.touch,
       model: p.model,
+      wordsButton: p.wordsButton,
+      wordsOnly: p.wordsOnly,
       photos,
     });
   }
@@ -222,6 +227,10 @@ function cleanLearner(raw, index, version) {
   // Backups older than version 3 have no Model prompt settings: use the defaults.
   const model = cleanModel(version >= 3 ? raw.model : null);
 
+  // Backups older than version 5 were made before the Words pages: Auto, and pictures on.
+  const wordsButton = version >= 5 && WORDS_BUTTON_CHOICES.includes(raw.wordsButton) ? raw.wordsButton : "auto";
+  const wordsOnly = version >= 5 && raw.wordsOnly === true;
+
   // Backups older than version 4 were made before the row-group category pages (Phase 1.6):
   // move any word the adult added to a cell that a built-in word now needs. (Pins are obsolete.)
   let notices = [];
@@ -241,7 +250,7 @@ function cleanLearner(raw, index, version) {
     const key = version < 2 ? photoKey(ph.key) : ph.key;
     photos.push({ key: moved[key] || key, blob });          // a moved word's photo moves with it
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, notices, photos };
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, notices, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

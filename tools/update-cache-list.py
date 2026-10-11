@@ -9,8 +9,9 @@ download the new files. Nothing here needs the internet.
 import os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKIP_DIRS = {".git", "tools", "node_modules"}
-SKIP_FILES = {"sw.js", "README.md", "CREDITS.md", ".gitignore"}
+SKIP_DIRS = {".git", "tools", "node_modules", "docs"}
+# (data/dolch.json is only read by tools/dolch-coverage.py, never by the app)
+SKIP_FILES = {"sw.js", "README.md", "CREDITS.md", ".gitignore", "data/dolch.json"}
 
 files = []
 for folder, dirs, names in os.walk(ROOT):

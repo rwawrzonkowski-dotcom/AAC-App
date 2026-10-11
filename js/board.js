@@ -40,9 +40,15 @@ const PLACEHOLDERS = {
 //   photoUrl = function(photoKey) -> picture URL or null
 //   backImage = symbol file for the Back button
 //   cols, rows, size = the grid (9x5 = 45, 12x7 = 84)
+//   wordsOnly = the reading stage: no symbols and no photos anywhere, only large words
 // The picture always goes inside the same fixed-size ".cell-image" box, so a
 // symbol, a photo or the emoji fallback can never change a cell's layout.
-export function renderBoard(boardEl, cells, { editing, photoUrl, backImage, cols, rows, size }) {
+//
+// TEXT-FORWARD BUTTONS (class "text-only"): a built-in word that has no symbol (the little words:
+// "the", "because", "are"...), and every button in words-only mode. The picture box is still there
+// (empty, same size, so the button is exactly as big as any other and nothing moves); the word is
+// simply drawn large and centered over the whole button (see styles.css).
+export function renderBoard(boardEl, cells, { editing, photoUrl, backImage, cols, rows, size, wordsOnly = false }) {
   boardEl.innerHTML = "";
   boardEl.dataset.size = String(size);
   boardEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
@@ -60,7 +66,8 @@ export function renderBoard(boardEl, cells, { editing, photoUrl, backImage, cols
       cell.setAttribute("role", "button");
       cell.setAttribute("aria-label", "Back");
       cell.innerHTML = '<div class="cell-image"></div><div class="cell-label"><span class="lbl">Back</span></div>';
-      showSymbol(cell.querySelector(".cell-image"), backImage, "\u2B05\uFE0F");
+      if (wordsOnly) cell.classList.add("text-only");
+      else showSymbol(cell.querySelector(".cell-image"), backImage, "\u2B05\uFE0F");
     } else if (d.kind === "word" && (d.visible || editing)) {
       cell.className = "cell tap type-" + d.wordType + (d.visible ? "" : " ghost");
       cell.setAttribute("role", "button");
@@ -70,7 +77,10 @@ export function renderBoard(boardEl, cells, { editing, photoUrl, backImage, cols
       const url = photoUrl(d.photoKey);
       const area = cell.querySelector(".cell-image");
       const letter = PLACEHOLDERS[d.base ? d.base.id : ""] || d.label.charAt(0).toUpperCase();
-      if (url) {
+      if (wordsOnly || (!url && d.base && !d.base.image)) {
+        area.replaceChildren();                        // empty picture box: the word is shown large instead
+        cell.classList.add("text-only");
+      } else if (url) {
         // The adult's own photo overrides the built-in symbol.
         const img = document.createElement("img");
         img.className = "photo";

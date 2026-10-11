@@ -2,6 +2,7 @@
 //   - loads the word map and the current learner's profile
 //   - draws the main board (45 or 84 locations) or a category / adult-made page
 //   - handles taps (speak / navigate), the adult lock, Edit mode and Model mode
+//   - the top-bar Words button (Words pages) and Forms button (other forms of the last word)
 import { speak, initSpeech, setVoiceSettings } from "./speech.js";
 import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js";
 import { buildModel, getPage, pathToCore, resolvePage, posKey, MAX_DEPTH } from "./boardmodel.js";
@@ -17,6 +18,7 @@ import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
 import { runPrompt, clearCritter, stepPauseMs, usesCritter, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS } from "./modelprompt.js";
 import { preloadCritterArt } from "./critters.js";
+import { loadForms, formsFor, openFormsPopover } from "./forms.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
@@ -46,8 +48,18 @@ const state = {
   page: "core",       // "core", a category id such as "food", or an adult-made page id
   editing: false,     // Edit mode
   modeling: false,    // Model mode
-  sentence: [],       // words in the message bar: {label, spoken}
+  sentence: [],       // words in the message bar: {label, spoken, base} (base = the word tapped on the board)
   cells: new Map(),   // key -> description of each cell currently drawn
+  forms: null,        // the open Forms popover, if any
+};
+
+// ---------- The Words button ----------
+// "auto" shows it from stage 3 up; "always" and "never" are the adult's choice (adult menu).
+const wordsButtonShown = (p) => p.wordsButton === "always" || (p.wordsButton !== "never" && p.stage >= 3);
+// True while the Words menu or any page opened from it is showing.
+const onWordsPage = (pageId = state.page) => {
+  const profile = getCurrent();
+  return pathToCore(modelNow(), profile, pageId).includes("words");
 };
 
 const $ = (id) => document.getElementById(id);
@@ -68,13 +80,14 @@ function currentPageDef() {
 function renderAll() {
   const profile = getCurrent();
   const model = modelNow();
+  if (state.page !== "core" && !wordsButtonShown(profile) && onWordsPage()) state.page = "core";   // the adult turned Words off
   const page = currentPageDef();
   const cells = resolvePage(page, profile, model);
   state.cells = new Map(cells.map((d) => [d.key, d]));
 
   renderBoard($("board"), cells, {
     editing: state.editing, photoUrl: getPhotoUrl, backImage: state.board.backImage,
-    cols: model.cols, rows: model.rows, size: model.size,
+    cols: model.cols, rows: model.rows, size: model.size, wordsOnly: profile.wordsOnly,
   });
 
   // Visual cue that the page changed: tinted background + page title.
@@ -90,6 +103,26 @@ function renderAll() {
   $("learner-name").textContent = m ? m[0] : profile.name;
 
   setVoiceSettings(profile.voice);
+  updateBar();
+}
+
+// The Words and Forms buttons in the top bar. They only change themselves (and the message text's width):
+// the grid below never moves.
+function updateBar() {
+  const profile = getCurrent();
+  const shown = wordsButtonShown(profile);
+  $("words-btn").hidden = !shown;
+  $("forms-btn").hidden = !shown;
+  $("words-btn").textContent = shown && onWordsPage() ? "Close" : "Words";
+  const ew = $("edit-words");
+  ew.hidden = !shown;
+  ew.textContent = shown && onWordsPage() ? "Close Words" : "Words";
+  updateFormsButton();
+}
+
+// Words button: open the Words menu; while a Words page is open the same button ("Close") goes back to the main board.
+function toggleWords() {
+  goTo(onWordsPage() ? "core" : "words");
 }
 
 function goTo(pageId) {
@@ -114,6 +147,51 @@ function drawMessage() {
   }
   const box = $("message-text");
   box.scrollLeft = box.scrollWidth;   // keep the newest word in view
+  updateFormsButton();
+}
+
+// ---------- Forms ----------
+// On only when the last word in the message bar has other forms (go: went, going...).
+function lastWordForms() {
+  const last = state.sentence[state.sentence.length - 1];
+  return last ? formsFor(last.label) || formsFor(last.spoken) : null;
+}
+function updateFormsButton() {
+  $("forms-btn").disabled = !lastWordForms();
+}
+function closeForms() { if (state.forms) { state.forms.close(); state.forms = null; } }
+
+// Open the popover over the grid. Choosing a form replaces the last word and speaks it.
+// In Model mode it also counts as a model event (and the chosen button gets the learner's prompt).
+function openForms() {
+  const forms = lastWordForms();
+  if (!forms || state.forms || returning || previewing) return;
+  const last = state.sentence[state.sentence.length - 1];
+  if (state.modeling) runPrompt($("forms-btn"), getCurrent().model, getPhotoUrl("critter"), RING_MS);
+  let chosen = false;
+  state.forms = openFormsPopover({
+    forms, current: last.label,
+    pressOptions: { holdMs, blocked: tapsBlocked },
+    onClose: () => { state.forms = null; },
+    onChoose: (form) => {
+      if (chosen) return;
+      chosen = true;
+      lastSelectAt = performance.now();
+      speak(form);
+      const base = last.base || last.label;
+      state.sentence[state.sentence.length - 1] = { label: form, spoken: form, base };
+      drawMessage();
+      logWord(base, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form });
+      if (state.modeling) {
+        // Let the adult's ring show on the chosen form for a moment, then close.
+        const pop = state.forms;
+        runPrompt(pop.button(form), getCurrent().model, getPhotoUrl("critter"), RING_MS);
+        setTimeout(() => { if (state.forms === pop) closeForms(); }, 700);
+      } else {
+        closeForms();
+      }
+    },
+  });
 }
 
 // ---------- Model mode prompt ----------
@@ -122,6 +200,10 @@ function drawMessage() {
 function promptCell(key, ringMs) {
   const el = document.querySelector(`#board .cell[data-key="${key}"]`);
   runPrompt(el, getCurrent().model, getPhotoUrl("critter"), ringMs);
+}
+// The same prompt on the top-bar Words button (the "opener" of the Words menu).
+function promptWordsButton(ringMs) {
+  runPrompt($("words-btn"), getCurrent().model, getPhotoUrl("critter"), ringMs);
 }
 
 // What to remember about the prompt in the event list (for Phase 2 data).
@@ -160,7 +242,8 @@ function onCellTap(cellEl) {
   // A normal word: speak immediately, add to the message bar.
   lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on
   speak(d.spoken);
-  state.sentence.push({ label: d.sentence ? d.spoken : d.label, spoken: d.spoken });
+  const shown = d.sentence ? d.spoken : d.label;
+  state.sentence.push({ label: shown, spoken: d.spoken, base: shown });
   drawMessage();
   logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined);
 
@@ -179,7 +262,9 @@ function onCellTap(cellEl) {
       const stepOut = (i) => setTimeout(() => {
         const child = getPage(model, profile, path[i]);
         goTo(path[i + 1]);
-        promptCell(posKey(model.size, path[i + 1], child.at.row, child.at.col), RING_PATH_MS);
+        // the Words menu is opened by the top-bar Words button; every other page by a button on the grid
+        if (child.at) promptCell(posKey(model.size, path[i + 1], child.at.row, child.at.col), RING_PATH_MS);
+        else promptWordsButton(RING_PATH_MS);
         if (i + 2 < path.length) stepOut(i + 1); else returning = false;
       }, pause);
       stepOut(0);
@@ -253,9 +338,9 @@ async function editCell(d) {
   renderAll();
 }
 
-function startEditing() { state.modeling = false; state.editing = true; renderAll(); }
+function startEditing() { closeForms(); state.modeling = false; state.editing = true; renderAll(); }
 function stopEditing() { state.editing = false; renderAll(); }
-function startModeling() { state.editing = false; state.modeling = true; renderAll(); }
+function startModeling() { closeForms(); state.editing = false; state.modeling = true; renderAll(); }
 function stopModeling() { state.modeling = false; clearCritter(); renderAll(); }
 
 // ---------- Adult lock ----------
@@ -269,6 +354,7 @@ function showAdultMenu(startAt) {
     startAt,
     onLearnerChanged: () => {
       // A different learner: start clean on the main board.
+      closeForms();
       state.sentence.length = 0;
       drawMessage();
       state.page = "core";
@@ -308,6 +394,7 @@ async function openAdult() {
 async function start() {
   initSpeech();
   state.board = await loadBoardData();
+  await loadForms();
   await initProfiles(state.board);
   preloadCritterArt();      // so the critter can appear instantly the first time
 
@@ -315,15 +402,19 @@ async function start() {
 
   // Message bar: tap text to speak the sentence; Delete / Clear
   attachPressHandling($("message-bar"), (el) => {
+    if (el.disabled) return;
     if (el.id === "message-text") speak(state.sentence.map((w) => w.spoken).join(" "));
     else if (el.id === "delete-btn") { state.sentence.pop(); drawMessage(); }
     else if (el.id === "clear-btn") { state.sentence.length = 0; drawMessage(); }
+    else if (el.id === "words-btn") { if (!returning && !previewing) toggleWords(); }
+    else if (el.id === "forms-btn") openForms();
   }, "#message-text, .bar-btn");
 
   fitLabelsOnResize($("board"));
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
   attachHold($("model-end"), HOLD_TO_END_MODEL_MS, stopModeling);
   $("edit-done").addEventListener("click", stopEditing);
+  $("edit-words").addEventListener("click", toggleWords);   // so an adult can edit the Words pages too
 
   renderAll();
 

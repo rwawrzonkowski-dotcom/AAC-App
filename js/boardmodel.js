@@ -12,6 +12,10 @@
 //     on BOTH sizes, so the words after it do not differ between sizes.
 //   - a page with no groups (Favorites) lists "items" that fill the page left to
 //     right, top to bottom, skipping the Back cell.
+//   - the WORDS pages (Phase 1.6B) are opened from the "Words" button in the top bar, not
+//     from a button on the grid. The menu page says "fromBar": true; it is depth 1 and has no
+//     Back cell (the top-bar button reads "Close"). Its page buttons open the word pages (depth 2).
+//     A page with "starter": "all" shows all of its words whenever the page is open.
 //
 // Two grid sizes exist: 45 (9 columns x 5 rows) and 84 (12 x 7). Each learner uses one.
 
@@ -57,12 +61,14 @@ export function buildModel(board, size) {
     const ids = p.groups
       ? p.groups.flatMap((g) => [...g.words.map(asEntry).filter(onSize), ...(size === 84 ? (g.adds || []).map(asEntry) : [])]).map((e) => e.id)
       : (p.items || []).map(asEntry).filter(onSize).map((e) => e.id);
-    defs[pid] = { id: pid, name: p.name, groups: p.groups || null, starter: p.starter || [], items: p.items || [], itemIds: ids };
+    defs[pid] = { id: pid, name: p.name, groups: p.groups || null, starter: p.starter || [], items: p.items || [], itemIds: ids,
+                  fromBar: !!p.fromBar };
   }
 
-  // Where is each page opened from? (the main grid, or an item on another page)
-  const openerOf = {};   // pageId -> { parent, openerId }
+  // Where is each page opened from? (the main grid, the top bar, or an item on another page)
+  const openerOf = {};   // pageId -> { parent, openerId }   (openerId null = the top-bar Words button)
   for (const b of main) if (b.loadBoard && defs[b.loadBoard]) openerOf[b.loadBoard] = { parent: "core", openerId: b.id };
+  for (const d of Object.values(defs)) if (d.fromBar) openerOf[d.id] = { parent: "core", openerId: null };
   for (const d of Object.values(defs)) {
     for (const id of d.itemIds) {
       const w = board.words[id];
@@ -82,8 +88,8 @@ export function buildModel(board, size) {
     if (o) {
       parent = o.parent;
       if (parent === "core") {
-        const b = main.find((x) => x.id === o.openerId);
-        at = { row: b.row, col: b.col };
+        const b = o.openerId ? main.find((x) => x.id === o.openerId) : null;
+        at = b ? { row: b.row, col: b.col } : null;      // the Words menu has no Back cell
       } else {
         const pp = layout(parent);
         const it = pp.items.find((x) => x.id === o.openerId);
@@ -95,7 +101,7 @@ export function buildModel(board, size) {
     if (d.groups) {
       // The 45 board's Back cell decides which column a group row skips, on BOTH sizes.
       const back45 = size === 45 ? at : ((buildModel(board, 45).pages[pid] || {}).at || null);
-      const starter = new Set(d.starter);
+      const starter = d.starter === "all" ? { has: () => true } : new Set(d.starter);
       const NEW_STAGE = board.pageNewWordStage || 3;
       // pageStage: from which stage the word shows on this page (original items: always)
       const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: starter.has(e.id) ? 1 : NEW_STAGE });

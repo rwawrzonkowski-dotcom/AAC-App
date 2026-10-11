@@ -4,10 +4,15 @@
 // Model events also record the prompt that was set at that moment:
 //   prompt: { style: "ring" | "critter" | "both", ringOpacity: 0..100, critterOpacity: 0..100 }
 // (an opacity of 0 means that prompt was off, but the model is still logged).
+//
+// Using the Forms button logs the same kind of event with the chosen form added:
+//   { word: "go", form: "went", time, mode: "model" | "learner", prompt? }
+// (word = the word that was tapped on the board; form = the form that was chosen.)
 export const events = [];
 
-export function logWord(word, mode, prompt) {
+export function logWord(word, mode, prompt, extra) {
   const e = { word, time: Date.now(), mode };
+  if (extra) Object.assign(e, extra);
   if (prompt) e.prompt = { ...prompt };
   events.push(e);
 }

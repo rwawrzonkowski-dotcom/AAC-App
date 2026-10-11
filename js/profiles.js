@@ -27,7 +27,10 @@
 //     model: {                          // what Model mode shows (adult menu > Model prompt)
 //       style: "ring", ringOpacity: 100, critterOpacity: 100,   // see js/critters.js
 //       animal, color, accessory, size, arrival
-//     }
+//     },
+//     wordsButton: "auto",              // the top-bar Words (and Forms) buttons: "auto" (from stage 3),
+//                                       // "always" or "never"  (adult menu > Vocabulary stage)
+//     wordsOnly: false,                 // reading stage: no pictures at all, only large words
 //   }
 // Cell keys are "<page>:<row>,<col>" (+ "@84" on the 84 board). Positions are
 // permanent, so a key always means the same place on the board. See js/migrate.js
@@ -52,6 +55,8 @@ const photos = new Map(); // photoKey -> { blob, url } for the CURRENT learner o
 
 function newId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
+export const WORDS_BUTTON_CHOICES = ["auto", "always", "never"];
+
 export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1 };
 
 function makeProfile(name, stage = 1, voice = CHILD_VOICE) {
@@ -59,6 +64,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE) {
     id: newId(), name, created: Date.now(), v: CURRENT_PROFILE_VERSION, stage, gridSize: 45,
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
+    wordsButton: "auto", wordsOnly: false,
   };
 }
 
@@ -110,6 +116,11 @@ export async function initProfiles(board) {
   for (const p of profiles) p.touch = { ...DEFAULT_TOUCH, ...(p.touch || {}) };
   // Learners saved before the model critter existed get the defaults (ring only, 100%).
   for (const p of profiles) p.model = cleanModel(p.model);
+  // Learners saved before the Words pages (Phase 1.6B): Words button on Auto, pictures on.
+  for (const p of profiles) {
+    if (!WORDS_BUTTON_CHOICES.includes(p.wordsButton)) p.wordsButton = "auto";
+    p.wordsOnly = p.wordsOnly === true;
+  }
   for (const p of profiles) await upgradeProfile(p, board);
 
   if (profiles.length === 0) {
@@ -229,7 +240,8 @@ export async function getPhotoBlobs(profileId) {
 
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
-// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, notices, photos: [{ key, blob }] }
+// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
+//            notices, photos: [{ key, blob }] }
 // Returns the saved profile.
 export async function importLearner(data, replaceId = null) {
   let p = replaceId ? profiles.find((x) => x.id === replaceId) : null;
@@ -243,6 +255,7 @@ export async function importLearner(data, replaceId = null) {
     p.voice = data.voice;
     p.touch = data.touch;
     p.model = data.model;
+    p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     await db.delPrefix("photos", p.id + "|");
   } else {
     p = makeProfile(data.name, data.stage, data.voice);
@@ -251,6 +264,7 @@ export async function importLearner(data, replaceId = null) {
     p.notices = data.notices || [];
     p.touch = data.touch;
     p.model = data.model;
+    p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     profiles.push(p);
   }
   await saveProfile(p);

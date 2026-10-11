@@ -29,6 +29,10 @@
         <!-- Whose board this is (small and subtle) -->
         <span id="learner-name"></span>
       </div>
+      <!-- Words opens the Words pages (reads "Close" while one is open); Forms opens the forms of the
+           last word (go: went, going...). Both are hidden unless the learner's "Show Words button" allows. -->
+      <button id="words-btn" class="bar-btn" type="button" hidden>Words</button>
+      <button id="forms-btn" class="bar-btn" type="button" hidden disabled>Forms</button>
       <button id="delete-btn" class="bar-btn" type="button">&#x232B; Delete</button>
       <button id="clear-btn" class="bar-btn" type="button">&#x2715; Clear</button>
     </header>
@@ -52,6 +56,7 @@
     <!-- Edit mode banner: covers the message bar only, so no cell moves -->
     <div id="edit-banner" hidden>
       <span>Editing &mdash; tap any button to change it</span>
+      <button id="edit-words" type="button" hidden>Words</button>
       <button id="edit-done" type="button">Done</button>
     </div>
   </main>

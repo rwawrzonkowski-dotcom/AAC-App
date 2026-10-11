@@ -164,7 +164,36 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         },
         h("span", { class: "stage-title", text: "Stage " + n }),
         h("span", { class: "stage-note", text: note[n] + ":" }),
-        h("span", { class: "stage-words", text: wordsFor(n) })))));
+        h("span", { class: "stage-words", text: wordsFor(n) })))),
+      wordsButtonSetting(cur),
+      wordsOnlySetting(cur));
+  }
+
+  // The top-bar Words button (and the Forms button next to it): Auto shows them from stage 3.
+  function wordsButtonSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (cur.wordsButton === value ? " on" : ""), id: `wordsbtn-${value}`, text,
+      onclick: async () => { cur.wordsButton = value; await saveProfile(cur); onVocabChanged(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-words-button" },
+      h("label", { text: "Show Words button" }),
+      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("p", { class: "muted", text: "The Words button in the top bar opens pages of little words, actions, describing words, time, colors, " +
+        "numbers, clothes, outside words and things (every Dolch sight word is on them, at most 3 taps away). " +
+        "The Forms button next to it shows other forms of the last word (go: went, going...). " +
+        "Both follow this setting. Words on these pages never move." }));
+  }
+
+  // Reading stage: take away every picture so the learner reads the words.
+  function wordsOnlySetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (!!cur.wordsOnly === value ? " on" : ""), id: `wordsonly-${value ? "on" : "off"}`, text,
+      onclick: async () => { cur.wordsOnly = value; await saveProfile(cur); onVocabChanged(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-words-only" },
+      h("label", { text: "Show words only (no pictures)" }),
+      h("div", { class: "seg-row touch-seg" }, btn(false, "Off"), btn(true, "On")),
+      h("p", { class: "muted", text: "Reading stage: hides pictures so the learner reads the words." }));
   }
 
   // ---------- Edit / Model ----------
