@@ -2,7 +2,7 @@
 //
 // A profile looks like this:
 //   {
-//     id, name, created, v: 2,
+//     id, name, created, v: 3,
 //     stage: 1..4,                      // how many core words are revealed
 //     gridSize: 45 | 84,                // which board this learner uses
 //     words: {                          // changes to BUILT-IN words, by word id.
@@ -16,7 +16,9 @@
 //     pages: {                          // pages an adult made (opened by a "opens" cell above)
 //       "x3k9a": { size: 45, name: "Trains", parent: "favorites", at: {row, col}, depth: 2 },
 //     },
-//     pins: {},                         // set only by the upgrade code (js/migrate.js)
+//     pins: {},                         // no longer used (always empty; kept so old backups still read)
+//     notices: ["..."],                 // plain-language notes for the adult (shown in the adult
+//                                       // menu until dismissed), e.g. a word that was moved by an upgrade
 //     voice: { voiceURI: "", pitch: 1.5, rate: 1.05 },
 //     touch: {                          // touch supports (adult menu > Touch)
 //       holdOn: false, holdSec: 0.5,    // hold to select
@@ -38,7 +40,7 @@
 // Only tiny things (which learner is current) go in localStorage.
 import * as db from "./db.js";
 import { load, save, remove } from "./storage.js";
-import { migrateCells, mapLegacyKey } from "./migrate.js";
+import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION } from "./migrate.js";
 import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05 };
@@ -54,8 +56,8 @@ export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ign
 
 function makeProfile(name, stage = 1, voice = CHILD_VOICE) {
   return {
-    id: newId(), name, created: Date.now(), v: 2, stage, gridSize: 45,
-    words: {}, cells: {}, pages: {}, pins: {},
+    id: newId(), name, created: Date.now(), v: CURRENT_PROFILE_VERSION, stage, gridSize: 45,
+    words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
   };
 }
@@ -78,7 +80,25 @@ async function upgradeProfile(p, board) {
     p.gridSize = 45; p.v = 2;
     await saveProfile(p);
   }
+  if (p.v < 3) {
+    // Version 2 -> 3 (Phase 1.6): category pages were reorganized into row groups. Words the adult
+    // ADDED to a cell that a built-in word now needs are kept and moved (see js/migrate.js).
+    const r = relocateAdultWords(board, p.cells, p.pages);
+    p.cells = r.cells; p.pages = r.pages; p.pins = {};
+    const map = moveMap(r.moves);
+    if (Object.keys(map).length) {
+      const prefix = p.id + "|";
+      for (const row of await db.getPrefix("photos", prefix)) {          // their photos move with them
+        const to = map[row.key.slice(prefix.length)];
+        if (to) { await db.put("photos", prefix + to, row.value); await db.del("photos", row.key); }
+      }
+    }
+    p.notices = [...(p.notices || []), ...describeMoves(r.moves)];
+    p.v = CURRENT_PROFILE_VERSION;
+    await saveProfile(p);
+  }
   p.words = p.words || {}; p.cells = p.cells || {}; p.pages = p.pages || {}; p.pins = p.pins || {};
+  p.notices = Array.isArray(p.notices) ? p.notices : [];
   p.gridSize = Number(p.gridSize) === 84 ? 84 : 45;
 }
 
@@ -209,7 +229,7 @@ export async function getPhotoBlobs(profileId) {
 
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
-// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, photos: [{ key, blob }] }
+// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, notices, photos: [{ key, blob }] }
 // Returns the saved profile.
 export async function importLearner(data, replaceId = null) {
   let p = replaceId ? profiles.find((x) => x.id === replaceId) : null;
@@ -218,6 +238,8 @@ export async function importLearner(data, replaceId = null) {
     p.stage = data.stage;
     p.gridSize = data.gridSize;
     p.words = data.words; p.cells = data.cells; p.pages = data.pages; p.pins = data.pins;
+    p.notices = data.notices || [];
+    p.v = CURRENT_PROFILE_VERSION;
     p.voice = data.voice;
     p.touch = data.touch;
     p.model = data.model;
@@ -226,6 +248,7 @@ export async function importLearner(data, replaceId = null) {
     p = makeProfile(data.name, data.stage, data.voice);
     p.gridSize = data.gridSize;
     p.words = data.words; p.cells = data.cells; p.pages = data.pages; p.pins = data.pins;
+    p.notices = data.notices || [];
     p.touch = data.touch;
     p.model = data.model;
     profiles.push(p);

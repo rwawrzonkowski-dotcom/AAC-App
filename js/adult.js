@@ -44,11 +44,29 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
   function refresh() {
     const top = body.scrollTop;
     stopVoiceListener();
-    body.replaceChildren(learnerSection(), sizeSection(), stageSection(), actionSection(),
+    body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
       modelSection({ refresh, closeMenu: close, onPreviewPrompt }), voiceSection(),
       touchSection(), backupSection(),
-      h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close }));
+      h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
     body.scrollTop = top;
+  }
+
+  // ---------- Notes about changes (only shown when there is something to tell the adult) ----------
+  // For example: after an upgrade moved a word the adult had added (see js/migrate.js).
+  function noticeSection() {
+    const cur = getCurrent();
+    if (!cur.notices || !cur.notices.length) return null;
+    return h("section", { class: "panel notice", id: "sec-notice" },
+      h("h2", { text: "Notes about " + cur.name + "'s board" }),
+      h("p", { class: "muted", text: "The category pages were reorganized into rows of related words. These words that you added " +
+        "sat where a built-in word now lives, so they were kept and moved to a free spot:" }),
+      h("ul", { class: "notice-list" }, cur.notices.map((t) => h("li", { text: t }))),
+      h("div", { class: "btn-row left" },
+        h("button", { type: "button", class: "btn", id: "notice-ok", text: "Got it", onclick: async () => {
+          cur.notices = [];
+          await saveProfile(cur);
+          refresh();
+        } })));
   }
 
   // ---------- Learner ----------
@@ -132,7 +150,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const note = { 1: "Starting words", 2: "Adds", 3: "Adds", 4: "Adds" };
     return h("section", { class: "panel", id: "sec-stage" },
       h("h2", { text: "Vocabulary stage" }),
-      h("p", { class: "muted", text: "Each stage reveals more words in their permanent spots. Nothing moves." }),
+      h("p", { class: "muted", text: "Each stage reveals more words in their permanent spots. Nothing moves. " +
+        "On the category pages the original words always show; the newer words on them appear from stage 3 (or use Always show on a word)." }),
       h("div", { class: "stage-grid" }, [1, 2, 3, 4].map((n) =>
         h("button", {
           type: "button", class: "stage-btn" + (cur.stage === n ? " on" : ""), "data-stage": n,

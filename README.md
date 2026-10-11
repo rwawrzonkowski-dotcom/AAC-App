@@ -1,4 +1,4 @@
-# AAC Board (Phase 1.5B)
+# AAC Board (Phase 1.6A)
 
 A free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
@@ -21,21 +21,31 @@ A free, offline communication board for children who are new to AAC
   it speaks, is added to the message bar, and the board returns to the main page.
   The orange **Back** button (left arrow) sits in the same spot the button that
   opened the page has. **Back goes up one level.**
-  - Page items fill the page left to right, top to bottom from the top-left,
-    skipping the Back cell, in the same order on both board sizes. Pages are the same
-    size as the learner's board (9 x 5 or 12 x 7).
-  - **Chat** (both sizes): hi, bye, my turn, your turn, sorry, how are you?,
-    I need a break, look at me, please, thank you, good morning, good job. Each speaks
-    its whole phrase.
+  - **Row groups.** Every category page is organized as rows of related words (for example
+    Food: Snacks, Fruit, Meals, Breakfast, Veggies and extras). A word keeps the **same row and
+    the same column on both board sizes**: the 45 board uses columns 1-9 of a row, and the 84
+    board adds a few more words in columns 10-12 of that same row. The Back button sits where
+    the button that opened the page sits; when it falls inside a word row on the 45 board
+    (Food and Chat), that column is left empty on both sizes. On the 84 board the two bottom
+    rows of every page are left empty for your own words.
+  - **Newer words appear from stage 3.** The original starter items of each page (for
+    example cracker, apple, banana ... on Food) show whenever the page is open; the newer words
+    in the rows show from stage 3 (or when you choose Always show on one). Nothing moves.
+  - **Chat** (both sizes): Greetings, Turns and play, Comments, Manners and protest, Help.
+    Each speaks its whole phrase ("I don't know" has the short label "don't know").
+  - **Feelings** (feelings, body needs, body parts) and **Animals** (pets and farm, wild,
+    small, more) are main-grid buttons on the 84 board. On the 45 board they are reached from
+    a page: Chat > Feelings and Play > Animals (three taps to a word; the Back button goes up
+    one level; "Make this a page" is not offered there).
   - **About me**: sentence buttons with a blank an adult fills in ("My name is ___",
-    "I am ___ years old", "I go to ___", "My mom is ___", "My dad is ___", "I use this
-    device to talk", "I am allergic to ___", "Emergency contact: ___"). A button whose
-    blank is empty stays a hidden gray tile until an adult fills it in (Edit board >
-    tap it > **Fill in**). It then speaks the whole sentence. On the 45 board it is
-    reached from the People page (People > About me, three taps); on the 84 board it
-    is a main-grid button (two taps). There is no home-address button, and the
-    emergency-contact field shows a privacy reminder.
-  - **Feelings** and **Animals** are on the 84 board only (the 45 board is full).
+    "I am ___ years old", "I go to ___", "My mom is ___", "My dad is ___", "I love ___",
+    "My birthday is ___", "My pet is ___", "My brother is ___", "My sister is ___", "My teacher is ___",
+    "I am allergic to ___", "Emergency contact: ___") plus two fixed sentences ("I use this device
+    to talk", "Please give me time to answer"). A button whose blank is empty stays a hidden gray
+    tile until an adult fills it in (Edit board > tap it > **Fill in**). On the 45 board it is
+    reached from the People page (People > About me, three taps); on the 84 board it is a
+    main-grid button (two taps). There is no home-address button, and the emergency-contact
+    field shows a privacy reminder.
   - **Places** includes "here" (it used to be on the main board).
 - Several learners can share one iPad. Each has their own stage, hidden/shown
   words, renamed words, photos, added words and voice settings.
@@ -67,7 +77,10 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
 - **Edit board:** see every button (hidden ones faded with a dashed outline) on the
   page you are on. Tap any button to change it: Follow stage / Always show / Always hide,
   label, spoken text, and a photo (take or choose one; it is shrunk and kept on the
-  device). Tap an **empty** cell to add a word there (this is how Favorites is filled);
+  device). A large **speaker button** ("Hear it") beside the Label, Spoken text, Fill in and
+  page name fields says the text you have typed so far, exactly as the board would (this learner's
+  voice, pitch and speed). It does not save anything, does not touch the message bar and is not
+  recorded. Tap an **empty** cell to add a word there (this is how Favorites is filled);
   it keeps that spot forever. There is no way to move a word. Tap **Done** to leave.
   In Edit mode, tap a category button and choose "Open this page" to edit its page.
   - **Make this a page** (up to three taps deep). When you add a button to an empty cell
@@ -147,10 +160,15 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
 - **Upgrading older learners.** Before Phase 1.5A everything was stored by position,
   and "here" sat where "Chat" now sits. On first start, old data is re-keyed: whatever
   belonged to "here" (rename, show/hide, photo) moves with "here" to the Places page and
-  nothing carries onto Chat. (If an adult had put their own word in the Places or People
-  cell where "here" or "About me" now go, that word stays put and the built-in button is
-  placed in the next free cell for that learner.) The same upgrade is applied to old
-  backup files. Code: `js/migrate.js`.
+  nothing carries onto Chat. The same upgrade is applied to old backup files.
+- **Phase 1.6 reorganized every category page into row groups.** Built-in words moved, and
+  their renames, photos and show/hide choices moved with them (they are stored by word id).
+  Where an adult had added a word to a cell that a built-in word now needs, **the adult's
+  word is kept** and moved to the first free cell of the same page (on the 84 board the two
+  bottom rows first). The 45 Food page is completely full, so such a word goes to the first free
+  cell of Favorites instead. A page button you made moves with its page, and photos move too. A note listing
+  every moved word appears at the top of the adult menu until you tap **Got it**. Backups made
+  before this phase are upgraded the same way when restored. Code: `js/migrate.js`.
 
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.
@@ -161,7 +179,8 @@ Make sure the iPad is not on silent mode and the volume is up.
 
 ## Files
 - `data/core-board.json` the word map: every word (type, stage, picture), the 45 and 84
-  main grids written out row by row, and the pages with their items in order. Positions are permanent.
+  main grids written out row by row, and the category pages as row groups ("words" in columns
+  1-9, "adds" in columns 10-12 on the 84 board). Positions are permanent.
 - `js/boardmodel.js` works out which word is in which cell for a grid size and a learner;
   `js/boarddata.js` loads the word map; `js/migrate.js` upgrades older learner data.
 - `js/app.js` ties it together (pages, taps, edit and model modes).

@@ -4,9 +4,14 @@
 // MOTOR PLANNING: on a given grid size a word's (row, col) is permanent. The
 // layouts live in data/core-board.json:
 //   - the main grid is written out row by row ("layouts" > "45" / "84" > "main")
-//   - a page's items are listed in order; they fill the page left to right, top
-//     to bottom from the top-left, skipping the Back cell. Adding an item to the
-//     END of a page's list therefore never moves the items before it.
+//   - a category page is written as ROW GROUPS ("groups"). Each group is one row:
+//       "words"  fill columns 0-8 of that row, in order (the 45 board's words);
+//       "adds"   fill columns 9-11 of the same row (the 84 board only).
+//     So a word has the SAME row and column on both sizes. When the page's Back
+//     button sits in a group's row on the 45 board, that Back column is skipped
+//     on BOTH sizes, so the words after it do not differ between sizes.
+//   - a page with no groups (Favorites) lists "items" that fill the page left to
+//     right, top to bottom, skipping the Back cell.
 //
 // Two grid sizes exist: 45 (9 columns x 5 rows) and 84 (12 x 7). Each learner uses one.
 
@@ -42,15 +47,17 @@ export function buildModel(board, size) {
   const main = [];
   geo.main.forEach((rowIds, row) => rowIds.forEach((id, col) => main.push({ ...word(id), row, col })));
 
-  // Which pages exist on this size, and the items on each (filtered by "sizes")
+  // Which pages exist on this size, and the items on each (filtered by "sizes").
+  // A word entry is "id" or { id, sizes: [45] }.
   const onSize = (o) => !o.sizes || o.sizes.includes(size);
+  const asEntry = (it) => (typeof it === "string" ? { id: it } : it);
   const defs = {};
   for (const [pid, p] of Object.entries(board.pages)) {
     if (!onSize(p)) continue;
-    defs[pid] = {
-      id: pid, name: p.name,
-      itemIds: p.items.map((it) => (typeof it === "string" ? { id: it } : it)).filter(onSize).map((it) => it.id),
-    };
+    const ids = p.groups
+      ? p.groups.flatMap((g) => [...g.words.map(asEntry).filter(onSize), ...(size === 84 ? (g.adds || []).map(asEntry) : [])]).map((e) => e.id)
+      : (p.items || []).map(asEntry).filter(onSize).map((e) => e.id);
+    defs[pid] = { id: pid, name: p.name, groups: p.groups || null, starter: p.starter || [], items: p.items || [], itemIds: ids };
   }
 
   // Where is each page opened from? (the main grid, or an item on another page)
@@ -85,12 +92,32 @@ export function buildModel(board, size) {
       }
     }
     const items = [];
-    let i = 0;
-    for (let r = 0; r < rows && i < d.itemIds.length; r++) {
-      for (let c = 0; c < cols && i < d.itemIds.length; c++) {
-        if (at && at.row === r && at.col === c) continue;   // the Back cell
-        items.push({ ...word(d.itemIds[i]), row: r, col: c });
-        i++;
+    if (d.groups) {
+      // The 45 board's Back cell decides which column a group row skips, on BOTH sizes.
+      const back45 = size === 45 ? at : ((buildModel(board, 45).pages[pid] || {}).at || null);
+      const starter = new Set(d.starter);
+      const NEW_STAGE = board.pageNewWordStage || 3;
+      // pageStage: from which stage the word shows on this page (original items: always)
+      const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: starter.has(e.id) ? 1 : NEW_STAGE });
+      for (const g of d.groups) {
+        const skip = back45 && back45.row === g.row ? back45.col : -1;
+        let col = 0;
+        for (const e of g.words.map(asEntry)) {
+          if (col === skip) col++;
+          if (col >= 9) throw new Error(`Page ${pid}: group row ${g.row} has too many words`);
+          if (onSize(e)) put(e, g.row, col);
+          col++;
+        }
+        if (size === 84) (g.adds || []).map(asEntry).forEach((e, i) => put(e, g.row, 9 + i));
+      }
+    } else {
+      let i = 0;
+      for (let r = 0; r < rows && i < d.itemIds.length; r++) {
+        for (let c = 0; c < cols && i < d.itemIds.length; c++) {
+          if (at && at.row === r && at.col === c) continue;   // the Back cell
+          items.push({ ...word(d.itemIds[i]), row: r, col: c });
+          i++;
+        }
       }
     }
     pages[pid] = { id: pid, name: d.name, parent, at, depth, items, builtin: true };
@@ -99,7 +126,7 @@ export function buildModel(board, size) {
   for (const pid of Object.keys(defs)) if (openerOf[pid]) layout(pid);   // pages nobody opens are not reachable
 
   const model = { size, cols, rows, main, pages, word };
-  models.set(board, { ...(cached || {}), [size]: model });
+  models.set(board, { ...(models.get(board) || {}), [size]: model });   // (the 45 model may have been built meanwhile)
   return model;
 }
 
@@ -141,11 +168,7 @@ export function pathToCore(model, profile, pageId) {
 export function resolvePage(page, profile, model) {
   const { cols, rows, size } = model;
   const byPos = new Map();
-  for (const it of page.items) {
-    const pin = profile.pins && profile.pins[`${size}:${page.id}:${it.id}`];   // set only by migration (see js/migrate.js)
-    const r = pin ? pin[0] : it.row, c = pin ? pin[1] : it.col;
-    byPos.set(r + "," + c, it);
-  }
+  for (const it of page.items) byPos.set(it.row + "," + it.col, it);
   const cells = [];
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
@@ -159,7 +182,10 @@ export function resolvePage(page, profile, model) {
         d.visible = true;
       } else if (base) {
         const ov = profile.words[base.id] || {};
-        const stageGated = page.id === "core";
+        // Stage rule. Main board: the word's own stage. Category pages: the page's original items
+        // always show; newer words show from stage 3 (pageStage, see layout above). Favorites: always.
+        const needStage = page.id === "core" ? base.stage : base.pageStage;
+        const stageGated = needStage !== undefined;
         d.kind = "word";
         d.base = base;
         d.wordId = base.id;
@@ -179,9 +205,9 @@ export function resolvePage(page, profile, model) {
         } else {
           d.spoken = ov.spoken ?? base.spokenText ?? d.label;
         }
-        // Main grid: stage rule. Pages: always visible (the page can only be opened
-        // when its button is visible). A blank sentence stays hidden until filled in.
-        d.defaultVisible = stageGated ? base.stage <= profile.stage : true;
+        // (A page can only be opened when its own button is visible.) A blank sentence stays
+        // hidden until it is filled in.
+        d.defaultVisible = stageGated ? needStage <= profile.stage : true;
         d.visible = (ov.show ?? d.defaultVisible) && !(d.blank && !d.fill);
       } else if (custom && custom.custom && custom.label) {
         d.kind = "word";                              // something the adult added

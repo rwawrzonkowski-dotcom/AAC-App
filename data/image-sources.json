@@ -874,5 +874,1655 @@
   "source": "Mulberry",
   "originalName": "rabbit",
   "license": "CC BY-SA 4.0"
+ },
+ "popcorn": {
+  "file": "images/symbols/popcorn.svg",
+  "source": "OpenMoji",
+  "originalName": "1F37F popcorn",
+  "license": "CC BY-SA 4.0"
+ },
+ "pretzel": {
+  "file": "images/symbols/pretzel.svg",
+  "source": "Mulberry",
+  "originalName": "pretzel",
+  "license": "CC BY-SA 4.0"
+ },
+ "fruit-snacks": {
+  "file": "images/symbols/fruit-snacks.svg",
+  "source": "Mulberry",
+  "originalName": "jelly_beans",
+  "license": "CC BY-SA 4.0"
+ },
+ "granola-bar": {
+  "file": "images/symbols/granola-bar.svg",
+  "source": "Mulberry",
+  "originalName": "chocolate_bar",
+  "license": "CC BY-SA 4.0"
+ },
+ "yogurt": {
+  "file": "images/symbols/yogurt.svg",
+  "source": "Mulberry",
+  "originalName": "yogurt",
+  "license": "CC BY-SA 4.0"
+ },
+ "candy": {
+  "file": "images/symbols/candy.svg",
+  "source": "OpenMoji",
+  "originalName": "1F36C candy",
+  "license": "CC BY-SA 4.0"
+ },
+ "ice-cream": {
+  "file": "images/symbols/ice-cream.svg",
+  "source": "Mulberry",
+  "originalName": "ice_cream",
+  "license": "CC BY-SA 4.0"
+ },
+ "cake": {
+  "file": "images/symbols/cake.svg",
+  "source": "Mulberry",
+  "originalName": "cake",
+  "license": "CC BY-SA 4.0"
+ },
+ "grapes": {
+  "file": "images/symbols/grapes.svg",
+  "source": "Mulberry",
+  "originalName": "grapes",
+  "license": "CC BY-SA 4.0"
+ },
+ "strawberry": {
+  "file": "images/symbols/strawberry.svg",
+  "source": "Mulberry",
+  "originalName": "strawberry",
+  "license": "CC BY-SA 4.0"
+ },
+ "orange": {
+  "file": "images/symbols/orange.svg",
+  "source": "Mulberry",
+  "originalName": "orange",
+  "license": "CC BY-SA 4.0"
+ },
+ "watermelon": {
+  "file": "images/symbols/watermelon.svg",
+  "source": "Mulberry",
+  "originalName": "watermelon",
+  "license": "CC BY-SA 4.0"
+ },
+ "blueberries": {
+  "file": "images/symbols/blueberries.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAD0 blueberries",
+  "license": "CC BY-SA 4.0"
+ },
+ "applesauce": {
+  "file": "images/symbols/applesauce.svg",
+  "source": "Mulberry",
+  "originalName": "sauce_apple",
+  "license": "CC BY-SA 4.0"
+ },
+ "pear": {
+  "file": "images/symbols/pear.svg",
+  "source": "Mulberry",
+  "originalName": "pear",
+  "license": "CC BY-SA 4.0"
+ },
+ "peach": {
+  "file": "images/symbols/peach.svg",
+  "source": "Mulberry",
+  "originalName": "peach",
+  "license": "CC BY-SA 4.0"
+ },
+ "pineapple": {
+  "file": "images/symbols/pineapple.svg",
+  "source": "Mulberry",
+  "originalName": "pineapple",
+  "license": "CC BY-SA 4.0"
+ },
+ "mango": {
+  "file": "images/symbols/mango.svg",
+  "source": "Mulberry",
+  "originalName": "mango",
+  "license": "CC BY-SA 4.0"
+ },
+ "chicken-nuggets": {
+  "file": "images/symbols/chicken-nuggets.svg",
+  "source": "Mulberry",
+  "originalName": "chicken_nuggets",
+  "license": "CC BY-SA 4.0"
+ },
+ "mac-and-cheese": {
+  "file": "images/symbols/mac-and-cheese.svg",
+  "source": "Mulberry",
+  "originalName": "macaroni_cheese",
+  "license": "CC BY-SA 4.0"
+ },
+ "hot-dog": {
+  "file": "images/symbols/hot-dog.svg",
+  "source": "Mulberry",
+  "originalName": "hot_dog",
+  "license": "CC BY-SA 4.0"
+ },
+ "pasta": {
+  "file": "images/symbols/pasta.svg",
+  "source": "Mulberry",
+  "originalName": "pasta",
+  "license": "CC BY-SA 4.0"
+ },
+ "rice": {
+  "file": "images/symbols/rice.svg",
+  "source": "Mulberry",
+  "originalName": "rice",
+  "license": "CC BY-SA 4.0"
+ },
+ "french-fries": {
+  "file": "images/symbols/french-fries.svg",
+  "source": "Mulberry",
+  "originalName": "chips",
+  "license": "CC BY-SA 4.0"
+ },
+ "hamburger": {
+  "file": "images/symbols/hamburger.svg",
+  "source": "Mulberry",
+  "originalName": "hamburger",
+  "license": "CC BY-SA 4.0"
+ },
+ "taco": {
+  "file": "images/symbols/taco.svg",
+  "source": "OpenMoji",
+  "originalName": "1F32E taco",
+  "license": "CC BY-SA 4.0"
+ },
+ "soup": {
+  "file": "images/symbols/soup.svg",
+  "source": "Mulberry",
+  "originalName": "soup",
+  "license": "CC BY-SA 4.0"
+ },
+ "quesadilla": {
+  "file": "images/symbols/quesadilla.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAD3 flatbread",
+  "license": "CC BY-SA 4.0"
+ },
+ "cereal": {
+  "file": "images/symbols/cereal.svg",
+  "source": "Mulberry",
+  "originalName": "cereal_bowl",
+  "license": "CC BY-SA 4.0"
+ },
+ "waffle": {
+  "file": "images/symbols/waffle.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9C7 waffle",
+  "license": "CC BY-SA 4.0"
+ },
+ "pancake": {
+  "file": "images/symbols/pancake.svg",
+  "source": "Mulberry",
+  "originalName": "pancakes",
+  "license": "CC BY-SA 4.0"
+ },
+ "toast": {
+  "file": "images/symbols/toast.svg",
+  "source": "Mulberry",
+  "originalName": "toast",
+  "license": "CC BY-SA 4.0"
+ },
+ "eggs": {
+  "file": "images/symbols/eggs.svg",
+  "source": "Mulberry",
+  "originalName": "eggs",
+  "license": "CC BY-SA 4.0"
+ },
+ "oatmeal": {
+  "file": "images/symbols/oatmeal.svg",
+  "source": "Mulberry",
+  "originalName": "porridge",
+  "license": "CC BY-SA 4.0"
+ },
+ "bacon": {
+  "file": "images/symbols/bacon.svg",
+  "source": "Mulberry",
+  "originalName": "bacon",
+  "license": "CC BY-SA 4.0"
+ },
+ "muffin": {
+  "file": "images/symbols/muffin.svg",
+  "source": "Mulberry",
+  "originalName": "cake_cup_cake",
+  "license": "CC BY-SA 4.0"
+ },
+ "bagel": {
+  "file": "images/symbols/bagel.svg",
+  "source": "Mulberry",
+  "originalName": "bagel",
+  "license": "CC BY-SA 4.0"
+ },
+ "sausage": {
+  "file": "images/symbols/sausage.svg",
+  "source": "Mulberry",
+  "originalName": "sausages",
+  "license": "CC BY-SA 4.0"
+ },
+ "peanut-butter": {
+  "file": "images/symbols/peanut-butter.svg",
+  "source": "Mulberry",
+  "originalName": "peanut_butter",
+  "license": "CC BY-SA 4.0"
+ },
+ "jelly": {
+  "file": "images/symbols/jelly.svg",
+  "source": "Mulberry",
+  "originalName": "jam",
+  "license": "CC BY-SA 4.0"
+ },
+ "carrots": {
+  "file": "images/symbols/carrots.svg",
+  "source": "Mulberry",
+  "originalName": "carrot",
+  "license": "CC BY-SA 4.0"
+ },
+ "broccoli": {
+  "file": "images/symbols/broccoli.svg",
+  "source": "Mulberry",
+  "originalName": "broccoli",
+  "license": "CC BY-SA 4.0"
+ },
+ "corn": {
+  "file": "images/symbols/corn.svg",
+  "source": "Mulberry",
+  "originalName": "sweetcorn",
+  "license": "CC BY-SA 4.0"
+ },
+ "peas": {
+  "file": "images/symbols/peas.svg",
+  "source": "Mulberry",
+  "originalName": "peas",
+  "license": "CC BY-SA 4.0"
+ },
+ "green-beans": {
+  "file": "images/symbols/green-beans.svg",
+  "source": "Mulberry",
+  "originalName": "green_beans",
+  "license": "CC BY-SA 4.0"
+ },
+ "salad": {
+  "file": "images/symbols/salad.svg",
+  "source": "Mulberry",
+  "originalName": "salad",
+  "license": "CC BY-SA 4.0"
+ },
+ "ketchup": {
+  "file": "images/symbols/ketchup.svg",
+  "source": "Mulberry",
+  "originalName": "sauce_tomato",
+  "license": "CC BY-SA 4.0"
+ },
+ "ranch": {
+  "file": "images/symbols/ranch.svg",
+  "source": "Mulberry",
+  "originalName": "sauce_brown",
+  "license": "CC BY-SA 4.0"
+ },
+ "butter": {
+  "file": "images/symbols/butter.svg",
+  "source": "Mulberry",
+  "originalName": "butter",
+  "license": "CC BY-SA 4.0"
+ },
+ "syrup": {
+  "file": "images/symbols/syrup.svg",
+  "source": "OpenMoji",
+  "originalName": "1F36F honey pot",
+  "license": "CC BY-SA 4.0"
+ },
+ "salt": {
+  "file": "images/symbols/salt.svg",
+  "source": "Mulberry",
+  "originalName": "salt",
+  "license": "CC BY-SA 4.0"
+ },
+ "chocolate-milk": {
+  "file": "images/symbols/chocolate-milk.svg",
+  "source": "Mulberry",
+  "originalName": "milkshake_chocolate",
+  "license": "CC BY-SA 4.0"
+ },
+ "apple-juice": {
+  "file": "images/symbols/apple-juice.svg",
+  "source": "Mulberry",
+  "originalName": "apple_juice",
+  "license": "CC BY-SA 4.0"
+ },
+ "orange-juice": {
+  "file": "images/symbols/orange-juice.svg",
+  "source": "Mulberry",
+  "originalName": "orange_juice",
+  "license": "CC BY-SA 4.0"
+ },
+ "lemonade": {
+  "file": "images/symbols/lemonade.svg",
+  "source": "Mulberry",
+  "originalName": "lemonade",
+  "license": "CC BY-SA 4.0"
+ },
+ "smoothie": {
+  "file": "images/symbols/smoothie.svg",
+  "source": "Mulberry",
+  "originalName": "milkshake_banana",
+  "license": "CC BY-SA 4.0"
+ },
+ "hot-chocolate": {
+  "file": "images/symbols/hot-chocolate.svg",
+  "source": "Mulberry",
+  "originalName": "hot_chocolate",
+  "license": "CC BY-SA 4.0"
+ },
+ "tea": {
+  "file": "images/symbols/tea.svg",
+  "source": "Mulberry",
+  "originalName": "tea",
+  "license": "CC BY-SA 4.0"
+ },
+ "sports-drink": {
+  "file": "images/symbols/sports-drink.svg",
+  "source": "Mulberry",
+  "originalName": "orange_fizzy_drink",
+  "license": "CC BY-SA 4.0"
+ },
+ "soda": {
+  "file": "images/symbols/soda.svg",
+  "source": "OpenMoji",
+  "originalName": "1F964 cup with straw",
+  "license": "CC BY-SA 4.0"
+ },
+ "cup": {
+  "file": "images/symbols/cup.svg",
+  "source": "Mulberry",
+  "originalName": "mug_2",
+  "license": "CC BY-SA 4.0"
+ },
+ "bottle": {
+  "file": "images/symbols/bottle.svg",
+  "source": "OpenMoji",
+  "originalName": "E0CC plastic bottle",
+  "license": "CC BY-SA 4.0"
+ },
+ "straw": {
+  "file": "images/symbols/straw.svg",
+  "source": "Mulberry",
+  "originalName": "straw",
+  "license": "CC BY-SA 4.0"
+ },
+ "ice": {
+  "file": "images/symbols/ice.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9CA ice",
+  "license": "CC BY-SA 4.0"
+ },
+ "spill": {
+  "file": "images/symbols/spill.svg",
+  "source": "Mulberry",
+  "originalName": "spill_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "refill": {
+  "file": "images/symbols/refill.svg",
+  "source": "Mulberry",
+  "originalName": "fill_2_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "lid": {
+  "file": "images/symbols/lid.svg",
+  "source": "Mulberry",
+  "originalName": "lid",
+  "license": "CC BY-SA 4.0"
+ },
+ "sippy-cup": {
+  "file": "images/symbols/sippy-cup.svg",
+  "source": "Mulberry",
+  "originalName": "cup_non_spill",
+  "license": "CC BY-SA 4.0"
+ },
+ "warm": {
+  "file": "images/symbols/warm.svg",
+  "source": "OpenMoji",
+  "originalName": "1F31E sun with face",
+  "license": "CC BY-SA 4.0"
+ },
+ "puzzle": {
+  "file": "images/symbols/puzzle.svg",
+  "source": "Mulberry",
+  "originalName": "jigsaw_puzzle",
+  "license": "CC BY-SA 4.0"
+ },
+ "cars": {
+  "file": "images/symbols/cars.svg",
+  "source": "Mulberry",
+  "originalName": "toy_car",
+  "license": "CC BY-SA 4.0"
+ },
+ "train": {
+  "file": "images/symbols/train.svg",
+  "source": "OpenMoji",
+  "originalName": "1F682 locomotive",
+  "license": "CC BY-SA 4.0"
+ },
+ "doll": {
+  "file": "images/symbols/doll.svg",
+  "source": "Mulberry",
+  "originalName": "doll",
+  "license": "CC BY-SA 4.0"
+ },
+ "playdough": {
+  "file": "images/symbols/playdough.svg",
+  "source": "Mulberry",
+  "originalName": "playdough",
+  "license": "CC BY-SA 4.0"
+ },
+ "stuffed-animal": {
+  "file": "images/symbols/stuffed-animal.svg",
+  "source": "Mulberry",
+  "originalName": "teddy_bear",
+  "license": "CC BY-SA 4.0"
+ },
+ "robot": {
+  "file": "images/symbols/robot.svg",
+  "source": "OpenMoji",
+  "originalName": "1F916 robot",
+  "license": "CC BY-SA 4.0"
+ },
+ "dinosaur-toy": {
+  "file": "images/symbols/dinosaur-toy.svg",
+  "source": "OpenMoji",
+  "originalName": "1F996 T-Rex",
+  "license": "CC BY-SA 4.0"
+ },
+ "kitchen-set": {
+  "file": "images/symbols/kitchen-set.svg",
+  "source": "OpenMoji",
+  "originalName": "1F373 cooking",
+  "license": "CC BY-SA 4.0"
+ },
+ "crayons": {
+  "file": "images/symbols/crayons.svg",
+  "source": "Mulberry",
+  "originalName": "crayon",
+  "license": "CC BY-SA 4.0"
+ },
+ "paint": {
+  "file": "images/symbols/paint.svg",
+  "source": "Mulberry",
+  "originalName": "paint_box",
+  "license": "CC BY-SA 4.0"
+ },
+ "stickers": {
+  "file": "images/symbols/stickers.svg",
+  "source": "Mulberry",
+  "originalName": "stickers",
+  "license": "CC BY-SA 4.0"
+ },
+ "tv": {
+  "file": "images/symbols/tv.svg",
+  "source": "Mulberry",
+  "originalName": "flatscreen_tv",
+  "license": "CC BY-SA 4.0"
+ },
+ "movie": {
+  "file": "images/symbols/movie.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3AC clapper board",
+  "license": "CC BY-SA 4.0"
+ },
+ "game": {
+  "file": "images/symbols/game.svg",
+  "source": "Mulberry",
+  "originalName": "computer_game",
+  "license": "CC BY-SA 4.0"
+ },
+ "piano": {
+  "file": "images/symbols/piano.svg",
+  "source": "Mulberry",
+  "originalName": "piano",
+  "license": "CC BY-SA 4.0"
+ },
+ "drum": {
+  "file": "images/symbols/drum.svg",
+  "source": "Mulberry",
+  "originalName": "drum",
+  "license": "CC BY-SA 4.0"
+ },
+ "guitar": {
+  "file": "images/symbols/guitar.svg",
+  "source": "Mulberry",
+  "originalName": "guitar",
+  "license": "CC BY-SA 4.0"
+ },
+ "trampoline": {
+  "file": "images/symbols/trampoline.svg",
+  "source": "Mulberry",
+  "originalName": "trampoline",
+  "license": "CC BY-SA 4.0"
+ },
+ "bike": {
+  "file": "images/symbols/bike.svg",
+  "source": "Mulberry",
+  "originalName": "bicycle",
+  "license": "CC BY-SA 4.0"
+ },
+ "sandbox": {
+  "file": "images/symbols/sandbox.svg",
+  "source": "Mulberry",
+  "originalName": "sand_pit",
+  "license": "CC BY-SA 4.0"
+ },
+ "chalk": {
+  "file": "images/symbols/chalk.svg",
+  "source": "Mulberry",
+  "originalName": "chalk",
+  "license": "CC BY-SA 4.0"
+ },
+ "water-table": {
+  "file": "images/symbols/water-table.svg",
+  "source": "Mulberry",
+  "originalName": "water_table",
+  "license": "CC BY-SA 4.0"
+ },
+ "scooter": {
+  "file": "images/symbols/scooter.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6F4 kick scooter",
+  "license": "CC BY-SA 4.0"
+ },
+ "ball-pit": {
+  "file": "images/symbols/ball-pit.svg",
+  "source": "Mulberry",
+  "originalName": "ball_pool",
+  "license": "CC BY-SA 4.0"
+ },
+ "pool": {
+  "file": "images/symbols/pool.svg",
+  "source": "Mulberry",
+  "originalName": "swimming_class",
+  "license": "CC BY-SA 4.0"
+ },
+ "sprinkler": {
+  "file": "images/symbols/sprinkler.svg",
+  "source": "Mulberry",
+  "originalName": "hose",
+  "license": "CC BY-SA 4.0"
+ },
+ "wagon": {
+  "file": "images/symbols/wagon.svg",
+  "source": "Mulberry",
+  "originalName": "cart",
+  "license": "CC BY-SA 4.0"
+ },
+ "tickle": {
+  "file": "images/symbols/tickle.svg",
+  "source": "Mulberry",
+  "originalName": "tickle_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "chase": {
+  "file": "images/symbols/chase.svg",
+  "source": "Mulberry",
+  "originalName": "chase_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "peekaboo": {
+  "file": "images/symbols/peekaboo.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAE3 face with peeking eye",
+  "license": "CC BY-SA 4.0"
+ },
+ "hide-and-seek": {
+  "file": "images/symbols/hide-and-seek.svg",
+  "source": "OpenMoji",
+  "originalName": "1F648 see-no-evil monkey",
+  "license": "CC BY-SA 4.0"
+ },
+ "sing": {
+  "file": "images/symbols/sing.svg",
+  "source": "Mulberry",
+  "originalName": "sing_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "dance": {
+  "file": "images/symbols/dance.svg",
+  "source": "Mulberry",
+  "originalName": "dance_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "spin": {
+  "file": "images/symbols/spin.svg",
+  "source": "Mulberry",
+  "originalName": "spin_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "bounce": {
+  "file": "images/symbols/bounce.svg",
+  "source": "Mulberry",
+  "originalName": "bounce_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "push": {
+  "file": "images/symbols/push.svg",
+  "source": "Mulberry",
+  "originalName": "push_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "piggyback": {
+  "file": "images/symbols/piggyback.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9D1-200D-1F9D2 family: adult, child",
+  "license": "CC BY-SA 4.0"
+ },
+ "high-five": {
+  "file": "images/symbols/high-five.svg",
+  "source": "OpenMoji",
+  "originalName": "1F64C raising hands",
+  "license": "CC BY-SA 4.0"
+ },
+ "race": {
+  "file": "images/symbols/race.svg",
+  "source": "Mulberry",
+  "originalName": "race_athletics",
+  "license": "CC BY-SA 4.0"
+ },
+ "bedroom": {
+  "file": "images/symbols/bedroom.svg",
+  "source": "Mulberry",
+  "originalName": "double_bed",
+  "license": "CC BY-SA 4.0"
+ },
+ "kitchen": {
+  "file": "images/symbols/kitchen.svg",
+  "source": "Mulberry",
+  "originalName": "cooker",
+  "license": "CC BY-SA 4.0"
+ },
+ "living-room": {
+  "file": "images/symbols/living-room.svg",
+  "source": "Mulberry",
+  "originalName": "settee_1",
+  "license": "CC BY-SA 4.0"
+ },
+ "backyard": {
+  "file": "images/symbols/backyard.svg",
+  "source": "Mulberry",
+  "originalName": "back_garden",
+  "license": "CC BY-SA 4.0"
+ },
+ "garage": {
+  "file": "images/symbols/garage.svg",
+  "source": "Mulberry",
+  "originalName": "garage",
+  "license": "CC BY-SA 4.0"
+ },
+ "upstairs": {
+  "file": "images/symbols/upstairs.svg",
+  "source": "Mulberry",
+  "originalName": "walk_upstairs_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "downstairs": {
+  "file": "images/symbols/downstairs.svg",
+  "source": "Mulberry",
+  "originalName": "walk_downstairs_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "playground": {
+  "file": "images/symbols/playground.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3A0 carousel horse",
+  "license": "CC BY-SA 4.0"
+ },
+ "store": {
+  "file": "images/symbols/store.svg",
+  "source": "Mulberry",
+  "originalName": "shop",
+  "license": "CC BY-SA 4.0"
+ },
+ "restaurant": {
+  "file": "images/symbols/restaurant.svg",
+  "source": "Mulberry",
+  "originalName": "cafe",
+  "license": "CC BY-SA 4.0"
+ },
+ "library": {
+  "file": "images/symbols/library.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4DA books",
+  "license": "CC BY-SA 4.0"
+ },
+ "doctor": {
+  "file": "images/symbols/doctor.svg",
+  "source": "Mulberry",
+  "originalName": "doctor_1a",
+  "license": "CC BY-SA 4.0"
+ },
+ "grandmas-house": {
+  "file": "images/symbols/grandmas-house.svg",
+  "source": "Mulberry",
+  "originalName": "grandmother",
+  "license": "CC BY-SA 4.0"
+ },
+ "dentist": {
+  "file": "images/symbols/dentist.svg",
+  "source": "Mulberry",
+  "originalName": "dentist_1a",
+  "license": "CC BY-SA 4.0"
+ },
+ "haircut": {
+  "file": "images/symbols/haircut.svg",
+  "source": "Mulberry",
+  "originalName": "haircut",
+  "license": "CC BY-SA 4.0"
+ },
+ "friends-house": {
+  "file": "images/symbols/friends-house.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3E1 house with garden",
+  "license": "CC BY-SA 4.0"
+ },
+ "bus": {
+  "file": "images/symbols/bus.svg",
+  "source": "Mulberry",
+  "originalName": "bus",
+  "license": "CC BY-SA 4.0"
+ },
+ "therapy": {
+  "file": "images/symbols/therapy.svg",
+  "source": "Mulberry",
+  "originalName": "speech_language_therapist_1a",
+  "license": "CC BY-SA 4.0"
+ },
+ "church": {
+  "file": "images/symbols/church.svg",
+  "source": "Mulberry",
+  "originalName": "church",
+  "license": "CC BY-SA 4.0"
+ },
+ "beach": {
+  "file": "images/symbols/beach.svg",
+  "source": "Mulberry",
+  "originalName": "beach",
+  "license": "CC BY-SA 4.0"
+ },
+ "zoo": {
+  "file": "images/symbols/zoo.svg",
+  "source": "OpenMoji",
+  "originalName": "1F992 giraffe",
+  "license": "CC BY-SA 4.0"
+ },
+ "farm": {
+  "file": "images/symbols/farm.svg",
+  "source": "OpenMoji",
+  "originalName": "1F69C tractor",
+  "license": "CC BY-SA 4.0"
+ },
+ "movies": {
+  "file": "images/symbols/movies.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3A6 cinema",
+  "license": "CC BY-SA 4.0"
+ },
+ "party": {
+  "file": "images/symbols/party.svg",
+  "source": "Mulberry",
+  "originalName": "party_celebration",
+  "license": "CC BY-SA 4.0"
+ },
+ "train-ride": {
+  "file": "images/symbols/train-ride.svg",
+  "source": "Mulberry",
+  "originalName": "train",
+  "license": "CC BY-SA 4.0"
+ },
+ "airplane": {
+  "file": "images/symbols/airplane.svg",
+  "source": "Mulberry",
+  "originalName": "aeroplane",
+  "license": "CC BY-SA 4.0"
+ },
+ "hotel": {
+  "file": "images/symbols/hotel.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3E8 hotel",
+  "license": "CC BY-SA 4.0"
+ },
+ "chair": {
+  "file": "images/symbols/chair.svg",
+  "source": "Mulberry",
+  "originalName": "chair",
+  "license": "CC BY-SA 4.0"
+ },
+ "table": {
+  "file": "images/symbols/table.svg",
+  "source": "Mulberry",
+  "originalName": "table",
+  "license": "CC BY-SA 4.0"
+ },
+ "door": {
+  "file": "images/symbols/door.svg",
+  "source": "Mulberry",
+  "originalName": "door",
+  "license": "CC BY-SA 4.0"
+ },
+ "window": {
+  "file": "images/symbols/window.svg",
+  "source": "Mulberry",
+  "originalName": "window",
+  "license": "CC BY-SA 4.0"
+ },
+ "floor": {
+  "file": "images/symbols/floor.svg",
+  "source": "Mulberry",
+  "originalName": "floor",
+  "license": "CC BY-SA 4.0"
+ },
+ "box": {
+  "file": "images/symbols/box.svg",
+  "source": "Mulberry",
+  "originalName": "toy_box",
+  "license": "CC BY-SA 4.0"
+ },
+ "paper": {
+  "file": "images/symbols/paper.svg",
+  "source": "Mulberry",
+  "originalName": "paper",
+  "license": "CC BY-SA 4.0"
+ },
+ "picture": {
+  "file": "images/symbols/picture.svg",
+  "source": "Mulberry",
+  "originalName": "picture",
+  "license": "CC BY-SA 4.0"
+ },
+ "letter": {
+  "file": "images/symbols/letter.svg",
+  "source": "Mulberry",
+  "originalName": "letter",
+  "license": "CC BY-SA 4.0"
+ },
+ "bell": {
+  "file": "images/symbols/bell.svg",
+  "source": "Mulberry",
+  "originalName": "bell",
+  "license": "CC BY-SA 4.0"
+ },
+ "money": {
+  "file": "images/symbols/money.svg",
+  "source": "Mulberry",
+  "originalName": "money",
+  "license": "CC BY-SA 4.0"
+ },
+ "watch": {
+  "file": "images/symbols/watch.svg",
+  "source": "Mulberry",
+  "originalName": "watch",
+  "license": "CC BY-SA 4.0"
+ },
+ "brother": {
+  "file": "images/symbols/brother.svg",
+  "source": "Mulberry",
+  "originalName": "brother",
+  "license": "CC BY-SA 4.0"
+ },
+ "sister": {
+  "file": "images/symbols/sister.svg",
+  "source": "Mulberry",
+  "originalName": "sister",
+  "license": "CC BY-SA 4.0"
+ },
+ "baby": {
+  "file": "images/symbols/baby.svg",
+  "source": "Mulberry",
+  "originalName": "baby",
+  "license": "CC BY-SA 4.0"
+ },
+ "grandma": {
+  "file": "images/symbols/grandma.svg",
+  "source": "OpenMoji",
+  "originalName": "1F475 old woman",
+  "license": "CC BY-SA 4.0"
+ },
+ "grandpa": {
+  "file": "images/symbols/grandpa.svg",
+  "source": "OpenMoji",
+  "originalName": "1F474 old man",
+  "license": "CC BY-SA 4.0"
+ },
+ "aunt": {
+  "file": "images/symbols/aunt.svg",
+  "source": "Mulberry",
+  "originalName": "aunt_maternal",
+  "license": "CC BY-SA 4.0"
+ },
+ "uncle": {
+  "file": "images/symbols/uncle.svg",
+  "source": "Mulberry",
+  "originalName": "uncle_maternal",
+  "license": "CC BY-SA 4.0"
+ },
+ "cousin": {
+  "file": "images/symbols/cousin.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9D2 child",
+  "license": "CC BY-SA 4.0"
+ },
+ "family": {
+  "file": "images/symbols/family.svg",
+  "source": "Mulberry",
+  "originalName": "family",
+  "license": "CC BY-SA 4.0"
+ },
+ "pet": {
+  "file": "images/symbols/pet.svg",
+  "source": "OpenMoji",
+  "originalName": "E182 person with dog",
+  "license": "CC BY-SA 4.0"
+ },
+ "therapist": {
+  "file": "images/symbols/therapist.svg",
+  "source": "Mulberry",
+  "originalName": "speech_language_therapist_1a",
+  "license": "CC BY-SA 4.0"
+ },
+ "nurse": {
+  "file": "images/symbols/nurse.svg",
+  "source": "Mulberry",
+  "originalName": "nurse_1a",
+  "license": "CC BY-SA 4.0"
+ },
+ "bus-driver": {
+  "file": "images/symbols/bus-driver.svg",
+  "source": "OpenMoji",
+  "originalName": "1F68C bus",
+  "license": "CC BY-SA 4.0"
+ },
+ "everybody": {
+  "file": "images/symbols/everybody.svg",
+  "source": "OpenMoji",
+  "originalName": "1F465 busts in silhouette",
+  "license": "CC BY-SA 4.0"
+ },
+ "boy": {
+  "file": "images/symbols/boy.svg",
+  "source": "OpenMoji",
+  "originalName": "1F466 boy",
+  "license": "CC BY-SA 4.0"
+ },
+ "girl": {
+  "file": "images/symbols/girl.svg",
+  "source": "OpenMoji",
+  "originalName": "1F467 girl",
+  "license": "CC BY-SA 4.0"
+ },
+ "neighbor": {
+  "file": "images/symbols/neighbor.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3D8 houses",
+  "license": "CC BY-SA 4.0"
+ },
+ "man": {
+  "file": "images/symbols/man.svg",
+  "source": "OpenMoji",
+  "originalName": "1F468 man",
+  "license": "CC BY-SA 4.0"
+ },
+ "woman": {
+  "file": "images/symbols/woman.svg",
+  "source": "OpenMoji",
+  "originalName": "1F469 woman",
+  "license": "CC BY-SA 4.0"
+ },
+ "men": {
+  "file": "images/symbols/men.svg",
+  "source": "OpenMoji",
+  "originalName": "1F46C men holding hands",
+  "license": "CC BY-SA 4.0"
+ },
+ "women": {
+  "file": "images/symbols/women.svg",
+  "source": "OpenMoji",
+  "originalName": "1F46D women holding hands",
+  "license": "CC BY-SA 4.0"
+ },
+ "children": {
+  "file": "images/symbols/children.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6B8 children crossing",
+  "license": "CC BY-SA 4.0"
+ },
+ "farmer": {
+  "file": "images/symbols/farmer.svg",
+  "source": "Mulberry",
+  "originalName": "farmer_1a",
+  "license": "CC BY-SA 4.0"
+ },
+ "good-night": {
+  "file": "images/symbols/good-night.svg",
+  "source": "Mulberry",
+  "originalName": "night",
+  "license": "CC BY-SA 4.0"
+ },
+ "see-you-later": {
+  "file": "images/symbols/see-you-later.svg",
+  "source": "OpenMoji",
+  "originalName": "1F51C SOON arrow",
+  "license": "CC BY-SA 4.0"
+ },
+ "im-good": {
+  "file": "images/symbols/im-good.svg",
+  "source": "OpenMoji",
+  "originalName": "1F44C OK hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "nice-to-meet-you": {
+  "file": "images/symbols/nice-to-meet-you.svg",
+  "source": "OpenMoji",
+  "originalName": "1F91D handshake",
+  "license": "CC BY-SA 4.0"
+ },
+ "whats-your-name": {
+  "file": "images/symbols/whats-your-name.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4DB name badge",
+  "license": "CC BY-SA 4.0"
+ },
+ "hello": {
+  "file": "images/symbols/hello.svg",
+  "source": "Mulberry",
+  "originalName": "hello",
+  "license": "CC BY-SA 4.0"
+ },
+ "welcome": {
+  "file": "images/symbols/welcome.svg",
+  "source": "OpenMoji",
+  "originalName": "1F917 smiling face with open hands",
+  "license": "CC BY-SA 4.0"
+ },
+ "happy-birthday": {
+  "file": "images/symbols/happy-birthday.svg",
+  "source": "OpenMoji",
+  "originalName": "1F382 birthday cake",
+  "license": "CC BY-SA 4.0"
+ },
+ "come-here": {
+  "file": "images/symbols/come-here.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAF4 palm up hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "lets-play": {
+  "file": "images/symbols/lets-play.svg",
+  "source": "Mulberry",
+  "originalName": "toys",
+  "license": "CC BY-SA 4.0"
+ },
+ "im-done": {
+  "file": "images/symbols/im-done.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3C1 chequered flag",
+  "license": "CC BY-SA 4.0"
+ },
+ "help-me": {
+  "file": "images/symbols/help-me.svg",
+  "source": "OpenMoji",
+  "originalName": "1F64B person raising hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "watch-this": {
+  "file": "images/symbols/watch-this.svg",
+  "source": "OpenMoji",
+  "originalName": "1F440 eyes",
+  "license": "CC BY-SA 4.0"
+ },
+ "follow-me": {
+  "file": "images/symbols/follow-me.svg",
+  "source": "OpenMoji",
+  "originalName": "1F463 footprints",
+  "license": "CC BY-SA 4.0"
+ },
+ "ready-set-go": {
+  "file": "images/symbols/ready-set-go.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6A6 vertical traffic light",
+  "license": "CC BY-SA 4.0"
+ },
+ "i-like-it": {
+  "file": "images/symbols/i-like-it.svg",
+  "source": "OpenMoji",
+  "originalName": "1F44D thumbs up",
+  "license": "CC BY-SA 4.0"
+ },
+ "i-dont-like-it": {
+  "file": "images/symbols/i-dont-like-it.svg",
+  "source": "OpenMoji",
+  "originalName": "1F44E thumbs down",
+  "license": "CC BY-SA 4.0"
+ },
+ "thats-funny": {
+  "file": "images/symbols/thats-funny.svg",
+  "source": "OpenMoji",
+  "originalName": "1F602 face with tears of joy",
+  "license": "CC BY-SA 4.0"
+ },
+ "wow": {
+  "file": "images/symbols/wow.svg",
+  "source": "OpenMoji",
+  "originalName": "1F62E face with open mouth",
+  "license": "CC BY-SA 4.0"
+ },
+ "uh-oh": {
+  "file": "images/symbols/uh-oh.svg",
+  "source": "OpenMoji",
+  "originalName": "1F62C grimacing face",
+  "license": "CC BY-SA 4.0"
+ },
+ "oops": {
+  "file": "images/symbols/oops.svg",
+  "source": "OpenMoji",
+  "originalName": "1F92D face with hand over mouth",
+  "license": "CC BY-SA 4.0"
+ },
+ "cool": {
+  "file": "images/symbols/cool.svg",
+  "source": "OpenMoji",
+  "originalName": "1F60E smiling face with sunglasses",
+  "license": "CC BY-SA 4.0"
+ },
+ "yuck": {
+  "file": "images/symbols/yuck.svg",
+  "source": "OpenMoji",
+  "originalName": "1F922 nauseated face",
+  "license": "CC BY-SA 4.0"
+ },
+ "yay": {
+  "file": "images/symbols/yay.svg",
+  "source": "OpenMoji",
+  "originalName": "1F389 party popper",
+  "license": "CC BY-SA 4.0"
+ },
+ "awesome": {
+  "file": "images/symbols/awesome.svg",
+  "source": "OpenMoji",
+  "originalName": "1F929 star-struck",
+  "license": "CC BY-SA 4.0"
+ },
+ "gross": {
+  "file": "images/symbols/gross.svg",
+  "source": "OpenMoji",
+  "originalName": "1F92E face vomiting",
+  "license": "CC BY-SA 4.0"
+ },
+ "oh-no": {
+  "file": "images/symbols/oh-no.svg",
+  "source": "OpenMoji",
+  "originalName": "1F627 anguished face",
+  "license": "CC BY-SA 4.0"
+ },
+ "excuse-me": {
+  "file": "images/symbols/excuse-me.svg",
+  "source": "OpenMoji",
+  "originalName": "1F647 person bowing",
+  "license": "CC BY-SA 4.0"
+ },
+ "yes-please": {
+  "file": "images/symbols/yes-please.svg",
+  "source": "OpenMoji",
+  "originalName": "1F64F folded hands",
+  "license": "CC BY-SA 4.0"
+ },
+ "no-thank-you": {
+  "file": "images/symbols/no-thank-you.svg",
+  "source": "OpenMoji",
+  "originalName": "1F645 person gesturing NO",
+  "license": "CC BY-SA 4.0"
+ },
+ "stop-it": {
+  "file": "images/symbols/stop-it.svg",
+  "source": "OpenMoji",
+  "originalName": "270B raised hand",
+  "license": "CC BY-SA 4.0"
+ },
+ "leave-me-alone": {
+  "file": "images/symbols/leave-me-alone.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6B7 no pedestrians",
+  "license": "CC BY-SA 4.0"
+ },
+ "not-now": {
+  "file": "images/symbols/not-now.svg",
+  "source": "OpenMoji",
+  "originalName": "23F2 timer clock",
+  "license": "CC BY-SA 4.0"
+ },
+ "my-body": {
+  "file": "images/symbols/my-body.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9CD person standing",
+  "license": "CC BY-SA 4.0"
+ },
+ "too-much": {
+  "file": "images/symbols/too-much.svg",
+  "source": "OpenMoji",
+  "originalName": "1F92F exploding head",
+  "license": "CC BY-SA 4.0"
+ },
+ "i-dont-know": {
+  "file": "images/symbols/i-dont-know.svg",
+  "source": "OpenMoji",
+  "originalName": "1F937 person shrugging",
+  "license": "CC BY-SA 4.0"
+ },
+ "i-dont-understand": {
+  "file": "images/symbols/i-dont-understand.svg",
+  "source": "OpenMoji",
+  "originalName": "1F615 confused face",
+  "license": "CC BY-SA 4.0"
+ },
+ "say-it-again": {
+  "file": "images/symbols/say-it-again.svg",
+  "source": "OpenMoji",
+  "originalName": "1F5E3 speaking head",
+  "license": "CC BY-SA 4.0"
+ },
+ "slow-down": {
+  "file": "images/symbols/slow-down.svg",
+  "source": "OpenMoji",
+  "originalName": "1F422 turtle",
+  "license": "CC BY-SA 4.0"
+ },
+ "im-trying": {
+  "file": "images/symbols/im-trying.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9D7 person climbing",
+  "license": "CC BY-SA 4.0"
+ },
+ "excited": {
+  "file": "images/symbols/excited.svg",
+  "source": "OpenMoji",
+  "originalName": "1F973 partying face",
+  "license": "CC BY-SA 4.0"
+ },
+ "frustrated": {
+  "file": "images/symbols/frustrated.svg",
+  "source": "OpenMoji",
+  "originalName": "1F624 face with steam from nose",
+  "license": "CC BY-SA 4.0"
+ },
+ "worried": {
+  "file": "images/symbols/worried.svg",
+  "source": "OpenMoji",
+  "originalName": "1F61F worried face",
+  "license": "CC BY-SA 4.0"
+ },
+ "proud": {
+  "file": "images/symbols/proud.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3C6 trophy",
+  "license": "CC BY-SA 4.0"
+ },
+ "hungry": {
+  "file": "images/symbols/hungry.svg",
+  "source": "Mulberry",
+  "originalName": "hungry",
+  "license": "CC BY-SA 4.0"
+ },
+ "thirsty": {
+  "file": "images/symbols/thirsty.svg",
+  "source": "Mulberry",
+  "originalName": "thirsty",
+  "license": "CC BY-SA 4.0"
+ },
+ "too-loud": {
+  "file": "images/symbols/too-loud.svg",
+  "source": "Mulberry",
+  "originalName": "loud",
+  "license": "CC BY-SA 4.0"
+ },
+ "too-bright": {
+  "file": "images/symbols/too-bright.svg",
+  "source": "Mulberry",
+  "originalName": "bright",
+  "license": "CC BY-SA 4.0"
+ },
+ "itchy": {
+  "file": "images/symbols/itchy.svg",
+  "source": "Mulberry",
+  "originalName": "itch",
+  "license": "CC BY-SA 4.0"
+ },
+ "dizzy": {
+  "file": "images/symbols/dizzy.svg",
+  "source": "OpenMoji",
+  "originalName": "1F635-200D-1F4AB face with spiral eyes",
+  "license": "CC BY-SA 4.0"
+ },
+ "need-quiet": {
+  "file": "images/symbols/need-quiet.svg",
+  "source": "Mulberry",
+  "originalName": "quiet",
+  "license": "CC BY-SA 4.0"
+ },
+ "need-hug": {
+  "file": "images/symbols/need-hug.svg",
+  "source": "Mulberry",
+  "originalName": "hug_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "sleepy": {
+  "file": "images/symbols/sleepy.svg",
+  "source": "OpenMoji",
+  "originalName": "1F62A sleepy face",
+  "license": "CC BY-SA 4.0"
+ },
+ "head": {
+  "file": "images/symbols/head.svg",
+  "source": "Mulberry",
+  "originalName": "head",
+  "license": "CC BY-SA 4.0"
+ },
+ "eyes": {
+  "file": "images/symbols/eyes.svg",
+  "source": "Mulberry",
+  "originalName": "eyes",
+  "license": "CC BY-SA 4.0"
+ },
+ "ears": {
+  "file": "images/symbols/ears.svg",
+  "source": "Mulberry",
+  "originalName": "ear",
+  "license": "CC BY-SA 4.0"
+ },
+ "nose": {
+  "file": "images/symbols/nose.svg",
+  "source": "OpenMoji",
+  "originalName": "1F443 nose",
+  "license": "CC BY-SA 4.0"
+ },
+ "mouth": {
+  "file": "images/symbols/mouth.svg",
+  "source": "Mulberry",
+  "originalName": "mouth",
+  "license": "CC BY-SA 4.0"
+ },
+ "teeth": {
+  "file": "images/symbols/teeth.svg",
+  "source": "Mulberry",
+  "originalName": "teeth",
+  "license": "CC BY-SA 4.0"
+ },
+ "tummy": {
+  "file": "images/symbols/tummy.svg",
+  "source": "Mulberry",
+  "originalName": "stomach",
+  "license": "CC BY-SA 4.0"
+ },
+ "hand": {
+  "file": "images/symbols/hand.svg",
+  "source": "OpenMoji",
+  "originalName": "1F590 hand with fingers splayed",
+  "license": "CC BY-SA 4.0"
+ },
+ "foot": {
+  "file": "images/symbols/foot.svg",
+  "source": "Mulberry",
+  "originalName": "foot",
+  "license": "CC BY-SA 4.0"
+ },
+ "arm": {
+  "file": "images/symbols/arm.svg",
+  "source": "Mulberry",
+  "originalName": "arm",
+  "license": "CC BY-SA 4.0"
+ },
+ "leg": {
+  "file": "images/symbols/leg.svg",
+  "source": "Mulberry",
+  "originalName": "leg",
+  "license": "CC BY-SA 4.0"
+ },
+ "body-back": {
+  "file": "images/symbols/body-back.svg",
+  "source": "Mulberry",
+  "originalName": "back_1",
+  "license": "CC BY-SA 4.0"
+ },
+ "pig": {
+  "file": "images/symbols/pig.svg",
+  "source": "OpenMoji",
+  "originalName": "1F437 pig face",
+  "license": "CC BY-SA 4.0"
+ },
+ "sheep": {
+  "file": "images/symbols/sheep.svg",
+  "source": "Mulberry",
+  "originalName": "sheep",
+  "license": "CC BY-SA 4.0"
+ },
+ "chicken": {
+  "file": "images/symbols/chicken.svg",
+  "source": "OpenMoji",
+  "originalName": "1F414 chicken",
+  "license": "CC BY-SA 4.0"
+ },
+ "frog": {
+  "file": "images/symbols/frog.svg",
+  "source": "Mulberry",
+  "originalName": "frog",
+  "license": "CC BY-SA 4.0"
+ },
+ "bear": {
+  "file": "images/symbols/bear.svg",
+  "source": "Mulberry",
+  "originalName": "bear",
+  "license": "CC BY-SA 4.0"
+ },
+ "lion": {
+  "file": "images/symbols/lion.svg",
+  "source": "Mulberry",
+  "originalName": "lion",
+  "license": "CC BY-SA 4.0"
+ },
+ "tiger": {
+  "file": "images/symbols/tiger.svg",
+  "source": "Mulberry",
+  "originalName": "tiger",
+  "license": "CC BY-SA 4.0"
+ },
+ "elephant": {
+  "file": "images/symbols/elephant.svg",
+  "source": "Mulberry",
+  "originalName": "elephant",
+  "license": "CC BY-SA 4.0"
+ },
+ "monkey": {
+  "file": "images/symbols/monkey.svg",
+  "source": "OpenMoji",
+  "originalName": "1F412 monkey",
+  "license": "CC BY-SA 4.0"
+ },
+ "giraffe": {
+  "file": "images/symbols/giraffe.svg",
+  "source": "Mulberry",
+  "originalName": "giraffe",
+  "license": "CC BY-SA 4.0"
+ },
+ "zebra": {
+  "file": "images/symbols/zebra.svg",
+  "source": "Mulberry",
+  "originalName": "zebra",
+  "license": "CC BY-SA 4.0"
+ },
+ "snake": {
+  "file": "images/symbols/snake.svg",
+  "source": "Mulberry",
+  "originalName": "snake",
+  "license": "CC BY-SA 4.0"
+ },
+ "turtle": {
+  "file": "images/symbols/turtle.svg",
+  "source": "Mulberry",
+  "originalName": "turtle",
+  "license": "CC BY-SA 4.0"
+ },
+ "dinosaur": {
+  "file": "images/symbols/dinosaur.svg",
+  "source": "Mulberry",
+  "originalName": "dinosaur",
+  "license": "CC BY-SA 4.0"
+ },
+ "shark": {
+  "file": "images/symbols/shark.svg",
+  "source": "OpenMoji",
+  "originalName": "1F988 shark",
+  "license": "CC BY-SA 4.0"
+ },
+ "whale": {
+  "file": "images/symbols/whale.svg",
+  "source": "OpenMoji",
+  "originalName": "1F40B whale",
+  "license": "CC BY-SA 4.0"
+ },
+ "butterfly": {
+  "file": "images/symbols/butterfly.svg",
+  "source": "Mulberry",
+  "originalName": "butterfly",
+  "license": "CC BY-SA 4.0"
+ },
+ "bug": {
+  "file": "images/symbols/bug.svg",
+  "source": "OpenMoji",
+  "originalName": "1F41B bug",
+  "license": "CC BY-SA 4.0"
+ },
+ "spider": {
+  "file": "images/symbols/spider.svg",
+  "source": "Mulberry",
+  "originalName": "spider",
+  "license": "CC BY-SA 4.0"
+ },
+ "bee": {
+  "file": "images/symbols/bee.svg",
+  "source": "Mulberry",
+  "originalName": "bee_bumble",
+  "license": "CC BY-SA 4.0"
+ },
+ "ladybug": {
+  "file": "images/symbols/ladybug.svg",
+  "source": "OpenMoji",
+  "originalName": "1F41E lady beetle",
+  "license": "CC BY-SA 4.0"
+ },
+ "snail": {
+  "file": "images/symbols/snail.svg",
+  "source": "Mulberry",
+  "originalName": "snail",
+  "license": "CC BY-SA 4.0"
+ },
+ "owl": {
+  "file": "images/symbols/owl.svg",
+  "source": "Mulberry",
+  "originalName": "owl",
+  "license": "CC BY-SA 4.0"
+ },
+ "mouse": {
+  "file": "images/symbols/mouse.svg",
+  "source": "Mulberry",
+  "originalName": "mouse",
+  "license": "CC BY-SA 4.0"
+ },
+ "squirrel": {
+  "file": "images/symbols/squirrel.svg",
+  "source": "Mulberry",
+  "originalName": "squirrel_1a",
+  "license": "CC BY-SA 4.0"
+ },
+ "octopus": {
+  "file": "images/symbols/octopus.svg",
+  "source": "OpenMoji",
+  "originalName": "1F419 octopus",
+  "license": "CC BY-SA 4.0"
+ },
+ "penguin": {
+  "file": "images/symbols/penguin.svg",
+  "source": "Mulberry",
+  "originalName": "penguin",
+  "license": "CC BY-SA 4.0"
+ },
+ "deer": {
+  "file": "images/symbols/deer.svg",
+  "source": "Mulberry",
+  "originalName": "deer",
+  "license": "CC BY-SA 4.0"
+ },
+ "goat": {
+  "file": "images/symbols/goat.svg",
+  "source": "OpenMoji",
+  "originalName": "1F410 goat",
+  "license": "CC BY-SA 4.0"
+ },
+ "robin": {
+  "file": "images/symbols/robin.svg",
+  "source": "Mulberry",
+  "originalName": "robin",
+  "license": "CC BY-SA 4.0"
+ },
+ "nest": {
+  "file": "images/symbols/nest.svg",
+  "source": "Mulberry",
+  "originalName": "nest",
+  "license": "CC BY-SA 4.0"
+ },
+ "kitty": {
+  "file": "images/symbols/kitty.svg",
+  "source": "OpenMoji",
+  "originalName": "1F431 cat face",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-favorite": {
+  "file": "images/symbols/about-favorite.svg",
+  "source": "OpenMoji",
+  "originalName": "1F60D smiling face with heart-eyes",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-birthday": {
+  "file": "images/symbols/about-birthday.svg",
+  "source": "OpenMoji",
+  "originalName": "1F388 balloon",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-pet": {
+  "file": "images/symbols/about-pet.svg",
+  "source": "OpenMoji",
+  "originalName": "1F43E paw prints",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-brother": {
+  "file": "images/symbols/about-brother.svg",
+  "source": "Mulberry",
+  "originalName": "brother",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-sister": {
+  "file": "images/symbols/about-sister.svg",
+  "source": "Mulberry",
+  "originalName": "sister",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-teacher": {
+  "file": "images/symbols/about-teacher.svg",
+  "source": "Mulberry",
+  "originalName": "teacher_2a",
+  "license": "CC BY-SA 4.0"
+ },
+ "about-wait": {
+  "file": "images/symbols/about-wait.svg",
+  "source": "OpenMoji",
+  "originalName": "23F3 hourglass not done",
+  "license": "CC BY-SA 4.0"
  }
 }

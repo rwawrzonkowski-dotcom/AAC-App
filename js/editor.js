@@ -1,6 +1,25 @@
 // The editor sheet that opens when an adult taps a cell in Edit mode.
 // It never offers a way to MOVE a word: a cell's place is permanent.
 import { h, openOverlay } from "./ui.js";
+import { speak } from "./speech.js";
+
+// A large speaker button ("Hear it") that speaks the text it is given RIGHT NOW, exactly as the
+// board would say it: with the current learner's voice, pitch and speed (js/speech.js). It does
+// not save anything, does not touch the message bar and does not write to the event log.
+//   getText()  returns the text to say (the CURRENT, unsaved text of the field)
+// Returns { button, update }: call update() whenever the text may have changed (the button is
+// disabled while there is nothing to say).
+const SPEAKER = '<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path fill="currentColor" ' +
+  'd="M3 9v6h4l5 4V5L7 9H3z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+  'd="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/></svg>';
+function hearButton(id, getText) {
+  const button = h("button", { type: "button", class: "hear-btn", id, title: "Hear it", "aria-label": "Hear it" });
+  button.innerHTML = SPEAKER;
+  button.addEventListener("click", () => { const t = getText(); if (t) speak(t); });
+  const update = () => { button.disabled = !getText(); };
+  update();
+  return { button, update };
+}
 
 // Shrink a chosen photo to at most 512 px on its long side, as a JPEG (~0.85).
 // Works on-device; the picture is never uploaded anywhere.
@@ -50,11 +69,16 @@ export function openCellEditor(d, photoUrl, { onOpenPage, canMakePage = false } 
     const labelIn = h("input", { type: "text", class: "text-input", id: "ed-label", maxlength: 30, value: curLabel });
     const spokenIn = h("input", { type: "text", class: "text-input", id: "ed-spoken", maxlength: 60,
       value: curSpoken, placeholder: "Same as label" });
-    labelIn.addEventListener("input", () => { if (linked) spokenIn.value = labelIn.value; });
-    spokenIn.addEventListener("input", () => { linked = false; });
+    // "Hear it" buttons. The label (or page name) button says what is typed in that field. The spoken
+    // button says what the board will say: the spoken text, or the label if the spoken text is empty.
+    const hearLabel = hearButton("ed-hear-label", () => labelIn.value.trim());
+    const hearSpoken = hearButton("ed-hear-spoken", () => spokenIn.value.trim() || labelIn.value.trim());
+    labelIn.addEventListener("input", () => { if (linked) spokenIn.value = labelIn.value; hearLabel.update(); hearSpoken.update(); });
+    spokenIn.addEventListener("input", () => { linked = false; hearSpoken.update(); });
     const labelCaption = h("label", { for: "ed-label", text: isPageButton ? "Page name" : "Label (what is written)" });
     const spokenField = h("div", { class: "field", id: "ed-spoken-field", hidden: isPageButton },
-      h("label", { for: "ed-spoken", text: "Spoken text (what is said)" }), spokenIn);
+      h("label", { for: "ed-spoken", text: "Spoken text (what is said)" }),
+      h("div", { class: "field-row" }, spokenIn, hearSpoken.button));
 
     // The built-in symbol (if this button has one) shows when there is no photo.
     const symbolUrl = d.base && d.base.image ? d.base.image : null;
@@ -134,6 +158,9 @@ export function openCellEditor(d, photoUrl, { onOpenPage, canMakePage = false } 
       fillIn = h("input", { type: "text", class: "text-input", id: "ed-fill", maxlength: 60,
         value: d.fill, placeholder: d.base.fillHint || "" });
       const says = h("p", { class: "muted", id: "ed-says" });
+      // Hear the whole sentence with the blank filled in (nothing to say while the blank is empty).
+      const hearFill = hearButton("ed-hear-fill", () => { const t = fillIn.value.trim(); return t ? d.template.replace("___", t) : ""; });
+      fillIn.addEventListener("input", hearFill.update);
       const paintSays = () => {
         const t = fillIn.value.trim();
         says.textContent = t ? "Will say: " + d.template.replace("___", t) : "Empty: this button stays hidden (gray) on the board until you fill it in.";
@@ -142,7 +169,8 @@ export function openCellEditor(d, photoUrl, { onOpenPage, canMakePage = false } 
       paintSays();
       fillBlock = h("div", { id: "ed-fill-block" },
         h("p", { class: "muted", text: "This button says: " + d.template }),
-        h("div", { class: "field" }, h("label", { for: "ed-fill", text: "Fill in" }), fillIn, says),
+        h("div", { class: "field" }, h("label", { for: "ed-fill", text: "Fill in" }),
+          h("div", { class: "field-row" }, fillIn, hearFill.button), says),
         d.base.privacy
           ? h("p", { class: "privacy-note", id: "ed-privacy",
               text: "Anyone holding this iPad can hear this. Only add what is safe to share." })
@@ -173,7 +201,7 @@ export function openCellEditor(d, photoUrl, { onOpenPage, canMakePage = false } 
       kindRow,
       showRow,
       fillBlock,
-      isFillIn ? null : h("div", { class: "field" }, labelCaption, labelIn),
+      isFillIn ? null : h("div", { class: "field" }, labelCaption, h("div", { class: "field-row" }, labelIn, hearLabel.button)),
       isFillIn ? null : spokenField,
       h("div", { class: "field" }, h("label", { text: "Photo" }),
         h("div", { class: "photo-row" }, thumb,

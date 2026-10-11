@@ -2,7 +2,7 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 3, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 4, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model,
 //         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
@@ -12,9 +12,11 @@
 // cells (by position), `pages` = pages the adult made. See js/profiles.js.
 // `model` = the Model prompt settings (js/critters.js). A learner's own critter picture
 // is one of the photos, with the key "critter".
-// Version 1 backups (made before Phase 1.5A, keyed only by position) and version 2
-// backups (made before the model critter) are still readable: they are upgraded on
-// the way in (see js/migrate.js; missing Model prompt settings become the defaults).
+// Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
+// backups (made before the model critter) and version 3 backups (made before the category
+// pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
+// the way in (see js/migrate.js; missing Model prompt settings become the defaults, and a word
+// the adult had added to a cell that a built-in word now needs is moved to a free cell).
 // Photos are stored inside the file as text (base64 "data URLs"), each with the
 // photo key it belongs to. The passcode is NEVER saved in a backup and never
 // restored from one. Nothing here uses the network: the file stays on this iPad
@@ -25,11 +27,11 @@ import {
 } from "./profiles.js";
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
-import { migrateCells, mapLegacyKey } from "./migrate.js";
+import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves } from "./migrate.js";
 import { cleanModel } from "./critters.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 3;
+export const BACKUP_VERSION = 4;
 
 // ---------------------------------------------------------------- saving
 
@@ -220,14 +222,26 @@ function cleanLearner(raw, index, version) {
   // Backups older than version 3 have no Model prompt settings: use the defaults.
   const model = cleanModel(version >= 3 ? raw.model : null);
 
+  // Backups older than version 4 were made before the row-group category pages (Phase 1.6):
+  // move any word the adult added to a cell that a built-in word now needs. (Pins are obsolete.)
+  let notices = [];
+  let moved = {};
+  if (version < 4) {
+    const r = relocateAdultWords(board, cells, pages);
+    cells = r.cells; pages = r.pages; pins = {};
+    moved = moveMap(r.moves);
+    notices = describeMoves(r.moves);
+  }
+
   const photos = [];
   for (const ph of raw.photos || []) {
     if (!isObj(ph) || !validKey(ph.key) || typeof ph.dataUrl !== "string") bad(`${name}: a photo entry is not valid.`);
     const blob = dataUrlToBlob(ph.dataUrl);
     if (!blob) bad(`${name}: a photo could not be read.`);
-    photos.push({ key: version < 2 ? photoKey(ph.key) : ph.key, blob });
+    const key = version < 2 ? photoKey(ph.key) : ph.key;
+    photos.push({ key: moved[key] || key, blob });          // a moved word's photo moves with it
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, photos };
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, notices, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
