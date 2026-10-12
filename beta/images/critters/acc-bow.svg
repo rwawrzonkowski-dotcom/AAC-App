@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-26 -16 52 32">
+  <!-- Bow. Origin (0,0) = the knot. -->
+  <g stroke="#5b3b2a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M0 0 C-6 -13 -22 -13 -22 0 C-22 13 -6 13 0 0Z" fill="#ff5d8f"/>
+    <path d="M0 0 C6 -13 22 -13 22 0 C22 13 6 13 0 0Z" fill="#ff5d8f"/>
+    <circle cx="0" cy="0" r="5.200" fill="#ff8fb1"/>
+  </g>
+</svg>

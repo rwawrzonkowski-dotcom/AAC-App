@@ -1,0 +1,261 @@
+// The board "model": which word sits in which cell, for one grid size.
+// No drawing and no learner data in here, just the fixed layout.
+//
+// MOTOR PLANNING: on a given grid size a word's (row, col) is permanent. The
+// layouts live in data/core-board.json:
+//   - the main grid is written out row by row ("layouts" > "45" / "84" > "main")
+//   - a category page is written as ROW GROUPS ("groups"). Each group is one row:
+//       "words"  fill columns 0-8 of that row, in order (the 45 board's words);
+//       "adds"   fill columns 9-11 of the same row (the 84 board only).
+//     So a word has the SAME row and column on both sizes. When the page's Back
+//     button sits in a group's row on the 45 board, that Back column is skipped
+//     on BOTH sizes, so the words after it do not differ between sizes.
+//   - a page with no groups (Favorites) lists "items" that fill the page left to
+//     right, top to bottom, skipping the Back cell.
+//   - the WORDS pages (Phase 1.6B) are opened from the "Words" button in the top bar, not
+//     from a button on the grid. The menu page says "fromBar": true; it is depth 1 and has no
+//     Back cell (the top-bar button reads "Close"). Its page buttons open the word pages (depth 2).
+//     A page with "starter": "all" shows all of its words whenever the page is open.
+//
+// Two grid sizes exist: 45 (9 columns x 5 rows) and 84 (12 x 7). Each learner uses one.
+
+export const SIZES = { 45: { cols: 9, rows: 5 }, 84: { cols: 12, rows: 7 } };
+// How deep a page an ADULT may make is limited: main board = 0, a page from it = 1, a page from that = 2
+// (3 taps to a word). "Make this a page" is never offered at depth 2 or more.
+//
+// DEPTH RULE FOR BUILT-IN FOLDER PAGES (generalized in Phase 1.8A; Phase 1.7B had it for the animal folders only):
+// a built-in FOLDER page may sit one level below a category page or a Words page, even if that makes a word on it
+// four taps deep. A folder is opened by a button on another built-in page, so its depth is the opener's depth + 1.
+//   - 84 board: the category pages (Food, Drinks, Places, People, Chat, Feelings, Play, Animals) are main-grid buttons
+//     (depth 1), so a folder is depth 2 (3 taps to a word: Places > Home > couch).
+//   - 45 board: Feelings is opened from Chat and Animals from Play (depth 2), so their folders are depth 3
+//     (Chat > Feelings > Calm down > deep breath = 4 taps). Food > More food > Desserts > cake is depth 3 on BOTH
+//     sizes (4 taps), because More food is itself a folder of Food.
+// Nothing in the code special-cases this: depth is simply counted from where each page is opened (see layout() below).
+// The limit above applies only to pages an ADULT makes, so the extra level exists ONLY for built-in pages. Such a page
+// carries folder: true (its parent is another built-in page, not the main board); "Make this a page" is never offered
+// there (the adult can still add a WORD to an empty cell, for example on the Friends folder). Back always goes up
+// exactly one level, and Model mode rings every step of the path.
+export const MAX_DEPTH = 2;
+
+// Every cell has a permanent key that is used to store things an adult adds there.
+//   45 board: "<page>:<row>,<col>"        e.g. "favorites:0,0"
+//   84 board: "<page>:<row>,<col>@84"     e.g. "favorites:0,0@84"
+// (The "@84" keeps the two boards' data apart: a word an adult adds to an empty
+// cell belongs to that grid size only.)
+export function posKey(size, pageId, row, col) {
+  return `${pageId}:${row},${col}` + (Number(size) === 84 ? "@84" : "");
+}
+
+// Key for a built-in word's own data (renamed label, photo, show/hide, filled blank).
+// It follows the word to whatever cell the word has on the other grid size.
+export const wordKey = (wordId) => "w:" + wordId;
+
+const models = new Map();
+
+// Build (and remember) the model for one grid size.
+export function buildModel(board, size) {
+  size = Number(size) === 84 ? 84 : 45;
+  const cached = models.get(board);
+  if (cached && cached[size]) return cached[size];
+
+  const { cols, rows } = SIZES[size];
+  const geo = board.layouts[String(size)];
+  const word = (id) => ({ id, ...board.words[id] });
+
+  // Main grid: one entry per cell
+  const main = [];
+  geo.main.forEach((rowIds, row) => rowIds.forEach((id, col) => main.push({ ...word(id), row, col })));
+
+  // Which pages exist on this size, and the items on each (filtered by "sizes").
+  // A word entry is "id" or { id, sizes: [45] }.
+  const onSize = (o) => !o.sizes || o.sizes.includes(size);
+  const asEntry = (it) => (typeof it === "string" ? { id: it } : it);
+  const defs = {};
+  for (const [pid, p] of Object.entries(board.pages)) {
+    if (!onSize(p)) continue;
+    const ids = p.groups
+      ? p.groups.flatMap((g) => [...g.words.map(asEntry).filter(onSize), ...(size === 84 ? (g.adds || []).map(asEntry) : [])]).map((e) => e.id)
+      : (p.items || []).map(asEntry).filter(onSize).map((e) => e.id);
+    defs[pid] = { id: pid, name: p.name, groups: p.groups || null, starter: p.starter || [], items: p.items || [], itemIds: ids,
+                  fromBar: !!p.fromBar, newWords: new Set(p.newWords || []) };
+  }
+
+  // Where is each page opened from? (the main grid, the top bar, or an item on another page)
+  const openerOf = {};   // pageId -> { parent, openerId }   (openerId null = the top-bar Words button)
+  for (const b of main) if (b.loadBoard && defs[b.loadBoard]) openerOf[b.loadBoard] = { parent: "core", openerId: b.id };
+  for (const d of Object.values(defs)) if (d.fromBar) openerOf[d.id] = { parent: "core", openerId: null };
+  for (const d of Object.values(defs)) {
+    for (const id of d.itemIds) {
+      const w = board.words[id];
+      if (w.loadBoard && defs[w.loadBoard]) openerOf[w.loadBoard] = { parent: d.id, openerId: id };
+    }
+  }
+
+  // Lay each page out. The Back cell sits where the opening button sits, which
+  // for a page opened from another page depends on that page's own layout,
+  // so lay pages out on demand and remember the result.
+  const pages = {};
+  function layout(pid) {
+    if (pages[pid]) return pages[pid];
+    const d = defs[pid];
+    const o = openerOf[pid];
+    let at = null, parent = null, depth = 1;
+    if (o) {
+      parent = o.parent;
+      if (parent === "core") {
+        const b = o.openerId ? main.find((x) => x.id === o.openerId) : null;
+        at = b ? { row: b.row, col: b.col } : null;      // the Words menu has no Back cell
+      } else {
+        const pp = layout(parent);
+        const it = pp.items.find((x) => x.id === o.openerId);
+        at = { row: it.row, col: it.col };
+        depth = pp.depth + 1;
+      }
+    }
+    const items = [];
+    if (d.groups) {
+      // The 45 board's Back cell decides which column a group row skips, on BOTH sizes.
+      const back45 = size === 45 ? at : ((buildModel(board, 45).pages[pid] || {}).at || null);
+      // "starter": "all" shows every word, except the ones the page lists in "newWords" (Phase 1.8B: the folder buttons
+      // on the Words pages are new stage-3 words even though the Words pages otherwise show everything).
+      const starter = d.starter === "all" ? { has: (id) => !d.newWords.has(id) } : new Set(d.starter);
+      const NEW_STAGE = board.pageNewWordStage || 3;
+      // pageStage: from which stage the word shows on this page (original items: always)
+      const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: starter.has(e.id) ? 1 : NEW_STAGE });
+      for (const g of d.groups) {
+        const skip = back45 && back45.row === g.row ? back45.col : -1;
+        let col = 0;
+        for (const e of g.words.map(asEntry)) {
+          if (col === skip) col++;
+          if (col >= 9) throw new Error(`Page ${pid}: group row ${g.row} has too many words`);
+          if (onSize(e)) put(e, g.row, col);
+          col++;
+        }
+        if (size === 84) (g.adds || []).map(asEntry).forEach((e, i) => put(e, g.row, 9 + i));
+      }
+    } else {
+      let i = 0;
+      for (let r = 0; r < rows && i < d.itemIds.length; r++) {
+        for (let c = 0; c < cols && i < d.itemIds.length; c++) {
+          if (at && at.row === r && at.col === c) continue;   // the Back cell
+          items.push({ ...word(d.itemIds[i]), row: r, col: c });
+          i++;
+        }
+      }
+    }
+    // folder: a built-in page opened from another built-in page (not from the main board and not from the top bar)
+    pages[pid] = { id: pid, name: d.name, parent, at, depth, items, builtin: true, folder: !!parent && parent !== "core" };
+    return pages[pid];
+  }
+  for (const pid of Object.keys(defs)) if (openerOf[pid]) layout(pid);   // pages nobody opens are not reachable
+
+  const model = { size, cols, rows, main, pages, word };
+  models.set(board, { ...(models.get(board) || {}), [size]: model });   // (the 45 model may have been built meanwhile)
+  return model;
+}
+
+// Any page by id for this learner: "core", a built-in page, or an adult-made page.
+// Returns { id, name, parent, at, depth, items, builtin, folder } or null.
+export function getPage(model, profile, pageId) {
+  if (pageId === "core") return { id: "core", name: "", parent: null, at: null, depth: 0, items: model.main, builtin: true };
+  if (model.pages[pageId]) return model.pages[pageId];
+  const ap = profile.pages && profile.pages[pageId];
+  if (ap && Number(ap.size) === model.size) {
+    return { id: pageId, name: ap.name, parent: ap.parent, at: ap.at, depth: ap.depth, items: [], builtin: false };
+  }
+  return null;
+}
+
+// The chain of pages from this one up to the main board: [page, parent, ..., "core"]
+export function pathToCore(model, profile, pageId) {
+  const out = [];
+  let id = pageId;
+  for (let n = 0; id && n < 6; n++) {
+    out.push(id);
+    if (id === "core") break;
+    const p = getPage(model, profile, id);
+    id = p ? p.parent : null;
+  }
+  return out;
+}
+
+// What is in each cell of one page, for one learner. Returns one description per
+// cell in row-by-row order. Nothing is ever moved: a cell is always at its own
+// (row, col), whether it is visible, hidden, or empty.
+//
+// Each description d has:
+//   key, row, col        the cell (key is the storage/DOM key, see posKey)
+//   kind                 "home" (Back), "word" or "empty"
+//   base                 the built-in word (or null for an adult-added one)
+//   ov                   the adult's changes for this button (may be {})
+//   label, spoken, wordType, loadBoard, visible, custom, photoKey ...
+export function resolvePage(page, profile, model) {
+  const { cols, rows, size } = model;
+  const byPos = new Map();
+  for (const it of page.items) byPos.set(it.row + "," + it.col, it);
+  const cells = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const key = posKey(size, page.id, row, col);
+      const d = { key, row, col, base: null, ov: {}, page: page.id };
+      const base = byPos.get(row + "," + col) || null;
+      const custom = profile.cells[key];
+
+      if (page.at && page.at.row === row && page.at.col === col) {
+        d.kind = "home";                              // Back button: not editable
+        d.visible = true;
+      } else if (base) {
+        const ov = profile.words[base.id] || {};
+        // Stage rule. Main board: the word's own stage. Category pages: the page's original items
+        // always show; newer words show from stage 3 (pageStage, see layout above). Favorites: always.
+        const needStage = page.id === "core" ? base.stage : base.pageStage;
+        const stageGated = needStage !== undefined;
+        d.kind = "word";
+        d.base = base;
+        d.wordId = base.id;
+        d.ov = ov;
+        d.photoKey = wordKey(base.id);
+        d.label = ov.label ?? base.label;
+        d.wordType = base.wordType;
+        d.loadBoard = base.loadBoard || null;
+        d.action = base.action || null;               // e.g. "numberpad": opens the number pad (no speech)
+        d.noForms = !!base.noForms;                   // the season "fall" and the month "May": the Forms button never offers verb forms for them
+        d.stageGated = stageGated;
+        // Sentence buttons ("My name is ___"): speak the sentence with the blank filled in.
+        if (base.template) {
+          d.template = base.template;
+          d.blank = !!base.blank;
+          d.fill = (ov.fill || "").trim();
+          d.spoken = ov.spoken ?? (d.blank ? base.template.replace("___", d.fill) : base.template);
+          d.sentence = true;
+        } else {
+          d.spoken = ov.spoken ?? base.spokenText ?? d.label;
+        }
+        // (A page can only be opened when its own button is visible.) A blank sentence stays
+        // hidden until it is filled in.
+        d.defaultVisible = stageGated ? needStage <= profile.stage : true;
+        d.visible = (ov.show ?? d.defaultVisible) && !(d.blank && !d.fill);
+      } else if (custom && custom.custom && custom.label) {
+        d.kind = "word";                              // something the adult added
+        d.custom = true;
+        d.ov = custom;
+        d.photoKey = key;
+        d.label = custom.label;
+        const opens = custom.opens && profile.pages[custom.opens] ? custom.opens : null;
+        d.loadBoard = opens;                          // an adult-made page opens like a category
+        d.opens = opens;
+        d.spoken = custom.spoken ?? custom.label;
+        d.wordType = opens ? "category" : "noun";
+        d.defaultVisible = true;
+        d.visible = custom.show ?? true;
+      } else {
+        d.kind = "empty";
+        d.photoKey = key;
+        d.visible = false;
+      }
+      cells.push(d);
+    }
+  }
+  return cells;
+}

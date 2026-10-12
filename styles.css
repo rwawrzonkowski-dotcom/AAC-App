@@ -114,6 +114,17 @@ button { font: inherit; touch-action: manipulation; }
   color: #9aa3ad; pointer-events: none;
 }
 
+/* Beta copy only (js/app.js adds this tag only when CHANNEL is "beta"): a tiny corner tag for adults. */
+#beta-tag {
+  position: absolute; right: 1.2vmin; top: 0.3vmin; font-size: 1.3vmin; font-weight: 700; letter-spacing: 0.1em;
+  color: #b45309; background: rgba(245, 158, 11, 0.18); border-radius: 0.6vmin; padding: 0.1vmin 0.7vmin;
+  pointer-events: none;
+}
+
+/* Version label ("Stable 1.0", "Beta 1.1"): small and quiet, for adults */
+.version-label { font-weight: 400; font-size: 0.55em; opacity: 0.75; margin-left: 12px; }
+.setup-version { text-align: center; margin: 0.4vmin 0 0; font-size: 1.6vmin; color: #64748b; }
+
 /* ---------- Core grid: 9 x 5 (45 cells) or 12 x 7 (84 cells), fixed forever ----------
    js/board.js sets the column/row counts; these are the 45-board defaults. */
 #board {

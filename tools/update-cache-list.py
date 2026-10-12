@@ -5,11 +5,20 @@ Run this from the project folder whenever you add or remove a file
 (a new picture, script, ...):      python3 tools/update-cache-list.py
 Then change CACHE_VERSION in sw.js (for example aac-v4 -> aac-v5) so devices
 download the new files. Nothing here needs the internet.
-"""
-import os, re
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKIP_DIRS = {".git", "tools", "node_modules", "docs"}
+It can also update the beta copy (each service worker lists only its own folder's files):
+    python3 tools/update-cache-list.py beta
+(For beta the CACHE_VERSION is "beta-aac-vNN".)
+"""
+import os, re, sys
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Optional first argument: the folder to update ("beta"). Default: the main (stable) app in the repo root.
+ROOT = os.path.join(REPO, sys.argv[1]) if len(sys.argv) > 1 else REPO
+if not os.path.isfile(os.path.join(ROOT, "sw.js")):
+    raise SystemExit(f"No sw.js found in {ROOT}")
+# "beta" is skipped so the stable service worker never lists the beta copy's files.
+SKIP_DIRS = {".git", "tools", "node_modules", "docs", "beta"}
 # (data/dolch.json is only read by tools/dolch-coverage.py, never by the app)
 SKIP_FILES = {"sw.js", "README.md", "CREDITS.md", ".gitignore", "data/dolch.json"}
 

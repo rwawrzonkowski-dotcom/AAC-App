@@ -26,6 +26,7 @@ import {
   runPrompt, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
 } from "./modelprompt.js";
 import { preloadCritterArt } from "./critters.js";
+import { CHANNEL } from "./channel.js";
 import { loadForms, formsFor, openFormsPopover } from "./forms.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
@@ -472,6 +473,13 @@ async function openAdult() {
 // ---------- Start ----------
 async function start() {
   initSpeech();
+  // Beta copy only: a small "BETA" tag in the message-bar corner so adults can tell the copies apart.
+  if (CHANNEL === "beta") {
+    const tag = document.createElement("span");
+    tag.id = "beta-tag";
+    tag.textContent = "BETA";
+    $("message-text").appendChild(tag);
+  }
   // Registered first so a brand-new device caches the app even while the quick setup screen is open.
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js", { scope: "./" }).catch((e) =>

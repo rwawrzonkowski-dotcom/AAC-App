@@ -1,7 +1,9 @@
 // Tiny wrapper around localStorage. Everything stays on this device.
 // All access is wrapped in try/catch because Safari private mode or full
 // storage can make localStorage throw. If it fails, we fall back to memory.
-const PREFIX = "aac.";
+import { STORAGE_PREFIX } from "./channel.js";
+// Stable: "aac." (as always). Beta: "beta-aac." (so beta never touches stable's settings or passcode).
+const PREFIX = STORAGE_PREFIX + "aac.";
 const memory = {};
 
 export function load(key, fallback) {

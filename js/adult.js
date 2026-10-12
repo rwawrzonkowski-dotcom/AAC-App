@@ -11,6 +11,7 @@ import { saveBackup, restoreFromFile } from "./backup.js";
 import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
+import { VERSION_LABEL } from "./channel.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -32,7 +33,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
 
   const o = openOverlay([
     h("div", { class: "menu-head" },
-      h("h1", { text: "Adult menu" }),
+      h("h1", {}, "Adult menu", h("small", { class: "version-label", id: "version-label", text: VERSION_LABEL })),
       h("button", { type: "button", class: "btn primary", id: "menu-close-top", text: "Close", onclick: close })),
     body,
   ], { sheetClass: "menu" });

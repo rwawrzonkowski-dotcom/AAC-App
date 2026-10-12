@@ -1,0 +1,510 @@
+/* ---------- Basics: fixed full-screen app, no scrolling, no selection ---------- */
+:root {
+  --gap: 0.6vmin;
+  --radius: 1.2vmin;
+  /* Modified Fitzgerald Key colours (soft) */
+  --c-people: #fff3a8;
+  --c-action: #bfe8b8;
+  --c-describing: #bcd9f5;
+  --c-question: #d9c6f0;
+  --c-social: #f8c4d8;
+  --c-category: #fcd6a6;
+  --c-place: #bcd9f5;
+  --c-hidden: #e2e2e2;
+  --c-noun: #ffe6d4;          /* soft peach: things (food, toys...) */
+  --c-little: #f3ece0;        /* warm cream: little words (the, and, because...) */
+  --c-home: #f7b46c;
+  --c-tint: #f4bd7c;          /* page background on a category page */
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; width: 100%;
+  overflow: hidden;
+  position: fixed;               /* stops iOS rubber-band scrolling */
+  overscroll-behavior: none;     /* stops pull-to-refresh */
+  background: #f4f4f4;
+  font-family: -apple-system, "SF Pro Rounded", "Helvetica Neue", Arial, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;   /* no long-press callout */
+  touch-action: manipulation;    /* no double-tap zoom */
+}
+button { font: inherit; touch-action: manipulation; }
+
+/* ---------- Page layout: message bar / context strip / grid ---------- */
+#app {
+  height: 100vh; height: 100dvh; width: 100vw;
+  display: grid;
+  /* minmax(0, 1fr): a long message in the message bar must never make the column (and so the
+     whole board) wider than the screen. The words just scroll inside the bar. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 12fr 10fr 78fr;
+  gap: var(--gap);
+  padding: var(--gap);
+  position: relative;            /* edit banner is positioned inside it */
+}
+#app.on-category { background: var(--c-tint); }
+
+/* ---------- Message bar ---------- */
+#message-bar { display: flex; gap: var(--gap); min-height: 0; min-width: 0; }
+#message-text {
+  flex: 1; min-width: 0; background: #fff; border: 0.3vmin solid #9aa5b1;
+  border-radius: var(--radius); display: flex; align-items: center;
+  padding: 0 1.5vmin; cursor: pointer; overflow: hidden;
+}
+#message-text.pressed { background: #e6eef7; }
+#message-chips {
+  display: flex; gap: 1vmin; align-items: center; white-space: nowrap;
+  width: 100%; justify-content: flex-start;
+}
+.chip {
+  flex: 0 0 auto; background: #e8eef5; border: 0.25vmin solid #9aa5b1;
+  border-radius: 1vmin; padding: 0.4vmin 1.6vmin;
+  font-size: min(4vmin, 5.5dvh); font-weight: 700; color: #222;
+}
+/* A chip still being typed on the keyboard / number pad: dashed outline, white */
+.chip.draft { background: #fff; border: 0.35vmin dashed #1d4ed8; color: #1e3a8a; }
+/* The chip being said while the message bar plays with pauses between words */
+.chip.speaking { background: #fde68a; border-color: #b45309; }
+.bar-btn {
+  flex: 0 0 13vw; border: 0.3vmin solid #6b7480; border-radius: var(--radius);
+  font-size: min(2.4vw, 4dvh); font-weight: 800; color: #222; cursor: pointer;
+}
+#delete-btn { background: #ffd9a0; }
+#clear-btn  { background: #ffb3b3; }
+.bar-btn.pressed { filter: brightness(0.8); }
+/* Words and Forms sit between the message text and Delete. They take their room from the message
+   text (which shrinks); the grid below is not affected. The word "Close" replaces "Words" while a
+   Words page is open. A hidden button takes no room at all. */
+#words-btn, #forms-btn { flex: 0 0 11vw; }
+#words-btn { background: #b9e6d6; }
+#forms-btn { background: #d9c6f0; }
+#abc-btn { flex: 0 0 11vw; background: #ffe08a; }
+#app.typing #abc-btn { background: #f5b82e; box-shadow: inset 0 0 0 0.5vmin #7a4b00; }   /* ABC is "on" while typing; tap it to close */
+#app.typing #words-btn, #app.typing #forms-btn { opacity: 0.38; }                            /* not usable behind the keyboard */
+.bar-btn[hidden] { display: none; }
+.bar-btn:disabled { opacity: 0.38; cursor: default; }
+.bar-btn:disabled.pressed { filter: none; }
+
+/* ---------- Context strip (Phase 3 placeholder) ---------- */
+#context-strip {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  background: #ebeef2; border-radius: var(--radius);
+  border: 0.2vmin dashed #cfd5dc;
+}
+.on-category #context-strip { background: #e8923a; border: 0.2vmin solid #b86a14; }
+#page-title { font-size: min(5vmin, 6.5dvh); font-weight: 800; color: #4a2500; letter-spacing: 0.02em; }
+
+/* Hidden adult target: small, unlabeled, low contrast. Press and hold 3 sec. */
+#adult-hold {
+  position: absolute; left: 0.4vmin; top: 0.4vmin; width: 6.5vmin; height: 6.5vmin;
+  padding: 0; border: 0; border-radius: 50%; background: rgba(0,0,0,0.04);
+  touch-action: none; cursor: default;
+}
+.hold-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.hold-ring circle { fill: none; stroke-width: 3; }
+.hold-ring .ring-bg { stroke: rgba(0,0,0,0.10); }
+.hold-ring .ring-fg { stroke: #3b4a5c; stroke-dasharray: 100; stroke-dashoffset: 100; opacity: 0; }
+.holding .ring-fg { opacity: 0.9; animation: fill-ring var(--hold-ms) linear forwards; }
+@keyframes fill-ring { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+
+/* Which learner this is: small and subtle */
+#message-text { position: relative; }
+#learner-name {
+  position: absolute; right: 1.2vmin; bottom: 0.3vmin; font-size: 1.5vmin;
+  color: #9aa3ad; pointer-events: none;
+}
+
+/* Beta copy only (js/app.js adds this tag only when CHANNEL is "beta"): a tiny corner tag for adults. */
+#beta-tag {
+  position: absolute; right: 1.2vmin; top: 0.3vmin; font-size: 1.3vmin; font-weight: 700; letter-spacing: 0.1em;
+  color: #b45309; background: rgba(245, 158, 11, 0.18); border-radius: 0.6vmin; padding: 0.1vmin 0.7vmin;
+  pointer-events: none;
+}
+
+/* Version label ("Stable 1.0", "Beta 1.1"): small and quiet, for adults */
+.version-label { font-weight: 400; font-size: 0.55em; opacity: 0.75; margin-left: 12px; }
+.setup-version { text-align: center; margin: 0.4vmin 0 0; font-size: 1.6vmin; color: #64748b; }
+
+/* ---------- Core grid: 9 x 5 (45 cells) or 12 x 7 (84 cells), fixed forever ----------
+   js/board.js sets the column/row counts; these are the 45-board defaults. */
+#board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: var(--gap);
+  min-height: 0; min-width: 0;
+}
+.cell {
+  position: relative; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  border-radius: var(--radius); border: 0.25vmin solid rgba(0,0,0,0.18);
+  padding: 0; overflow: hidden; color: #111; cursor: pointer;
+}
+/* Hidden word: occupies its cell but is blank, gray and inert */
+.cell.hidden {
+  background: var(--c-hidden); border-color: transparent;
+  pointer-events: none; cursor: default;
+}
+.cell.hidden * { display: none; }
+#board.page-change { animation: page-fade 0.18s ease-out; }
+@keyframes page-fade { from { opacity: 0.35; } to { opacity: 1; } }
+
+.type-people     { background: var(--c-people); }
+.type-action     { background: var(--c-action); }
+.type-describing { background: var(--c-describing); }
+.type-question   { background: var(--c-question); }
+.type-social     { background: var(--c-social); }
+.type-category   { background: var(--c-category); }
+.type-place      { background: var(--c-place); }
+.type-noun       { background: var(--c-noun); }
+.type-little     { background: var(--c-little); }
+.type-home       { background: var(--c-home); border: 0.5vmin solid #b86a14; }
+
+/* Press feedback: brief darken */
+.cell.pressed { filter: brightness(0.78); }
+
+/* Image area: FIXED proportion (66% of cell) so real images can replace
+   the placeholder later without changing the layout. */
+.cell-image {
+  flex: 0 0 66%; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.cell-image .placeholder { font-size: min(5.2vw, 8dvh); line-height: 1; }
+/* Built-in symbol: centered, scaled to fit INSIDE the fixed image area (never
+   stretched, never cropped), on the button's own colour. The image area keeps
+   its size whatever picture is in it. */
+.cell-image img.symbol { width: 100%; height: 100%; padding: 3% 6%; object-fit: contain; -webkit-user-drag: none; }
+.cell-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+/* A photo fills the same fixed image area (cropped, never stretched) */
+.cell-image img.photo { width: 100%; height: 100%; object-fit: cover; }
+.cell-label {
+  flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 1.7vw; font-weight: 800; letter-spacing: -0.01em;
+  overflow: hidden; pointer-events: none;
+}
+/* The label text. js/board.js (fitLabels) wraps a long label onto two lines or
+   shrinks its letters so it always fits the button. The button never changes. */
+.cell-label .lbl {
+  display: inline-block; min-width: 0; max-width: 100%; white-space: nowrap; text-align: center;
+}
+.cell-label .lbl.two-lines { white-space: normal; line-height: 1.05; }
+.cell-label .lbl.break-word { overflow-wrap: anywhere; }
+
+/* Text-forward button (a word with no symbol, or words-only mode). The picture box above stays
+   exactly as it was (empty), so the button and its picture area keep their size; the label is
+   laid over the WHOLE button so the word can be big. js/board.js fitLabels() still shrinks a long
+   word to fit. */
+.cell.text-only .cell-label {
+  position: absolute; inset: 0; font-size: 3vw; letter-spacing: -0.02em; padding: 0 0.3vw; z-index: 1;
+}
+#board[data-size="84"] .cell.text-only .cell-label { font-size: 2.3vw; padding: 0 0.2vw; }
+
+/* 84-location board: more, smaller buttons, so smaller letters (and emoji fallback) */
+#board[data-size="84"] { --radius: 0.9vmin; }
+#board[data-size="84"] .cell { border-radius: 0.9vmin; border-width: 0.2vmin; }
+#board[data-size="84"] .cell-label { font-size: 1.3vw; letter-spacing: -0.02em; padding: 0 0.15vw; }
+#board[data-size="84"] .cell-image .placeholder { font-size: min(3.6vw, 5.4dvh); }
+#board[data-size="84"] .cell.empty-slot .plus { font-size: 3.4vmin; }
+
+/* ---------- Hold to select: filling ring on the pressed button ----------
+   A layer on top of the button (absolute, so nothing is resized or moved). */
+.touch-hold {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.35);
+}
+.touch-hold svg { height: 78%; max-width: 90%; transform: rotate(-90deg); }
+.touch-hold circle { fill: none; stroke-width: 5; }
+.touch-hold .th-bg { stroke: rgba(0, 0, 0, 0.22); }
+.touch-hold .th-fg { stroke: #0b4fa8; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100;
+  animation: fill-ring var(--hold-ms) linear forwards; }
+
+/* ---------- Portrait: show only the rotate message ---------- */
+#rotate-message {
+  display: none; position: fixed; inset: 0; z-index: 10;
+  background: #1e6ec8; color: #fff; text-align: center;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 6vmin;
+}
+#rotate-message .rotate-icon { font-size: 18vmin; margin-bottom: 4vmin; }
+#rotate-message p { font-size: 6vmin; font-weight: 800; margin: 0; }
+@media (orientation: portrait) {
+  #rotate-message { display: flex; }
+  #app { display: none; }
+}
+
+/* ---------- Edit mode: show every cell, hidden ones faded with dashed outline ---------- */
+.cell.ghost { border: 0.25vmin dashed #6b7480; opacity: 0.5; }
+.cell.empty-slot { background: transparent; align-items: center; justify-content: center; }
+.cell.empty-slot .plus { font-size: 5vmin; color: #6b7480; font-weight: 300; }
+#edit-banner {
+  position: absolute; grid-row: 1 / 2; grid-column: 1 / 2; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 2vmin;
+  background: #1f2937; color: #fff; border-radius: var(--radius); padding: 0 2vmin;
+  font-size: min(3.4vmin, 5dvh); font-weight: 700;
+}
+#edit-banner[hidden] { display: none; }
+#edit-words {
+  background: #b9e6d6; color: #052e16; border: 0; border-radius: 1.2vmin; margin-left: auto; margin-right: 2vmin;
+  font-size: min(3.4vmin, 5dvh); font-weight: 800; padding: 0 4vmin; height: 80%; cursor: pointer;
+}
+#edit-words[hidden] { display: none; }
+#edit-done {
+  background: #22c55e; color: #052e16; border: 0; border-radius: 1.2vmin;
+  font-size: min(3.6vmin, 5.5dvh); font-weight: 800; padding: 0 5vmin; height: 80%; cursor: pointer;
+}
+
+/* ---------- Model mode ---------- */
+#model-banner {
+  position: fixed; top: 0; left: 0; right: 0; height: 3.6dvh; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 2vmin;
+  background: rgba(109, 40, 217, 0.92); color: #fff; font-weight: 800;
+  font-size: 2.4dvh; letter-spacing: 0.08em;
+}
+#model-banner[hidden] { display: none; }
+#model-end {
+  position: relative; overflow: hidden; height: 80%; border: 0.2vmin solid #fff; border-radius: 1vmin;
+  background: transparent; color: #fff; font-size: 2.2dvh; font-weight: 700; padding: 0 2vmin; cursor: pointer;
+  touch-action: none;
+}
+.hold-bar::after {            /* progress bar that fills while holding */
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255,255,255,0.45);
+}
+.hold-bar.holding::after { animation: fill-bar var(--hold-ms) linear forwards; }
+@keyframes fill-bar { from { width: 0; } to { width: 100%; } }
+/* The ring is a glow around the button: it takes no room. --ring-a (0 to 1) is the
+   learner's "ring opacity" setting; js/modelprompt.js sets it on the button. */
+.cell.model-ring, .mp-mock.ring-on, .bar-btn.model-ring, .kb-key.model-ring {
+  z-index: 5;
+  animation: model-pulse 0.5s ease-in-out infinite alternate;
+  box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
+}
+@keyframes model-pulse {
+  from { box-shadow: 0 0 0 0.6vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.2vmin rgba(124, 58, 237, var(--ring-a, 1)); }
+  to   { box-shadow: 0 0 0 0.9vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 2.2vmin rgba(124, 58, 237, var(--ring-a, 1)),
+                     0 0 3vmin 2vmin rgba(124, 58, 237, calc(var(--ring-a, 1) * 0.5)); }
+}
+
+/* ---------- Model critter ----------
+   A see-through layer over the whole screen. It never catches a tap (pointer-events: none)
+   and is not part of the board's grid, so nothing on the board can move because of it. */
+#critter-layer { position: fixed; inset: 0; z-index: 25; pointer-events: none; overflow: hidden; }
+.critter-slot { position: absolute; pointer-events: none; }
+.critter { position: absolute; pointer-events: none; transform-origin: 50% 100%; }
+.critter * { pointer-events: none; }
+.critter-art, .critter-art svg { display: block; width: 100%; height: 100%; }
+/* The animal's main body color (the "body" parts of each drawing) comes from --body. */
+.critter-art .body, .critter-art.body { fill: var(--body, #f5a04a); }
+.critter-photo {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  border-radius: 22%; border: 0.5vmin solid #fff; box-shadow: 0 0.6vmin 1.6vmin rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Adult screens (overlays): plain, adult-styled, separate from the child board ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, 0.72);
+  display: flex; align-items: center; justify-content: center; padding: 2vmin;
+}
+.sheet.adult {
+  background: #fff; color: #1f2937; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+  width: min(560px, 94vw); max-height: 94dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 24px; font-size: clamp(16px, 2.4vmin, 21px);
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+.sheet.adult.small { width: min(480px, 92vw); }
+.sheet.adult.editor { width: min(640px, 94vw); }
+.sheet.adult.menu { width: min(980px, 96vw); height: 94dvh; display: flex; flex-direction: column; overflow: hidden; padding: 0; background: #f1f5f9; }
+.sheet.adult h1 { margin: 0; font-size: 1.5em; }
+.sheet.adult h2 { margin: 0 0 12px; font-size: 1.2em; }
+.menu-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #1f2937; color: #fff; }
+.menu-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+.panel { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #d5dde6; }
+.muted { color: #64748b; margin: 4px 0 12px; }
+.panel.notice { background: #fffbeb; border-color: #f59e0b; }
+.notice-list { margin: 0 0 8px; padding-left: 22px; line-height: 1.5; }
+.confirm-text { margin: 0 0 18px; line-height: 1.4; }
+
+.btn {
+  font-size: 1em; font-weight: 700; padding: 14px 20px; min-height: 52px; border-radius: 10px;
+  border: 2px solid #94a3b8; background: #fff; color: #1f2937; cursor: pointer; display: inline-flex;
+  align-items: center; justify-content: center; text-align: center;
+}
+.btn.primary { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+.btn.danger { background: #fff; border-color: #dc2626; color: #b91c1c; }
+.btn[disabled] { opacity: 0.4; cursor: default; }
+.btn.wide { width: 100%; margin-top: 10px; }
+.btn.big { flex: 1; min-height: 76px; font-size: 1.2em; background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+.btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+.btn-row.left { justify-content: flex-start; margin-top: 12px; }
+.action-row { display: flex; gap: 16px; }
+.link-btn { background: none; border: 0; color: #1d4ed8; text-decoration: underline; font-size: 0.95em; padding: 12px; cursor: pointer; }
+
+.learner-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.learner-item { padding: 14px 22px; min-height: 52px; border-radius: 10px; border: 2px solid #94a3b8; background: #fff; font-size: 1em; font-weight: 600; cursor: pointer; }
+.learner-item.current { background: #dbeafe; border-color: #1d4ed8; }
+.stage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stage-btn { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; text-align: left; padding: 14px; min-height: 120px; border-radius: 12px; border: 2px solid #94a3b8; background: #fff; cursor: pointer; font-size: 0.85em; color: #1f2937; }
+.stage-btn.on { background: #dbeafe; border-color: #1d4ed8; box-shadow: inset 0 0 0 2px #1d4ed8; }
+.stage-title { font-size: 1.35em; font-weight: 800; }
+.stage-note { color: #64748b; font-weight: 600; }
+.stage-words { line-height: 1.35; }
+
+.field { margin: 12px 0; }
+.field > label { display: block; font-weight: 700; margin-bottom: 6px; }
+.field-row { display: flex; gap: 10px; align-items: stretch; }
+.field-row .text-input { flex: 1; min-width: 0; }
+.hear-btn {
+  flex: 0 0 60px; min-height: 56px; border-radius: 10px; border: 2px solid #1d4ed8; background: #eff6ff;
+  color: #1d4ed8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+}
+.hear-btn:active { background: #dbeafe; }
+.hear-btn[disabled] { opacity: 0.35; cursor: default; }
+.text-input { width: 100%; font-size: 1em; padding: 12px 14px; border: 2px solid #94a3b8; border-radius: 10px; background: #fff; color: #1f2937; -webkit-user-select: text; user-select: text; }
+.slider-row { display: grid; grid-template-columns: 90px 1fr 60px; align-items: center; gap: 14px; margin: 14px 0; }
+.slider-row label { font-weight: 700; }
+.slider-row input[type=range] { width: 100%; height: 36px; }
+.slider-num { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+
+.seg-row { display: flex; gap: 8px; }
+.seg { flex: 1; padding: 12px 8px; min-height: 52px; border-radius: 10px; border: 2px solid #94a3b8; background: #fff; font-size: 0.95em; font-weight: 700; cursor: pointer; color: #1f2937; }
+.seg.on { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+.photo-row { display: flex; gap: 16px; align-items: center; }
+.photo-thumb { flex: 0 0 110px; height: 110px; border-radius: 10px; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; overflow: hidden; color: #64748b; font-size: 0.85em; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-btns { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.file-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.form-error { color: #b91c1c; font-weight: 700; min-height: 1.2em; margin: 8px 0 0; }
+
+.pic-state { margin: 0; font-weight: 700; color: #334155; }
+.photo-thumb img.symbol { object-fit: contain; padding: 6px; background: #f8fafc; }
+
+/* Touch settings and Backup */
+.touch-setting { padding: 10px 0 4px; border-top: 1px solid #e2e8f0; }
+.touch-setting:first-of-type { border-top: 0; }
+.touch-seg { max-width: 260px; }
+.touch-slider { grid-template-columns: 60px 1fr 70px; }
+.touch-slider.off { opacity: 0.4; }
+.backup-status { font-weight: 700; color: #166534; min-height: 1.3em; margin: 12px 0 0; word-break: break-word; }
+.restore-list { display: flex; flex-direction: column; gap: 12px; max-height: 50dvh; overflow-y: auto; }
+.restore-row { border: 1px solid #d5dde6; border-radius: 10px; padding: 12px; }
+.restore-row .muted { margin: 2px 0 8px; }
+.restore-name { font-weight: 800; font-size: 1.1em; }
+.restore-row .seg-row { flex-wrap: wrap; }
+
+/* Passcode keypad */
+.sheet.adult.lock { width: min(420px, 92vw); text-align: center; }
+.lock-hint { color: #64748b; min-height: 2.6em; margin: 4px 0 8px; }
+.lock-dots { display: flex; justify-content: center; gap: 18px; margin: 6px 0 16px; }
+.lock-dots .dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #1f2937; }
+.lock-dots .dot.filled { background: #1f2937; }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.key { font-size: 1.9em; font-weight: 700; min-height: 72px; border-radius: 14px; border: 2px solid #94a3b8; background: #f8fafc; color: #1f2937; cursor: pointer; }
+.key.ghost-key { font-size: 1.1em; background: transparent; border-color: transparent; color: #475569; }
+.lock-forgot { color: #475569; font-size: 0.85em; line-height: 1.4; text-align: left; }
+.lock-forgot[hidden] { display: none; }
+
+/* Never show adult screens when the iPad is upright (rotate message instead) */
+@media (orientation: portrait) { .overlay { display: none; } }
+
+/* Editor: privacy reminder for the emergency-contact button */
+.privacy-note { margin: 4px 0 12px; padding: 10px 14px; border-radius: 10px; background: #fef3c7; border: 2px solid #d97706; color: #78350f; font-weight: 700; }
+.size-seg { max-width: 460px; }
+
+/* Model prompt section of the adult menu */
+.sheet.adult h3 { margin: 4px 0 8px; font-size: 1.05em; }
+.mp-critter { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+.mp-seg { flex-wrap: wrap; }
+.mp-seg .seg { min-width: 120px; }
+.mp-slider { grid-template-columns: 150px 1fr 60px; }
+.mp-slider.off { opacity: 0.4; }
+.mp-animals .animal-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 96px; padding: 8px 6px; }
+.mp-thumb { display: block; width: 56px; height: 56px; }
+.mp-thumb svg { display: block; width: 100%; height: 100%; }
+.mp-thumb .body { fill: var(--body, #f5a04a); }
+.seg[disabled], .swatch[disabled] { opacity: 0.4; cursor: default; }
+.mp-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+.swatch { width: 52px; height: 52px; border-radius: 50%; border: 3px solid #94a3b8; cursor: pointer; padding: 0; }
+.swatch.on { border-color: #1f2937; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1d4ed8; }
+.mp-preview-row { display: flex; gap: 20px; align-items: flex-start; margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; }
+.mp-preview-title { display: block; font-weight: 700; margin-bottom: 8px; }
+.mp-mock { position: relative; border-radius: 12px; background: #ffe6d4; border: 2px solid rgba(0, 0, 0, 0.18); overflow: visible; margin: 8px; }
+.mp-mock .critter { transform-origin: 50% 100%; }
+.mp-preview-side { flex: 1; min-width: 220px; }
+
+/* ---------- Forms popover (Phase 1.6B) ----------
+   A see-through layer over the whole screen (so the grid never moves); tapping the dim area closes it. */
+#forms-backdrop {
+  position: fixed; inset: 0; z-index: 40; background: rgba(15, 23, 42, 0.45);
+  display: flex; justify-content: center; align-items: flex-start; padding: 24dvh 4vw 0;
+}
+#forms-popover {
+  width: 100%; max-width: 96vw; background: #fff; border: 0.5vmin solid #6b7480; border-radius: 2vmin;
+  padding: 2vmin; display: grid; grid-template-columns: repeat(var(--forms-cols, 3), minmax(0, 1fr)); gap: 1.6vmin;
+  box-shadow: 0 1vmin 5vmin rgba(0, 0, 0, 0.5);
+}
+.form-btn {
+  display: flex; align-items: center; justify-content: center; min-height: 19dvh; padding: 0 1vmin;
+  border: 0.35vmin solid rgba(0, 0, 0, 0.3); border-radius: 1.6vmin; background: #e8eef5; color: #111;
+  font-size: min(6vw, 9dvh); font-weight: 800; cursor: pointer; text-align: center; overflow: hidden;
+}
+.form-btn span { max-width: 100%; overflow-wrap: anywhere; }
+.form-btn.current { background: #d9c6f0; border-color: #4c1d95; border-width: 0.8vmin; }
+.form-btn.pressed { filter: brightness(0.78); }
+@media (orientation: portrait) { #forms-backdrop { display: none; } }
+
+/* ---------- Keyboard and number pad (Phase 1.7) ----------
+   One overlay laid over the grid's row (an absolutely positioned child of #app, so it takes no room and no
+   grid cell moves or resizes). The message bar above stays visible and shows the dashed draft chip. */
+#typing-overlay {
+  position: absolute; grid-row: 3 / 4; grid-column: 1 / 2; inset: 0; z-index: 35;
+  background: #dfe5ec; border: 0.4vmin solid #6b7480; border-radius: var(--radius);
+  padding: 1.2vmin; display: flex; flex-direction: column; gap: 1.2vmin;
+}
+.kb-head { flex: 0 0 auto; height: max(9dvh, 64px); display: flex; align-items: stretch; gap: 1.2vmin; }
+.kb-title { flex: 1; align-self: center; text-align: center; font-size: min(3.6vmin, 5dvh); font-weight: 800; color: #334155; }
+.kb-keys { flex: 1; min-height: 0; display: grid; gap: 1vmin; }
+.kb-letters { grid-template-columns: repeat(20, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); }
+.kb-pad { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); width: min(100%, 92vmin); margin: 0 auto; }
+.kb-key {
+  min-height: 64px; min-width: 0; padding: 0; border: 0.35vmin solid #4b5563; border-radius: 1.4vmin;
+  background: #fff; color: #111; font-weight: 800; font-size: min(7.5vmin, 10dvh); line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; text-transform: none;
+}
+.kb-key.pressed { filter: brightness(0.78); }
+.kb-key.refused { background: #fecaca; border-color: #b91c1c; }
+.kb-pad .kb-key { font-size: min(11vmin, 14dvh); }
+.kb-space { background: #dbeafe; font-size: min(4.4vmin, 6dvh); letter-spacing: 0.05em; }
+.kb-back { background: #fdba74; }
+.kb-done { background: #22c55e; font-size: min(5.2vmin, 7dvh); }
+.kb-switch { background: #ddd6fe; font-size: min(5.2vmin, 7dvh); }
+.kb-head .kb-key { flex: 0 0 auto; padding: 0 3.5vmin; font-size: min(3.8vmin, 5.4dvh); min-height: 0; }
+.kb-close { background: #e5e7eb; }
+.kb-pad .kb-done { font-size: min(6vmin, 8dvh); }
+
+/* ---------- Passcode: stay unlocked ---------- */
+.lock-stay { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 4px; font-size: 1em; cursor: pointer; }
+.lock-stay input { width: 24px; height: 24px; }
+
+/* ---------- Quick setup screen (adult-facing, full screen, above everything) ---------- */
+.setup-screen {
+  position: fixed; inset: 0; z-index: 90; background: #f1f5f9; color: #1f2937;
+  display: flex; align-items: center; justify-content: center; padding: 2vmin; overflow-y: auto;
+}
+.setup-screen[hidden] { display: none; }
+.setup-card { width: min(900px, 96vw); text-align: center; }
+.setup-card h1 { margin: 0 0 1.4vmin; font-size: 4.4vmin; }
+.setup-name-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 2vmin; font-size: 2.2vmin; }
+.setup-name-row .text-input { width: 30vmin; }
+.setup-choices { display: flex; flex-direction: column; gap: 1.6vmin; }
+.setup-choice {
+  display: flex; flex-direction: column; gap: 0.6vmin; align-items: center; justify-content: center;
+  min-height: 15vmin; padding: 1.6vmin 3vmin; border: 3px solid #1d4ed8; border-radius: 14px;
+  background: #fff; color: #1f2937; cursor: pointer; font-family: inherit;
+}
+.setup-choice.new { background: #1d4ed8; color: #fff; }
+.setup-choice-title { font-size: 3.4vmin; font-weight: 700; }
+.setup-choice-text { font-size: 2.2vmin; opacity: 0.85; }
+.setup-note { margin: 2vmin 0 0; font-size: 2vmin; }
+.setup-foot { display: flex; justify-content: center; gap: 12px; margin-top: 0.6vmin; }
+.setup-foot .link-btn { font-size: 2vmin; }

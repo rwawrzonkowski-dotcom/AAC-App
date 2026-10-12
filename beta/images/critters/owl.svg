@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Owl: round body, ear tufts, big eye discs. class="body" = recolorable body colour. -->
+  <g stroke="#5b3b2a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- feet -->
+    <ellipse cx="40" cy="94.500" rx="7.500" ry="3.500" fill="#f7b733"/>
+    <ellipse cx="60" cy="94.500" rx="7.500" ry="3.500" fill="#f7b733"/>
+    <!-- ear tufts -->
+    <path class="body" d="M21 32 L17 10 Q17 8 20 9 L41 21 Z" fill="#f5a04a"/>
+    <path class="body" d="M79 32 L83 10 Q83 8 80 9 L59 21 Z" fill="#f5a04a"/>
+    <!-- body -->
+    <ellipse class="body" cx="50" cy="56" rx="34" ry="37" fill="#f5a04a"/>
+    <ellipse cx="50" cy="72" rx="20" ry="19" fill="#fff4e2" stroke="none"/>
+    <path d="M39 66q3.500 4 7 0M46 66q4 4 8 0M54 66q3.500 4 7 0M42.500 74q3.500 4 7 0M50 74q3.500 4 7 0M46 82q4 4 8 0" fill="none" stroke="#d9b98f" stroke-width="2.200"/>
+    <!-- wings -->
+    <path class="body" d="M17 52 Q4 64 12 82 Q22 88 27 72 Z" fill="#f5a04a"/>
+    <path d="M17 52 Q4 64 12 82 Q22 88 27 72 Z" fill="#000" fill-opacity=".13" stroke="none"/>
+    <path class="body" d="M83 52 Q96 64 88 82 Q78 88 73 72 Z" fill="#f5a04a"/>
+    <path d="M83 52 Q96 64 88 82 Q78 88 73 72 Z" fill="#000" fill-opacity=".13" stroke="none"/>
+    <!-- face -->
+    <circle cx="36" cy="42" r="13.500" fill="#fff4e2"/>
+    <circle cx="64" cy="42" r="13.500" fill="#fff4e2"/>
+    <path d="M50 47l-6 5.500q6 8 12 0z" fill="#f7b733" stroke-width="2.800"/>
+  </g>
+  <circle cx="37" cy="43" r="6.800" fill="#2b1d18"/><circle cx="63" cy="43" r="6.800" fill="#2b1d18"/>
+  <circle cx="34.800" cy="40.500" r="2.400" fill="#fff"/><circle cx="60.800" cy="40.500" r="2.400" fill="#fff"/>
+</svg>

@@ -340,6 +340,34 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
   adult-added word in one of those previously empty cells is kept and moved the same way, with a note. Learner data is now version 7
   and backups version 9 (older backups get the same check when restored). Code: `js/migrate.js`.
 
+## How updates are tested (stable and beta)
+The app comes in two copies on the same website, so clients never get an untested change:
+- **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
+  ("Stable 1.0") is shown small at the top of the adult menu and at the bottom of the setup screen.
+- **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
+  It shows "Beta 1.1" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It can be added to the home screen as its own icon ("AAC Beta", icon with a BETA band).
+
+**Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
+starts with `beta-`, and stable keeps exactly the names it always used (database `aac-board`, settings `aac.*`). So beta
+starts empty and shows the setup screen on its first open, and nothing done in beta can touch a client's data in stable.
+To test with a real learner, make a backup in the stable app (adult menu > Backup) and use **Restore from a backup file** in beta
+(backup files work in both). Offline copies are kept apart the same way: stable's is `aac-vNN`, beta's is `beta-aac-vNN`;
+each service worker deletes only its own, and the stable one ignores everything under `beta/`.
+
+**Scripts** (run them from the project folder; they only change files on this computer and never commit or push):
+- `tools/make-beta.sh` rebuilds `beta/` as a fresh copy of the stable app set up as beta. Use it to start testing a new round, or
+  to throw away beta experiments. It overwrites `beta/`, so make beta changes only after running it. Running it twice changes
+  nothing; if beta did change, its cache number goes up so devices fetch the new files.
+- `tools/promote-beta.sh "Stable 1.1"` makes the tested beta the new stable: it copies beta's app files over the main ones, keeps
+  stable's own channel file, manifest, icons and names, sets the new version label, raises stable's cache number (`aac-v15` to
+  `aac-v16`), rewrites the file list and prints which files changed. Then test, commit, and run `tools/make-beta.sh` to restart beta.
+- `python3 tools/update-cache-list.py` (stable) and `python3 tools/update-cache-list.py beta` rewrite the file list in each `sw.js`
+  (each lists only its own folder). Bump that copy's `CACHE_VERSION` after changing files.
+- `tools/make-beta-icons.py` (needs Pillow) redraws the beta icons in `tools/beta-icons/` if the stable icon ever changes.
+
+Typical round: `tools/make-beta.sh`, change files in `beta/`, test on an iPad at `/beta/`, then `tools/promote-beta.sh "Stable 1.1"`.
+
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.
 2. Tap the Share button, then **Add to Home Screen**.
@@ -376,6 +404,7 @@ Make sure the iPad is not on silent mode and the volume is up.
   `tools/update-cache-list.py` rewrites the file list in sw.js (run both after changing
   pictures or files, then bump `CACHE_VERSION`).
 - `sw.js` caches the app for offline use. Change `CACHE_VERSION` whenever files change.
+- `js/channel.js` says whether this copy is stable or beta (version label and storage prefix); `beta/` is the generated test copy (see How updates are tested).
 
 ## Testing locally
 `python3 -m http.server` in this folder, then open http://localhost:8000.

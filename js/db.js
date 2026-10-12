@@ -7,7 +7,9 @@
 //
 // Two "stores" (like tables): "profiles" and "photos". Keys are strings.
 
-const DB_NAME = "aac-board";
+import { STORAGE_PREFIX } from "./channel.js";
+// Stable: "aac-board" (as always). Beta: "beta-aac-board" (its own database).
+const DB_NAME = STORAGE_PREFIX + "aac-board";
 const DB_VERSION = 1;
 const STORES = ["profiles", "photos"];
 

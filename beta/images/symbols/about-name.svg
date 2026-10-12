@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
+  <!-- A plain "hello, my name is" tag drawn for this project: a card with a red band on top
+       and a handwritten squiggle where the name goes. No text, so it works in any language. -->
+  <g stroke="#000" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="8" y="12" width="56" height="48" rx="6" fill="#fff"/>
+    <path d="M8 18a6 6 0 0 1 6-6h44a6 6 0 0 1 6 6v10H8z" fill="#d22f27"/>
+    <rect x="28" y="16" width="16" height="5" rx="2.5" fill="#fff"/>
+    <path d="M17 46c3-8 5-8 6-2s3 6 5-1 3-7 5-1 3 6 5-1 4-6 5 0 3 5 5 0" fill="none" stroke-width="2.6"/>
+    <path d="M16 54h40" fill="none" stroke-width="1.8" stroke="#6b7280"/>
+  </g>
+</svg>

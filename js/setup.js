@@ -9,6 +9,7 @@
 import { h } from "./ui.js";
 import { restoreFromFile } from "./backup.js";
 import { listProfiles } from "./profiles.js";
+import { VERSION_LABEL } from "./channel.js";
 
 export const SETUP_CHOICES = [
   { id: "full84", title: "Full board — 84 buttons", gridSize: 84, stage: 4,
@@ -59,6 +60,7 @@ export function showSetup({ first = false } = {}) {
         h("div", { class: "setup-foot" },
           first ? h("label", { class: "link-btn", for: "setup-restore-file", id: "setup-restore", text: "Restore from a backup file" }) : null,
           first ? null : h("button", { type: "button", class: "btn", id: "setup-cancel", text: "Cancel", onclick: () => done(null) })),
+        h("p", { class: "version-label setup-version", id: "setup-version", text: VERSION_LABEL }),
         fileIn));
     document.body.appendChild(screen);
   });
