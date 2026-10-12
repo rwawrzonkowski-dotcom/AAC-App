@@ -190,10 +190,26 @@ Every button shows an open-licensed symbol (Mulberry Symbols or OpenMoji, see
 CREDITS.md). Symbols for objects and food are stand-ins until an adult adds real
 photos. Not built yet: photo-suggested words, data logging.
 
+## Getting started (quick setup)
+The very first time the app opens on a device (and whenever you tap **Add learner** in the adult menu) a
+full-screen **Set up this board** card appears, with an optional learner name (default "Learner 1") and three big choices:
+- **Full board - 84 buttons:** 84 board, stage 4 (every word shown).
+- **Full board - 45 buttons:** 45 board, stage 4 (every word shown).
+- **New AAC learner:** 45 board, stage 1 (6 words; reveal more as the learner grows).
+
+Words and keyboard buttons are left on Auto. Everything can be changed later in the adult menu. On a brand-new
+device there is also a small **Restore from a backup file** link, so you can load a prepared board (see Backup).
+The passcode is not asked for here; you create it the first time you open the adult menu. Devices that already
+have learners never see this card on start, and no learner's stage is changed by this update.
+
+**Staying unlocked.** The passcode screen has a **Stay unlocked for 10 minutes** box (on by default). After a
+correct passcode, the next opening of the adult menu on that device skips the passcode for 10 minutes (the 3-second
+hold is still needed every time). Untick the box to be asked every time.
+
 ## For adults
 **Open the adult menu:** press and HOLD the small faint circle at the top-left of
 the gray strip (under the message bar) for 3 seconds. A ring fills while you hold.
-Then type your 4-digit passcode.
+Then type your 4-digit passcode (unless you are still unlocked, see above).
 
 **First time:** you are asked to create a passcode (type it twice). This only keeps
 little fingers out; it is not security. If it is forgotten it can only be reset by
@@ -201,7 +217,7 @@ clearing this app's website data in iPad Settings, which ALSO erases all learner
 photos. Keep a recent backup (see Backup below), then restore it after resetting.
 
 **Adult menu**
-- **Learner:** switch, add, rename or delete a learner (the last one cannot be deleted).
+- **Learner:** switch, add (shows the quick setup card), rename or delete a learner (the last one cannot be deleted).
   The current learner's first name shows faintly in the message bar corner.
 - **Board size (per learner):** 45 or 84 locations. Switching asks you to confirm and
   explains that word locations change (a relearning event). The learner keeps their stage.
@@ -347,7 +363,7 @@ Make sure the iPad is not on silent mode and the volume is up.
   and critter in Model mode; `js/modelsettings.js` is the Model prompt part of the adult menu.
 - `js/profiles.js` + `js/db.js` learner profiles and photos (IndexedDB);
   `js/storage.js` small settings (current learner, passcode) in localStorage.
-- `js/lock.js` passcode keypad; `js/adult.js` adult menu; `js/editor.js` button editor;
+- `js/setup.js` the quick setup card (first open and Add learner); `js/lock.js` passcode keypad (and the 10-minute unlock); `js/adult.js` adult menu; `js/editor.js` button editor;
   `js/hold.js` press-and-hold; `js/ui.js` small dialog helpers;
   `js/events.js` in-memory tap list for a later phase.
 - `images/critters/` the five drawn animals and three accessories (original drawings; the body

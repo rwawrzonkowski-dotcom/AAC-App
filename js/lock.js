@@ -4,10 +4,20 @@
 import { load, save } from "./storage.js";
 import { h, openOverlay } from "./ui.js";
 
-// Resolves to true if the adult entered (or just created) the passcode.
+// "Stay unlocked for 10 minutes": after a correct passcode (with the box ticked) the passcode step is
+// skipped on this device until this time. The 3-second hold is still needed each time.
+export const STAY_UNLOCKED_MS = 10 * 60 * 1000;
+function stillUnlocked() {
+  const until = load("unlockUntil", 0);
+  const left = typeof until === "number" ? until - Date.now() : 0;
+  return left > 0 && left <= STAY_UNLOCKED_MS;     // (a clock set far back cannot make it last longer)
+}
+
+// Resolves to true if the adult entered (or just created) the passcode, or is still unlocked.
 export function requestAdultAccess() {
   return new Promise((resolve) => {
     const saved = load("passcode", null);
+    if (saved && stillUnlocked()) return resolve(true);
     let mode = saved ? "enter" : "create";   // enter | create | confirm
     let first = "";                          // the code typed the first time (create)
     let digits = "";
@@ -27,6 +37,7 @@ export function requestAdultAccess() {
     }
 
     function finish(ok) {
+      if (ok) save("unlockUntil", stay.checked ? Date.now() + STAY_UNLOCKED_MS : 0);
       document.removeEventListener("keydown", onKey);
       o.close();
       resolve(ok);
@@ -80,7 +91,9 @@ export function requestAdultAccess() {
           "Restore from backup to bring the learners back.";
       },
     });
-    const o = openOverlay([title, hint, dots, pad, saved ? forgotLink : null, forgot], { sheetClass: "lock" });
+    const stay = h("input", { type: "checkbox", id: "stay-unlocked", checked: true });
+    const stayRow = h("label", { class: "lock-stay" }, stay, " Stay unlocked for 10 minutes");
+    const o = openOverlay([title, hint, dots, pad, stayRow, saved ? forgotLink : null, forgot], { sheetClass: "lock" });
     paint();
   });
 }

@@ -8,6 +8,7 @@ import {
 } from "./profiles.js";
 import { setVoiceSettings, speak, speakSequence, stopSpeech, listVoices, onVoicesChanged, pauseMs, PAUSE_MS } from "./speech.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
+import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 
@@ -91,9 +92,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         }))),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn", id: "learner-add", text: "Add learner", onclick: async () => {
-          const name = await askText("New learner's name", "", "Add");
-          if (!name) return;
-          const p = await addProfile(name);
+          const choice = await showSetup({ first: false });   // quick setup: board size, stage, name
+          if (!choice) return;
+          const p = await addProfile(choice.name, choice);
           await switchTo(p.id);
           onLearnerChanged();
           refresh();

@@ -470,3 +470,30 @@ button { font: inherit; touch-action: manipulation; }
 .kb-head .kb-key { flex: 0 0 auto; padding: 0 3.5vmin; font-size: min(3.8vmin, 5.4dvh); min-height: 0; }
 .kb-close { background: #e5e7eb; }
 .kb-pad .kb-done { font-size: min(6vmin, 8dvh); }
+
+/* ---------- Passcode: stay unlocked ---------- */
+.lock-stay { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 4px; font-size: 1em; cursor: pointer; }
+.lock-stay input { width: 24px; height: 24px; }
+
+/* ---------- Quick setup screen (adult-facing, full screen, above everything) ---------- */
+.setup-screen {
+  position: fixed; inset: 0; z-index: 90; background: #f1f5f9; color: #1f2937;
+  display: flex; align-items: center; justify-content: center; padding: 2vmin; overflow-y: auto;
+}
+.setup-screen[hidden] { display: none; }
+.setup-card { width: min(900px, 96vw); text-align: center; }
+.setup-card h1 { margin: 0 0 1.4vmin; font-size: 4.4vmin; }
+.setup-name-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 2vmin; font-size: 2.2vmin; }
+.setup-name-row .text-input { width: 30vmin; }
+.setup-choices { display: flex; flex-direction: column; gap: 1.6vmin; }
+.setup-choice {
+  display: flex; flex-direction: column; gap: 0.6vmin; align-items: center; justify-content: center;
+  min-height: 15vmin; padding: 1.6vmin 3vmin; border: 3px solid #1d4ed8; border-radius: 14px;
+  background: #fff; color: #1f2937; cursor: pointer; font-family: inherit;
+}
+.setup-choice.new { background: #1d4ed8; color: #fff; }
+.setup-choice-title { font-size: 3.4vmin; font-weight: 700; }
+.setup-choice-text { font-size: 2.2vmin; opacity: 0.85; }
+.setup-note { margin: 2vmin 0 0; font-size: 2vmin; }
+.setup-foot { display: flex; justify-content: center; gap: 12px; margin-top: 0.6vmin; }
+.setup-foot .link-btn { font-size: 2vmin; }

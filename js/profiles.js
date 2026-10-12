@@ -69,9 +69,9 @@ export const KEYBOARD_BUTTON_CHOICES = ["auto", "always", "never"];   // same th
 
 export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1 };
 
-function makeProfile(name, stage = 1, voice = CHILD_VOICE) {
+function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
   return {
-    id: newId(), name, created: Date.now(), v: CURRENT_PROFILE_VERSION, stage, gridSize: 45,
+    id: newId(), name, created: Date.now(), v: CURRENT_PROFILE_VERSION, stage, gridSize,
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
     wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
@@ -160,20 +160,19 @@ export async function initProfiles(board) {
   }
   for (const p of profiles) await upgradeProfile(p, board);
 
-  if (profiles.length === 0) {
-    // First run. Carry over the old temporary ?stage= / ?voice= settings, if any.
-    const oldStage = parseInt(load("stage", 1), 10);
-    const oldVoice = load("voice", "child");
-    const p = makeProfile(
-      "Learner 1",
-      oldStage >= 1 && oldStage <= 4 ? oldStage : 1,
-      oldVoice === "adult" ? ADULT_VOICE : CHILD_VOICE
-    );
-    profiles.push(p);
-    await saveProfile(p);
-    remove("stage");
-    remove("voice");
-  }
+  // A brand-new device has no learners yet: the quick setup screen (js/setup.js) creates the first one
+  // (addProfile) or restores a backup, then app.js calls chooseCurrent(). The old temporary
+  // ?stage= / ?voice= settings from the very first prototype are simply cleared.
+  remove("stage");
+  remove("voice");
+  if (profiles.length === 0) return;
+  await chooseCurrent();
+}
+
+export const hasProfiles = () => profiles.length > 0;
+
+// Make the remembered learner (or the first one) current and load their photos.
+export async function chooseCurrent() {
   const wanted = load("currentProfile", null);
   currentId = (profiles.find((p) => p.id === wanted) || profiles[0]).id;
   save("currentProfile", currentId);
@@ -191,8 +190,9 @@ export async function switchTo(id) {
   await loadPhotos();
 }
 
-export async function addProfile(name) {
-  const p = makeProfile(name);
+// opts: { gridSize: 45 | 84, stage: 1..4 } (from the quick setup screen; the default is the usual new learner)
+export async function addProfile(name, { gridSize = 45, stage = 1 } = {}) {
+  const p = makeProfile(name, stage, CHILD_VOICE, gridSize === 84 ? 84 : 45);
   profiles.push(p);
   await saveProfile(p);
   return p;

@@ -13,12 +13,13 @@ import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js"
 import { buildModel, getPage, pathToCore, resolvePage, posKey, MAX_DEPTH } from "./boardmodel.js";
 import { loadBoardData } from "./boarddata.js";
 import {
-  initProfiles, getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto, newPageId, deleteAdultPage,
+  initProfiles, hasProfiles, addProfile, chooseCurrent, getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto, newPageId, deleteAdultPage,
 } from "./profiles.js";
 import { attachHold } from "./hold.js";
 import { requestAdultAccess } from "./lock.js";
 import { openAdultMenu } from "./adult.js";
 import { askConfirm } from "./ui.js";
+import { showSetup } from "./setup.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
 import {
@@ -471,9 +472,20 @@ async function openAdult() {
 // ---------- Start ----------
 async function start() {
   initSpeech();
+  // Registered first so a brand-new device caches the app even while the quick setup screen is open.
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js", { scope: "./" }).catch((e) =>
+      console.warn("Offline support unavailable:", e));
+  }
   state.board = await loadBoardData();
   await loadForms();
   await initProfiles(state.board);
+  if (!hasProfiles()) {
+    // Very first open on this device: quick setup (or restore a backup), then start.
+    const c = await showSetup({ first: true });
+    if (!c.restored) await addProfile(c.name, c);
+    await chooseCurrent();
+  }
   preloadCritterArt();      // so the critter can appear instantly the first time
 
   typing = createTyping({
@@ -513,11 +525,6 @@ async function start() {
   document.addEventListener("gesturestart", (e) => e.preventDefault());
   document.addEventListener("touchmove", (e) => { if (!e.target.closest(".sheet")) e.preventDefault(); }, { passive: false });
   document.addEventListener("contextmenu", (e) => e.preventDefault());
-
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js", { scope: "./" }).catch((e) =>
-      console.warn("Offline support unavailable:", e));
-  }
 }
 
 start();
