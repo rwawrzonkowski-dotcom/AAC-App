@@ -172,10 +172,22 @@ function showSymbol(area, src, fallbackEmoji) {
 //                        early or sliding off cancels, with no speech.
 //   options.blocked() -> true while taps must be ignored (the "ignore repeated
 //                        taps" window). Nothing is shown and nothing happens.
+//
+// Optional press-and-hold word-forms dial (beta; see js/dial.js and js/forms.js):
+//   options.dialMs(el)   -> how long a finger must stay down on this button before its dial opens
+//                           (0 = this button has no dial; it is then an ordinary button).
+//   options.openDial(el, { pointer, afterSelect }) -> true if the dial opened.
+//                           pointer = { id, x, y } of the finger still down; afterSelect = true when
+//                           "hold to select" already selected the word during this same press.
+// A quick tap is untouched: the dial timer is cancelled on release, so a tap speaks on pointerup with no
+// extra delay. Once the dial is open the dial itself reads the finger (js/dial.js), so this handler
+// forgets the press: lifting does NOT select the word.
 export function attachPressHandling(container, onActivate, selector = ".cell.tap", options = {}) {
   let down = null;       // the button the finger is on
   let holdTimer = null;  // running only while a hold is in progress
   let holdOverlay = null;
+  let dialTimer = null;  // running only while waiting to open the dial
+  let dialEl = null, dialPointer = null, afterSelect = false;
 
   const clear = () => {
     if (down) down.classList.remove("pressed");
@@ -183,6 +195,12 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
     clearTimeout(holdTimer);
     holdTimer = null;
     if (holdOverlay) { holdOverlay.remove(); holdOverlay = null; }
+  };
+  const clearDial = () => {
+    clearTimeout(dialTimer);
+    dialTimer = null;
+    dialEl = null;
+    dialPointer = null;
   };
 
   // The filling ring is an absolutely positioned layer inside the button, so
@@ -198,8 +216,16 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
     holdTimer = setTimeout(() => {
       const start = down;
       clear();
+      if (dialTimer !== null) afterSelect = true;   // the dial may still open later in this same press
       if (start) onActivate(start);   // held long enough: select it now
     }, ms);
+  }
+
+  // The dial's time has come while the finger is still on the button.
+  function fireDial() {
+    const el = dialEl, pointer = dialPointer, after = afterSelect;
+    clearDial();
+    if (el && options.openDial && options.openDial(el, { pointer, afterSelect: after })) clear();   // the dial now owns this press
   }
 
   container.addEventListener("pointerdown", (e) => {
@@ -207,12 +233,19 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
     if (!el) return;
     if (options.blocked && options.blocked()) return;   // ignore-repeats window: show nothing
     clear();
+    clearDial();
     down = el;
     el.classList.add("pressed");
     const ms = options.holdMs ? options.holdMs() : 0;
     if (ms > 0) startHold(el, ms);
+    const dms = options.dialMs ? options.dialMs(el) : 0;
+    if (dms > 0) {
+      dialEl = el; dialPointer = { id: e.pointerId, x: e.clientX, y: e.clientY }; afterSelect = false;
+      dialTimer = setTimeout(fireDial, dms);
+    }
   });
   container.addEventListener("pointerup", (e) => {
+    clearDial();                      // released before the dial opened: an ordinary tap
     if (!down) return;
     const start = down;
     const wasHolding = holdTimer !== null;
@@ -223,10 +256,15 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
     if (under && under.closest(selector) === start &&
         !(options.blocked && options.blocked())) onActivate(start);
   });
-  container.addEventListener("pointercancel", clear);
-  container.addEventListener("pointerleave", clear);
+  const cancelAll = () => { clear(); clearDial(); };
+  container.addEventListener("pointercancel", cancelAll);
+  container.addEventListener("pointerleave", cancelAll);
   // Moving off the button visually un-presses it (and the tap is ignored).
   container.addEventListener("pointermove", (e) => {
+    if (dialTimer !== null) {         // sliding off the button before the dial opens cancels the dial
+      const at = document.elementFromPoint(e.clientX, e.clientY);
+      if (!at || at.closest(selector) !== dialEl) clearDial();
+    }
     if (!down) return;
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const on = !!under && under.closest(selector) === down;

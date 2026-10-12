@@ -178,6 +178,41 @@ A free, offline communication board for children who are new to AAC
   change); tap a form to replace the last word and speak it. Tap outside to close. The forms live in
   `data/word-forms.json`; add a family there to add more. In Model mode, Forms counts as a model event
   (`{ word, form, mode: "model" }`).
+- **Word-forms dial (BETA only for now).** Press and hold a word that has forms (go, eat, big, dog, I...) for about
+  0.5 s and its forms open around the button on a see-through layer (the grid does not move). The word stays in the
+  centre. Nothing is spoken when the dial opens. A quick tap is exactly as before (speaks on release, no delay), and a word
+  with no forms behaves as a normal tap even when held. **Two ways to choose:** *slide* (keep the finger down, slide onto a form,
+  it lights up, lift) or *tap* (lift without sliding, then tap a form). Tapping outside, or sliding onto a form and then back to the
+  middle or off the dial before lifting, cancels. Choosing speaks the form (one word: Speed), puts it in the message bar and logs
+  `{ word, form, id, mode }`, like the Forms button. From a category page the board then returns to the main board, as for any word.
+  Only the first word of a family has a dial (go, not went; I, not me).
+  - **Fixed slots (motor planning):** a form of a given type always sits in the same direction, for every word. 8 compass slots; a slot
+    with no form is simply empty:
+
+    | Word type | N (up) | NE | E (right) | SE | S (down) | SW | W (left) | NW |
+    |---|---|---|---|---|---|---|---|---|
+    | Verb | past (went) | negative (don't) | -ing (going) | extra | -s (goes) | extra | past participle (gone) | extra |
+    | Describing word | | -est (biggest) | -er (bigger) | | | | | |
+    | Noun | | | plural (dogs) | | | | | |
+    | Pronoun | | | object (me, him, her, us, them) | other (mine, yours, hers, ours, theirs) | possessive (my, his, your, our, their, its) | | reflexive (myself...) | |
+
+    Extras (am / are / were for "be") use the first free slot in the order NW, SE, SW, NE, S, W, N, E. this / that: these / those count as plurals (E).
+    The map is in `js/forms.js` (`TYPE_SLOT`); change it there.
+  - **Edges:** the dial is a compact 3 x 3 arrangement of big chips (at least 64 px tall; about 72 to 77 px on an iPad). Every chip keeps its
+    direction from the centre word. Near a screen edge the whole dial (centre word included) is nudged inward by the smallest amount so every chip
+    is fully on screen and nothing covers the centre word (the gaps only shrink if it still would not fit).
+  - **Markers:** each chip has a small picture for its type (arrow back = past, arrow to a line = past participle, motion lines = -ing, + = -s,
+    two dots = plural, no sign = negative, bars = -er / -est, person pictures = pronouns). Per learner, *Show form markers* (default On; turn Off for
+    readers). It is independent of *Show words only*.
+  - **Settings (adult menu > Vocabulary stage, under Show Words button), per learner and in backups:** *Word forms dial* Auto (stage 3 and up, default)
+    / Always / Never; *Hold time for dial* 0.3 to 1.0 s (default 0.5); *Show form markers*.
+  - **With the touch settings:** with *Hold to select* on, the word is selected after the hold-to-select time as usual and the dial opens 0.8 s later
+    if the finger is still down (releasing between the two times just selects the word; choosing a form then replaces that word in the message bar,
+    cancelling keeps it). The dial's own hold-time slider is not used then. Choosing a form counts as a selection for *Ignore repeated taps*;
+    opening the dial does not. Choices inside the dial are not themselves subject to hold-to-select or the ignore window. If hold-to-select has
+    already taken the child back to the main board from a category page, no dial opens.
+  - **Other modes:** no dial in Edit mode. In Model mode an adult hold shows the dial; the chosen form gets the ring / critter prompt and is logged
+    as a model event with the form.
 - **Reading stage (words only).** Adult menu > Vocabulary stage > *Show words only (no pictures)*: hides every
   symbol and photo on every page and shows the words large and centered in the same buttons (colors stay).
   Saved per learner and included in backups.
@@ -263,7 +298,8 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
 - **Backup:** *Save backup of this learner* or *of all learners* makes one .json file
   (board size, stage, button changes, pages you made, voice including Sentence speed and the pause, touch settings, Model prompt
   settings, the Words button, keyboard button and Speak-each-letter settings, the words-only setting, and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded: an older backup gets keyboard button Auto, letters not
-  spoken, Sentence speed 0.9 and no pauses). On the
+  spoken, Sentence speed 0.9 and no pauses; a backup without the word-forms dial settings gets the defaults). In beta the backup file is version 10
+  (the dial settings were added); the stable app refuses version 10 files until this is promoted. On the
   iPad a save sheet opens: choose **Save to Files**. *Restore from backup* reads a file,
   shows the learners and photo count inside, and for each learner asks whether to **add
   as a new learner** (default) or **replace** a learner with the same name (asks again
@@ -345,7 +381,7 @@ The app comes in two copies on the same website, so clients never get an unteste
 - **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
   ("Stable 1.0") is shown small at the top of the adult menu and at the bottom of the setup screen.
 - **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
-  It shows "Beta 1.1" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It shows "Beta 1.2" in the same two places and a small orange **BETA** tag in the corner of the message bar.
   It can be added to the home screen as its own icon ("AAC Beta", icon with a BETA band).
 
 **Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
@@ -384,7 +420,8 @@ Make sure the iPad is not on silent mode and the volume is up.
 - `js/app.js` ties it together (pages, taps, edit and model modes, the Words and Forms buttons).
 - `js/keyboard.js` the keyboard and number pad overlay (draft, finalizing, debounce); `js/numberwords.js` turns a number into
   English words (`tools/test-numberwords.mjs` tests it).
-- `js/forms.js` loads `data/word-forms.json` and shows the Forms popover.
+- `js/forms.js` loads `data/word-forms.json`, shows the Forms popover and holds the dial's slot map; `js/dial.js` draws the
+  press-and-hold word-forms dial (beta) and reads the finger (slide or tap).
 - `js/board.js` draws the grid (and fits labels into buttons); `js/speech.js` speaks (every sound in the app goes through it:
   word speed vs Sentence speed, and the message-bar playback with pauses).
 - `js/critters.js` the critter's settings, checks and drawing; `js/modelprompt.js` shows the ring

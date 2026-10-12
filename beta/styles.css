@@ -275,7 +275,7 @@ button { font: inherit; touch-action: manipulation; }
 @keyframes fill-bar { from { width: 0; } to { width: 100%; } }
 /* The ring is a glow around the button: it takes no room. --ring-a (0 to 1) is the
    learner's "ring opacity" setting; js/modelprompt.js sets it on the button. */
-.cell.model-ring, .mp-mock.ring-on, .bar-btn.model-ring, .kb-key.model-ring {
+.cell.model-ring, .mp-mock.ring-on, .bar-btn.model-ring, .kb-key.model-ring, .dial-chip.model-ring {
   z-index: 5;
   animation: model-pulse 0.5s ease-in-out infinite alternate;
   box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
@@ -453,6 +453,36 @@ button { font: inherit; touch-action: manipulation; }
 .form-btn.pressed { filter: brightness(0.78); }
 @media (orientation: portrait) { #forms-backdrop { display: none; } }
 
+/* ---------- Word-forms dial (beta): press and hold a word ----------
+   A see-through layer over the whole screen (so the grid never moves), above the board and below the model critter
+   (z-index 25). js/dial.js sets each chip's size and position; the compass slots are explained in js/forms.js.
+   Chips are big and high contrast: white with a thick black outline, black text. */
+#dial-layer {
+  position: fixed; inset: 0; z-index: 22; background: rgba(15, 23, 42, 0.42);
+  touch-action: none; -webkit-user-select: none; user-select: none;
+}
+.dial-chip {
+  position: absolute; display: flex; align-items: center; justify-content: center; gap: 0.35em;
+  padding: 0 0.6em; background: #fff; color: #111; border: 3px solid #111; border-radius: 1.6vmin;
+  font-weight: 800; line-height: 1; white-space: nowrap; cursor: pointer; overflow: hidden;
+  box-shadow: 0 0.5vmin 2vmin rgba(0, 0, 0, 0.5);
+}
+.dial-mark { display: inline-flex; flex: 0 0 auto; width: 0.95em; height: 0.95em; color: #1d4ed8; }
+.dial-mark svg { width: 100%; height: 100%; display: block; }
+/* The form under the finger (sliding) or being pressed (tapping) lights up; the chosen one turns green. */
+.dial-chip.hot { background: #fde047; border-color: #1d4ed8; box-shadow: 0 0 0 0.9vmin #1d4ed8, 0 0.5vmin 2vmin rgba(0, 0, 0, 0.5); }
+.dial-chip.chosen { background: #86efac; border-color: #166534; }
+.dial-chip.model-ring { z-index: 5; }
+/* The base word in the centre: the button's colour, its symbol faint behind its name. Never catches a touch. */
+.dial-hub {
+  position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  border: 0.6vmin solid #1d4ed8; border-radius: var(--radius); pointer-events: none;
+  box-shadow: 0 0 0 0.5vmin #fff;
+}
+.dial-hub img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0.3; padding: 6%; }
+.dial-hub span { position: relative; font-weight: 800; font-size: min(2.4vw, 3.4vh); color: #111; text-align: center; padding: 0 0.3em; }
+@media (orientation: portrait) { #dial-layer { display: none; } }
+
 /* ---------- Keyboard and number pad (Phase 1.7) ----------
    One overlay laid over the grid's row (an absolutely positioned child of #app, so it takes no room and no
    grid cell moves or resizes). The message bar above stays visible and shows the dashed draft chip. */
@@ -508,3 +538,6 @@ button { font: inherit; touch-action: manipulation; }
 .setup-note { margin: 2vmin 0 0; font-size: 2vmin; }
 .setup-foot { display: flex; justify-content: center; gap: 12px; margin-top: 0.6vmin; }
 .setup-foot .link-btn { font-size: 2vmin; }
+/* "Hold time for dial": keep the label on one line, like the other settings */
+#setting-word-dial .slider-row label { flex: 0 0 auto; white-space: nowrap; }
+#setting-word-dial .slider-row { grid-template-columns: auto 1fr 60px; }

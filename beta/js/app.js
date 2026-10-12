@@ -2,6 +2,7 @@
 //   - loads the word map and the current learner's profile
 //   - draws the main board (45 or 84 locations) or a category / adult-made page
 //   - handles taps (speak / navigate), the adult lock, Edit mode and Model mode
+//   - press-and-hold on a word: the word-forms dial (js/dial.js, slots in js/forms.js)
 //   - the top-bar Words button (Words pages), Forms button (other forms of the last word) and
 //     ABC button (the keyboard overlay; the number pad opens from the Numbers page or the keyboard's 123 key)
 //   - playing the message bar (one utterance, or chip by chip with pauses: js/speech.js)
@@ -27,7 +28,8 @@ import {
 } from "./modelprompt.js";
 import { preloadCritterArt } from "./critters.js";
 import { CHANNEL } from "./channel.js";
-import { loadForms, formsFor, openFormsPopover } from "./forms.js";
+import { loadForms, formsFor, dialFor, openFormsPopover } from "./forms.js";
+import { openDial } from "./dial.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
@@ -60,6 +62,7 @@ const state = {
   sentence: [],       // words in the message bar: {label, spoken, base} (base = the word tapped on the board)
   cells: new Map(),   // key -> description of each cell currently drawn
   forms: null,        // the open Forms popover, if any
+  dial: null,         // the open press-and-hold word-forms dial, if any (js/dial.js)
   draft: null,        // what is being typed on the keyboard / number pad: { text, kind } or null
 };
 let typing = null;    // the keyboard / number pad overlay (js/keyboard.js), created in start()
@@ -234,6 +237,78 @@ function updateFormsButton() {
 }
 function closeForms() { if (state.forms) { state.forms.close(); state.forms = null; } }
 
+// ---------- The word-forms dial (press and hold a word) ----------
+// "Auto" turns the dial on from stage 3, like the Words and ABC buttons; "always" and "never" are the adult's choice.
+const wordDialOn = (p) => p.wordDial.mode === "always" || (p.wordDial.mode !== "never" && p.stage >= 3);
+function closeDial() { if (state.dial) state.dial.close(); }
+
+// The dial this board button can show, or null (then it is an ordinary button: holding it behaves like a tap).
+// Only the word a family starts with has one (go, eat, big, dog, I), and only on the child's board:
+// not in Edit mode, not while the Forms popover, the keyboard or a Model-mode walk back is on screen.
+function dialSpecFor(cellEl) {
+  if (!wordDialOn(getCurrent()) || state.editing || state.dial || state.forms || returning || previewing) return null;
+  if (typing && typing.isOpen()) return null;
+  const d = state.cells.get(cellEl.dataset.key);
+  if (!d || d.kind !== "word" || !d.visible || d.loadBoard || d.action || d.noForms || d.sentence) return null;
+  return dialFor(d.label);
+}
+
+// How long this button must be held before its dial opens (0 = no dial here).
+// With "Hold to select" on, the word is selected after the hold-to-select time as usual; the dial then
+// opens 0.8 s later if the finger is still down (releasing between the two times is just a selection).
+function dialMs(cellEl) {
+  if (!dialSpecFor(cellEl)) return 0;
+  const hold = holdMs();
+  return hold > 0 ? hold + 800 : Math.round(getCurrent().wordDial.holdSec * 1000);
+}
+
+// Open the dial around this button. `pointer` is the finger still down; `afterSelect` is true when Hold to
+// select already selected the word during this press (the chosen form then replaces that chip).
+// Nothing is spoken and nothing is added when the dial opens.
+function openWordDial(cellEl, { pointer, afterSelect }) {
+  const spec = dialSpecFor(cellEl);
+  const d = state.cells.get(cellEl.dataset.key);
+  const r = cellEl.getBoundingClientRect();
+  // (If Hold to select already took the child back to the main board, this button is gone: no dial.)
+  if (!spec || !d || !cellEl.isConnected || !r.width) return false;
+  const profile = getCurrent();
+  const id = d.wordId || d.key;
+  const img = cellEl.querySelector(".cell-image img");
+  state.dial = openDial({
+    anchor: { rect: { left: r.left, top: r.top, width: r.width, height: r.height }, label: d.label,
+              bg: getComputedStyle(cellEl).backgroundColor, imgSrc: img ? img.src : null },
+    entries: spec.entries,
+    markers: profile.wordDial.markers,
+    pointer,
+    onClose: () => { state.dial = null; },
+    // Same as choosing a form with the Forms button: it is spoken (one word: Speed), becomes the chip, and is logged
+    // with the word that was held, its id and the form. (Hold to select already added the word: the form replaces it.)
+    onChoose: (entry, chip) => {
+      lastSelectAt = performance.now();      // choosing counts as a selection for "Ignore repeated taps" (opening did not)
+      speak(entry.word);
+      const item = { label: entry.word, spoken: entry.word, base: d.label, id };
+      const last = state.sentence[state.sentence.length - 1];
+      if (afterSelect && last && last.id === id) state.sentence[state.sentence.length - 1] = item; else state.sentence.push(item);
+      drawMessage();
+      logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form: entry.word, id });
+      if (state.modeling) {
+        // The adult's ring / critter shows on the chosen form for a moment, then the dial closes (and, from a
+        // category page, the board steps back out one page at a time, as for any word).
+        const dial = state.dial;
+        runPrompt(chip, profile.model, getPhotoUrl("critter"), RING_MS);
+        setTimeout(() => {
+          if (state.dial === dial) closeDial();
+          if (state.page !== "core") returnToMain(d);
+        }, 700);
+      } else {
+        closeDial();
+        if (state.page !== "core") goTo("core");     // standard behavior after a word chosen on a category page
+      }
+    },
+  });
+  return true;
+}
+
 // Open the popover over the grid. Choosing a form replaces the last word and speaks it.
 // In Model mode it also counts as a model event (and the chosen button gets the learner's prompt).
 function openForms() {
@@ -324,32 +399,34 @@ function onCellTap(cellEl) {
   drawMessage();
   logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id });
 
-  if (state.page !== "core") {
-    // Item on any page: go back to the main board automatically.
-    const profile = getCurrent();
-    const model = modelNow();
-    const path = pathToCore(model, profile, state.page);       // [this page, its parent, ..., "core"]
-    if (state.modeling) {
-      // Model mode: keep the page visible briefly so the item's ring is seen, then
-      // step back out one page at a time, ringing the button that was used to open
-      // each page (so the whole path is shown: item, sub-page button, category button).
-      promptCell(d.key, RING_MS);
-      returning = true;                    // ignore taps during the pauses
-      const pause = stepPauseMs(profile.model);
-      const stepOut = (i) => setTimeout(() => {
-        const child = getPage(model, profile, path[i]);
-        goTo(path[i + 1]);
-        // the Words menu is opened by the top-bar Words button; every other page by a button on the grid
-        if (child.at) promptCell(posKey(model.size, path[i + 1], child.at.row, child.at.col), RING_PATH_MS);
-        else promptWordsButton(RING_PATH_MS);
-        if (i + 2 < path.length) stepOut(i + 1); else returning = false;
-      }, pause);
-      stepOut(0);
-    } else {
-      goTo("core");                        // learner taps return immediately
-    }
-  } else if (state.modeling) {
+  if (state.page !== "core") returnToMain(d);
+  else if (state.modeling) promptCell(d.key, RING_MS);
+}
+
+// A word was chosen on a category / sub-page: go back to the main board automatically.
+// (Used by a tap on the word, and by choosing one of its forms in the dial.)
+function returnToMain(d) {
+  const profile = getCurrent();
+  const model = modelNow();
+  const path = pathToCore(model, profile, state.page);       // [this page, its parent, ..., "core"]
+  if (state.modeling) {
+    // Model mode: keep the page visible briefly so the item's ring is seen, then
+    // step back out one page at a time, ringing the button that was used to open
+    // each page (so the whole path is shown: item, sub-page button, category button).
     promptCell(d.key, RING_MS);
+    returning = true;                    // ignore taps during the pauses
+    const pause = stepPauseMs(profile.model);
+    const stepOut = (i) => setTimeout(() => {
+      const child = getPage(model, profile, path[i]);
+      goTo(path[i + 1]);
+      // the Words menu is opened by the top-bar Words button; every other page by a button on the grid
+      if (child.at) promptCell(posKey(model.size, path[i + 1], child.at.row, child.at.col), RING_PATH_MS);
+      else promptWordsButton(RING_PATH_MS);
+      if (i + 2 < path.length) stepOut(i + 1); else returning = false;
+    }, pause);
+    stepOut(0);
+  } else {
+    goTo("core");                        // learner taps return immediately
   }
 }
 
@@ -416,9 +493,9 @@ async function editCell(d) {
   renderAll();
 }
 
-function startEditing() { closeForms(); stopSpeech(); state.modeling = false; state.editing = true; renderAll(); }
+function startEditing() { closeForms(); closeDial(); stopSpeech(); state.modeling = false; state.editing = true; renderAll(); }
 function stopEditing() { state.editing = false; renderAll(); }
-function startModeling() { closeForms(); stopSpeech(); state.editing = false; state.modeling = true; renderAll(); }
+function startModeling() { closeForms(); closeDial(); stopSpeech(); state.editing = false; state.modeling = true; renderAll(); }
 function stopModeling() { state.modeling = false; clearCritter(); renderAll(); }
 
 // ---------- Adult lock ----------
@@ -433,6 +510,7 @@ function showAdultMenu(startAt) {
     onLearnerChanged: () => {
       // A different learner: start clean on the main board.
       closeForms();
+      closeDial();
       stopSpeech();
       state.sentence.length = 0;
       drawMessage();
@@ -442,6 +520,7 @@ function showAdultMenu(startAt) {
     },
     onVocabChanged: renderAll,
     onBoardSizeChanged: () => {
+      closeDial();
       // Different grid: word locations changed, so start clean on the main board.
       state.sentence.length = 0;
       drawMessage();
@@ -507,7 +586,7 @@ async function start() {
     onOpenChange: (open) => { $("app").classList.toggle("typing", open); },
   });
 
-  attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked });
+  attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked, dialMs, openDial: openWordDial });
 
   // Message bar: tap text to speak the sentence; Delete / Clear
   attachPressHandling($("message-bar"), (el) => {

@@ -4,7 +4,7 @@
 import { h, openOverlay, askText, askConfirm } from "./ui.js";
 import {
   listProfiles, getCurrent, switchTo, addProfile, renameProfile, deleteProfile,
-  saveProfile, CHILD_VOICE, ADULT_VOICE,
+  saveProfile, CHILD_VOICE, ADULT_VOICE, DIAL_HOLD_MIN, DIAL_HOLD_MAX,
 } from "./profiles.js";
 import { setVoiceSettings, speak, speakSequence, stopSpeech, listVoices, onVoicesChanged, pauseMs, PAUSE_MS } from "./speech.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
@@ -171,6 +171,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("span", { class: "stage-note", text: note[n] + ":" }),
         h("span", { class: "stage-words", text: wordsFor(n) })))),
       wordsButtonSetting(cur),
+      wordDialSetting(cur),
       keyboardButtonSetting(cur),
       speakLettersSetting(cur),
       wordsOnlySetting(cur));
@@ -189,6 +190,40 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "numbers, clothes, outside words and things (every Dolch sight word is on them, at most 3 taps away). " +
         "The Forms button next to it shows other forms of the last word (go: went, going...). " +
         "Both follow this setting. Words on these pages never move." }));
+  }
+
+  // Press-and-hold word-forms dial: hold a word to see its other forms around it (went / going / goes / gone).
+  // Three settings, saved per learner (profile.wordDial, see js/profiles.js). They are read when a finger goes
+  // down, so nothing on the board needs to be redrawn.
+  function wordDialSetting(cur) {
+    const d = cur.wordDial;
+    const persist = () => saveProfile(cur);
+    const modeBtn = (value, text) => h("button", {
+      type: "button", class: "seg" + (d.mode === value ? " on" : ""), id: `dial-${value}`, text,
+      onclick: async () => { d.mode = value; await persist(); refresh(); },
+    });
+    const holdNum = h("span", { class: "slider-num", id: "dial-hold-val", text: d.holdSec.toFixed(1) + " s" });
+    const holdInput = h("input", { type: "range", id: "dial-hold-slider", min: DIAL_HOLD_MIN, max: DIAL_HOLD_MAX, step: 0.1, value: d.holdSec,
+      oninput: () => { d.holdSec = parseFloat(holdInput.value); holdNum.textContent = d.holdSec.toFixed(1) + " s"; persist(); } });
+    const markBtn = (value, text) => h("button", {
+      type: "button", class: "seg" + (d.markers === value ? " on" : ""), id: `dial-markers-${value ? "on" : "off"}`, text,
+      onclick: async () => { d.markers = value; await persist(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-word-dial" },
+      h("label", { text: "Word forms dial (press and hold a word)" }),
+      h("div", { class: "seg-row" }, modeBtn("auto", "Auto (stage 3 and up)"), modeBtn("always", "Always"), modeBtn("never", "Never")),
+      h("p", { class: "muted", text: "Press and hold a word such as go, eat, big, dog or I: its other forms appear around it, always in the same " +
+        "directions (past = up, -ing = right, -s = down, past participle = left). Lift on a form, or lift and then tap one, to say it and add it " +
+        "to the message bar. Tap outside to cancel. A quick tap still just says the word, with no delay. Words with no forms act like a normal tap. " +
+        "The Forms button works as before." }),
+      h("div", { class: "slider-row touch-slider" },
+        h("label", { for: "dial-hold-slider", text: "Hold time for dial" }), holdInput, holdNum),
+      h("p", { class: "muted", text: "If Hold to select (Touch section) is on, the dial opens 0.8 s after the hold-to-select time instead " +
+        "(releasing before that selects the word as usual), and this slider is not used." }),
+      h("label", { text: "Show form markers" }),
+      h("div", { class: "seg-row touch-seg" }, markBtn(true, "On"), markBtn(false, "Off")),
+      h("p", { class: "muted", text: "A small picture on each form (arrow back = past, motion lines = -ing, + = -s, two dots = plural, bars = -er / -est, " +
+        "a person = pronouns). Turn off for learners who read. This is separate from Show words only." }));
   }
 
   // The top-bar ABC button (keyboard overlay): Auto shows it from stage 3, like the Words button.
