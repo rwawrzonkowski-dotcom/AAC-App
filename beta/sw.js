@@ -1439,8 +1439,9 @@ const FILES = [
 ];
 // END FILE LIST
 
+// cache: "reload" skips the browser's own HTTP cache, so a new version always installs the files that are really on the server.
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE_VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE_VERSION).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {
