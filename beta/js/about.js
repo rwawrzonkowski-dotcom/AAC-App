@@ -35,9 +35,10 @@ export async function openAbout() {
   // In stable, the whole Creator section is left out when there is nothing to show in it.
   const creator = (name || creds || bio || SHOW_PLACEHOLDERS) ? h("section", { class: "panel about-creator", id: "about-creator" },
     h("h2", { text: "Creator" }),
-    name ? h("p", { class: "about-name", id: "about-creator-name", text: name })
+    // Name and credentials on one line, e.g. "Richard Wawrzonkowski, M.S., LBA, BCBA".
+    name ? h("p", { class: "about-name", id: "about-creator-name", text: creds ? name + ", " + creds : name })
          : (SHOW_PLACEHOLDERS ? h("p", { class: "about-placeholder", id: "about-creator-name", text: "Creator name goes here" }) : null),
-    creds ? h("p", { class: "about-creds", text: creds }) : null,
+    (!name && creds) ? h("p", { class: "about-creds", text: creds }) : null,
     bio ? h("p", { class: "about-bio", text: bio }) : null) : null;
 
   // Links: a button when there is a web address, otherwise a muted "coming soon" line. Opens in a new tab.
