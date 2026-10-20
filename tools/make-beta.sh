@@ -4,7 +4,7 @@
 # Use it to start beta over from stable (for example right after promoting beta, or to throw away experiments).
 # It overwrites everything in beta/, so edit beta files only AFTER running it.
 # Beta gets: its own storage names ("beta-" prefix), its own service worker cache (beta-aac-vNN), a "BETA" tag,
-# the name "AAC Beta" and a home-screen icon with a BETA band, so it installs as a separate app icon.
+# the name "VOICE Beta" and a home-screen icon with a BETA band, so it installs as a separate app icon.
 # Running it twice in a row changes nothing. If the beta files did change, the cache number goes up by one
 # so devices fetch the new files.
 set -euo pipefail
@@ -36,7 +36,7 @@ cat > "$NEW/js/channel.js" <<'JS'
 // Beta's prefix "beta-" keeps its saved data completely separate from the stable app's.
 // tools/make-beta.sh writes this file; do not copy it over the stable one.
 export const CHANNEL = "beta";               // "stable" or "beta"
-export const VERSION_LABEL = "Beta 1.1";     // shown small in the adult menu and on the setup screen
+export const VERSION_LABEL = "VOICE Beta 1.0";   // shown small in the adult menu and on the setup screen
 export const STORAGE_PREFIX = "beta-";       // "" for stable, "beta-" for beta
 JS
 
@@ -45,12 +45,12 @@ JS
 $SETLINE "$NEW/sw.js" 'const CACHE_PREFIX' 'const CACHE_PREFIX = "beta-aac-";'
 $SETLINE "$NEW/sw.js" 'const OTHER_CHANNEL_FOLDER' 'const OTHER_CHANNEL_FOLDER = "";   // beta: nothing to ignore (the stable app does not use this copy)'
 
-# 4. Name, home-screen title and icons, so it installs as a separate "AAC Beta" icon.
-$SETLINE "$NEW/manifest.webmanifest" '  "name":' '  "name": "AAC Beta",'
-$SETLINE "$NEW/manifest.webmanifest" '  "short_name":' '  "short_name": "AAC Beta",'
-$SETLINE "$NEW/manifest.webmanifest" '  "description":' '  "description": "Test copy of the AAC Board. New features are tried here first.",'
-$SETLINE "$NEW/index.html" '<title>' '<title>AAC Beta</title>'
-$SETLINE "$NEW/index.html" '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="AAC Beta">'
+# 4. Name, home-screen title and icons, so it installs as a separate "VOICE Beta" icon (the icons come from tools/beta-icons/).
+$SETLINE "$NEW/manifest.webmanifest" '  "name":' '  "name": "VOICE Beta",'
+$SETLINE "$NEW/manifest.webmanifest" '  "short_name":' '  "short_name": "VOICE Beta",'
+$SETLINE "$NEW/manifest.webmanifest" '  "description":' '  "description": "Test copy of VOICE. New features are tried here first.",'
+$SETLINE "$NEW/index.html" '<title>' '<title>VOICE</title>'
+$SETLINE "$NEW/index.html" '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="VOICE Beta">'
 cp tools/beta-icons/*.png "$NEW/icons/"
 
 # 5. Service worker file list for beta (only beta's own files). Needs a sw.js version first.

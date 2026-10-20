@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # Makes the tested beta copy the new STABLE app.
-#   tools/promote-beta.sh "Stable 1.1"        (the argument is the new version label)
+#   tools/promote-beta.sh "VOICE 1.1"        (the argument is the new version label)
 # It copies the beta app files over the main app files, then:
 #   - keeps the stable channel settings (js/channel.js stays "stable"; only its version label changes),
 #   - keeps stable's own service worker settings and raises its cache number (aac-v15 -> aac-v16),
-#   - keeps stable's own manifest, icons and "AAC Board" names (beta's are marked as beta),
+#   - gives stable the VOICE names: manifest name and short_name "VOICE", page title "VOICE" (beta's say "VOICE Beta"),
+#   - gives stable the new unbanded VOICE icons (tools/icon/*.png; beta's copies have the BETA band) and the beta manifest's
+#     icon list (including the maskable icon),
+#   - brings data/about.json along (the About screen's creator and links: fill it in beta first, see README),
 #   - rewrites stable's cache file list.
 # It does NOT commit or push anything. Read the summary, test, then commit.
 # Afterwards, run tools/make-beta.sh to start beta over from the new stable.
@@ -15,7 +18,7 @@ SETLINE="python3 tools/set-line.py"
 
 LABEL="${1:-}"
 if [ -z "$LABEL" ]; then
-  echo "Please give the new version label, for example:  tools/promote-beta.sh \"Stable 1.1\"" >&2
+  echo "Please give the new version label, for example:  tools/promote-beta.sh \"VOICE 1.1\"" >&2
   exit 1
 fi
 [ -d beta ] || { echo "There is no beta/ folder to promote. Run tools/make-beta.sh first." >&2; exit 1; }
@@ -34,11 +37,18 @@ cp beta/index.html beta/styles.css beta/sw.js .
 rm -rf js data images
 cp -R beta/js beta/data beta/images .
 cp "$BEFORE/js/channel.js" js/channel.js            # stable keeps its own channel file
-cp "$BEFORE/manifest.webmanifest" manifest.webmanifest   # (icons/ and manifest are not copied from beta)
+# Manifest: beta's (it lists the maskable icon) with stable's names. Icons: the unbanded VOICE ones, not beta's banded copies.
+cp beta/manifest.webmanifest manifest.webmanifest
+$SETLINE manifest.webmanifest '  "name":' '  "name": "VOICE",'
+$SETLINE manifest.webmanifest '  "short_name":' '  "short_name": "VOICE",'
+$SETLINE manifest.webmanifest '  "description":' '  "description": "A free AAC app that grows with the learner. Variable Output for Individualized Communication and Expression.",'
+rm -rf icons
+mkdir icons
+cp tools/icon/*.png icons/
 
-# 2. Undo the beta-only names in index.html.
-$SETLINE index.html '<title>' '<title>AAC Board</title>'
-$SETLINE index.html '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="AAC Board">'
+# 2. Undo the beta-only names in index.html (stable says "VOICE", beta says "VOICE Beta").
+$SETLINE index.html '<title>' '<title>VOICE</title>'
+$SETLINE index.html '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="VOICE">'
 
 # 3. Stable service worker settings (the cache number goes up by one).
 $SETLINE sw.js 'const CACHE_VERSION' "const CACHE_VERSION = \"aac-v$((OLD_N + 1))\";"

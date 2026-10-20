@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- VOICE app icon, drawn for this project (original artwork, shared under CC BY-SA 4.0).
+     A rounded speech bubble in deep indigo with a bold white "V" and five small dots in the board's soft
+     Fitzgerald colours (yellow, green, blue, pink, orange). 512 x 512, full-bleed square background
+     (iPad rounds the corners itself). Everything that matters sits in the top 68% so the BETA band
+     (tools/make-beta-icons.py) does not hide it.
+     tools/make-icons.py draws the PNGs from this file; it wraps <g id="art"> in a smaller transform for the maskable icon. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#fff4de"/>
+  <g id="art">
+    <!-- speech bubble: rounded body plus a tail at the lower left -->
+    <rect x="64" y="70" width="384" height="256" rx="96" fill="#3b2f9e"/>
+    <path d="M118 302 L100 348 L192 312 Z" fill="#3b2f9e" stroke="#3b2f9e" stroke-width="16" stroke-linejoin="round"/>
+    <!-- bold V -->
+    <path d="M184 130 L256 234 L328 130" fill="none" stroke="#ffffff" stroke-width="52"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- five dots: soft Fitzgerald colours (people, action, describing, social, category) -->
+    <circle cx="176" cy="290" r="14" fill="#fde047"/>
+    <circle cx="216" cy="290" r="14" fill="#86d97a"/>
+    <circle cx="256" cy="290" r="14" fill="#7fb8f0"/>
+    <circle cx="296" cy="290" r="14" fill="#f58fb4"/>
+    <circle cx="336" cy="290" r="14" fill="#f7a64c"/>
+  </g>
+</svg>

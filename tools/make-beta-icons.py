@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Makes the beta home-screen icons: a copy of each stable icon with an orange "BETA" band along the bottom.
+"""Makes the beta home-screen icons: a copy of each VOICE icon (tools/icon/*.png, drawn by tools/make-icons.py) with an orange "BETA" band along the bottom.
 Needs the Pillow package (pip install pillow). The results are saved in tools/beta-icons/ and committed,
-so you only run this if the stable icon artwork changes. tools/make-beta.sh copies them into beta/icons/."""
+so you only run this if the icon artwork changes (run tools/make-icons.py first). tools/make-beta.sh copies them into beta/icons/."""
 import os
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ICONS = os.path.join(os.path.dirname(HERE), "icons")
+ICONS = os.path.join(HERE, "icon")          # the new unbanded VOICE icons
 OUT = os.path.join(HERE, "beta-icons")
+os.makedirs(OUT, exist_ok=True)
 
 def font(size):
     for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",

@@ -50,9 +50,9 @@ export function showSetup({ first = false } = {}) {
         screen.hidden = false;                      // cancelled or failed: back to the choices
       } }) : null;
 
-    const screen = h("div", { class: "setup-screen", id: "setup-screen", role: "dialog", "aria-label": "Set up this board" },
+    const screen = h("div", { class: "setup-screen", id: "setup-screen", role: "dialog", "aria-label": "Set up VOICE" },
       h("div", { class: "setup-card" },
-        h("h1", { text: "Set up this board" }),
+        h("h1", { text: "Set up VOICE" }),
         h("div", { class: "setup-name-row" },
           h("label", { for: "setup-name", text: first ? "Learner name (optional)" : "Learner name" }), nameIn),
         h("div", { class: "setup-choices" }, choices),

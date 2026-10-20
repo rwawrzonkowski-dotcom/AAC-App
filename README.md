@@ -1,6 +1,6 @@
-# AAC Board (Phase 1.8 part B)
+# VOICE (Phase 1.8 part B)
 
-A free, offline communication board for children who are new to AAC
+**VOICE** stands for **Variable Output for Individualized Communication and Expression**. It is a free, offline communication board for children who are new to AAC
 (augmentative and alternative communication). Built for iPad, in landscape.
 
 ## What it does
@@ -379,10 +379,10 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
 ## How updates are tested (stable and beta)
 The app comes in two copies on the same website, so clients never get an untested change:
 - **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
-  ("Stable 1.0") is shown small at the top of the adult menu and at the bottom of the setup screen.
+  ("Stable 1.0"; it becomes "VOICE 1.1" and so on once VOICE is promoted) is shown small at the top of the adult menu and at the bottom of the setup screen.
 - **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
-  It shows "Beta 1.2" in the same two places and a small orange **BETA** tag in the corner of the message bar.
-  It can be added to the home screen as its own icon ("AAC Beta", icon with a BETA band).
+  It shows "VOICE Beta 1.3" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It can be added to the home screen as its own icon ("VOICE Beta", the VOICE icon with a BETA band).
 
 **Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
 starts with `beta-`, and stable keeps exactly the names it always used (database `aac-board`, settings `aac.*`). So beta
@@ -395,14 +395,34 @@ each service worker deletes only its own, and the stable one ignores everything 
 - `tools/make-beta.sh` rebuilds `beta/` as a fresh copy of the stable app set up as beta. Use it to start testing a new round, or
   to throw away beta experiments. It overwrites `beta/`, so make beta changes only after running it. Running it twice changes
   nothing; if beta did change, its cache number goes up so devices fetch the new files.
-- `tools/promote-beta.sh "Stable 1.1"` makes the tested beta the new stable: it copies beta's app files over the main ones, keeps
-  stable's own channel file, manifest, icons and names, sets the new version label, raises stable's cache number (`aac-v15` to
+- `tools/promote-beta.sh "VOICE 1.1"` makes the tested beta the new stable: it copies beta's app files over the main ones, keeps
+  stable's own channel file, gives stable the names "VOICE" (manifest, page title), the unbanded VOICE icons from `tools/icon/` and
+  `data/about.json`, sets the new version label, raises stable's cache number (`aac-v15` to
   `aac-v16`), rewrites the file list and prints which files changed. Then test, commit, and run `tools/make-beta.sh` to restart beta.
 - `python3 tools/update-cache-list.py` (stable) and `python3 tools/update-cache-list.py beta` rewrite the file list in each `sw.js`
   (each lists only its own folder). Bump that copy's `CACHE_VERSION` after changing files.
-- `tools/make-beta-icons.py` (needs Pillow) redraws the beta icons in `tools/beta-icons/` if the stable icon ever changes.
+- `tools/make-icons.py` draws the VOICE icon PNGs (180, 192, 512, maskable 512, apple-touch-icon) from `tools/icon/voice-icon.svg`
+  (needs cairosvg, or Playwright with Chromium). `tools/make-beta-icons.py` (needs Pillow) then redraws the BETA-band copies in
+  `tools/beta-icons/`. Run both only if the icon artwork changes.
 
-Typical round: `tools/make-beta.sh`, change files in `beta/`, test on an iPad at `/beta/`, then `tools/promote-beta.sh "Stable 1.1"`.
+Typical round: `tools/make-beta.sh`, change files in `beta/`, test on an iPad at `/beta/`, then `tools/promote-beta.sh "VOICE 1.1"`.
+
+## Filling in the About screen
+The adult menu has an **About VOICE** button (at the bottom). It shows the full name, a one-line description, the creator, resource links,
+a credits summary, the privacy note and the version. The creator and links are not in the code: they come from `data/about.json`
+(in `beta/data/` for beta; `tools/promote-beta.sh` carries it to stable). Open it in any text editor and fill in the quotes:
+```
+{ "creatorName": "", "creatorCredentials": "", "creatorBio": "",
+  "links": [ {"label": "Website", "url": ""}, {"label": "Resources", "url": ""},
+             {"label": "Trainings", "url": ""}, {"label": "Contact", "url": ""} ] }
+```
+- `creatorName`, `creatorCredentials` (for example "M.S., BCBA") and `creatorBio` (a few sentences) are shown under "Creator".
+  While `creatorName` is empty, the screen shows the muted italic line "Creator name goes here" so you can see the spot.
+- Each entry in `links` needs a `label` (the button text) and a full `url` starting with `https://` (a Contact link can be
+  `mailto:you@example.com`). A link with an empty `url` shows as the muted line "Link coming soon: Website" instead of a button.
+  You can rename, remove or add entries. Links open in a new tab and need internet; the rest of the app stays fully offline.
+- Keep it valid JSON (straight double quotes, commas between entries, none after the last). If the file is broken the placeholders show.
+- After editing, raise `CACHE_VERSION` in that copy's `sw.js` (for example `beta-aac-v3` to `beta-aac-v4`) so devices fetch the new file.
 
 ## Install on an iPad
 1. Open https://rwawrzonkowski-dotcom.github.io/AAC-App/ in **Safari**.

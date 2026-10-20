@@ -30,6 +30,9 @@ No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
 - **Drawn for this project** - simple pictures made for this app (for example
   the name tag on the About me page), shared under the same CC BY-SA 4.0 license.
 
+- **VOICE app icon** (`tools/icon/voice-icon.svg`) - an original speech bubble with a "V" and five
+  colored dots, drawn for this project, CC BY-SA 4.0.
+
 ## Model critters
 
 The five animals (puppy, kitten, bunny, frog, owl) and the three accessories

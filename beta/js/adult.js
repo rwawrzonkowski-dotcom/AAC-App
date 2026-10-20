@@ -12,6 +12,7 @@ import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 import { VERSION_LABEL } from "./channel.js";
+import { openAbout } from "./about.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -33,7 +34,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
 
   const o = openOverlay([
     h("div", { class: "menu-head" },
-      h("h1", {}, "Adult menu", h("small", { class: "version-label", id: "version-label", text: VERSION_LABEL })),
+      h("h1", {}, "VOICE", h("small", { class: "version-label", id: "version-label", text: VERSION_LABEL })),
       h("button", { type: "button", class: "btn primary", id: "menu-close-top", text: "Close", onclick: close })),
     body,
   ], { sheetClass: "menu" });
@@ -50,7 +51,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     stopVoiceListener();
     body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
       modelSection({ refresh, closeMenu: close, onPreviewPrompt }), voiceSection(),
-      touchSection(), backupSection(),
+      touchSection(), backupSection(), aboutSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
     body.scrollTop = top;
   }
@@ -430,6 +431,14 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("label", { class: "btn", for: "restore-file", id: "restore-btn", text: "Restore from backup" }),
         fileIn),
       status);
+  }
+
+  // ---------- About ----------
+  function aboutSection() {
+    return h("section", { class: "panel", id: "sec-about" },
+      h("h2", { text: "About" }),
+      h("div", { class: "btn-row left" },
+        h("button", { type: "button", class: "btn", id: "about-open", text: "About VOICE", onclick: () => openAbout() })));
   }
 
   refresh();

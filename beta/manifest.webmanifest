@@ -1,7 +1,7 @@
 {
-  "name": "AAC Beta",
-  "short_name": "AAC Beta",
-  "description": "Test copy of the AAC Board. New features are tried here first.",
+  "name": "VOICE Beta",
+  "short_name": "VOICE Beta",
+  "description": "Test copy of VOICE (Variable Output for Individualized Communication and Expression). New features are tried here first.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -11,6 +11,7 @@
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" }
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

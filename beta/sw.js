@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v2";
+const CACHE_VERSION = "beta-aac-v3";
 // The stable app and the beta copy live on the same website, so they share one cache storage.
 // Each copy only ever deletes caches that start with ITS OWN prefix, and ignores the other copy's folder.
 // (tools/make-beta.sh swaps these three lines in beta/sw.js: "beta-aac-v1", "beta-aac-" and "".)
@@ -10,12 +10,15 @@ const OTHER_CHANNEL_FOLDER = "";   // beta: nothing to ignore (the stable app do
 const FILES = [
   "./",
   "index.html",
+  "data/about.json",
   "data/core-board.json",
   "data/image-sources.json",
   "data/word-forms.json",
+  "icons/apple-touch-icon.png",
   "icons/icon-180.png",
   "icons/icon-192.png",
   "icons/icon-512.png",
+  "icons/icon-maskable-512.png",
   "images/critters/acc-bow.svg",
   "images/critters/acc-glasses.svg",
   "images/critters/acc-hat.svg",
@@ -1410,6 +1413,7 @@ const FILES = [
   "images/symbols/zero.svg",
   "images/symbols/zip.svg",
   "images/symbols/zoo.svg",
+  "js/about.js",
   "js/adult.js",
   "js/app.js",
   "js/backup.js",
