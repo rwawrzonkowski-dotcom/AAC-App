@@ -6,7 +6,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ICONS = os.path.join(HERE, "icon")          # the new unbanded VOICE icons
+ICONS = os.path.join(HERE, "icon", "beta-base")   # VOICE icons with the art raised to leave room for the band
 OUT = os.path.join(HERE, "beta-icons")
 os.makedirs(OUT, exist_ok=True)
 

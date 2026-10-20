@@ -417,9 +417,10 @@ a credits summary, the privacy note and the version. The creator and links are n
              {"label": "Trainings", "url": ""}, {"label": "Contact", "url": ""} ] }
 ```
 - `creatorName`, `creatorCredentials` (for example "M.S., BCBA") and `creatorBio` (a few sentences) are shown under "Creator".
-  While `creatorName` is empty, the screen shows the muted italic line "Creator name goes here" so you can see the spot.
+  In the beta, while `creatorName` is empty, the screen shows the muted italic line "Creator name goes here" so you can see the spot.
 - Each entry in `links` needs a `label` (the button text) and a full `url` starting with `https://` (a Contact link can be
   `mailto:you@example.com`). A link with an empty `url` shows as the muted line "Link coming soon: Website" instead of a button.
+  These placeholders show **only in beta**; in stable, empty creator and empty links are left out entirely (no Resources heading if every link is empty).
   You can rename, remove or add entries. Links open in a new tab and need internet; the rest of the app stays fully offline.
 - Keep it valid JSON (straight double quotes, commas between entries, none after the last). If the file is broken the placeholders show.
 - After editing, raise `CACHE_VERSION` in that copy's `sw.js` (for example `beta-aac-v3` to `beta-aac-v4`) so devices fetch the new file.

@@ -2,9 +2,9 @@
 <!-- VOICE app icon, drawn for this project (original artwork, shared under CC BY-SA 4.0).
      A rounded speech bubble in deep indigo with a bold white "V" and five small dots in the board's soft
      Fitzgerald colours (yellow, green, blue, pink, orange). 512 x 512, full-bleed square background
-     (iPad rounds the corners itself). Everything that matters sits in the top 68% so the BETA band
-     (tools/make-beta-icons.py) does not hide it.
-     tools/make-icons.py draws the PNGs from this file; it wraps <g id="art"> in a smaller transform for the maskable icon. -->
+     (iPad rounds the corners itself). The art is drawn at its natural size in <g id="art">.
+     tools/make-icons.py wraps that group in a transform to make each layout: centred and slightly larger for the
+     normal icons, raised (so the BETA band does not touch the tail) for the beta icons, smaller for the maskable ones. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <rect width="512" height="512" fill="#fff4de"/>
   <g id="art">

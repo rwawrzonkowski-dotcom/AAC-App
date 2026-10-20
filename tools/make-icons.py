@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draws the VOICE home-screen icons (PNG) from tools/icon/voice-icon.svg into tools/icon/.
     python3 tools/make-icons.py
-Makes icon-180.png, icon-192.png, icon-512.png, icon-maskable-512.png (artwork shrunk into the safe centre so
+Makes (into tools/icon/, plus raised bases for the beta in tools/icon/beta-base/) icon-180.png, icon-192.png, icon-512.png, icon-maskable-512.png (artwork shrunk into the safe centre so
 Android can crop it) and apple-touch-icon.png (180). Then run tools/make-beta-icons.py for the BETA-band copies.
 Drawing needs one of: cairosvg (pip install cairosvg), or Playwright with Chromium (what is used offline here).
 The PNGs are committed, so you only run this if the artwork changes. Nothing here needs the internet."""
@@ -9,12 +9,25 @@ import os, re, io
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "icon")
 SVG = open(os.path.join(OUT, "voice-icon.svg"), encoding="utf-8").read()
-# Maskable: shrink the artwork and centre it so a round or squircle crop never cuts it.
-MASKABLE = SVG.replace('<g id="art">', '<g id="art" transform="translate(256 256) scale(0.7) translate(-256 -209)">')
-assert MASKABLE != SVG, "could not find <g id=\"art\"> in the SVG"
+# The art in <g id="art"> spans about x 64-448, y 70-356 (centre y 213). Each layout wraps it in a transform:
+#   normal   centred vertically and 8% larger (the stable icons; tools/promote-beta.sh copies them to icons/)
+#   maskable smaller, in the safe centre so a round or squircle crop never cuts it
+#   beta     raised so the orange BETA band (bottom 32%, drawn by tools/make-beta-icons.py) never covers the tail
+def layout(transform):
+    out = SVG.replace('<g id="art">', f'<g id="art" transform="{transform}">')
+    assert out != SVG, "could not find <g id=\"art\"> in the SVG"
+    return out
+NORMAL = layout("translate(256 256) scale(1.08) translate(-256 -213)")
+MASKABLE = layout("translate(256 256) scale(0.7) translate(-256 -213)")
+BETA = layout("translate(0 -30)")
+BETA_MASKABLE = layout("translate(256 236) scale(0.64) translate(-256 -213)")
 
-JOBS = [("icon-180.png", 180, SVG), ("icon-192.png", 192, SVG), ("icon-512.png", 512, SVG),
-        ("icon-maskable-512.png", 512, MASKABLE), ("apple-touch-icon.png", 180, SVG)]
+BASE = os.path.join(OUT, "beta-base")   # unbanded bases for the beta icons
+os.makedirs(BASE, exist_ok=True)
+JOBS = [("icon-180.png", 180, NORMAL), ("icon-192.png", 192, NORMAL), ("icon-512.png", 512, NORMAL),
+        ("icon-maskable-512.png", 512, MASKABLE), ("apple-touch-icon.png", 180, NORMAL),
+        ("beta-base/icon-180.png", 180, BETA), ("beta-base/icon-192.png", 192, BETA), ("beta-base/icon-512.png", 512, BETA),
+        ("beta-base/icon-maskable-512.png", 512, BETA_MASKABLE), ("beta-base/apple-touch-icon.png", 180, BETA)]
 
 def with_cairosvg():
     import cairosvg

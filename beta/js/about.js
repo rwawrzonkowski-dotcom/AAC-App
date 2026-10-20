@@ -2,7 +2,7 @@
 // The creator and the links come from data/about.json, so they can be filled in later without touching any code
 // (see README, "Filling in the About screen"). Empty values show a clearly marked placeholder so the spot is visible.
 import { h, openOverlay } from "./ui.js";
-import { VERSION_LABEL } from "./channel.js";
+import { VERSION_LABEL, CHANNEL } from "./channel.js";
 
 const FULL_NAME = "Variable Output for Individualized Communication and Expression";
 const ONE_LINE = "A free AAC app that grows with the learner.";
@@ -19,6 +19,9 @@ async function loadAbout() {
   }
 }
 
+// Placeholders ("Creator name goes here", "Link coming soon") are for the beta only. Stable shows nothing for empty values.
+const SHOW_PLACEHOLDERS = CHANNEL !== "stable";
+
 const text = (v) => (typeof v === "string" ? v.trim() : "");
 
 export async function openAbout() {
@@ -29,12 +32,13 @@ export async function openAbout() {
   const links = Array.isArray(about.links) ? about.links : [];
 
   // Creator: placeholder (muted italic) while the name is empty.
-  const creator = h("section", { class: "panel about-creator", id: "about-creator" },
+  // In stable, the whole Creator section is left out when there is nothing to show in it.
+  const creator = (name || creds || bio || SHOW_PLACEHOLDERS) ? h("section", { class: "panel about-creator", id: "about-creator" },
     h("h2", { text: "Creator" }),
     name ? h("p", { class: "about-name", id: "about-creator-name", text: name })
-         : h("p", { class: "about-placeholder", id: "about-creator-name", text: "Creator name goes here" }),
+         : (SHOW_PLACEHOLDERS ? h("p", { class: "about-placeholder", id: "about-creator-name", text: "Creator name goes here" }) : null),
     creds ? h("p", { class: "about-creds", text: creds }) : null,
-    bio ? h("p", { class: "about-bio", text: bio }) : null);
+    bio ? h("p", { class: "about-bio", text: bio }) : null) : null;
 
   // Links: a button when there is a web address, otherwise a muted "coming soon" line. Opens in a new tab.
   const linkItems = links.map((l) => {
@@ -42,11 +46,12 @@ export async function openAbout() {
     const url = text(l && l.url);
     return url
       ? h("a", { class: "btn about-link", href: url, target: "_blank", rel: "noopener", text: label })
-      : h("span", { class: "about-placeholder about-link-soon", text: "Link coming soon: " + label });
-  });
-  const linkSection = h("section", { class: "panel", id: "about-links" },
+      : (SHOW_PLACEHOLDERS ? h("span", { class: "about-placeholder about-link-soon", text: "Link coming soon: " + label }) : null);
+  }).filter(Boolean);
+  // No heading when there is nothing to list (stable, all links empty).
+  const linkSection = linkItems.length ? h("section", { class: "panel", id: "about-links" },
     h("h2", { text: "Resources" }),
-    h("div", { class: "about-link-row" }, linkItems));
+    h("div", { class: "about-link-row" }, linkItems)) : null;
 
   const credits = h("section", { class: "panel", id: "about-credits" },
     h("h2", { text: "Credits" }),
