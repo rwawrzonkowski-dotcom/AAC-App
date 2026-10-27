@@ -588,3 +588,111 @@ button { font: inherit; touch-action: manipulation; }
 }
 .phone-size-tip { margin: 8px 0 0; padding: 8px 12px; border-radius: 8px; background: #dbeafe; color: #1e3a8a; font-weight: 700; }
 .phone-size-tip[hidden] { display: none; }
+
+/* ======================================================================================================
+   Teaching (Phase 2, Round A, beta). Nothing here is part of the board's grid: the choose-targets banner covers
+   the message bar, the session controls live inside the (otherwise empty) context strip, and every prompt is a
+   glow, ring or critter drawn over a button. None of it changes the size or position of a cell or catches a tap.
+   ====================================================================================================== */
+
+/* ---------- Choose targets ("Add targets") ---------- */
+#target-banner {
+  position: absolute; grid-row: 1 / 2; grid-column: 1 / 2; inset: 0; z-index: 20;
+  display: flex; align-items: center; gap: 2vmin;
+  background: #0f766e; color: #fff; border-radius: var(--radius); padding: 0 2vmin;
+  font-size: min(3.4vmin, 5dvh); font-weight: 700;
+}
+#target-banner[hidden] { display: none; }
+#target-count { margin-left: auto; font-size: 0.7em; font-weight: 600; opacity: 0.9; }
+#target-words, #target-done {
+  border: 0; border-radius: 1.2vmin; height: 80%; cursor: pointer; font-size: min(3.4vmin, 5dvh); font-weight: 800; padding: 0 4vmin;
+}
+#target-words { background: #b9e6d6; color: #052e16; }
+#target-words[hidden] { display: none; }
+#target-done { background: #22c55e; color: #052e16; padding: 0 5vmin; }
+/* A target word: an amber frame and a star in the corner (drawn inside the button, so nothing moves). */
+.cell.is-target { box-shadow: inset 0 0 0 0.6vmin #f59e0b; }
+.cell.is-target::after {
+  content: "\2605"; position: absolute; top: 0.2vmin; right: 0.6vmin; font-size: 3.2vmin; line-height: 1; color: #d97706;
+  text-shadow: 0 0 0.4vmin #fff, 0 0 0.4vmin #fff; pointer-events: none;
+}
+
+/* ---------- Session controls in the context strip ---------- */
+#session-bar { display: none; }
+#app.in-session #session-bar {
+  display: flex; align-items: stretch; gap: 0.8vmin; position: absolute; inset: 0.5vmin 0.6vmin 0.5vmin 8vmin;
+}
+#app.in-session #page-title { display: none; }
+.sb-btn {
+  position: relative; flex: 1.15 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 0.6vmin;
+  padding: 0 0.7vmin; border: 0.3vmin solid #475569; border-radius: var(--radius); background: #fff; color: #111;
+  font-size: min(2.05vmin, 3dvh); font-weight: 800; cursor: pointer; touch-action: none; overflow: hidden; white-space: nowrap;
+}
+.sb-btn .sb-ring { flex: 0 0 auto; width: 2.9vmin; height: 2.9vmin; }
+.sb-btn .sb-label { overflow: hidden; text-overflow: ellipsis; }
+.sb-btn .hold-ring .ring-bg { stroke: rgba(0, 0, 0, 0.22); }
+.sb-btn .hold-ring .ring-fg { stroke: #0f172a; }
+.sb-btn.holding { filter: brightness(0.9); }
+.sb-btn.off { opacity: 0.5; filter: saturate(0.4); pointer-events: none; }
+.sb-picker { flex: 1.5 1 0; flex-direction: row; background: #fff; justify-content: flex-start; }
+.sb-picker .sb-name { overflow: hidden; text-overflow: ellipsis; font-size: 1.1em; }
+.sb-picker .sb-level { font-size: 0.7em; font-weight: 600; color: #475569; overflow: hidden; text-overflow: ellipsis; margin-left: auto; }
+.sb-start { background: #bbf7d0; }
+.sb-net { background: #bfdbfe; }
+.sb-skip { background: #fde68a; }
+.sb-end { background: #fecaca; }
+.sb-count {
+  flex: 0.85 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  font-size: min(2.1vmin, 3dvh); font-weight: 800; color: #1f2937; line-height: 1.15; text-align: center;
+}
+.sb-count small { font-size: 0.68em; font-weight: 600; color: #475569; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Prompts ---------- */
+/* Glow (level 2): a soft amber pulse around the next button. */
+.cell.teach-glow, .bar-btn.teach-glow { z-index: 4; animation: teach-glow 1.2s ease-in-out infinite alternate; }
+@keyframes teach-glow {
+  from { box-shadow: 0 0 0 0.5vmin rgba(245, 158, 11, 0.55), 0 0 2vmin 0.4vmin rgba(245, 158, 11, 0.40); }
+  to   { box-shadow: 0 0 0 0.9vmin rgba(245, 158, 11, 0.95), 0 0 3.5vmin 1.2vmin rgba(245, 158, 11, 0.70); }
+}
+/* Path highlight (level 3) and the ring part of the model prompt (levels 4-7): the same ring as Model mode,
+   kept on until the child answers. --ring-a is the strength (0 to 1). */
+.cell.teach-ring, .bar-btn.teach-ring {
+  z-index: 5;
+  animation: model-pulse 0.5s ease-in-out infinite alternate;
+  box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
+}
+/* Reward picture: full screen for 2 seconds; never catches a tap. */
+#reward-layer {
+  position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, 0.82); pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+}
+#reward-layer img { max-width: 92vw; max-height: 92dvh; border-radius: 2vmin; object-fit: contain; }
+
+/* ---------- Adult screens for teaching ---------- */
+.teach-active { background: #ecfdf5; border: 2px solid #059669; border-radius: 10px; padding: 10px 14px; font-weight: 700; color: #065f46; }
+.pill { display: inline-block; margin-left: 10px; padding: 2px 10px; border-radius: 999px; font-size: 0.8em; font-weight: 800; background: #e2e8f0; color: #334155; }
+.pill.st-teaching { background: #dbeafe; color: #1e40af; }
+.pill.st-baseline { background: #fef3c7; color: #92400e; }
+.pill.st-mastered { background: #dcfce7; color: #166534; }
+.pill.st-maintenance { background: #ede9fe; color: #5b21b6; }
+.tgt-list { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+.tgt-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; border: 1px solid #d5dde6; border-radius: 10px; padding: 12px; }
+.tgt-main { min-width: 0; }
+.tgt-label { font-weight: 800; font-size: 1.15em; }
+.tgt-detail { margin: 2px 0 0; font-size: 0.85em; }
+.tgt-btns { display: flex; gap: 8px; flex: 0 0 auto; }
+.step-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+.step-label { flex: 1; font-weight: 700; }
+.step-btn { min-width: 56px; min-height: 48px; padding: 0; font-size: 1.4em; }
+.step-val { min-width: 76px; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
+.seg-wrap { flex-wrap: wrap; }
+.seg-wrap .seg { min-width: 110px; }
+.ss-list { display: flex; flex-direction: column; gap: 6px; max-height: 32dvh; overflow-y: auto; }
+.ss-target, .check-line { display: flex; align-items: center; gap: 12px; font-weight: 700; padding: 6px 4px; }
+.ss-target input, .check-line input { width: 24px; height: 24px; flex: 0 0 auto; }
+.check-line { margin: 4px 0 0; }
+.pick-list { display: flex; flex-direction: column; gap: 8px; }
+.sum-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.sum-table th, .sum-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+.sum-table th { font-size: 0.85em; color: #64748b; }
+.sum-name { font-weight: 800; }

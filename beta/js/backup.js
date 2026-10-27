@@ -2,10 +2,11 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 10, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 11, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
 //         keyboardButton, speakLetters, wordDial,
+//         teaching: { targets: [...], sessions: [...], trials: [...] },     (optional: see below)
 //         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
 //     ]
 //   }
@@ -25,6 +26,12 @@
 // `wordDial` ({ mode, holdSec, markers }: the press-and-hold word-forms dial) came with version 10 (beta). A backup without it
 // (every version 9 and older backup, including ones made by the stable app) restores with the defaults: Auto, 0.5 s, markers on.
 // Version 10 changed no layout, so the version 9 checks still apply to older backups.
+// `teaching` (Phase 2, version 11, beta) holds the learner's targets, teaching sessions and trials (see js/teachdata.js). The adult
+// chooses in the backup section whether to include it ("Include teaching data", on by default); without it the field is simply
+// missing. A reward picture of a target is one of the photos, with the key "reward:<word id>", and travels with the teaching
+// data. Every older backup (version 10 and below) has no `teaching` field and restores as before; restoring one over an
+// existing learner leaves that learner's teaching data alone. A version 11 file is too new for the stable app, so it can only
+// be restored in the beta.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -38,6 +45,8 @@ import { h, openOverlay, askConfirm } from "./ui.js";
 import {
   listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES,
 } from "./profiles.js";
+import { exportTeaching } from "./teachdata.js";
+import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE } from "./migrate.js";
@@ -45,7 +54,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 10;
+export const BACKUP_VERSION = 11;
 
 // ---------------------------------------------------------------- saving
 
@@ -59,11 +68,13 @@ function blobToDataUrl(blob) {
 }
 
 // Build the backup object for these learners (profile objects from profiles.js).
-export async function buildBackup(learners) {
+// options.teaching (default true): include the learners' targets, sessions, trials and reward pictures.
+export async function buildBackup(learners, { teaching = true } = {}) {
   const out = [];
   for (const p of learners) {
     const photos = [];
     for (const ph of await getPhotoBlobs(p.id)) {
+      if (!teaching && ph.key.startsWith("reward:")) continue;      // reward pictures belong to the teaching data
       photos.push({ key: ph.key, dataUrl: await blobToDataUrl(ph.blob) });
     }
     out.push({
@@ -82,6 +93,7 @@ export async function buildBackup(learners) {
       keyboardButton: p.keyboardButton,
       speakLetters: p.speakLetters,
       wordDial: p.wordDial,
+      ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
       photos,
     });
   }
@@ -114,8 +126,8 @@ export function downloadBackup(backup, filename) {
 }
 
 // Save one learner, or everyone. Returns the file name used.
-export async function saveBackup(learners, label) {
-  const backup = await buildBackup(learners);
+export async function saveBackup(learners, label, options) {
+  const backup = await buildBackup(learners, options);
   const filename = backupFilename(label);
   downloadBackup(backup, filename);
   return filename;
@@ -142,7 +154,8 @@ function validCellKey(key) {
   return +m[1] < g.rows && +m[2] < g.cols;
 }
 // A photo key: a built-in word ("w:want"), a cell, or the learner's own critter picture.
-const validKey = (key) => typeof key === "string" && (key === "critter" || WORD_KEY.test(key) || validCellKey(key));
+const REWARD_KEY = /^reward:[A-Za-z0-9_:,@.|-]{1,80}$/;
+const validKey = (key) => typeof key === "string" && (key === "critter" || WORD_KEY.test(key) || REWARD_KEY.test(key) || validCellKey(key));
 
 // Turn base64 text into a Blob (works offline, no network).
 function dataUrlToBlob(dataUrl) {
@@ -269,7 +282,18 @@ function cleanLearner(raw, index, version) {
     const key = version < 2 ? photoKey(ph.key) : ph.key;
     photos.push({ key: moved[key] || key, blob });          // a moved word's photo moves with it
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, photos };
+  // Teaching data exists only in version 11+ backups made with "Include teaching data". Anything unreadable is skipped.
+  let teaching = null;
+  if (version >= 11 && isObj(raw.teaching)) {
+    const list = (v, max) => (Array.isArray(v) ? v.slice(0, max) : []);
+    const seen = new Set();
+    teaching = {
+      targets: list(raw.teaching.targets, 500).map((t) => cleanTarget(t, "")).filter((t) => t && !seen.has(t.wordId) && seen.add(t.wordId)),
+      sessions: list(raw.teaching.sessions, 20000).map((s) => cleanSession(s, "")).filter(Boolean),
+      trials: list(raw.teaching.trials, 400000).map((t) => cleanTrial(t, "")).filter(Boolean),
+    };
+  }
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
@@ -342,9 +366,10 @@ export async function restoreFromFile(file) {
       addBtn.addEventListener("click", () => { choice[i] = "add"; paint(); });
       if (repBtn) repBtn.addEventListener("click", () => { choice[i] = match.id; paint(); });
       const photoText = l.photos.length === 1 ? "1 photo" : `${l.photos.length} photos`;
+      const tc = l.teaching ? `, teaching data (${l.teaching.targets.length} targets, ${l.teaching.sessions.length} sessions)` : "";
       return h("div", { class: "restore-row" },
         h("div", { class: "restore-name", text: l.name }),
-        h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}` }),
+        h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}${tc}` }),
         h("div", { class: "seg-row" }, addBtn, repBtn),
         match ? null : h("div", { class: "muted", text: "No learner with this name here yet." }));
     });

@@ -9,7 +9,7 @@
 | What | Where |
 |---|---|
 | Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 1.1" |
-| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — currently the same features as VOICE 1.1 |
+| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 2.0": VOICE 1.1 plus teaching sessions (Phase 2, Round A) |
 | Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE) and `stable-1.1` (VOICE 1.1) |
 | Planning doc (source of truth for decisions) | https://claude.ai/code/artifact/133274d9-e0f2-4009-8086-6f527aebe3af |
 | Website plan | https://claude.ai/code/artifact/35106cdc-bca5-4b24-8e2f-c5c6a34d44d0 |
@@ -60,12 +60,20 @@
 - "Test the volume" button (setup screen and adult menu Voice section) with iOS or Android/Samsung tips; every utterance plays at full volume.
 - Phones: setup screen and Board size panel recommend the 45 board.
 
+## In beta (VOICE Beta 2.0): Phase 2, Round A — targets, sessions, prompting and fading
+
+Not promoted yet. Adult menu > Teaching (see README "Teaching sessions (beta)").
+- **Targets** per learner (word id + page path), chosen by tapping words in an "Add targets" mode; status Baseline / Teaching / Mastered / Maintenance; per-target direction (most-to-least default or least-to-most), time delay (3 s), fade after 3 correct, back up after 2 misses, mastery rule (80% independent, 3 sessions, 3 trials each, 2 different people or settings), optional reward picture.
+- **Sessions** (Who: Parent/RBT/Teacher/BCBA/Other; Where: Home/Clinic/School/Community): the empty context strip holds 1-second-hold controls (target, Start trial, Opportunity [NET], Skip, End session, trial counter). Prompt levels 0-7: independent, time delay, glow, path highlight, model critter/ring at 25/50/75/100%. Forward chaining for words on category pages. Automatic fading for most-to-least targets; mastery and next-stage suggestions at session end (adult confirms).
+- **Data** (IndexedDB stores `targets`, `sessions`, `trials`, keyed `<learnerId>|<id>`; database version 2) included in backups (file version 11, "Include teaching data", on by default). Rounds B (everyday recording) and C (reports) will read these rows.
+- Tested with Playwright at 1180x820 and 1024x768 on the 45 and 84 boards; stable app files unchanged.
+
 ## Next steps
 
 1. **Done Oct 27:** VOICE 1.1 promoted to clients. Pilot iPads update after the app is fully closed and reopened; the home-screen label changes to "VOICE" only if the icon is removed and re-added (save a backup first).
 2. **Send web addresses** for the About links whenever ready.
 3. **Pilot gate:** about two weeks of daily use with clients on the stable app.
-4. **Phase 2 — teaching and data:** opt-in teaching sessions, prompt hierarchy with automatic fading (including critter and ring opacity), mastery suggestions for stages, data reports and export.
+4. **Phase 2 — teaching and data:** Round A (targets, sessions, prompting, fading, mastery) is in beta; Round B (everyday recording) and Round C (reports and export) still to build.
 5. **Phase 3 — camera scenes:** photograph a setting, approve suggested words, show them in the context strip (the strip is reserved but unused).
 6. **Website:** answer the open questions in the website plan, then build the pilot pages (Home, Get started, For clinicians, About, Privacy) at rwawrzonkowski-dotcom.github.io.
 7. **Before public release:** trademark and domain check, privacy policy, App Store name (e.g. "VOICE AAC"; "Voice" is taken), app code license (MIT or GPL), move app and site to a custom domain using backup/restore.

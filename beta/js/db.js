@@ -5,15 +5,17 @@
 // back to plain in-memory storage so the app still works for the current
 // session (but nothing is remembered after a reload).
 //
-// Two "stores" (like tables): "profiles" and "photos". Keys are strings.
+// Five "stores" (like tables): "profiles" and "photos", plus (Phase 2, teaching) "targets", "sessions" and "trials".
+// Keys are strings. Teaching rows are keyed "<learnerId>|<id>" so one learner's rows are found (and deleted) by prefix.
 
 import { STORAGE_PREFIX } from "./channel.js";
 // Stable: "aac-board" (as always). Beta: "beta-aac-board" (its own database).
 const DB_NAME = STORAGE_PREFIX + "aac-board";
-const DB_VERSION = 1;
-const STORES = ["profiles", "photos"];
+// Version 2 added the three teaching stores. Opening an older database just creates the missing stores.
+const DB_VERSION = 2;
+export const STORES = ["profiles", "photos", "targets", "sessions", "trials"];
 
-const memory = { profiles: new Map(), photos: new Map() };
+const memory = Object.fromEntries(STORES.map((s) => [s, new Map()]));
 let dbPromise = null;
 export let usingFallback = false;
 

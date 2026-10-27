@@ -298,12 +298,15 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
 - **Backup:** *Save backup of this learner* or *of all learners* makes one .json file
   (board size, stage, button changes, pages you made, voice including Sentence speed and the pause, touch settings, Model prompt
   settings, the Words button, keyboard button and Speak-each-letter settings, the words-only setting, and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded: an older backup gets keyboard button Auto, letters not
-  spoken, Sentence speed 0.9 and no pauses; a backup without the word-forms dial settings gets the defaults). In beta the backup file is version 10
-  (the dial settings were added); the stable app refuses version 10 files until this is promoted. On the
+  spoken, Sentence speed 0.9 and no pauses; a backup without the word-forms dial settings gets the defaults). In Beta 2.0 the backup file is version 11
+  (teaching data was added; see *Include teaching data* below); the stable app refuses version 11 files until this is promoted. On the
   iPad a save sheet opens: choose **Save to Files**. *Restore from backup* reads a file,
   shows the learners and photo count inside, and for each learner asks whether to **add
   as a new learner** (default) or **replace** a learner with the same name (asks again
   before replacing). Nothing changes until you tap Restore.
+  **Include teaching data** (beta, on by default) puts the learner's targets, teaching sessions, trials and reward pictures in the file; untick it to
+  leave them out. Restoring a backup that has teaching data gives it to the new learner (or replaces the old learner's); restoring one without it
+  leaves an existing learner's teaching data alone. A backup older than Beta 2.0 simply has none.
 - **Start modeling:** a purple "Modeling" bar appears. Your taps work normally and the
   tapped button gets the learner's *Model prompt* (see below); after a category item, the
   page stays up briefly so the prompt on the item is seen, then each button that opened a
@@ -332,6 +335,80 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
     opacity sooner) or switch to the ring. The critter is only meant to point at the button.
   - The ring and critter are drawn on top of the board and never block a tap, and they never move,
     resize or reflow any button.
+
+## Teaching sessions (beta)
+Teaching is opt-in. Nothing is recorded, and the board never changes, unless you start a session. The words, the pictures and every button's
+place stay exactly as they are. Everything is kept on the iPad. Adult menu > **Teaching**.
+
+**Setting targets.** *Targets > Add targets* shows the board with a green banner, "Tap words to add as targets". Tap a word to make it a target (a star
+and an amber frame appear); tap it again to take it back. Nothing is spoken and nothing goes into the message bar. Category and folder buttons open
+their pages, Back goes up, and the Words button works, so you can choose a word such as *cake* through Food > More food > Desserts. The app
+remembers which pages lead to the word (its path). Tap **Done** to return to the Teaching section.
+Each target has *Settings*:
+- *Status:* **Baseline**, **Teaching**, **Mastered** or **Maintenance**. Only Teaching targets are prompted; the others are tried with no prompts.
+- *Prompt direction:* **Most-to-least** (the default) starts each trial with help and the app fades it for you; **Least-to-most** starts with none and
+  adds help step by step.
+- *Starting prompt level* (for most-to-least; the app moves it by itself), *Most help allowed* (the highest level, 7 unless you lower it) and the
+  *Time delay* (seconds to wait before more help, 3).
+- *Fade after* N correct in a row (3) and *Back up after* M misses in a row (2).
+- *Mastery rule:* percent independent (80), across this many sessions (3), at least this many trials per session (3), with at least this many different
+  people or settings (2).
+- *Reward picture:* optional, off by default. A photo you choose shows full screen for 2 seconds after a correct trial.
+
+**Remove** (it asks first) takes a word off the list but keeps its sessions, trials and level history; adding the word again brings its settings back.
+
+**Running a session.** *Start a session* asks which targets (all Teaching and Baseline ones are ticked), **who** is running it (Parent, RBT, Teacher,
+BCBA, Other) and **where** (Home, Clinic, School, Community). The last choices are remembered. The menu closes and the strip under the message bar
+turns into the adult's controls: the current target (hold it to choose another), **Start trial**, **Opportunity**, **Skip**, **End session** and a
+small trial counter. **Every control needs a 1-second hold**, with a ring that fills, so a child cannot press one by accident. The board itself is
+unchanged and works as always. Model mode is off during a session (Edit board and Start modeling are greyed out in the menu).
+- *Start trial:* give the verbal cue (for example, "What do you want?"), then hold Start trial. A planned trial starts from the main board.
+  *Opportunity* is the same but is logged as a natural-environment trial ("NET") and does not move the board.
+- A trial ends when the child selects the target word (correct, at whatever prompt was showing), when you hold *Skip* (not scored), or after the
+  longest trial time (30 seconds, adjustable in the Teaching section) with no correct answer ("no response", or "error" if the child only tapped
+  other words). If the child taps a different word it still speaks (every tap talks), is logged as an error, and the prompt gets stronger.
+- For a word on a category or folder page, the prompt goes to the **next button the child needs**: first the category button, then the folder button,
+  then the word (forward chaining). Each new button starts again at the trial's first prompt level. If the child goes the wrong way, the Back button is
+  prompted. The app logs which step was prompted.
+- The app speaks nothing during a trial except the child's own taps. Prompts are only pictures on the screen: they never block a tap and never move or
+  resize a button. If you open the adult menu in the middle of a trial, that trial is skipped.
+- *End session* asks first, then shows a **session summary** (trials, percent independent for each target, and any prompt level changes) and saves the
+  session. A trial still running is skipped. Changing learner or board size also closes the session.
+
+**The prompt levels** (from least to most help):
+
+| Level | Name | What the child sees |
+|---|---|---|
+| 0 | Independent | nothing |
+| 1 | Time delay | nothing; the app waits the time delay (a correct answer now still counts as independent) |
+| 2 | Glow | the next button pulses softly (amber) |
+| 3 | Path highlight | the next button gets the Model-mode ring (white and purple) |
+| 4 to 7 | Model | the learner's Model prompt (critter and/or ring, as set in *Model prompt*) at 25%, 50%, 75% and 100% strength |
+
+At levels 4 to 7 the strength comes from the level, not from the learner's opacity sliders, and the critter hops in again every few seconds while the
+prompt stays on. Levels 0 and 1 look the same on the screen. A half-second pause comes before the first prompt appears.
+
+**How fading works.** For a **most-to-least** target the trial starts at the target's current level and shows it right away. If the child taps a wrong
+word, or does not answer within the time delay, the prompt steps up one level inside the trial (up to *Most help allowed*). The trial is scored at the
+most help that was shown. After the set number of correct trials in a row at the current level (3 by default; "correct" means no error and no more
+help than the level the trial started at) the target's starting level moves one step down (100% to 75% to 50% to 25% model, then path highlight,
+glow, time delay, independent). After the set number of misses in a row (2: a trial that needed more help, had an error, or got no response) it
+moves one step back up. The target list and the session summary say what changed ("Faded to 50% model", "Backed up to 75% model"). A **least-to-most**
+target starts at independent, waits the time delay, then shows Glow, Path highlight and the Model levels one at a time, each after another delay (an
+error steps up at once). Its starting level never changes, but its performance is still recorded.
+
+**How mastery works.** *Independent* means the child chose the target at level 1 or lower with no error first. When a session ends, for each Baseline or
+Teaching target in it the app looks at the target's last sessions: if each of the last 3 (or the number in that target's rule) had at least 3 trials and
+at least 80% independent, and those sessions include at least 2 different people or at least 2 different settings, it asks "Mark <word> as mastered?"
+(you confirm; "Not yet" changes nothing). Skipped trials are not counted. When every target that is a word of the learner's current vocabulary stage (the
+words on the main board that show at that stage) is Mastered or in Maintenance, it also asks "Move <name> to stage N?" (you confirm; the new words appear
+in their permanent spots).
+
+**Data kept.** Each learner's targets, sessions and trials are saved on the iPad as they happen (a session you do not end is closed at its last trial the
+next time the app opens). A session has its start, end, who, where and targets. A trial has the word, its type (planned or NET), start and end, how long
+until the first tap (latency), the result (correct, error, no response, skipped), the prompt level it reached, the level it started at, the direction, the
+wrong taps and the buttons prompted along the path. They go into backups (*Include teaching data*) and are never sent anywhere. Everyday recording and
+reports are planned for later rounds.
 
 ## Where your changes are stored (rules)
 Every change is kept in one of two places, so nothing lands on the wrong word:
@@ -381,7 +458,7 @@ The app comes in two copies on the same website, so clients never get an unteste
 - **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
   ("Stable 1.0"; it becomes "VOICE 1.1" and so on once VOICE is promoted) is shown small at the top of the adult menu and at the bottom of the setup screen.
 - **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
-  It shows "VOICE Beta 1.3" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It shows "VOICE Beta 2.0" in the same two places and a small orange **BETA** tag in the corner of the message bar.
   It can be added to the home screen as its own icon ("VOICE Beta", the VOICE icon with a BETA band).
 
 **Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
@@ -391,11 +468,10 @@ To test with a real learner, make a backup in the stable app (adult menu > Backu
 (backup files work in both). Offline copies are kept apart the same way: stable's is `aac-vNN`, beta's is `beta-aac-vNN`;
 each service worker deletes only its own, and the stable one ignores everything under `beta/`.
 
-**Beta-only features waiting to be promoted:** iPhone safe areas (the board and every full-screen layer keep clear of the camera cutout
-and home bar; the same space is kept on both sides so buttons never move when the phone is turned), a "Test the volume" button with
-device-specific tips (setup screen and adult menu > Voice), and a "45 buttons is easier on a phone" tip. On iPads and computers the
-board is exactly as before. To test the safe areas on a desktop browser, set the CSS variables `--test-inset-l`, `--test-inset-r`,
-`--test-inset-t`, `--test-inset-b` on `:root` (they stand in for the phone's real `env(safe-area-inset-*)` values; the app never sets them).
+**Beta-only features waiting to be promoted (VOICE Beta 2.0):** teaching sessions: targets, prompt levels with automatic fading, mastery suggestions and
+saved session data (see *Teaching sessions (beta)* above). On an iPad the board looks and behaves as in VOICE 1.1 unless you start a session or choose
+targets. Because the backup file gained teaching data, Beta 2.0 backups are version 11, which the stable app cannot read until this is promoted (the beta
+reads every older backup).
 
 **Scripts** (run them from the project folder; they only change files on this computer and never commit or push):
 - `tools/make-beta.sh` rebuilds `beta/` as a fresh copy of the stable app set up as beta. Use it to start testing a new round, or
@@ -458,6 +534,9 @@ Make sure the iPad is not on silent mode and the volume is up.
 - `js/setup.js` the quick setup card (first open and Add learner); `js/lock.js` passcode keypad (and the 10-minute unlock); `js/adult.js` adult menu; `js/editor.js` button editor;
   `js/hold.js` press-and-hold; `js/ui.js` small dialog helpers;
   `js/events.js` in-memory tap list for a later phase.
+- Teaching (beta): `js/teaching.js` the rules (prompt levels, fading, mastery; no screen, no database), `js/teachdata.js` saving targets, sessions and
+  trials, `js/session.js` the running session (strip controls, trials, prompts), `js/teachui.js` the adult screens (targets, settings, start form, summary,
+  mastery and stage suggestions); `js/modelprompt.js` also keeps a prompt on for a session.
 - `images/critters/` the five drawn animals and three accessories (original drawings; the body
   color is the CSS variable `--body`, so recoloring needs no extra files).
 - `images/symbols/` the built-in symbols (one SVG per word); `data/image-sources.json`

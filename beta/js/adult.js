@@ -14,6 +14,7 @@ import { modelSection } from "./modelsettings.js";
 import { VERSION_LABEL } from "./channel.js";
 import { openAbout } from "./about.js";
 import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP } from "./devicetips.js";
+import { teachingSection } from "./teachui.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -27,8 +28,9 @@ const PREVIEW_WORD = "bubbles";                      // "Preview a word"
 //   onPreviewPrompt()   "Preview on board" in the Model prompt section (the menu closes first;
 //                       the app runs the prompt and then opens the menu again)
 //   startAt             id of a section to scroll to when the menu opens (optional)
+//   teach               the Teaching section (Phase 2): { sessionActive(), onChooseTargets(), onStartSession(opts) }
 export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel,
-  onPreviewPrompt }) {
+  onPreviewPrompt, teach }) {
   const body = h("div", { class: "menu-body" });
   let stopVoiceListener = () => {};
   let backupMessage = "";   // result of the last save / restore, shown in the Backup section
@@ -51,7 +53,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const top = body.scrollTop;
     stopVoiceListener();
     body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
-      modelSection({ refresh, closeMenu: close, onPreviewPrompt }), voiceSection(),
+      modelSection({ refresh, closeMenu: close, onPreviewPrompt }),
+      teachingSection({ refresh, closeMenu: close, ...teach }), voiceSection(),
       touchSection(), backupSection(), aboutSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
     body.scrollTop = top;
@@ -269,13 +272,16 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
   }
 
   // ---------- Edit / Model ----------
+  // (Edit and Model mode are off while a teaching session is running: model mode and sessions are separate.)
   function actionSection() {
+    const busy = teach.sessionActive();
     return h("section", { class: "panel", id: "sec-actions" },
       h("div", { class: "action-row" },
-        h("button", { type: "button", class: "btn big", id: "menu-edit", text: "Edit board",
+        h("button", { type: "button", class: "btn big", id: "menu-edit", text: "Edit board", disabled: busy,
           onclick: () => { close(); onEdit(); } }),
-        h("button", { type: "button", class: "btn big", id: "menu-model", text: "Start modeling",
-          onclick: () => { close(); onModel(); } })));
+        h("button", { type: "button", class: "btn big", id: "menu-model", text: "Start modeling", disabled: busy,
+          onclick: () => { close(); onModel(); } })),
+      busy ? h("p", { class: "muted", text: "Editing and modeling are off while a teaching session is running." }) : null);
   }
 
   // ---------- Voice ----------
@@ -423,16 +429,22 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         const msg = await restoreFromFile(f);
         if (msg) { backupMessage = msg; onLearnerChanged(); refresh(); }
       } });
+    // Teaching data (targets, sessions and trials) is on by default; untick it to leave it out of the file.
+    const teachBox = h("input", { type: "checkbox", id: "backup-teaching" });
+    teachBox.checked = true;
+    const opts = () => ({ teaching: teachBox.checked });
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
         "A backup is one file with a learner's board size, stage, button changes, pages you made, voice and speech pacing, keyboard settings, touch settings, Model prompt settings and photos. " +
         "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included." }),
+      h("label", { class: "check-line", for: "backup-teaching" }, teachBox,
+        h("span", { text: "Include teaching data (targets, sessions and trials)" })),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
-          onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name) + ". Keep it somewhere safe.") }),
+          onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name, opts()) + ". Keep it somewhere safe.") }),
         h("button", { type: "button", class: "btn", id: "backup-all", text: "Save backup of all learners",
-          onclick: () => run(async () => "Saved " + await saveBackup(listProfiles(), "all") + ". Keep it somewhere safe.") }),
+          onclick: () => run(async () => "Saved " + await saveBackup(listProfiles(), "all", opts()) + ". Keep it somewhere safe.") }),
         h("label", { class: "btn", for: "restore-file", id: "restore-btn", text: "Restore from backup" }),
         fileIn),
       status);

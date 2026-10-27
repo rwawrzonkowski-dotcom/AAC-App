@@ -59,6 +59,7 @@ import { load, save, remove } from "./storage.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION, RANCH_NOTE } from "./migrate.js";
 import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 import { PAUSE_CHOICES } from "./speech.js";
+import { deleteTeaching, importTeaching } from "./teachdata.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
@@ -236,6 +237,7 @@ export async function deleteProfile(id) {
   profiles.splice(i, 1);
   await db.del("profiles", id);
   await db.delPrefix("photos", id + "|");
+  for (const store of ["targets", "sessions", "trials"]) await db.delPrefix(store, id + "|");   // teaching data goes too
   if (currentId === id) await switchTo(profiles[0].id);
   return true;
 }
@@ -301,10 +303,11 @@ export async function getPhotoBlobs(profileId) {
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
 // `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial,
-//            notices, photos: [{ key, blob }] }
+//            notices, teaching: null | { targets, sessions, trials }, photos: [{ key, blob }] }
 // Returns the saved profile.
 export async function importLearner(data, replaceId = null) {
   let p = replaceId ? profiles.find((x) => x.id === replaceId) : null;
+  let keepRewards = [];
   if (p) {
     p.name = data.name;
     p.stage = data.stage;
@@ -318,6 +321,8 @@ export async function importLearner(data, replaceId = null) {
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
     p.wordDial = cleanWordDial(data.wordDial);
+    // Reward pictures belong to the teaching data: when the backup has none, the learner keeps theirs.
+    if (!data.teaching) keepRewards = (await db.getPrefix("photos", p.id + "|reward:")).filter((r) => r.value && r.value.blob);
     await db.delPrefix("photos", p.id + "|");
   } else {
     p = makeProfile(data.name, data.stage, data.voice);
@@ -333,6 +338,11 @@ export async function importLearner(data, replaceId = null) {
   }
   await saveProfile(p);
   for (const ph of data.photos) await db.put("photos", p.id + "|" + ph.key, { blob: ph.blob });
+  for (const r of keepRewards) await db.put("photos", r.key, r.value);
+  if (data.teaching) {                       // targets, sessions and trials from the backup replace this learner's
+    await deleteTeaching(p.id);
+    await importTeaching(p.id, data.teaching);
+  }
   if (p.id === currentId) await loadPhotos();   // the learner on screen changed: reload their photos
   return p;
 }

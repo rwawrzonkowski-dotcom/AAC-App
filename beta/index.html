@@ -41,7 +41,8 @@
 
     <!-- Context strip. Phase 3 will show photo-suggested words here.
          Now: shows the page title on category pages, and holds the hidden
-         adult-menu target (press and hold 3 seconds at the top-left). -->
+         adult-menu target (press and hold 3 seconds at the top-left).
+         During a teaching session js/session.js puts the adult's small controls here (Phase 2, beta). -->
     <section id="context-strip">
       <button id="adult-hold" type="button" aria-label="Adult menu (press and hold)">
         <svg class="hold-ring" viewBox="0 0 40 40" aria-hidden="true">
@@ -60,6 +61,14 @@
       <span>Editing &mdash; tap any button to change it</span>
       <button id="edit-words" type="button" hidden>Words</button>
       <button id="edit-done" type="button">Done</button>
+    </div>
+
+    <!-- Choose-targets banner (Teaching): covers the message bar only, so no cell moves -->
+    <div id="target-banner" hidden>
+      <span id="target-banner-text">Tap words to add as targets</span>
+      <span id="target-count"></span>
+      <button id="target-words" type="button" hidden>Words</button>
+      <button id="target-done" type="button">Done</button>
     </div>
   </main>
 
