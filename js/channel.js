@@ -7,5 +7,5 @@
 // and nobody's saved learners change. Beta's prefix is "beta-", so beta has its own empty storage.
 // tools/make-beta.sh writes the beta version of this file; tools/promote-beta.sh never overwrites this one.
 export const CHANNEL = "stable";             // "stable" or "beta"
-export const VERSION_LABEL = "Stable 1.0";   // shown small in the adult menu and on the setup screen
+export const VERSION_LABEL = "VOICE 1.1";   // shown small in the adult menu and on the setup screen
 export const STORAGE_PREFIX = "";            // "" for stable, "beta-" for beta

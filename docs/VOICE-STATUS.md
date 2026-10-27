@@ -1,6 +1,6 @@
 # VOICE — Project Status and Reference
 
-*Last updated: Oct 27, 2026. Read this first in any new session instead of re-reading old chats.*
+*Last updated: Oct 27, 2026 (VOICE 1.1 promoted). Read this first in any new session instead of re-reading old chats.*
 
 **VOICE** = Variable Output for Individualized Communication and Expression. A free, iPad-first AAC (speech) app for nonvocal children new to AAC, built by **Richard Wawrzonkowski, M.S., LBA, BCBA**. Pilot with his clients now; public release later.
 
@@ -8,9 +8,9 @@
 
 | What | Where |
 |---|---|
-| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "Stable 1.0" (still named "AAC Board" until the next promote) |
-| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 1.3" |
-| Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore point branch `stable-1.0` |
+| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 1.1" |
+| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — currently the same features as VOICE 1.1 |
+| Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE) and `stable-1.1` (VOICE 1.1) |
 | Planning doc (source of truth for decisions) | https://claude.ai/code/artifact/133274d9-e0f2-4009-8086-6f527aebe3af |
 | Website plan | https://claude.ai/code/artifact/35106cdc-bca5-4b24-8e2f-c5c6a34d44d0 |
 | This status file | Project doc `claude/VOICE-status.md` and repo `docs/VOICE-STATUS.md` |
@@ -19,7 +19,7 @@
 
 - **Opus plans and reviews; Sonnet builds.** Nothing is built until Richard says "approved."
 - **New features go to the beta first.** Root folder = stable; `beta/` = full copy with its own storage (`beta-` prefix), passcode and offline cache. Only `beta/` and `tools/` change during feature work.
-- **"Promote"** → `tools/promote-beta.sh "VOICE 1.1"` copies beta to stable (sets VOICE names, new icon, About data). **"Roll back to stable"** → restore branch `stable-1.0`.
+- **"Promote"** → `tools/promote-beta.sh "VOICE 1.1"` copies beta to stable (sets VOICE names, new icon, About data). **"Roll back"** → restore the most recent `stable-*` branch.
 - **Before every push:** confirm no stable file changed (for beta work), board cells unchanged on 45 and 84, no console errors. After pushing, devices update when the app is fully closed and reopened.
 - **Commit trailer:** `Co-Authored-By` + `Claude-Session` lines; author `Claude <noreply@anthropic.com>`.
 - Tag pushes are blocked by the workspace proxy; use branches as restore points.
@@ -53,7 +53,7 @@
 - Backup and restore (one learner or all).
 - Event log of taps with word ids, ready for Phase 2 data.
 
-**Beta only (waiting to be promoted)**
+**Added in VOICE 1.1 (promoted Oct 27)**
 - Press-and-hold word-forms dial: tap or slide; fixed spots (past up, -ing right, -s down, participle left); markers can be turned off; on from stage 3.
 - VOICE name, new icon (indigo speech bubble with "V" and five colored dots), About VOICE screen with Richard's name and five blank link spots (Website, Resources, Trainings, Reserve a training, Contact).
 - iPhone safe areas: equal side margins keep buttons clear of the camera cutout and home bar; the board stays centered so nothing moves when the phone is turned. iPads unchanged.
@@ -62,7 +62,7 @@
 
 ## Next steps
 
-1. **Test the beta on an iPad** (dial, name, icon, About). Then say "promote" → becomes VOICE 1.1 for clients.
+1. **Done Oct 27:** VOICE 1.1 promoted to clients. Pilot iPads update after the app is fully closed and reopened; the home-screen label changes to "VOICE" only if the icon is removed and re-added (save a backup first).
 2. **Send web addresses** for the About links whenever ready.
 3. **Pilot gate:** about two weeks of daily use with clients on the stable app.
 4. **Phase 2 — teaching and data:** opt-in teaching sessions, prompt hierarchy with automatic fading (including critter and ring opacity), mastery suggestions for stages, data reports and export.

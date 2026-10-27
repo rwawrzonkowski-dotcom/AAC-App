@@ -15,6 +15,18 @@
   --c-little: #f3ece0;        /* warm cream: little words (the, and, because...) */
   --c-home: #f7b46c;
   --c-tint: #f4bd7c;          /* page background on a category page */
+
+  /* ---- Safe areas (iPhone camera cutout / Dynamic Island / home bar) ----
+     The phone's unusable edge strips. --safe-x is the SAME on both sides: the larger of the left and right
+     insets, so the board stays centered and every button is in the same place whichever way the phone is
+     turned. On iPads and computers every inset is 0px, so nothing changes there.
+     TEST HOOK: --test-inset-l / -r / -t / -b (set only by tests, never by the app) stand in for the real
+     env() values so a desktop browser can pretend to be an iPhone. */
+  --inset-l: var(--test-inset-l, env(safe-area-inset-left, 0px));
+  --inset-r: var(--test-inset-r, env(safe-area-inset-right, 0px));
+  --safe-x: max(var(--inset-l), var(--inset-r));
+  --safe-t: var(--test-inset-t, env(safe-area-inset-top, 0px));
+  --safe-b: var(--test-inset-b, env(safe-area-inset-bottom, 0px));
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body {
@@ -39,7 +51,7 @@ button { font: inherit; touch-action: manipulation; }
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 12fr 10fr 78fr;
   gap: var(--gap);
-  padding: var(--gap);
+  padding: calc(var(--gap) + var(--safe-t)) calc(var(--gap) + var(--safe-x)) calc(var(--gap) + var(--safe-b));
   position: relative;            /* edit banner is positioned inside it */
 }
 #app.on-category { background: var(--c-tint); }
@@ -225,7 +237,7 @@ button { font: inherit; touch-action: manipulation; }
   display: none; position: fixed; inset: 0; z-index: 10;
   background: #1e6ec8; color: #fff; text-align: center;
   flex-direction: column; align-items: center; justify-content: center;
-  padding: 6vmin;
+  padding: calc(6vmin + var(--safe-t)) calc(6vmin + var(--safe-x)) calc(6vmin + var(--safe-b));
 }
 #rotate-message .rotate-icon { font-size: 18vmin; margin-bottom: 4vmin; }
 #rotate-message p { font-size: 6vmin; font-weight: 800; margin: 0; }
@@ -257,8 +269,9 @@ button { font: inherit; touch-action: manipulation; }
 
 /* ---------- Model mode ---------- */
 #model-banner {
-  position: fixed; top: 0; left: 0; right: 0; height: 3.6dvh; z-index: 30;
-  display: flex; align-items: center; justify-content: space-between; padding: 0 2vmin;
+  position: fixed; top: 0; left: 0; right: 0; height: calc(3.6dvh + var(--safe-t)); z-index: 30;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--safe-t) calc(2vmin + var(--safe-x)) 0;
   background: rgba(109, 40, 217, 0.92); color: #fff; font-weight: 800;
   font-size: 2.4dvh; letter-spacing: 0.08em;
 }
@@ -275,7 +288,7 @@ button { font: inherit; touch-action: manipulation; }
 @keyframes fill-bar { from { width: 0; } to { width: 100%; } }
 /* The ring is a glow around the button: it takes no room. --ring-a (0 to 1) is the
    learner's "ring opacity" setting; js/modelprompt.js sets it on the button. */
-.cell.model-ring, .mp-mock.ring-on, .bar-btn.model-ring, .kb-key.model-ring {
+.cell.model-ring, .mp-mock.ring-on, .bar-btn.model-ring, .kb-key.model-ring, .dial-chip.model-ring {
   z-index: 5;
   animation: model-pulse 0.5s ease-in-out infinite alternate;
   box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
@@ -304,17 +317,18 @@ button { font: inherit; touch-action: manipulation; }
 /* ---------- Adult screens (overlays): plain, adult-styled, separate from the child board ---------- */
 .overlay {
   position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, 0.72);
-  display: flex; align-items: center; justify-content: center; padding: 2vmin;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(2vmin + var(--safe-t)) calc(2vmin + var(--safe-x)) calc(2vmin + var(--safe-b));
 }
 .sheet.adult {
   background: #fff; color: #1f2937; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.45);
-  width: min(560px, 94vw); max-height: 94dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  width: min(560px, calc(94vw - 2 * var(--safe-x))); max-height: calc(94dvh - var(--safe-t) - var(--safe-b)); overflow-y: auto; -webkit-overflow-scrolling: touch;
   padding: 24px; font-size: clamp(16px, 2.4vmin, 21px);
   font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
 }
-.sheet.adult.small { width: min(480px, 92vw); }
-.sheet.adult.editor { width: min(640px, 94vw); }
-.sheet.adult.menu { width: min(980px, 96vw); height: 94dvh; display: flex; flex-direction: column; overflow: hidden; padding: 0; background: #f1f5f9; }
+.sheet.adult.small { width: min(480px, calc(92vw - 2 * var(--safe-x))); }
+.sheet.adult.editor { width: min(640px, calc(94vw - 2 * var(--safe-x))); }
+.sheet.adult.menu { width: min(980px, calc(96vw - 2 * var(--safe-x))); height: calc(94dvh - var(--safe-t) - var(--safe-b)); display: flex; flex-direction: column; overflow: hidden; padding: 0; background: #f1f5f9; }
 .sheet.adult h1 { margin: 0; font-size: 1.5em; }
 .sheet.adult h2 { margin: 0 0 12px; font-size: 1.2em; }
 .menu-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #1f2937; color: #fff; }
@@ -436,7 +450,8 @@ button { font: inherit; touch-action: manipulation; }
    A see-through layer over the whole screen (so the grid never moves); tapping the dim area closes it. */
 #forms-backdrop {
   position: fixed; inset: 0; z-index: 40; background: rgba(15, 23, 42, 0.45);
-  display: flex; justify-content: center; align-items: flex-start; padding: 24dvh 4vw 0;
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: calc(24dvh + var(--safe-t)) calc(4vw + var(--safe-x)) 0;
 }
 #forms-popover {
   width: 100%; max-width: 96vw; background: #fff; border: 0.5vmin solid #6b7480; border-radius: 2vmin;
@@ -452,6 +467,36 @@ button { font: inherit; touch-action: manipulation; }
 .form-btn.current { background: #d9c6f0; border-color: #4c1d95; border-width: 0.8vmin; }
 .form-btn.pressed { filter: brightness(0.78); }
 @media (orientation: portrait) { #forms-backdrop { display: none; } }
+
+/* ---------- Word-forms dial (beta): press and hold a word ----------
+   A see-through layer over the whole screen (so the grid never moves), above the board and below the model critter
+   (z-index 25). js/dial.js sets each chip's size and position; the compass slots are explained in js/forms.js.
+   Chips are big and high contrast: white with a thick black outline, black text. */
+#dial-layer {
+  position: fixed; inset: 0; z-index: 22; background: rgba(15, 23, 42, 0.42);
+  touch-action: none; -webkit-user-select: none; user-select: none;
+}
+.dial-chip {
+  position: absolute; display: flex; align-items: center; justify-content: center; gap: 0.35em;
+  padding: 0 0.6em; background: #fff; color: #111; border: 3px solid #111; border-radius: 1.6vmin;
+  font-weight: 800; line-height: 1; white-space: nowrap; cursor: pointer; overflow: hidden;
+  box-shadow: 0 0.5vmin 2vmin rgba(0, 0, 0, 0.5);
+}
+.dial-mark { display: inline-flex; flex: 0 0 auto; width: 0.95em; height: 0.95em; color: #1d4ed8; }
+.dial-mark svg { width: 100%; height: 100%; display: block; }
+/* The form under the finger (sliding) or being pressed (tapping) lights up; the chosen one turns green. */
+.dial-chip.hot { background: #fde047; border-color: #1d4ed8; box-shadow: 0 0 0 0.9vmin #1d4ed8, 0 0.5vmin 2vmin rgba(0, 0, 0, 0.5); }
+.dial-chip.chosen { background: #86efac; border-color: #166534; }
+.dial-chip.model-ring { z-index: 5; }
+/* The base word in the centre: the button's colour, its symbol faint behind its name. Never catches a touch. */
+.dial-hub {
+  position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  border: 0.6vmin solid #1d4ed8; border-radius: var(--radius); pointer-events: none;
+  box-shadow: 0 0 0 0.5vmin #fff;
+}
+.dial-hub img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0.3; padding: 6%; }
+.dial-hub span { position: relative; font-weight: 800; font-size: min(2.4vw, 3.4vh); color: #111; text-align: center; padding: 0 0.3em; }
+@media (orientation: portrait) { #dial-layer { display: none; } }
 
 /* ---------- Keyboard and number pad (Phase 1.7) ----------
    One overlay laid over the grid's row (an absolutely positioned child of #app, so it takes no room and no
@@ -489,10 +534,12 @@ button { font: inherit; touch-action: manipulation; }
 /* ---------- Quick setup screen (adult-facing, full screen, above everything) ---------- */
 .setup-screen {
   position: fixed; inset: 0; z-index: 90; background: #f1f5f9; color: #1f2937;
-  display: flex; align-items: center; justify-content: center; padding: 2vmin; overflow-y: auto;
+  display: flex; align-items: center; justify-content: center; overflow-y: auto;
+  padding: calc(2vmin + var(--safe-t)) calc(2vmin + var(--safe-x)) calc(2vmin + var(--safe-b));
 }
 .setup-screen[hidden] { display: none; }
-.setup-card { width: min(900px, 96vw); text-align: center; }
+.setup-card { width: min(900px, calc(96vw - 2 * var(--safe-x))); text-align: center;
+  margin: auto; }   /* auto margins centre it when it fits and let it scroll from the top when it does not (phones) */
 .setup-card h1 { margin: 0 0 1.4vmin; font-size: 4.4vmin; }
 .setup-name-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 2vmin; font-size: 2.2vmin; }
 .setup-name-row .text-input { width: 30vmin; }
@@ -508,3 +555,36 @@ button { font: inherit; touch-action: manipulation; }
 .setup-note { margin: 2vmin 0 0; font-size: 2vmin; }
 .setup-foot { display: flex; justify-content: center; gap: 12px; margin-top: 0.6vmin; }
 .setup-foot .link-btn { font-size: 2vmin; }
+/* "Hold time for dial": keep the label on one line, like the other settings */
+#setting-word-dial .slider-row label { flex: 0 0 auto; white-space: nowrap; }
+#setting-word-dial .slider-row { grid-template-columns: auto 1fr 60px; }
+
+/* About screen (adult menu > About VOICE). Placeholders are muted italic so empty spots are easy to see. */
+.about-title { font-size: 2em; margin: 0; letter-spacing: 0.04em; color: #3b2f9e; }
+.about-full { font-weight: 600; margin: 2px 0 8px; }
+.about-name { font-size: 1.2em; font-weight: 700; margin: 0 0 4px; }
+.about-creds { margin: 0 0 8px; color: #475569; }
+.about-bio { margin: 0; white-space: pre-line; }
+.about-placeholder { color: #64748b; font-style: italic; margin: 4px 0; }
+.about-link-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.about-link { text-decoration: none; display: inline-block; }
+.about-link-soon { padding: 12px 4px; }
+.about-list { margin: 4px 0 8px; padding-left: 1.2em; }
+.about-version { margin: 0; text-align: center; }
+
+/* ---------- Volume test and phone tip (beta) ---------- */
+.volume-test { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-start; margin-top: 12px; text-align: left; }
+.volume-test .btn { flex: 0 0 auto; }
+.volume-tips { flex: 1 1 260px; margin: 0; padding-left: 1.2em; font-size: 0.9em; line-height: 1.4; color: #475569; }
+.volume-tips li { margin-bottom: 4px; }
+.volume-tips[hidden] { display: none; }
+.setup-volume { justify-content: center; margin-top: 1.2vmin; }
+.setup-volume .btn { min-height: 44px; padding: 8px 16px; font-size: max(14px, 2vmin); }
+.setup-volume .volume-tips { font-size: max(13px, 1.9vmin); }
+.setup-phone-tip { margin: 0 0 1.4vmin; font-size: max(14px, 2.4vmin); font-weight: 700; color: #1d4ed8; }
+.setup-badge {
+  display: inline-block; margin-top: 0.4vmin; padding: 2px 10px; border-radius: 999px;
+  background: #16a34a; color: #fff; font-size: max(12px, 1.9vmin); font-weight: 800;
+}
+.phone-size-tip { margin: 8px 0 0; padding: 8px 12px; border-radius: 8px; background: #dbeafe; color: #1e3a8a; font-weight: 700; }
+.phone-size-tip[hidden] { display: none; }

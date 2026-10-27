@@ -39,6 +39,11 @@
 //     keyboardButton: "auto",           // the top-bar ABC (keyboard) button: "auto" (from stage 3),
 //                                       // "always" or "never"  (adult menu > Vocabulary stage)
 //     speakLetters: false,              // the keyboard says each letter's name as it is typed
+//     wordDial: {                       // press-and-hold word-forms dial (beta; adult menu > Vocabulary stage)
+//       mode: "auto",                   //   "auto" (from stage 3), "always" or "never"
+//       holdSec: 0.5,                   //   how long to hold a word before the dial opens (0.3 to 1.0)
+//       markers: true,                  //   little pictures on the form chips (turn off for readers)
+//     },
 //   }
 // Cell keys are "<page>:<row>,<col>" (+ "@84" on the 84 board). Positions are
 // permanent, so a key always means the same place on the board. See js/migrate.js
@@ -67,6 +72,21 @@ function newId() { return "p" + Date.now().toString(36) + Math.random().toString
 export const WORDS_BUTTON_CHOICES = ["auto", "always", "never"];
 export const KEYBOARD_BUTTON_CHOICES = ["auto", "always", "never"];   // same three choices for the ABC button
 
+export const WORD_DIAL_CHOICES = ["auto", "always", "never"];
+export const DEFAULT_WORD_DIAL = { mode: "auto", holdSec: 0.5, markers: true };
+export const DIAL_HOLD_MIN = 0.3, DIAL_HOLD_MAX = 1.0;
+
+// A wordDial object with every field present and in range (used for old learners and when reading backups).
+export function cleanWordDial(v) {
+  const o = v && typeof v === "object" ? v : {};
+  const sec = typeof o.holdSec === "number" && isFinite(o.holdSec) ? o.holdSec : DEFAULT_WORD_DIAL.holdSec;
+  return {
+    mode: WORD_DIAL_CHOICES.includes(o.mode) ? o.mode : DEFAULT_WORD_DIAL.mode,
+    holdSec: Math.round(Math.min(DIAL_HOLD_MAX, Math.max(DIAL_HOLD_MIN, sec)) * 20) / 20,   // steps of 0.05 s
+    markers: o.markers === false ? false : true,
+  };
+}
+
 export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1 };
 
 function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
@@ -75,6 +95,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
     wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
+    wordDial: { ...DEFAULT_WORD_DIAL },
   };
 }
 
@@ -158,6 +179,8 @@ export async function initProfiles(board) {
     p.speakLetters = p.speakLetters === true;
     p.voice = cleanVoice(p.voice);
   }
+  // Learners saved before the word-forms dial: Auto (from stage 3), hold 0.5 s, markers on.
+  for (const p of profiles) p.wordDial = cleanWordDial(p.wordDial);
   for (const p of profiles) await upgradeProfile(p, board);
 
   // A brand-new device has no learners yet: the quick setup screen (js/setup.js) creates the first one
@@ -277,7 +300,7 @@ export async function getPhotoBlobs(profileId) {
 
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
-// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters,
+// `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial,
 //            notices, photos: [{ key, blob }] }
 // Returns the saved profile.
 export async function importLearner(data, replaceId = null) {
@@ -294,6 +317,7 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.wordDial = cleanWordDial(data.wordDial);
     await db.delPrefix("photos", p.id + "|");
   } else {
     p = makeProfile(data.name, data.stage, data.voice);
@@ -304,6 +328,7 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.wordDial = cleanWordDial(data.wordDial);
     profiles.push(p);
   }
   await saveProfile(p);

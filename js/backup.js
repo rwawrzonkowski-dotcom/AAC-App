@@ -2,10 +2,10 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 9, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 10, exportedAt: "2026-10-09T12:00:00.000Z",
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
-//         keyboardButton, speakLetters,
+//         keyboardButton, speakLetters, wordDial,
 //         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
 //     ]
 //   }
@@ -22,6 +22,9 @@
 // Version 8 (Phase 1.8A) is the same kind of change (folders on Places, People, Chat, Feelings, Drinks and Food): a backup
 // older than 8 is checked again, and gets a note that "ranch" moved into More food. Version 9 (Phase 1.8B) is the same kind of
 // change again (folders on the Describing, Time, Numbers, Clothes, Outside and Things Words pages): a backup older than 9 is checked.
+// `wordDial` ({ mode, holdSec, markers }: the press-and-hold word-forms dial) came with version 10 (beta). A backup without it
+// (every version 9 and older backup, including ones made by the stable app) restores with the defaults: Auto, 0.5 s, markers on.
+// Version 10 changed no layout, so the version 9 checks still apply to older backups.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -39,10 +42,10 @@ import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE } from "./migrate.js";
 import { cleanModel } from "./critters.js";
-import { WORDS_BUTTON_CHOICES } from "./profiles.js";
+import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 9;
+export const BACKUP_VERSION = 10;
 
 // ---------------------------------------------------------------- saving
 
@@ -78,6 +81,7 @@ export async function buildBackup(learners) {
       wordsOnly: p.wordsOnly,
       keyboardButton: p.keyboardButton,
       speakLetters: p.speakLetters,
+      wordDial: p.wordDial,
       photos,
     });
   }
@@ -239,6 +243,8 @@ function cleanLearner(raw, index, version) {
   // Backups older than version 6 were made before the keyboard: ABC on Auto, letters not spoken.
   const keyboardButton = version >= 6 && KEYBOARD_BUTTON_CHOICES.includes(raw.keyboardButton) ? raw.keyboardButton : "auto";
   const speakLetters = version >= 6 && raw.speakLetters === true;
+  // Backups older than version 10 (or without the field) were made before the word-forms dial: the defaults.
+  const wordDial = cleanWordDial(version >= 10 ? raw.wordDial : null);
 
   // Backups older than version 4 were made before the row-group category pages (Phase 1.6), and backups
   // older than version 9 before the Number pad button, the toy and animal folder buttons (Phase 1.7), the folder
@@ -263,7 +269,7 @@ function cleanLearner(raw, index, version) {
     const key = version < 2 ? photoKey(ph.key) : ph.key;
     photos.push({ key: moved[key] || key, blob });          // a moved word's photo moves with it
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, notices, photos };
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
