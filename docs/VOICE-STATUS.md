@@ -56,6 +56,9 @@
 **Beta only (waiting to be promoted)**
 - Press-and-hold word-forms dial: tap or slide; fixed spots (past up, -ing right, -s down, participle left); markers can be turned off; on from stage 3.
 - VOICE name, new icon (indigo speech bubble with "V" and five colored dots), About VOICE screen with Richard's name and five blank link spots (Website, Resources, Trainings, Reserve a training, Contact).
+- iPhone safe areas: equal side margins keep buttons clear of the camera cutout and home bar; the board stays centered so nothing moves when the phone is turned. iPads unchanged.
+- "Test the volume" button (setup screen and adult menu Voice section) with iOS or Android/Samsung tips; every utterance plays at full volume.
+- Phones: setup screen and Board size panel recommend the 45 board.
 
 ## Next steps
 
@@ -75,3 +78,4 @@
 - A 24-location grid is mentioned in the original rules but not built (only 45 and 84).
 - Optional visual cue during the dial's half-second hold.
 - Insect "fly" shares a label with the verb in Forms.
+- Optional later: VOICE's own built-in offline voice (allows volume boost and the same voice on every device; adds 20–60 MB). Revisit if loudness complaints continue.
