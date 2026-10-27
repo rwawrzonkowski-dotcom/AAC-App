@@ -34,7 +34,7 @@ export function volumeTips() {
       "Speech Recognition and Synthesis from Google.");
   }
   if (isIOS()) {
-    tips.push("Open Control Center (swipe down from the top right corner) and drag the volume slider up while VOICE is talking.");
+    tips.push("Open Control Center (swipe down from the top right corner, or up from the bottom on devices with a Home button) and drag the volume slider up while VOICE is talking.");
     if (isIPhone()) tips.push("iPhone: flip the Ring/Silent switch (or hold the Action button) so the phone is not on silent.");
     if (isIPad()) tips.push("iPad: if a mute icon shows in Control Center, tap it off. A side switch or the sidebar can set Ring/Silent " +
       "(Settings → General → Use Side Switch To).");
