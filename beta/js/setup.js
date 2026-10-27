@@ -8,7 +8,8 @@
 // On the first open there is also a "Restore from a backup file" link (uses the existing restore flow).
 import { h } from "./ui.js";
 import { restoreFromFile } from "./backup.js";
-import { listProfiles } from "./profiles.js";
+import { listProfiles, CHILD_VOICE } from "./profiles.js";
+import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP } from "./devicetips.js";
 import { VERSION_LABEL } from "./channel.js";
 
 export const SETUP_CHOICES = [
@@ -32,11 +33,14 @@ export function showSetup({ first = false } = {}) {
     const done = (v) => { screen.remove(); resolve(v); };
     const choose = (c) => done({ name: nameIn.value.trim() || defaultName, gridSize: c.gridSize, stage: c.stage });
 
+    // On a phone, the 45-button choice is marked "Recommended for phones" (choices and defaults are unchanged).
+    const phone = looksLikePhone();
     const choices = SETUP_CHOICES.map((c) =>
       h("button", { type: "button", class: "setup-choice" + (c.id === "new" ? " new" : ""), id: "setup-" + c.id,
         "data-grid": c.gridSize, "data-stage": c.stage, onclick: () => choose(c) },
         h("span", { class: "setup-choice-title", text: c.title }),
-        h("span", { class: "setup-choice-text", text: c.text })));
+        h("span", { class: "setup-choice-text", text: c.text }),
+        phone && c.id === "full45" ? h("span", { class: "setup-badge", id: "setup-recommended", text: "Recommended for phones" }) : null));
 
     // Restore link (first open only). A label for a hidden file input, like the adult menu's Backup section.
     const fileIn = first ? h("input", { type: "file", accept: ".json,application/json", id: "setup-restore-file", class: "file-hidden",
@@ -55,7 +59,10 @@ export function showSetup({ first = false } = {}) {
         h("h1", { text: "Set up VOICE" }),
         h("div", { class: "setup-name-row" },
           h("label", { for: "setup-name", text: first ? "Learner name (optional)" : "Learner name" }), nameIn),
+        phone ? h("p", { class: "setup-phone-tip", id: "setup-phone-tip", text: PHONE_BOARD_TIP }) : null,
         h("div", { class: "setup-choices" }, choices),
+        // Volume check with the default child voice (no learner exists yet on a new device)
+        volumeTestBlock({ voice: CHILD_VOICE, tipsOnTap: true, extraClass: "setup-volume" }),
         h("p", { class: "muted setup-note", text: "You can change this anytime in the adult menu." }),
         h("div", { class: "setup-foot" },
           first ? h("label", { class: "link-btn", for: "setup-restore-file", id: "setup-restore", text: "Restore from a backup file" }) : null,

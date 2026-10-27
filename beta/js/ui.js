@@ -20,6 +20,21 @@ export function h(tag, props = {}, ...kids) {
   return e;
 }
 
+// The phone's unusable edge strips in pixels, { x, t, b }: x is the same on both sides (the larger of the
+// left and right insets), t = top (camera cutout), b = bottom (home bar). All 0 on iPads and computers.
+// Read from the CSS variables in styles.css (one place decides them, including the test hook).
+export function safeInsets() {
+  const probe = h("div", { "aria-hidden": "true" });
+  probe.style.cssText = "position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;" +
+    "padding:var(--safe-t) var(--safe-x) var(--safe-b) var(--safe-x)";
+  document.body.append(probe);
+  const cs = getComputedStyle(probe);
+  const px = (v) => parseFloat(v) || 0;
+  const out = { x: px(cs.paddingLeft), t: px(cs.paddingTop), b: px(cs.paddingBottom) };
+  probe.remove();
+  return out;
+}
+
 // Show `content` on a dimmed full-screen layer. Returns {close, sheet}.
 // Layers stack: a later overlay appears on top of an earlier one.
 export function openOverlay(content, { sheetClass = "" } = {}) {

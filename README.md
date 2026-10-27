@@ -391,6 +391,12 @@ To test with a real learner, make a backup in the stable app (adult menu > Backu
 (backup files work in both). Offline copies are kept apart the same way: stable's is `aac-vNN`, beta's is `beta-aac-vNN`;
 each service worker deletes only its own, and the stable one ignores everything under `beta/`.
 
+**Beta-only features waiting to be promoted:** iPhone safe areas (the board and every full-screen layer keep clear of the camera cutout
+and home bar; the same space is kept on both sides so buttons never move when the phone is turned), a "Test the volume" button with
+device-specific tips (setup screen and adult menu > Voice), and a "45 buttons is easier on a phone" tip. On iPads and computers the
+board is exactly as before. To test the safe areas on a desktop browser, set the CSS variables `--test-inset-l`, `--test-inset-r`,
+`--test-inset-t`, `--test-inset-b` on `:root` (they stand in for the phone's real `env(safe-area-inset-*)` values; the app never sets them).
+
 **Scripts** (run them from the project folder; they only change files on this computer and never commit or push):
 - `tools/make-beta.sh` rebuilds `beta/` as a fresh copy of the stable app set up as beta. Use it to start testing a new round, or
   to throw away beta experiments. It overwrites `beta/`, so make beta changes only after running it. Running it twice changes

@@ -13,6 +13,7 @@ import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 import { VERSION_LABEL } from "./channel.js";
 import { openAbout } from "./about.js";
+import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP } from "./devicetips.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -145,7 +146,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("h2", { text: "Board size (for this learner)" }),
       h("p", { class: "muted", text: "45 locations (9 x 5) is the starting board. 84 locations (12 x 7) is a larger board with more words. " +
         "The first four rows are the same on both; the bottom row of the 45 board moves down to the bottom row of the 84 board." }),
-      h("div", { class: "seg-row size-seg" }, btn(45, "45 locations"), btn(84, "84 locations")));
+      h("div", { class: "seg-row size-seg" }, btn(45, "45 locations"), btn(84, "84 locations")),
+      // On a phone, nudge toward the smaller board while 84 is selected
+      looksLikePhone() && cur.gridSize === 84 ? h("p", { class: "phone-size-tip", id: "size-phone-tip", text: PHONE_BOARD_TIP }) : null);
   }
 
   // ---------- Vocabulary stage ----------
@@ -330,7 +333,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("button", { type: "button", class: "btn", id: "voice-child", text: "Reset to child default",
           onclick: resetTo(CHILD_VOICE) }),
         h("button", { type: "button", class: "btn", id: "voice-adult", text: "Reset to adult default",
-          onclick: resetTo(ADULT_VOICE) })));
+          onclick: resetTo(ADULT_VOICE) })),
+      // Uses this learner's voice (speak() reads the current learner's settings)
+      volumeTestBlock({}));
   }
 
   // "Pause between words": Off plays the message bar as one sentence; otherwise chip by chip with a gap.

@@ -18,6 +18,7 @@
 // This file only draws the dial and reads the finger. What choosing MEANS (speak, message bar, event log,
 // Model mode prompt) is decided by js/app.js, which passes onChoose.
 import { SLOT_VECTOR } from "./forms.js";
+import { safeInsets } from "./ui.js";
 
 const MOVE_PX = 12;      // the finger must travel this far from where it went down before a chip lights up
 const MARGIN = 8;        // chips stay at least this far from the screen edge
@@ -29,7 +30,10 @@ const GAPS = [10, 6, 3, 0];   // space between chips; shrinks only if the dial w
 // Returns { hub: {left, top, width, height}, chips: [{ slot, left, top, width, height }], shiftX, shiftY }.
 // Each chip keeps its compass direction from the hub. If the dial would leave the screen, the whole dial
 // (hub included) is moved inward by the smallest amount; if it is still too big, the gaps shrink first.
-export function computeDialLayout({ rect, vw, vh, chips, chipH }) {
+// safe (optional) = { x, t, b }: the phone's unusable edge strips (see safeInsets() in js/ui.js); chips stay out of them.
+export function computeDialLayout({ rect, vw, vh, chips, chipH, safe = { x: 0, t: 0, b: 0 } }) {
+  const minLeft = MARGIN + safe.x, maxRight = vw - MARGIN - safe.x;
+  const minTop = MARGIN + safe.t, maxBottom = vh - MARGIN - safe.b;
   const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
   const widthOf = (vx) => Math.max(0, ...chips.filter((c) => SLOT_VECTOR[c.slot][0] === vx).map((c) => c.w));
   const colW = { "-1": widthOf(-1), "0": widthOf(0), "1": widthOf(1) };
@@ -53,14 +57,14 @@ export function computeDialLayout({ rect, vw, vh, chips, chipH }) {
     const minY = Math.min(...boxes.map((b) => b.top)), maxY = Math.max(...boxes.map((b) => b.top + b.height));
     // Smallest nudge that brings the whole dial inside the margins.
     let shiftX = 0, shiftY = 0;
-    if (minX < MARGIN) shiftX = MARGIN - minX; else if (maxX > vw - MARGIN) shiftX = vw - MARGIN - maxX;
-    if (minY < MARGIN) shiftY = MARGIN - minY; else if (maxY > vh - MARGIN) shiftY = vh - MARGIN - maxY;
+    if (minX < minLeft) shiftX = minLeft - minX; else if (maxX > maxRight) shiftX = maxRight - maxX;
+    if (minY < minTop) shiftY = minTop - minY; else if (maxY > maxBottom) shiftY = maxBottom - maxY;
     result = {
       hub: { left: rect.left + shiftX, top: rect.top + shiftY, width: rect.width, height: rect.height },
       chips: placed.map((b) => ({ ...b, left: b.left + shiftX, top: b.top + shiftY })),
       shiftX, shiftY,
     };
-    if (maxX - minX <= vw - 2 * MARGIN && maxY - minY <= vh - 2 * MARGIN) break;   // fits; otherwise try a tighter gap
+    if (maxX - minX <= maxRight - minLeft && maxY - minY <= maxBottom - minTop) break;   // fits; otherwise try a tighter gap
   }
   return result;
 }
@@ -153,7 +157,7 @@ export function openDial({ anchor, entries, markers, pointer, onChoose, onClose 
 
   // Place everything.
   const lay = computeDialLayout({
-    rect: anchor.rect, vw, vh, chipH,
+    rect: anchor.rect, vw, vh, chipH, safe: safeInsets(),
     chips: [...chipEls].map(([slot, el]) => ({ slot, w: Math.ceil(el.getBoundingClientRect().width) })),
   });
   for (const c of lay.chips) {

@@ -50,8 +50,8 @@ export function onVoicesChanged(fn) {
 }
 
 // The chosen voice if still installed; otherwise en-US, then any English.
-function pickVoice() {
-  const chosen = settings.voiceURI && voices.find((v) => v.voiceURI === settings.voiceURI);
+function pickVoice(s = settings) {
+  const chosen = s.voiceURI && voices.find((v) => v.voiceURI === s.voiceURI);
   return (
     chosen ||
     voices.find((v) => v.lang === "en-US" && v.localService) ||
@@ -85,12 +85,13 @@ export function initSpeech() {
 
 // ---------- Speaking ----------
 // Build one utterance with the learner's voice and pitch at the given speed.
-function makeUtterance(text, rate) {
+function makeUtterance(text, rate, s = settings) {
   const u = new SpeechSynthesisUtterance(text);
-  const voice = pickVoice();
+  const voice = pickVoice(s);
   if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = "en-US"; }
-  u.pitch = settings.pitch;
+  u.pitch = s.pitch;
   u.rate = rate;
+  u.volume = 1;                     // always full: the device's own volume is the only volume control (the silent unlock below is the one exception)
   return u;
 }
 
@@ -98,7 +99,9 @@ function makeUtterance(text, rate) {
 //   kind "word"      -> the learner's Speed
 //   kind "sentence"  -> Sentence speed
 //   kind "auto" (default): one word -> Speed; more than one word -> Sentence speed
-export function speak(text, kind = "auto") {
+//   voice (optional)  settings to use instead of the current learner's (the setup screen's volume test uses the
+//                     default child voice before any learner exists)
+export function speak(text, kind = "auto", voice = settings) {
   if (!synth || !text) return;
   try {
     stopSequence();
@@ -106,7 +109,10 @@ export function speak(text, kind = "auto") {
     synth.cancel();
     refreshVoices();
     const asSentence = kind === "sentence" || (kind === "auto" && isPhrase(text));
-    synth.speak(makeUtterance(text, asSentence ? sentenceRate() : settings.rate));
+    const rate = asSentence
+      ? (typeof voice.sentenceRate === "number" ? voice.sentenceRate : DEFAULT_SENTENCE_RATE)
+      : voice.rate;
+    synth.speak(makeUtterance(text, rate, voice));
   } catch (e) {
     console.warn("Speech failed:", e);
   }
