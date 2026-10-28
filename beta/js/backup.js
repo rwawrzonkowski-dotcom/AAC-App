@@ -38,6 +38,11 @@
 // changed fields). Version 11 backups restore with the starting template assigned to every target (js/templates.js); restoring a
 // file with `teachingTemplates` asks before replacing this device's own edited templates. The template wording itself is in
 // data/teaching-templates.json and is not saved in backups.
+// Version 13 (beta 2.2, everyday recording) added `everyday` to a learner: { settings: { record, retentionDays }, events, utterances,
+// daily, firstSeen } (see js/everyday.js for what each row holds). The adult chooses in the backup section whether to include it
+// ("Include everyday use data", on by default); without it the field is missing. Restoring brings the raw rows and the daily
+// summaries, then rebuilds the summaries of the days that have raw events, so they always match. A backup older than 13 has no
+// `everyday` field and restores as before; restoring one over an existing learner leaves that learner's everyday data alone.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -52,6 +57,7 @@ import {
   listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES,
 } from "./profiles.js";
 import { exportTeaching } from "./teachdata.js";
+import { exportEveryday, cleanEverydayBackup } from "./everyday.js";
 import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
@@ -61,7 +67,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 12;
+export const BACKUP_VERSION = 13;
 
 // ---------------------------------------------------------------- saving
 
@@ -76,8 +82,9 @@ function blobToDataUrl(blob) {
 
 // Build the backup object for these learners (profile objects from profiles.js).
 // options.teaching (default true): include the learners' targets, sessions, trials and reward pictures.
+// options.everyday (default true): include the learners' everyday use data (word events, utterances, daily summaries, settings).
 // options.templates (default false; the "all learners" button): include this device's edited teaching templates, if there are any.
-export async function buildBackup(learners, { teaching = true, templates = false } = {}) {
+export async function buildBackup(learners, { teaching = true, templates = false, everyday = true } = {}) {
   const out = [];
   for (const p of learners) {
     const photos = [];
@@ -102,6 +109,7 @@ export async function buildBackup(learners, { teaching = true, templates = false
       speakLetters: p.speakLetters,
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
+      ...(everyday ? { everyday: await exportEveryday(p.id) } : {}),
       photos,
     });
   }
@@ -302,7 +310,9 @@ function cleanLearner(raw, index, version) {
       trials: list(raw.teaching.trials, 400000).map((t) => cleanTrial(t, "")).filter(Boolean),
     };
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, photos };
+  // Everyday use data exists only in version 13+ backups made with "Include everyday use data".
+  const everyday = version >= 13 ? cleanEverydayBackup(raw.everyday) : null;
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, everyday, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
@@ -376,7 +386,8 @@ export async function restoreFromFile(file) {
       addBtn.addEventListener("click", () => { choice[i] = "add"; paint(); });
       if (repBtn) repBtn.addEventListener("click", () => { choice[i] = match.id; paint(); });
       const photoText = l.photos.length === 1 ? "1 photo" : `${l.photos.length} photos`;
-      const tc = l.teaching ? `, teaching data (${l.teaching.targets.length} targets, ${l.teaching.sessions.length} sessions)` : "";
+      const tc = (l.teaching ? `, teaching data (${l.teaching.targets.length} targets, ${l.teaching.sessions.length} sessions)` : "") +
+        (l.everyday ? `, everyday use data (${l.everyday.events.length} words, ${l.everyday.utterances.length} messages)` : "");
       return h("div", { class: "restore-row" },
         h("div", { class: "restore-name", text: l.name }),
         h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}${tc}` }),

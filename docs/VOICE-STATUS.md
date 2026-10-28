@@ -1,6 +1,6 @@
 # VOICE — Project Status and Reference
 
-*Last updated: Oct 28, 2026 (VOICE 1.1 stable; Beta 2.1 in test). Read this first in any new session instead of re-reading old chats.*
+*Last updated: Oct 28, 2026 (VOICE 1.1 stable; Beta 2.2 in test). Read this first in any new session instead of re-reading old chats.*
 
 **VOICE** = Variable Output for Individualized Communication and Expression. A free, iPad-first AAC (speech) app for nonvocal children new to AAC, built by **Richard Wawrzonkowski, M.S., LBA, BCBA**. Pilot with his clients now; public release later.
 
@@ -9,7 +9,7 @@
 | What | Where |
 |---|---|
 | Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 1.1" |
-| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 2.1": VOICE 1.1 plus teaching sessions and teaching instructions (Phase 2, Round A) |
+| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 2.2": VOICE 1.1 plus teaching sessions, teaching instructions and everyday recording (Phase 2, Rounds A and B) |
 | Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE) and `stable-1.1` (VOICE 1.1) |
 | Planning doc (source of truth for decisions) | https://claude.ai/code/artifact/133274d9-e0f2-4009-8086-6f527aebe3af |
 | Website plan | https://claude.ai/code/artifact/35106cdc-bca5-4b24-8e2f-c5c6a34d44d0 |
@@ -60,21 +60,24 @@
 - "Test the volume" button (setup screen and adult menu Voice section) with iOS or Android/Samsung tips; every utterance plays at full volume.
 - Phones: setup screen and Board size panel recommend the 45 board.
 
-## In beta (VOICE Beta 2.1): Phase 2, Round A — targets, sessions, prompting and fading, teaching instructions
+## In beta (VOICE Beta 2.2): Phase 2, Rounds A and B — targets, sessions, prompting and fading, teaching instructions, everyday recording
 
 Not promoted yet. Adult menu > Teaching (see README "Teaching sessions (beta)").
 - **Targets** per learner (word id + page path), chosen by tapping words in an "Add targets" mode; status Baseline / Teaching / Mastered / Maintenance; per-target direction (most-to-least default or least-to-most), time delay (3 s), fade after 3 correct, back up after 2 misses, mastery rule (80% independent, 3 sessions, 3 trials each, 2 different people or settings), optional reward picture.
 - **Sessions** (Who: Parent/RBT/Teacher/BCBA/Other; Where: Home/Clinic/School/Community): the empty context strip holds 1-second-hold controls (target, Start trial, Opportunity [NET], Skip, End session, trial counter). Prompt levels 0-7: independent, time delay, glow, path highlight, model critter/ring at 25/50/75/100%. Forward chaining for words on category pages. Automatic fading for most-to-least targets; mastery and next-stage suggestions at session end (adult confirms).
-- **Data** (IndexedDB stores `targets`, `sessions`, `trials`, keyed `<learnerId>|<id>`; database version 2) included in backups (file version 11, "Include teaching data", on by default). Rounds B (everyday recording) and C (reports) will read these rows.
+- **Data** (IndexedDB stores `targets`, `sessions`, `trials`, keyed `<learnerId>|<id>`; database version 2) included in backups (file version 11, "Include teaching data", on by default). Round C (reports) reads these rows and the everyday data.
 - **Teaching instructions (Beta 2.1, Oct 28):** 10 BCBA-approved templates (`beta/data/teaching-templates.json`), each with Clinical and Parent wording for cue, set up, when to teach, reinforcement, error correction and notes (`{word}`, `{name}` tokens). A target starts with a template picked from its word, then its page or folder, then General (`js/templates.js`); Round A targets get one on first load. Per target: edit any box, reset a box, change template, copy to other targets or to another learner (instructions only). Adult menu > Teaching > Teaching templates edits the wording per device (restore original wording; saved in all-learner backups, asks before replacing on restore). The session strip has an **Instructions** control (1-second hold) that opens a card for the current target; blocked while a trial runs. Backup file version 12.
 - Tested with Playwright at 1180x820 and 1024x768 on the 45 and 84 boards; stable app files unchanged.
+
+- **Everyday recording (Beta 2.2, Oct 28):** adult menu > Data: everyday use (README "Everyday recording (beta)"). On by default for every learner, per-learner On/Off and Pause, saved on the iPad only. IndexedDB stores `events` (each selected word: id, label, how reached, mode learner/model/session, session and trial ids), `utterances` (message-bar sentences ended by bar tap, Clear or 20 s idle), `daily` (per-day summary kept forever: learner taps, unique and new words, utterances, multi-word, longest, word counts, model and session taps) and `firstseen` (first learner use per word; makes "new word" survive pruning); database version 3. Raw rows kept 90 / **180** / 365 days or forever (pruned at app start). Check panel, "Clear this learner's everyday data" (optional second box for sessions and trials), backup "Include everyday use data" (backup file version 13; summaries rebuilt on restore). Speech is never delayed (record is queued, written after 1.5 s). Round C (reports, export) reads `daily` first and the raw rows for detail; helper readers are in `js/everyday.js` (`listDaily`, `listEvents`, `listUtterances`, `newWordsSince`).
+- Tested with Playwright at 1180x820 and 1024x768, 45 and 84 boards, including 50,000 seeded events; stable app files unchanged.
 
 ## Next steps
 
 1. **Done Oct 27:** VOICE 1.1 promoted to clients. Pilot iPads update after the app is fully closed and reopened; the home-screen label changes to "VOICE" only if the icon is removed and re-added (save a backup first).
 2. **Send web addresses** for the About links whenever ready.
 3. **Pilot gate:** about two weeks of daily use with clients on the stable app.
-4. **Phase 2 — teaching and data:** Round A (targets, sessions, prompting, fading, mastery) is in beta; Round B (everyday recording) and Round C (reports and export) still to build.
+4. **Phase 2 — teaching and data:** Rounds A (targets, sessions, prompting, fading, mastery) and B (everyday recording) are in beta; Round C (reports and export) still to build.
 5. **Phase 3 — camera scenes:** photograph a setting, approve suggested words, show them in the context strip (the strip is reserved but unused).
 6. **Website:** answer the open questions in the website plan, then build the pilot pages (Home, Get started, For clinicians, About, Privacy) at rwawrzonkowski-dotcom.github.io.
 7. **Before public release:** trademark and domain check, privacy policy, App Store name (e.g. "VOICE AAC"; "Voice" is taken), app code license (MIT or GPL), move app and site to a custom domain using backup/restore.

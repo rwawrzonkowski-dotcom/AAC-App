@@ -15,6 +15,7 @@ import { VERSION_LABEL } from "./channel.js";
 import { openAbout } from "./about.js";
 import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP } from "./devicetips.js";
 import { teachingSection } from "./teachui.js";
+import { dataSection } from "./datapanel.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -54,7 +55,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     stopVoiceListener();
     body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
       modelSection({ refresh, closeMenu: close, onPreviewPrompt }),
-      teachingSection({ refresh, closeMenu: close, ...teach }), voiceSection(),
+      teachingSection({ refresh, closeMenu: close, ...teach }), dataSection({ refresh, sessionActive: teach.sessionActive }), voiceSection(),
       touchSection(), backupSection(), aboutSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
     body.scrollTop = top;
@@ -432,7 +433,10 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     // Teaching data (targets, sessions and trials) is on by default; untick it to leave it out of the file.
     const teachBox = h("input", { type: "checkbox", id: "backup-teaching" });
     teachBox.checked = true;
-    const opts = () => ({ teaching: teachBox.checked });
+    // Everyday use data (which words were used and when) is on by default too.
+    const everydayBox = h("input", { type: "checkbox", id: "backup-everyday" });
+    everydayBox.checked = true;
+    const opts = () => ({ teaching: teachBox.checked, everyday: everydayBox.checked });
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
@@ -440,6 +444,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included. A backup of all learners also keeps the teaching templates you edited." }),
       h("label", { class: "check-line", for: "backup-teaching" }, teachBox,
         h("span", { text: "Include teaching data (targets, sessions and trials)" })),
+      h("label", { class: "check-line", for: "backup-everyday" }, everydayBox,
+        h("span", { text: "Include everyday use data (words used and when, for progress reports)" })),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
           onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name, opts()) + ". Keep it somewhere safe.") }),

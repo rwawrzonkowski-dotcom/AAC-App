@@ -49,7 +49,7 @@ export function teachingSection(ctx) {
     h("h2", { text: "Teaching (for this learner)" }),
     h("p", { class: "muted", text: "Choose the words to teach (targets), then run a session. During a session the board stays exactly as it is; " +
       "small adult controls appear in the strip under the message bar, and the app shows prompts and fades them automatically. " +
-      "Sessions are opt-in: nothing is recorded unless you start one." }),
+      "Sessions are opt-in: no teaching data is recorded unless you start one. (Everyday use is recorded separately: see Data below.)" }),
     active ? h("p", { class: "teach-active", id: "teach-active", text: "A teaching session is running. End it from the strip under the message bar (hold End session)." }) : null,
     h("div", { class: "btn-row left" },
       h("button", { type: "button", class: "btn primary", id: "teach-targets-open", text: `Targets (${n})`, onclick: () => openTargetsList(ctx) }),

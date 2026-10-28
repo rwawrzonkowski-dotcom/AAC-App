@@ -60,6 +60,7 @@ import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves,
 import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 import { PAUSE_CHOICES } from "./speech.js";
 import { deleteTeaching, importTeaching } from "./teachdata.js";
+import { deleteEveryday, importEveryday } from "./everyday.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
@@ -238,6 +239,7 @@ export async function deleteProfile(id) {
   await db.del("profiles", id);
   await db.delPrefix("photos", id + "|");
   for (const store of ["targets", "sessions", "trials"]) await db.delPrefix(store, id + "|");   // teaching data goes too
+  await deleteEveryday(id);                                                                         // and the everyday use data
   if (currentId === id) await switchTo(profiles[0].id);
   return true;
 }
@@ -303,7 +305,8 @@ export async function getPhotoBlobs(profileId) {
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
 // `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial,
-//            notices, teaching: null | { targets, sessions, trials }, photos: [{ key, blob }] }
+//            notices, teaching: null | { targets, sessions, trials }, everyday: null | { settings, events, utterances, daily, firstSeen },
+//            photos: [{ key, blob }] }
 // Returns the saved profile.
 export async function importLearner(data, replaceId = null) {
   let p = replaceId ? profiles.find((x) => x.id === replaceId) : null;
@@ -343,6 +346,7 @@ export async function importLearner(data, replaceId = null) {
     await deleteTeaching(p.id);
     await importTeaching(p.id, data.teaching);
   }
+  if (data.everyday) await importEveryday(p.id, data.everyday);   // everyday use data (Beta 2.2) replaces this learner's; summaries are rebuilt
   if (p.id === currentId) await loadPhotos();   // the learner on screen changed: reload their photos
   return p;
 }

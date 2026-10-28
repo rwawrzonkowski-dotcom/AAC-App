@@ -33,6 +33,8 @@ let S = null;                       // the running session, or null
 export function initSession(h2) { hooks = h2; }
 export const isActive = () => !!S;
 export const trialRunning = () => !!(S && S.trial);
+// The ids everyday recording stores with a tap made during a session (js/everyday.js): the session, and the trial if one is running.
+export function recordIds() { return S ? { sessionId: S.rec.id, trialId: S.trial ? S.trial.id : undefined } : null; }
 export function liveInfo() { return S ? { trials: S.scored(), targets: S.targets.length } : null; }
 
 // ---------- Starting and ending ----------

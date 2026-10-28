@@ -64,7 +64,7 @@ export async function openAbout() {
 
   const privacy = h("section", { class: "panel", id: "about-privacy" },
     h("h2", { text: "Privacy" }),
-    h("p", { text: "No accounts, no tracking, no ads. Everything (photos, learners, settings) stays on this device." }));
+    h("p", { text: "No accounts, no tracking, no ads. Everything (photos, learners, settings, and which words are used and when) stays on this device. Everyday use data only leaves this iPad in a backup an adult saves." }));
 
   const o = openOverlay([
     h("div", { class: "menu-head" },

@@ -718,3 +718,14 @@ textarea.instr-edit { display: block; resize: vertical; min-height: 56px; font-f
 .tpl-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; }
 .tpl-cur { font-size: 0.8em; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #e2e8f0; color: #334155; }
 .instr-card .btn-row { position: sticky; bottom: 0; background: #fff; padding-top: 10px; margin-top: 6px; }
+
+/* ---- Adult menu > Data: everyday use (Beta 2.2). Adult screens only; the board is untouched. ---- */
+.data-check h3 { margin: 14px 0 6px; font-size: 1.05rem; }
+.data-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.data-tile { background: #f1f5f9; border-radius: 10px; padding: 10px 12px; }
+.data-tile .muted { margin: 0; font-size: 0.85rem; }
+.data-num { font-size: 1.5rem; font-weight: 800; }
+.data-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.data-chip { display: inline-block; background: #e0e7ff; color: #1e1b4b; border-radius: 8px; padding: 2px 9px; margin: 2px 4px 2px 0; font-weight: 700; }
+.data-utts { margin: 0; padding-left: 22px; }
+.data-utts li { margin: 4px 0; }

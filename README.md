@@ -338,7 +338,7 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
     resize or reflow any button.
 
 ## Teaching sessions (beta)
-Teaching is opt-in. Nothing is recorded, and the board never changes, unless you start a session. The words, the pictures and every button's
+Teaching is opt-in. No teaching data is recorded, and the board never changes, unless you start a session (everyday use is recorded separately: see *Everyday recording (beta)*). The words, the pictures and every button's
 place stay exactly as they are. Everything is kept on the iPad. Adult menu > **Teaching**.
 
 **Setting targets.** *Targets > Add targets* shows the board with a green banner, "Tap words to add as targets". Tap a word to make it a target (a star
@@ -408,8 +408,45 @@ in their permanent spots).
 **Data kept.** Each learner's targets, sessions and trials are saved on the iPad as they happen (a session you do not end is closed at its last trial the
 next time the app opens). A session has its start, end, who, where and targets. A trial has the word, its type (planned or NET), start and end, how long
 until the first tap (latency), the result (correct, error, no response, skipped), the prompt level it reached, the level it started at, the direction, the
-wrong taps and the buttons prompted along the path. They go into backups (*Include teaching data*) and are never sent anywhere. Everyday recording and
-reports are planned for later rounds.
+wrong taps and the buttons prompted along the path. They go into backups (*Include teaching data*) and are never sent anywhere. Everyday recording is described
+below (*Everyday recording (beta)*); reports are planned for a later round.
+
+## Everyday recording (beta)
+Beta 2.2 quietly saves **which words a learner uses and when**, so that progress reports (a later round) have something to read. It is on by default
+for every learner (also learners that existed before), stays on this iPad, and never changes the board, the speech or any button.
+Adult menu > **Data: everyday use**.
+- **Switch.** *Record everyday use* On / Off per learner, plus a *Pause recording* / *Resume recording* button (the same switch). While it is off
+  nothing at all is saved for that learner. Teaching sessions are still saved, because an adult starts them.
+- **What is saved** (IndexedDB, keys `<learnerId>|<id>`):
+  - *Word events:* time, word id (none for typed words and numbers), label, what was spoken, how it was reached (`board`, `page` with the page
+    ids, `forms` or `dial` with the base word and the form, `keyboard`, `numberpad`), the mode (`learner`; `model` when an adult tapped in Model mode;
+    `session` for a tap during a teaching session, with the session id and the trial id while a trial runs), board size and stage.
+  - *Messages (utterances):* the chips left in the message bar when it was spoken (tap the bar), cleared, or left alone for 20 seconds after the
+    last chip was added; start, end, how it ended (`barSpeak`, `clear`, `idle`), whether it was spoken as a sentence. Delete-key edits count (only the
+    final chips). Only the learner's own chips are listed; if an adult (Model mode) or a teaching session supplied some of the chips the message is
+    marked `mixed`, and a message with no learner chip is not saved. A message that was already spoken or timed out is not saved again when the same
+    chips are still showing.
+  - *Daily summaries,* one per learner per local day, kept forever, updated as taps happen: learner taps, different words (`uniqueWords`), new
+    words, messages, messages of two or more words, the longest message, a count per word, model taps and session taps. Model and session taps are
+    stored with the right flag and are **not** in the learner counts. A **new word** is the first learner-mode use ever of that word for that
+    learner on this iPad (a form chosen from Forms or the dial, such as *go + went*, and a typed word each count as their own word). One small
+    row per word records when it was first used, so a word stays "not new" even after its old events were deleted.
+- **Keeping it small.** *Keep detailed records for* 90 days, **180 days** (default), 1 year or Forever: older word events and messages are deleted
+  when the app starts (one quick delete per learner, after the board is ready). The daily summaries and first-use rows are kept. About 220 bytes per
+  word event: 50,000 events are roughly 11 MB. The panel shows the estimate.
+- **Check panel** (a sanity view, not the reports): today's learner taps and different words, new words in the last 7 days, the last 10 messages,
+  recording on/off, storage used and the retention setting.
+- **Clear this learner's everyday data...** asks first and erases the events, messages, summaries and first-use rows. The box *Also clear teaching
+  data* additionally erases the learner's teaching sessions and trials (targets and their settings stay). It cannot be undone.
+- **Backup.** The backup section has *Include everyday use data* (on by default) next to *Include teaching data*. Backups are version 13; a restore
+  brings the raw rows, the summaries and the settings, then rebuilds the summaries of every day that has raw events (so they always match).
+  Beta backups from before 2.2 restore as before, without everyday data (restoring one over an existing learner leaves that learner's everyday
+  data alone). Deleting a learner deletes their everyday data too.
+- **Speed.** Speech always happens first; the record is queued and written 1.5 seconds later (or when the app is hidden) in one database
+  transaction. If the iPad is switched off within that second and a half the last taps are lost. Rebuilding and backup read in chunks of 2,000 so taps
+  are never kept waiting. Code: `js/everyday.js` (rules, storage, rebuild, pruning), `js/datapanel.js` (the menu section), hooks in `js/app.js`.
+- **Privacy.** Everyday data stays on this iPad. It leaves only in a backup an adult saves (or, in a later round, an export an adult chooses). The
+  About screen says so.
 
 ## Teaching instructions (beta)
 Each target carries written instructions for the adult (not the child): the cue to give, how to set up, when to teach, what reinforcement to deliver,
@@ -480,7 +517,7 @@ The app comes in two copies on the same website, so clients never get an unteste
 - **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
   ("Stable 1.0"; it becomes "VOICE 1.1" and so on once VOICE is promoted) is shown small at the top of the adult menu and at the bottom of the setup screen.
 - **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
-  It shows "VOICE Beta 2.1" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It shows "VOICE Beta 2.2" in the same two places and a small orange **BETA** tag in the corner of the message bar.
   It can be added to the home screen as its own icon ("VOICE Beta", the VOICE icon with a BETA band).
 
 **Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
@@ -490,9 +527,9 @@ To test with a real learner, make a backup in the stable app (adult menu > Backu
 (backup files work in both). Offline copies are kept apart the same way: stable's is `aac-vNN`, beta's is `beta-aac-vNN`;
 each service worker deletes only its own, and the stable one ignores everything under `beta/`.
 
-**Beta-only features waiting to be promoted (VOICE Beta 2.1):** teaching sessions: targets, prompt levels with automatic fading, mastery suggestions and
+**Beta-only features waiting to be promoted (VOICE Beta 2.2):** teaching sessions: targets, prompt levels with automatic fading, mastery suggestions and
 saved session data (see *Teaching sessions (beta)* above), and teaching instructions for each target (see *Teaching instructions (beta)*). On an iPad the board looks and behaves as in VOICE 1.1 unless you start a session or choose
-targets. Because the backup file gained teaching data, Beta backups are version 11 (Beta 2.0) or 12 (Beta 2.1), which the stable app cannot read until this is promoted (the beta
+targets. Because the backup file gained teaching data, Beta backups are version 11 (Beta 2.0), 12 (Beta 2.1) or 13 (Beta 2.2), which the stable app cannot read until this is promoted (the beta
 reads every older backup).
 
 **Scripts** (run them from the project folder; they only change files on this computer and never commit or push):
@@ -556,6 +593,7 @@ Make sure the iPad is not on silent mode and the volume is up.
 - `js/setup.js` the quick setup card (first open and Add learner); `js/lock.js` passcode keypad (and the 10-minute unlock); `js/adult.js` adult menu; `js/editor.js` button editor;
   `js/hold.js` press-and-hold; `js/ui.js` small dialog helpers;
   `js/events.js` in-memory tap list for a later phase.
+- Everyday recording (beta): `js/everyday.js` (what is saved, daily summaries, pruning, rebuild, backup support; no screen) and `js/datapanel.js` (the Data section of the adult menu).
 - Teaching (beta): `js/teaching.js` the rules (prompt levels, fading, mastery; no screen, no database), `js/teachdata.js` saving targets, sessions and
   trials, `js/session.js` the running session (strip controls, trials, prompts), `js/teachui.js` the adult screens (targets, settings, start form, summary,
   mastery and stage suggestions); `js/modelprompt.js` also keeps a prompt on for a session.

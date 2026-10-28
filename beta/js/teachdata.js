@@ -139,6 +139,11 @@ export async function exportTeaching(learnerId) {
 export async function deleteTeaching(learnerId) {
   for (const store of ["targets", "sessions", "trials"]) await db.delPrefix(store, learnerId + "|");
 }
+// Only the sessions and trials (the record of what happened); the targets and their settings stay. Used by "Clear everyday data" with
+// "Also clear teaching data" ticked (js/datapanel.js).
+export async function deleteSessionData(learnerId) {
+  for (const store of ["sessions", "trials"]) await db.delPrefix(store, learnerId + "|");
+}
 // Write already-cleaned teaching data for this learner (the caller has deleted the old rows when replacing).
 export async function importTeaching(learnerId, data) {
   await Promise.all([loadTemplates(), loadBoardData()]);
