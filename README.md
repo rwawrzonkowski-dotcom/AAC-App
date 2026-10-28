@@ -299,14 +299,15 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   (board size, stage, button changes, pages you made, voice including Sentence speed and the pause, touch settings, Model prompt
   settings, the Words button, keyboard button and Speak-each-letter settings, the words-only setting, and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded: an older backup gets keyboard button Auto, letters not
   spoken, Sentence speed 0.9 and no pauses; a backup without the word-forms dial settings gets the defaults). In Beta 2.0 the backup file is version 11
-  (teaching data was added; see *Include teaching data* below); the stable app refuses version 11 files until this is promoted. On the
+  (teaching data was added; see *Include teaching data* below) and in Beta 2.1 version 12 (teaching instructions); the stable app refuses version 11 and 12 files until this is promoted. On the
   iPad a save sheet opens: choose **Save to Files**. *Restore from backup* reads a file,
   shows the learners and photo count inside, and for each learner asks whether to **add
   as a new learner** (default) or **replace** a learner with the same name (asks again
   before replacing). Nothing changes until you tap Restore.
   **Include teaching data** (beta, on by default) puts the learner's targets, teaching sessions, trials and reward pictures in the file; untick it to
   leave them out. Restoring a backup that has teaching data gives it to the new learner (or replaces the old learner's); restoring one without it
-  leaves an existing learner's teaching data alone. A backup older than Beta 2.0 simply has none.
+  leaves an existing learner's teaching data alone. A backup older than Beta 2.0 simply has none. A backup of **all learners** also keeps the teaching
+  templates you edited on this device; restoring one asks before replacing this device's own edited templates.
 - **Start modeling:** a purple "Modeling" bar appears. Your taps work normally and the
   tapped button gets the learner's *Model prompt* (see below); after a category item, the
   page stays up briefly so the prompt on the item is seen, then each button that opened a
@@ -410,6 +411,27 @@ until the first tap (latency), the result (correct, error, no response, skipped)
 wrong taps and the buttons prompted along the path. They go into backups (*Include teaching data*) and are never sent anywhere. Everyday recording and
 reports are planned for later rounds.
 
+## Teaching instructions (beta)
+Each target carries written instructions for the adult (not the child): the cue to give, how to set up, when to teach, what reinforcement to deliver,
+how to correct an error, and notes. They come from 10 **templates** (Requesting items, Requesting actions and more, Help/break/finished, Social words,
+Labeling, Commenting, Feelings and body, Yes/no and questions, Concept words, General word), each with a **Clinical** and a **Parent** wording
+(`data/teaching-templates.json`; `{word}` becomes the target word and `{name}` the learner's name). Nothing shows by itself: an adult has to open them.
+- **Starting template.** When a word is added as a target, the app picks a template from the word first (for example *more* is Requesting actions,
+  *help* and *no* are Help/break, *where* is Yes/no and questions), then from the page or folder it was chosen on (Food is Requesting items, Animals is
+  Labeling, Feelings is Feelings and body, Colors is Concept words), then General. Targets made in Beta 2.0 and older backups get a template the first
+  time they load; their teaching settings do not change. The rules are in `js/templates.js`.
+- **In a target's settings** (Teaching > Targets > Settings > *Teaching instructions*): the six boxes with a **Clinical / Parent** switch (remembered on
+  this device). Type in any box to give that target its own wording (marked *Edited*); **Reset field to template** undoes it. **Change template**
+  lists the 10 templates; if the target has its own wording you choose whether to keep it with the new template or start over. **Copy instructions
+  to other targets...** copies the template and your wording to targets you tick. **Copy to another learner...** adds the word as a target for another
+  learner on this iPad (or updates it if it is already one), copying only the instructions, never the teaching history, sessions or settings.
+- **Teaching templates** (adult menu > Teaching > *Teaching templates*): edit the wording of any template, Clinical and Parent. Edits are kept on this
+  device and apply to every learner's targets except boxes a target has changed for itself. **Restore original wording** puts a template back. A backup of
+  all learners carries the edited templates (restoring asks before replacing this device's own).
+- **During a session** the strip has an **Instructions** control (1-second hold like the others). It opens a card over the board with the current
+  target's word, its template, the six boxes and the Clinical / Parent switch. It cannot be opened while a trial is running ("Finish or skip the trial
+  first"), and no trial can start while it is open. The board is never changed.
+
 ## Where your changes are stored (rules)
 Every change is kept in one of two places, so nothing lands on the wrong word:
 - **Built-in words** (everything in the board file, including "want", "Chat", every
@@ -458,7 +480,7 @@ The app comes in two copies on the same website, so clients never get an unteste
 - **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
   ("Stable 1.0"; it becomes "VOICE 1.1" and so on once VOICE is promoted) is shown small at the top of the adult menu and at the bottom of the setup screen.
 - **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
-  It shows "VOICE Beta 2.0" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It shows "VOICE Beta 2.1" in the same two places and a small orange **BETA** tag in the corner of the message bar.
   It can be added to the home screen as its own icon ("VOICE Beta", the VOICE icon with a BETA band).
 
 **Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
@@ -468,9 +490,9 @@ To test with a real learner, make a backup in the stable app (adult menu > Backu
 (backup files work in both). Offline copies are kept apart the same way: stable's is `aac-vNN`, beta's is `beta-aac-vNN`;
 each service worker deletes only its own, and the stable one ignores everything under `beta/`.
 
-**Beta-only features waiting to be promoted (VOICE Beta 2.0):** teaching sessions: targets, prompt levels with automatic fading, mastery suggestions and
-saved session data (see *Teaching sessions (beta)* above). On an iPad the board looks and behaves as in VOICE 1.1 unless you start a session or choose
-targets. Because the backup file gained teaching data, Beta 2.0 backups are version 11, which the stable app cannot read until this is promoted (the beta
+**Beta-only features waiting to be promoted (VOICE Beta 2.1):** teaching sessions: targets, prompt levels with automatic fading, mastery suggestions and
+saved session data (see *Teaching sessions (beta)* above), and teaching instructions for each target (see *Teaching instructions (beta)*). On an iPad the board looks and behaves as in VOICE 1.1 unless you start a session or choose
+targets. Because the backup file gained teaching data, Beta backups are version 11 (Beta 2.0) or 12 (Beta 2.1), which the stable app cannot read until this is promoted (the beta
 reads every older backup).
 
 **Scripts** (run them from the project folder; they only change files on this computer and never commit or push):
@@ -537,6 +559,9 @@ Make sure the iPad is not on silent mode and the volume is up.
 - Teaching (beta): `js/teaching.js` the rules (prompt levels, fading, mastery; no screen, no database), `js/teachdata.js` saving targets, sessions and
   trials, `js/session.js` the running session (strip controls, trials, prompts), `js/teachui.js` the adult screens (targets, settings, start form, summary,
   mastery and stage suggestions); `js/modelprompt.js` also keeps a prompt on for a session.
+- Teaching instructions (beta): `data/teaching-templates.json` the 10 approved templates, `js/templates.js` which template a target starts with, edited templates and the
+  text shown, `js/instrcard.js` the card in a session and the Clinical/Parent switch, `js/instrui.js` the settings section, template picker, copy screens and the
+  Teaching templates editor.
 - `images/critters/` the five drawn animals and three accessories (original drawings; the body
   color is the CSS variable `--body`, so recoloring needs no extra files).
 - `images/symbols/` the built-in symbols (one SVG per word); `data/image-sources.json`

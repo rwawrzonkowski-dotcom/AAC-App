@@ -20,6 +20,7 @@ import { getPage, pathToCore, resolvePage, posKey } from "./boardmodel.js";
 import { sustainPrompt } from "./modelprompt.js";
 import * as T from "./teaching.js";
 import * as data from "./teachdata.js";
+import { openInstructionsCard } from "./instrcard.js";
 
 export const HOLD_MS = 1000;        // every control in the strip
 const REWARD_MS = 2000;             // how long a reward picture is shown
@@ -74,6 +75,7 @@ export async function endSession() {
 function teardown() {
   if (S && S.trial) endTrial("skipped");
   clearVisual();
+  if (S && S.card) S.card.close();
   const bar = document.getElementById("session-bar");
   if (bar) bar.remove();
   hooks.appEl.classList.remove("in-session");
@@ -97,10 +99,27 @@ function buildStrip() {
     holdButton("sb-start", "sb-start", () => startTrial("planned"), h("span", { class: "sb-label", text: "Start trial" })),
     holdButton("sb-net", "sb-net", () => startTrial("NET"), h("span", { class: "sb-label", text: "Opportunity" })),
     holdButton("sb-skip", "sb-skip", () => { if (S && S.trial) endTrial("skipped"); }, h("span", { class: "sb-label", text: "Skip" })),
+    holdButton("sb-instr", "sb-instr", openInstructions, h("span", { class: "sb-label", text: "Instructions" })),
     holdButton("sb-end", "sb-end", askEnd, h("span", { class: "sb-label", text: "End session" })),
     h("div", { class: "sb-count", id: "sb-count", role: "status" },
       h("span", { id: "sb-trials", text: "Trials 0" }), h("small", { id: "sb-last", text: "" })));
   hooks.strip.appendChild(bar);
+}
+
+// Hold "Instructions": the current target's teaching instructions, on a card over the board. Adults only see them when they
+// ask. While a trial is running the card cannot be opened; while the card is open no trial can start.
+function openInstructions() {
+  if (!S || S.cardOpen) return;
+  if (S.trial) { flashBrief("Finish or skip the trial first"); return; }
+  S.cardOpen = true;
+  const t = S.targets[S.idx];
+  S.card = openInstructionsCard(t, getCurrent().name, { onClose: () => { if (S) { S.cardOpen = false; S.card = null; } } });
+}
+// A short note in the counter's small line; it goes back to the last result after a moment.
+function flashBrief(text, ms = 2500) {
+  const before = S.last;
+  S.last = text; paintBar();
+  setTimeout(() => { if (S && S.last === text) { S.last = before; paintBar(); } }, ms);
 }
 
 async function askEnd() {
@@ -171,7 +190,7 @@ function buildChain(target) {
 function flash(text) { S.last = text; paintBar(); }
 
 function startTrial(type) {
-  if (!S || S.trial) return;
+  if (!S || S.trial || S.cardOpen) return;
   const target = S.targets[S.idx];
   const chain = buildChain(target);
   if (!chain) { flash(`"${target.label}" is not on this board`); return; }

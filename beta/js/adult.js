@@ -437,14 +437,14 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
         "A backup is one file with a learner's board size, stage, button changes, pages you made, voice and speech pacing, keyboard settings, touch settings, Model prompt settings and photos. " +
-        "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included." }),
+        "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included. A backup of all learners also keeps the teaching templates you edited." }),
       h("label", { class: "check-line", for: "backup-teaching" }, teachBox,
         h("span", { text: "Include teaching data (targets, sessions and trials)" })),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
           onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name, opts()) + ". Keep it somewhere safe.") }),
         h("button", { type: "button", class: "btn", id: "backup-all", text: "Save backup of all learners",
-          onclick: () => run(async () => "Saved " + await saveBackup(listProfiles(), "all", opts()) + ". Keep it somewhere safe.") }),
+          onclick: () => run(async () => "Saved " + await saveBackup(listProfiles(), "all", { ...opts(), templates: true }) + ". Keep it somewhere safe.") }),
         h("label", { class: "btn", for: "restore-file", id: "restore-btn", text: "Restore from backup" }),
         fileIn),
       status);

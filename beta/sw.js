@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v8";
+const CACHE_VERSION = "beta-aac-v9";
 // The stable app and the beta copy live on the same website, so they share one cache storage.
 // Each copy only ever deletes caches that start with ITS OWN prefix, and ignores the other copy's folder.
 // (tools/make-beta.sh swaps these three lines in beta/sw.js: "beta-aac-v1", "beta-aac-" and "".)
@@ -13,6 +13,7 @@ const FILES = [
   "data/about.json",
   "data/core-board.json",
   "data/image-sources.json",
+  "data/teaching-templates.json",
   "data/word-forms.json",
   "icons/apple-touch-icon.png",
   "icons/icon-180.png",
@@ -1429,6 +1430,8 @@ const FILES = [
   "js/events.js",
   "js/forms.js",
   "js/hold.js",
+  "js/instrcard.js",
+  "js/instrui.js",
   "js/keyboard.js",
   "js/lock.js",
   "js/migrate.js",
@@ -1443,6 +1446,7 @@ const FILES = [
   "js/teachdata.js",
   "js/teaching.js",
   "js/teachui.js",
+  "js/templates.js",
   "js/ui.js",
   "manifest.webmanifest",
   "styles.css",

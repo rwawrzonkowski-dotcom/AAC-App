@@ -64,6 +64,7 @@ const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 //     status, direction, level (the starting prompt level), ceiling, delaySec, fadeAfter, backUpAfter,
 //     mastery: { pct, sessions, minTrials, differentTags },
 //     reward: false (a picture is stored in the photos under "reward:<wordId>"),
+//     instructions: { templateId, overrides: { clinical: {field: text}, parent: {field: text} } }   (see "Teaching instructions" below),
 //     streakHits, streakMisses,
 //     history: [{ time, from, to, reason }]          every change of the starting level
 //     statusHistory: [{ time, from, to, reason }]    every change of status
@@ -75,7 +76,47 @@ export function newTarget(learnerId, info, now = Date.now()) {
     status: "teaching", direction: s.direction, level: s.level, ceiling: s.ceiling, delaySec: s.delaySec,
     fadeAfter: s.fadeAfter, backUpAfter: s.backUpAfter, mastery: { ...s.mastery },
     reward: false, streakHits: 0, streakMisses: 0, history: [], statusHistory: [], removed: null,
+    instructions: info.instructions || null,       // (filled in by teachdata.addTarget; null only until the migration gives one)
   };
+}
+
+// ---------- Teaching instructions ----------
+// Each target shows instructions for the adult from a wording template (data/teaching-templates.json, js/templates.js).
+// The target keeps only WHICH template and the fields the adult changed; everything else is read from the template.
+export const VOICES = ["clinical", "parent"];
+export const VOICE_LABELS = { clinical: "Clinical", parent: "Parent" };
+export const FIELD_IDS = ["cue", "setup", "when", "reinforcement", "errorCorrection", "notes"];
+export const FALLBACK_TEMPLATE = "general";
+const MAX_INSTR_TEXT = 3000;
+
+export const newInstructions = (templateId) => ({ templateId, overrides: { clinical: {}, parent: {} } });
+
+// null when there is nothing usable (the template is then assigned by js/templates.js ensureInstructions).
+export function cleanInstructions(raw) {
+  if (!isObj(raw) || typeof raw.templateId !== "string" || !/^[A-Za-z0-9_-]{1,40}$/.test(raw.templateId)) return null;
+  const out = newInstructions(raw.templateId);
+  const o = isObj(raw.overrides) ? raw.overrides : {};
+  for (const v of VOICES) {
+    const src = isObj(o[v]) ? o[v] : {};
+    for (const f of FIELD_IDS) if (typeof src[f] === "string") out.overrides[v][f] = src[f].slice(0, MAX_INSTR_TEXT);
+  }
+  return out;
+}
+
+// {word} = the target word's label, {name} = the learner's name. One pass, so a name that contains "{word}" is not filled again.
+export const fillTokens = (text, word, name) => String(text).replace(/\{(word|name)\}/g, (_, k) => (k === "word" ? word : name));
+// The reverse, used when the adult edits the text they see: the word and the name go back to tokens so the text can be copied to
+// another target or learner. Whole words only, and labels shorter than 3 characters are left alone ("I" would match too much).
+export function unfillTokens(text, word, name) {
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = [];
+  if (word && word.length >= 3) parts.push([word, "{word}"]);
+  if (name && name.length >= 3) parts.push([name, "{name}"]);
+  if (!parts.length) return String(text);
+  parts.sort((a, b) => b[0].length - a[0].length);
+  const map = new Map(parts);
+  const re = new RegExp("(?<![A-Za-z0-9])(" + parts.map((p) => esc(p[0])).join("|") + ")(?![A-Za-z0-9])", "g");
+  return String(text).replace(re, (m) => map.get(m) || m);
 }
 
 function cleanChanges(list, max = 500) {
@@ -111,6 +152,7 @@ export function cleanTarget(raw, learnerId) {
     streakHits: clampInt(raw.streakHits, 0, 1000, 0), streakMisses: clampInt(raw.streakMisses, 0, 1000, 0),
     history: cleanChanges(raw.history), statusHistory: cleanChanges(raw.statusHistory),
     removed: typeof raw.removed === "number" ? clampInt(raw.removed, 0, 4e12, 0) : null,
+    instructions: cleanInstructions(raw.instructions),
   };
 }
 

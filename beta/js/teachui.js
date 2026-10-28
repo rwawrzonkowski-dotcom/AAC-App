@@ -8,6 +8,7 @@ import { downscaleImage } from "./editor.js";
 import * as T from "./teaching.js";
 import * as data from "./teachdata.js";
 import { startText } from "./session.js";
+import { instructionsSection, openTemplatesList } from "./instrui.js";
 
 // A row "label  [-]  value  [+]" for a number setting. `fmt` turns the number into text.
 function stepper(id, label, { min, max, step = 1, value, fmt = (n) => String(n), onChange }) {
@@ -52,7 +53,8 @@ export function teachingSection(ctx) {
     active ? h("p", { class: "teach-active", id: "teach-active", text: "A teaching session is running. End it from the strip under the message bar (hold End session)." }) : null,
     h("div", { class: "btn-row left" },
       h("button", { type: "button", class: "btn primary", id: "teach-targets-open", text: `Targets (${n})`, onclick: () => openTargetsList(ctx) }),
-      h("button", { type: "button", class: "btn primary", id: "teach-start-open", text: "Start a session", disabled: active, onclick: () => openStartSession(ctx) })),
+      h("button", { type: "button", class: "btn primary", id: "teach-start-open", text: "Start a session", disabled: active, onclick: () => openStartSession(ctx) }),
+      h("button", { type: "button", class: "btn", id: "teach-templates-open", text: "Teaching templates", onclick: () => openTemplatesList() })),
     h("div", { class: "field touch-setting" },
       stepper("teach-max", "Longest a trial can run", { min: 5, max: 120, step: 5, value: maxSec, fmt: (v) => v + " s",
         onChange: (v) => data.setMaxTrialSec(cur.id, v) }),
@@ -161,6 +163,7 @@ export function openTargetSettings(t, onDone) {
         h("button", { type: "button", class: "btn", id: "ts-reward-remove", text: "Remove picture", onclick: async () => {
           await removePhoto("reward:" + t.wordId); t.reward = false; await save(); paintReward();
         } }))),
+    instructionsSection(t),
     h("div", { class: "btn-row" }, h("button", { type: "button", class: "btn primary", id: "ts-done", text: "Done", onclick: () => { o.close(); onDone(); } })),
   ], { sheetClass: "editor tall" });
   paintReward();

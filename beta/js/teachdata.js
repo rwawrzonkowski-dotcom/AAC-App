@@ -1,7 +1,7 @@
 // Saving and reading teaching data (Phase 2, Round A). Everything stays on this device, in IndexedDB (js/db.js).
 //
 // Three stores, one row per item, each keyed "<learnerId>|<id>" so a learner's rows are found, backed up and deleted by prefix:
-//   targets   one per word: its settings, status and the history of level changes   (see newTarget in js/teaching.js)
+//   targets   one per word: its settings, status, the history of level changes and its teaching instructions (see newTarget in js/teaching.js)
 //   sessions  { id, learnerId, start, end, who, where, targets: [wordId], notes, levelChanges }
 //   trials    { id, sessionId, learnerId, wordId, label, type, start, end, latencyMs, result, promptLevel, startLevel,
 //               direction, errors, chainStepsPrompted, chain, promptTimeline }
@@ -10,6 +10,9 @@
 import * as db from "./db.js";
 import { newTarget, cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { load, save } from "./storage.js";
+import { loadBoardData, getBoardData } from "./boarddata.js";
+import { buildModel, pathToCore } from "./boardmodel.js";
+import { loadTemplates, ensureInstructions, copyInstructions } from "./templates.js";
 
 export const newId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
@@ -24,6 +27,10 @@ export async function loadTeaching(learnerId) {
     const t = cleanTarget(value, learnerId);
     if (t) cache.set(t.wordId, t);
   }
+  // Migration (beta 2.1): a target from Round A, or from an older backup, has no teaching instructions yet. It gets the starting
+  // template for its word and page; nothing else about the target changes.
+  await Promise.all([loadTemplates(), loadBoardData()]);
+  for (const t of cache.values()) if (ensureInstructions(getBoardData(), t)) await db.put("targets", learnerId + "|" + t.wordId, t);
 }
 export const loadedFor = () => cacheFor;
 
@@ -39,9 +46,16 @@ export async function saveTarget(t) {
 
 // Add a word as a target (or bring a removed one back with its old settings and history).
 export async function addTarget(learnerId, info) {
+  await Promise.all([loadTemplates(), loadBoardData()]);
   const old = cache.get(info.wordId);
-  if (old) { old.removed = null; old.label = info.label; old.pageId = info.pageId || "core"; old.path = info.path || []; await saveTarget(old); return old; }
+  if (old) {
+    old.removed = null; old.label = info.label; old.pageId = info.pageId || "core"; old.path = info.path || [];
+    ensureInstructions(getBoardData(), old);
+    await saveTarget(old);
+    return old;
+  }
   const t = newTarget(learnerId, info);
+  ensureInstructions(getBoardData(), t);          // the starting template for this word (js/templates.js)
   await saveTarget(t);
   return t;
 }
@@ -76,6 +90,45 @@ export async function closeOrphanSessions(learnerId) {
   }
 }
 
+// ---------- Copying instructions ----------
+// Copy one target's instructions (template and the adult's edits, nothing else) onto other targets of the same learner.
+export async function copyInstructionsToTargets(source, wordIds) {
+  let n = 0;
+  for (const id of wordIds) {
+    const t = cache.get(id);
+    if (!t || t.removed || t === source) continue;
+    copyInstructions(source, t);
+    await saveTarget(t);
+    n++;
+  }
+  return n;
+}
+// Copy a target's instructions to another learner. If that learner already has the word as a target the instructions are
+// updated (a removed target comes back); otherwise the word is added there as a new target with default settings. The
+// teaching history, sessions and trials are never copied. Returns "added" or "updated".
+export async function copyTargetToLearner(source, profile) {
+  await Promise.all([loadTemplates(), loadBoardData()]);
+  const key = profile.id + "|" + source.wordId;
+  const row = await db.get("targets", key);
+  const old = row ? cleanTarget(row, profile.id) : null;
+  let t, how;
+  if (old) {
+    t = old; how = "updated";
+    t.removed = null;
+  } else {
+    // The route to the word depends on the learner's board size (for example Animals is a Play folder on the 45 board).
+    const model = buildModel(getBoardData(), profile.gridSize);
+    const route = pathToCore(model, profile, source.pageId);
+    const onBoard = route[route.length - 1] === "core";
+    t = newTarget(profile.id, { wordId: source.wordId, label: source.label, pageId: onBoard ? source.pageId : "core",
+      path: onBoard ? route.reverse().slice(1) : [] });
+    how = "added";
+  }
+  copyInstructions(source, t);
+  await db.put("targets", key, t);
+  return how;
+}
+
 // ---------- Backup support ----------
 export async function exportTeaching(learnerId) {
   const targets = (await db.getPrefix("targets", learnerId + "|")).map((r) => r.value).filter(Boolean);
@@ -88,7 +141,11 @@ export async function deleteTeaching(learnerId) {
 }
 // Write already-cleaned teaching data for this learner (the caller has deleted the old rows when replacing).
 export async function importTeaching(learnerId, data) {
-  for (const t of data.targets) await db.put("targets", learnerId + "|" + t.wordId, { ...t, learnerId });
+  await Promise.all([loadTemplates(), loadBoardData()]);
+  for (const t of data.targets) {
+    ensureInstructions(getBoardData(), t);        // a backup from before beta 2.1 has no instructions: assign the starting template
+    await db.put("targets", learnerId + "|" + t.wordId, { ...t, learnerId });
+  }
   for (const s of data.sessions) await db.put("sessions", learnerId + "|" + s.id, { ...s, learnerId });
   for (const t of data.trials) await db.put("trials", learnerId + "|" + t.id, { ...t, learnerId });
 }

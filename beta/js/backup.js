@@ -2,7 +2,8 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 11, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 12, exportedAt: "2026-10-09T12:00:00.000Z",
+//     teachingTemplates: { templateId: { clinical: {field: text}, parent: {field: text} } },     (optional: only in "all learners" files)
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
 //         keyboardButton, speakLetters, wordDial,
@@ -32,6 +33,11 @@
 // data. Every older backup (version 10 and below) has no `teaching` field and restores as before; restoring one over an
 // existing learner leaves that learner's teaching data alone. A version 11 file is too new for the stable app, so it can only
 // be restored in the beta.
+// Version 12 (beta 2.1, teaching instructions) added `instructions` to every target ({ templateId, overrides }) and, in a backup of
+// ALL learners, `teachingTemplates`: the wording of the templates this device has edited (device-wide, not per learner; only the
+// changed fields). Version 11 backups restore with the starting template assigned to every target (js/templates.js); restoring a
+// file with `teachingTemplates` asks before replacing this device's own edited templates. The template wording itself is in
+// data/teaching-templates.json and is not saved in backups.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -47,6 +53,7 @@ import {
 } from "./profiles.js";
 import { exportTeaching } from "./teachdata.js";
 import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
+import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE } from "./migrate.js";
@@ -54,7 +61,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 11;
+export const BACKUP_VERSION = 12;
 
 // ---------------------------------------------------------------- saving
 
@@ -69,7 +76,8 @@ function blobToDataUrl(blob) {
 
 // Build the backup object for these learners (profile objects from profiles.js).
 // options.teaching (default true): include the learners' targets, sessions, trials and reward pictures.
-export async function buildBackup(learners, { teaching = true } = {}) {
+// options.templates (default false; the "all learners" button): include this device's edited teaching templates, if there are any.
+export async function buildBackup(learners, { teaching = true, templates = false } = {}) {
   const out = [];
   for (const p of learners) {
     const photos = [];
@@ -97,7 +105,8 @@ export async function buildBackup(learners, { teaching = true } = {}) {
       photos,
     });
   }
-  return { app: BACKUP_APP, version: BACKUP_VERSION, exportedAt: new Date().toISOString(), learners: out };
+  return { app: BACKUP_APP, version: BACKUP_VERSION, exportedAt: new Date().toISOString(),
+    ...(templates && hasEdits() ? { teachingTemplates: getEdits() } : {}), learners: out };
 }
 
 // "Sam R." -> "Sam-R"; used inside the file name.
@@ -308,7 +317,8 @@ export async function readBackupFile(file) {
   if (!Array.isArray(data.learners) || data.learners.length === 0) bad("This backup does not contain any learners.");
   if (data.learners.length > 50) bad("This backup has too many learners.");
   const learners = data.learners.map((l, i) => cleanLearner(l, i, data.version));
-  return { exportedAt: typeof data.exportedAt === "string" ? data.exportedAt : "", learners };
+  const teachingTemplates = data.version >= 12 ? cleanEdits(data.teachingTemplates) : {};
+  return { exportedAt: typeof data.exportedAt === "string" ? data.exportedAt : "", learners, teachingTemplates };
 }
 
 // ---------------------------------------------------------------- restoring
@@ -387,6 +397,15 @@ export async function restoreFromFile(file) {
           "Replace");
         if (!sure) return;
       }
+      // Edited teaching templates in the file (a backup of all learners): ask before replacing this device's own edits.
+      const tn = Object.keys(backup.teachingTemplates).length;
+      let templatesNote = "";
+      if (tn) {
+        const ok = !hasEdits() || await askConfirm(
+          `This backup has ${tn} edited teaching ${tn === 1 ? "template" : "templates"}. This device already has ${editedCount()} of its own. ` +
+          "Replace this device's edited templates with the ones in the backup? (Cancel keeps this device's; the learners are still restored.)", "Replace");
+        if (ok) { replaceEdits(backup.teachingTemplates); templatesNote = " Edited teaching templates restored."; }
+      }
       const taken = listProfiles().map((p) => p.name);
       let added = 0, replaced = 0;
       for (let i = 0; i < backup.learners.length; i++) {
@@ -404,7 +423,7 @@ export async function restoreFromFile(file) {
       const parts = [];
       if (added) parts.push(added === 1 ? "1 learner added" : `${added} learners added`);
       if (replaced) parts.push(replaced === 1 ? "1 learner replaced" : `${replaced} learners replaced`);
-      finish("Restored: " + parts.join(", ") + ".");
+      finish("Restored: " + parts.join(", ") + "." + templatesNote);
     }
 
     const total = backup.learners.reduce((n, l) => n + l.photos.length, 0);
@@ -414,6 +433,7 @@ export async function restoreFromFile(file) {
       h("p", { class: "muted",
         text: `This file has ${backup.learners.length === 1 ? "1 learner" : backup.learners.length + " learners"} ` +
           `and ${total === 1 ? "1 photo" : total + " photos"}` +
+          (Object.keys(backup.teachingTemplates).length ? " and edited teaching templates" : "") +
           (when && !isNaN(when) ? `, saved ${when.toLocaleDateString()}.` : ".") +
           " Choose what to do with each learner. Nothing changes until you tap Restore." }),
       h("div", { class: "restore-list" }, rows),
