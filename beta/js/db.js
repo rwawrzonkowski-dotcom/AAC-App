@@ -154,14 +154,28 @@ export async function countPrefix(store, prefix) {
   return n;
 }
 
+// How many rows have a key between `lower` and `upperKey` (both included), counted by the database. Used by the reports to count a time range.
+export async function countRange(store, lower, upperKey) {
+  const db = await open();
+  if (db) {
+    try { return await run(db, store, "readonly", (s) => s.count(rangeOf(lower, upperKey))); }
+    catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+  }
+  let n = 0;
+  for (const k of memory[store].keys()) if (k >= lower && k <= upperKey) n++;
+  return n;
+}
+
 // Rows with a key that starts with `prefix`, at most `count` of them, in key order, starting after `afterKey` (or from the start).
 // Returns [{key, value}]. Used to read big stores in chunks.
-export async function getPage(store, prefix, afterKey, count) {
+// (Reports, Beta 2.5: `endKey` stops the page before that key, so a time range of rows can be read without reading the rest.)
+export async function getPage(store, prefix, afterKey, count, endKey = null) {
   const db = await open();
   if (db) {
     try {
+      const top = endKey || upper(prefix);
       const range = typeof IDBKeyRange !== "undefined"
-        ? (afterKey ? IDBKeyRange.bound(afterKey, upper(prefix), true, false) : IDBKeyRange.bound(prefix, upper(prefix))) : null;
+        ? (afterKey ? IDBKeyRange.bound(afterKey, top, true, false) : IDBKeyRange.bound(prefix, top)) : null;
       const [keys, values] = await run(db, store, "readonly", (s) => {
         const a = s.getAllKeys(range, count), b = s.getAll(range, count);
         return { get result() { return [a.result, b.result]; } };
@@ -169,7 +183,7 @@ export async function getPage(store, prefix, afterKey, count) {
       return keys.map((key, i) => ({ key, value: values[i] }));
     } catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
   }
-  return [...memory[store].entries()].filter(([k]) => k.startsWith(prefix) && (!afterKey || k > afterKey))
+  return [...memory[store].entries()].filter(([k]) => k.startsWith(prefix) && (!afterKey || k > afterKey) && (!endKey || k < endKey))
     .sort((a, b) => (a[0] < b[0] ? -1 : 1)).slice(0, count).map(([key, value]) => ({ key, value }));
 }
 

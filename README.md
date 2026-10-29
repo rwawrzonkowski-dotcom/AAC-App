@@ -466,6 +466,37 @@ Adult menu > **Data: everyday use**.
 - **Privacy.** Everyday data stays on this iPad. It leaves only in a backup an adult saves (or, in a later round, an export an adult chooses). The
   About screen says so.
 
+## Reports (beta)
+Adult menu > **Reports** (behind the same 3-second hold and passcode as the rest of the menu) turns the saved teaching and everyday data into graphs, printouts
+and spreadsheets. Nothing is worked out until Reports is open, nothing leaves the iPad unless you print a page or save a file, and the board is never touched.
+At the top: **Learner** (the current one by default), **Last 2 weeks / 4 weeks / 12 weeks / All / Custom** (two date boxes), and optional **Who** and **Where**
+filters (the tags of the teaching sessions; everyday use has no tags, so these two do not change the everyday graphs). Five tabs:
+- **Teaching.** One graph per target, in the usual ABA way: % independent (0 to 100) for each session, points joined only within a phase, a dashed line at the
+  target's mastery criterion, and a labelled vertical line wherever the status changed (Baseline, Teaching, Mastered, Maintenance) or the prompt ladder or step size
+  changed. The SHAPE of each point says who ran the session (circle Parent, square RBT, triangle Teacher, diamond BCBA, X Other) and the letter under the date says
+  where (H, C, S, Cm), so generalization across people and places can be read straight off the graph. A smaller step graph below shows the average prompt help of
+  each session (Model 100% down to Independent), which is how fading is read. Then the **target table** (status, sessions, trials, last 3 sessions, current prompt
+  step, mastery progress such as "2 of 3 sessions at 80% or more; 1 of 2 people/settings") and the **session list**; open a session for the same summary shown at the
+  end of that session. "Show as table" under each graph gives its numbers.
+- **Everyday use.** Only words the learner chose (adult Model-mode taps and teaching-session taps are left out): words used per day (bars) with different words per day
+  (line), vocabulary growth (new words added up), the average words per message and the share of messages with 2 or more words for each week, the 20 most used words, how
+  words were reached (board, pages, forms, dial, keyboard, number pad) and the newest words. If recording was off or nothing was saved, it says so. Beyond 120 days the
+  first graph switches to weeks.
+- **Printable summary.** A clinical page (header with learner, period, filters, date made, VOICE version and "Created with VOICE"; teaching table and a graph for each
+  target; everyday key numbers and graphs). Tick **Include teaching instructions** for a program sheet with each target's clinical wording, and type **notes** to print.
+  **Print / Save as PDF** uses the iPad's print sheet: tap Print, then pinch out on the preview (or use Share, then Save to Files) to save a PDF. The graphs are vector
+  drawings, so they print crisply; a graph is never split across pages and the buttons and menus are hidden when printing.
+- **Parent summary.** A short, warm page in plain words: how many different words were used, new words, favorite words, the longest message, how each practiced word is
+  going ("needs less help now") and **Words to practice at home** (the current Teaching targets with each one's parent-wording cue). No percentages and no clinical terms.
+  Print or **Copy as text**.
+- **Export.** Five spreadsheet files (CSV, opens in Excel, Numbers or Google Sheets; UTF-8 with the marker Excel needs, ISO dates and local times, names like
+  `voice-ana-trials-2026-10-29.csv`): **Trials** (one row per trial: date, time, session, who, where, target word, planned or NET, result, prompt step, help 0 to 1,
+  response time, errors), **Sessions**, **Targets** (status, ladder, rules), **Everyday events** (date, time, word, how reached, mode) and **Daily summary**. They follow the date range;
+  Who and Where apply to trials and sessions. Tapping a button saves the file through the share sheet (Save to Files, AirDrop, Mail...).
+How it stays fast: the graphs read the daily summaries (one small row per day), not every tap. Days saved before Beta 2.5 lack two counts (how words were reached and the
+total words in messages), so for those days only, Reports reads the raw rows; new days keep both counts. A seeded test with 50,000 taps, 5,000 messages and 1,000 trials opens in
+about a third of a second. The graphs are hand-written SVG: no chart library and no internet.
+
 ## Teaching instructions (beta)
 Each target carries written instructions for the adult (not the child): the cue to give, how to set up, when to teach, what reinforcement to deliver,
 how to correct an error, and notes. They come from 10 **templates** (Requesting items, Requesting actions and more, Help/break/finished, Social words,

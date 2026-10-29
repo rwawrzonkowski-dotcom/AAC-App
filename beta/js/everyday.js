@@ -18,7 +18,10 @@
 //               supplied some of the chips of that message.
 //   daily       one per learner per local day (key "<learnerId>|YYYY-MM-DD"), updated as taps happen, kept forever:
 //               { date, learnerTaps, uniqueWords: [keys], newWords, newWordList: [keys], utterances, multiWordUtterances,
-//                 longestUtterance, wordCounts: { key: n }, modelTaps, sessionTaps }
+//                 longestUtterance, wordCounts: { key: n }, modelTaps, sessionTaps,
+//                 howCounts: { board|page|forms|dial|keyboard|numberpad: n } (learner taps by how they were reached; Beta 2.5),
+//                 utteranceWords: total words in all of the day's messages (for the average message length; Beta 2.5) }
+//               (howCounts and utteranceWords are null on a day saved before Beta 2.5: the reports then read that day's raw rows instead.)
 //               Only mode "learner" taps count in learnerTaps, uniqueWords, wordCounts and newWords. A "key" is the word id
 //               ("go"), "go+went" for a form chosen from the Forms button or the dial, or "~label" for typed words and numbers.
 //   firstseen   one per word key the learner has used in learner mode: { key, wordId, label, time, date }. This is what makes a
@@ -90,7 +93,7 @@ export function setSettings(learnerId, patch) {
 // ---------------------------------------------------------------- per-learner state (memory)
 const states = new Map();
 const blankDay = (date) => ({ date, learnerTaps: 0, uniqueWords: [], newWords: 0, newWordList: [], utterances: 0,
-  multiWordUtterances: 0, longestUtterance: 0, wordCounts: {}, modelTaps: 0, sessionTaps: 0 });
+  multiWordUtterances: 0, longestUtterance: 0, wordCounts: {}, modelTaps: 0, sessionTaps: 0, howCounts: {}, utteranceWords: 0 });
 
 function stateFor(learnerId) {
   let st = states.get(learnerId);
@@ -160,6 +163,7 @@ function applyWord(st, ev, row) {
     row.learnerTaps++;
     if (!row.wordCounts[key]) row.uniqueWords.push(key);
     row.wordCounts[key] = (row.wordCounts[key] || 0) + 1;
+    if (row.howCounts) row.howCounts[ev.how] = (row.howCounts[ev.how] || 0) + 1;
     if (!st.known.has(key)) {
       st.known.add(key);
       row.newWords++; row.newWordList.push(key);
@@ -175,6 +179,7 @@ function applyUtterance(st, u, row) {
   row.utterances++;
   if (u.chips.length >= 2) row.multiWordUtterances++;
   row.longestUtterance = Math.max(row.longestUtterance, u.chips.length);
+  if (row.utteranceWords !== null) row.utteranceWords += u.chips.length;
   touch(st, row);
 }
 
@@ -290,6 +295,31 @@ export async function listEvents(learnerId, from = 0, to = Infinity) {
   await flushAll();
   return readAll("events", learnerId, (e) => e.time >= from && e.time < to);
 }
+// Rows with a time in [from, to), oldest first, read straight from the key range (the id starts with the time), so a short period
+// does not read the whole store. Used by the reports (Beta 2.5).
+async function readTimeRange(store, learnerId, from, to) {
+  const out = [], endKey = isFinite(to) ? P(learnerId) + pad13(to) : null;
+  for (let after = P(learnerId) + pad13(Math.max(0, from));;) {
+    const page = await db.getPage(store, P(learnerId), after, CHUNK, endKey);
+    for (const { value } of page) out.push(value);
+    if (page.length < CHUNK) break;
+    after = page[page.length - 1].key;
+    await yieldNow();
+  }
+  return out;
+}
+export async function listEventsBetween(learnerId, from, to) { await flushAll(); return readTimeRange("events", learnerId, from, to); }
+export async function listUtterancesBetween(learnerId, from, to) { await flushAll(); return readTimeRange("utterances", learnerId, from, to); }
+/** How many word events have a time in [from, to) (counted by the database, nothing is read). */
+export async function countEventsBetween(learnerId, from, to) {
+  await flushAll();
+  return db.countRange("events", P(learnerId) + pad13(Math.max(0, from)), P(learnerId) + (isFinite(to) ? pad13(to) : "\uffff"));
+}
+/** Every first-seen row of a learner (word key, label, time, date). */
+export async function listFirstSeen(learnerId) {
+  await flushAll();
+  return (await db.getPrefix("firstseen", P(learnerId))).map((r) => r.value).filter((f) => f && f.key);
+}
 export async function listUtterances(learnerId, from = 0, to = Infinity) {
   await flushAll();
   return readAll("utterances", learnerId, (u) => u.time >= from && u.time < to);
@@ -368,6 +398,7 @@ export async function rebuildDaily(learnerId, { wipe = false } = {}) {
         row.learnerTaps++;
         if (!row.wordCounts[key]) row.uniqueWords.push(key);
         row.wordCounts[key] = (row.wordCounts[key] || 0) + 1;
+        row.howCounts[e.how] = (row.howCounts[e.how] || 0) + 1;
         if (!first.has(key)) first.set(key, { key, wordId: e.wordId || null, label: e.form || e.label, time: e.time, date: row.date });
       } else if (e.mode === "model") row.modelTaps++;
       else if (e.mode === "session") row.sessionTaps++;
@@ -377,6 +408,7 @@ export async function rebuildDaily(learnerId, { wipe = false } = {}) {
       row.utterances++;
       if (u.chips.length >= 2) row.multiWordUtterances++;
       row.longestUtterance = Math.max(row.longestUtterance, u.chips.length);
+      row.utteranceWords += u.chips.length;
     }
     const ops = [];
     // First-seen rows: the earlier of the stored time and the raw time. A word is "new" on the day of its raw event when that
@@ -471,9 +503,12 @@ export function cleanDay(raw, date) {
   const counts = {};
   if (isObj(raw.wordCounts)) for (const [k, v] of Object.entries(raw.wordCounts).slice(0, 5000)) counts[txt(k, 90)] = nat(v);
   const list = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(0, 5000).map((x) => x.slice(0, 90)) : []);
+  let how = null;                                   // (null = a day saved before Beta 2.5)
+  if (isObj(raw.howCounts)) { how = {}; for (const h of HOWS) if (raw.howCounts[h]) how[h] = nat(raw.howCounts[h]); }
   return { date: raw.date, learnerTaps: nat(raw.learnerTaps), uniqueWords: list(raw.uniqueWords), newWords: nat(raw.newWords), newWordList: list(raw.newWordList),
     utterances: nat(raw.utterances), multiWordUtterances: nat(raw.multiWordUtterances), longestUtterance: nat(raw.longestUtterance), wordCounts: counts,
-    modelTaps: nat(raw.modelTaps), sessionTaps: nat(raw.sessionTaps) };
+    modelTaps: nat(raw.modelTaps), sessionTaps: nat(raw.sessionTaps), howCounts: how,
+    utteranceWords: typeof raw.utteranceWords === "number" && isFinite(raw.utteranceWords) ? nat(raw.utteranceWords) : null };
 }
 export function cleanFirstSeen(raw) {
   if (!isObj(raw) || typeof raw.key !== "string" || !raw.key || typeof raw.time !== "number" || !isFinite(raw.time)) return null;

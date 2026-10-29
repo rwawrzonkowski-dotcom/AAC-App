@@ -17,6 +17,7 @@ import { openAbout } from "./about.js";
 import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesHelp } from "./devicetips.js";
 import { teachingSection } from "./teachui.js";
 import { dataSection } from "./datapanel.js";
+import { openReports } from "./reports.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -57,10 +58,21 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     stopVoiceListener();
     body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
       modelSection({ refresh, closeMenu: close, onPreviewPrompt }),
-      teachingSection({ refresh, closeMenu: close, ...teach }), dataSection({ refresh, sessionActive: teach.sessionActive }), voiceSection(),
+      teachingSection({ refresh, closeMenu: close, ...teach }), dataSection({ refresh, sessionActive: teach.sessionActive }), reportsSection(), voiceSection(),
       touchSection(), backupSection(), aboutSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
     body.scrollTop = top;
+  }
+
+  // ---------- Reports (Beta 2.5) ----------
+  // Opens the Reports screen over the menu. Everything is worked out only while that screen is open.
+  function reportsSection() {
+    return h("section", { class: "panel", id: "sec-reports" },
+      h("h2", { text: "Reports" }),
+      h("p", { class: "muted", text: "Progress graphs for teaching and everyday use, a printable summary, a plain-language summary for the family, and spreadsheet (CSV) files. " +
+        "Nothing leaves this iPad unless you print a page or save a file." }),
+      h("div", { class: "btn-row left" },
+        h("button", { type: "button", class: "btn primary", id: "reports-open", text: "Open reports", onclick: () => openReports({ learnerId: getCurrent().id }) })));
   }
 
   // ---------- Notes about changes (only shown when there is something to tell the adult) ----------
