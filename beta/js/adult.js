@@ -6,14 +6,15 @@ import {
   listProfiles, getCurrent, switchTo, addProfile, renameProfile, deleteProfile,
   saveProfile, CHILD_VOICE, ADULT_VOICE, DIAL_HOLD_MIN, DIAL_HOLD_MAX,
 } from "./profiles.js";
-import { setVoiceSettings, speak, speakSequence, stopSpeech, listVoices, onVoicesChanged, pauseMs, PAUSE_MS } from "./speech.js";
+import { setVoiceSettings, speak, speakSequence, stopSpeech, pauseMs, PAUSE_MS } from "./speech.js";
+import { createVoicePicker, newPickerState } from "./voicepicker.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
 import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 import { VERSION_LABEL } from "./channel.js";
 import { openAbout } from "./about.js";
-import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP } from "./devicetips.js";
+import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesHelp } from "./devicetips.js";
 import { teachingSection } from "./teachui.js";
 import { dataSection } from "./datapanel.js";
 
@@ -34,6 +35,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
   onPreviewPrompt, teach }) {
   const body = h("div", { class: "menu-body" });
   let stopVoiceListener = () => {};
+  const pickerState = newPickerState();   // which voice groups are open; kept when the menu is rebuilt
   let backupMessage = "";   // result of the last save / restore, shown in the Backup section
 
   const o = openOverlay([
@@ -291,17 +293,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const v = cur.voice;
     const persist = () => { setVoiceSettings(v); return saveProfile(cur); };
 
-    const select = h("select", { id: "voice-select", class: "text-input",
-      onchange: () => { v.voiceURI = select.value; persist(); } });
-    function fillVoices() {
-      const voices = listVoices();
-      select.replaceChildren(
-        h("option", { value: "", text: "Automatic (best English voice)" }),
-        voices.map((x) => h("option", { value: x.voiceURI, text: `${x.name} (${x.lang})` })));
-      select.value = voices.some((x) => x.voiceURI === v.voiceURI) ? v.voiceURI : "";
-    }
-    fillVoices();
-    stopVoiceListener = onVoicesChanged(fillVoices);
+    // The voice picker lists the voices installed on this device (js/voicepicker.js)
+    const picker = createVoicePicker({ voice: v, persist, state: pickerState });
+    stopVoiceListener = picker.stop;
 
     // A slider with its current number shown beside it
     function slider(id, label, min, max, step, key, decimals) {
@@ -324,7 +318,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
 
     return h("section", { class: "panel", id: "sec-voice" },
       h("h2", { text: "Voice (for this learner)" }),
-      h("div", { class: "field" }, h("label", { for: "voice-select", text: "Voice" }), select),
+      h("div", { class: "field", id: "voice-field" }, picker.el, moreVoicesHelp()),
       slider("pitch", "Pitch", 0.5, 2, 0.1, "pitch", 1),
       slider("rate", "Speed", 0.5, 1.5, 0.05, "rate", 2),
       h("p", { class: "muted", text: "Speed is for a single word. Anything of two or more words (a phrase button, a phrase you added, " +

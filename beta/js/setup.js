@@ -9,7 +9,7 @@
 import { h } from "./ui.js";
 import { restoreFromFile } from "./backup.js";
 import { listProfiles, CHILD_VOICE } from "./profiles.js";
-import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP } from "./devicetips.js";
+import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesLine } from "./devicetips.js";
 import { VERSION_LABEL } from "./channel.js";
 
 export const SETUP_CHOICES = [
@@ -63,6 +63,7 @@ export function showSetup({ first = false } = {}) {
         h("div", { class: "setup-choices" }, choices),
         // Volume check with the default child voice (no learner exists yet on a new device)
         volumeTestBlock({ voice: CHILD_VOICE, tipsOnTap: true, extraClass: "setup-volume" }),
+        moreVoicesLine(),
         h("p", { class: "muted setup-note", text: "You can change this anytime in the adult menu." }),
         h("div", { class: "setup-foot" },
           first ? h("label", { class: "link-btn", for: "setup-restore-file", id: "setup-restore", text: "Restore from a backup file" }) : null,

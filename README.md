@@ -530,12 +530,39 @@ Every change is kept in one of two places, so nothing lands on the wrong word:
   adult-added word in one of those previously empty cells is kept and moved the same way, with a note. Learner data is now version 7
   and backups version 9 (older backups get the same check when restored). Code: `js/migrate.js`.
 
+## Voices (beta)
+
+Adult menu > Voice lists the voices **installed on this iPad** (or phone, or computer). VOICE has no recorded or bundled voices;
+it asks the device (`speechSynthesis.getVoices()`), so nothing is downloaded and nothing needs the internet. iOS often hands
+the list over a few seconds late, so the picker says "Loading the voices on this device..." and fills in when they arrive.
+- **Groups.** English voices are grouped by accent from the language tag: United States, United Kingdom, Australia, Ireland,
+  India, South Africa, Scotland, New Zealand, Other English (e.g. Canada). A final **Fun voices** group holds Apple's novelty
+  voices (Albert, Bad News, Bahh, Bells, Boing, Bubbles, Cellos, Fred, Good News, Jester, Junior, Kathy, Organ, Ralph, Superstar,
+  Trinoids, Whisper, Wobble, Zarvox, plus Deranged, Hysterical, Princess). The list is `NOVELTY_NAMES` in `js/voicepicker.js`.
+  Novelty voices are matched by name or by a voiceURI ending in `speech.synthesis.voice.<Name>`, only for English voices.
+  Groups open and close; the first group and the group with the chosen voice start open. **Show other languages** (closed
+  by default) lists the rest grouped by language, for bilingual families.
+- **Badges.** *Premium*, *Enhanced* (found as "premium" or "enhanced" in the voice name, e.g. "Zoe (Premium)", or in its voiceURI,
+  e.g. `com.apple.voice.enhanced.en-US.Samantha`), *Standard* (a `compact` voiceURI), *Novelty*, *On this device* (the voice is
+  local) and *Needs internet* (an online voice such as Android's "network" voices). Best quality is listed first in each group.
+  A voice with no quality word in its name (most Android voices) gets no quality badge.
+- **Preview** beside every voice (and Automatic) says "I want more bubbles please" with the learner's current pitch and
+  sentence speed. Previewing does not choose the voice; tapping the voice does. The choice is saved per learner.
+- **Saved voice missing.** If a learner's saved voice is not on this device (for example a backup restored on another iPad), a
+  yellow note says which voice is used instead. The saved choice is kept, so it works again on the original device.
+- **Get more voices** (collapsible, in the Voice section) shows the steps for the device: iPad/iPhone: Settings > Accessibility >
+  Spoken Content > Voices > English, download an Enhanced or Premium voice, then fully close and reopen VOICE; Android: Settings >
+  General management > Text-to-speech > (Google engine) > Install voice data. It also notes that some system voices (such as
+  Siri voices) may not be available to web apps. The setup screen has a one-line pointer.
+- Pitch, Speed, Sentence speed, Pause between words, Preview a word, Hear a sample sentence, the reset buttons and Test the
+  volume work as before. The board, its buttons and the speed of speech are unchanged.
+
 ## How updates are tested (stable and beta)
 The app comes in two copies on the same website, so clients never get an untested change:
 - **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
   ("Stable 1.0"; it becomes "VOICE 1.1" and so on once VOICE is promoted) is shown small at the top of the adult menu and at the bottom of the setup screen.
 - **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
-  It shows "VOICE Beta 2.3" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It shows "VOICE Beta 2.4" in the same two places and a small orange **BETA** tag in the corner of the message bar.
   It can be added to the home screen as its own icon ("VOICE Beta", the VOICE icon with a BETA band).
 
 **Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
@@ -545,7 +572,7 @@ To test with a real learner, make a backup in the stable app (adult menu > Backu
 (backup files work in both). Offline copies are kept apart the same way: stable's is `aac-vNN`, beta's is `beta-aac-vNN`;
 each service worker deletes only its own, and the stable one ignores everything under `beta/`.
 
-**Beta-only features waiting to be promoted (VOICE Beta 2.3):** teaching sessions: targets, prompt ladders with automatic fading, mastery suggestions and
+**Beta-only features waiting to be promoted (VOICE Beta 2.4):** a better voice picker (see *Voices (beta)* above), teaching sessions: targets, prompt ladders with automatic fading, mastery suggestions and
 saved session data (see *Teaching sessions (beta)* above), and teaching instructions for each target (see *Teaching instructions (beta)*). On an iPad the board looks and behaves as in VOICE 1.1 unless you start a session or choose
 targets. Because the backup file gained teaching data, Beta backups are version 11 (Beta 2.0), 12 (Beta 2.1), 13 (Beta 2.2) or 14 (Beta 2.3), which the stable app cannot read until this is promoted (the beta
 reads every older backup).

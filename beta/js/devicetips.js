@@ -57,3 +57,38 @@ export function volumeTestBlock({ voice, tipsOnTap = false, extraClass = "" } = 
     } });
   return h("div", { class: "volume-test " + extraClass }, btn, list);
 }
+
+// ---------- "Get more voices" help ----------
+// Which steps to show: iPad / iPhone text on iOS, Android text on Android, both on anything else (a computer).
+export const IOS_VOICE_STEPS =
+  "iPad or iPhone: Settings → Accessibility → Spoken Content → Voices → English → choose a voice and download " +
+  "the Enhanced or Premium version. Then fully close and reopen VOICE (swipe it away and open it again) so it sees the new voice.";
+export const ANDROID_VOICE_STEPS =
+  "Android: Settings → General management → Text-to-speech → (choose the Google engine, the gear icon beside it) → " +
+  "Install voice data → pick the language and a voice. Then fully close and reopen VOICE.";
+export const VOICE_LIMIT_NOTE =
+  "Some system voices (such as Siri voices) may not be available to web apps like VOICE.";
+
+// The device-specific steps as an array of strings.
+export function moreVoicesSteps() {
+  if (isIOS()) return [IOS_VOICE_STEPS];
+  if (isAndroid()) return [ANDROID_VOICE_STEPS];
+  return [IOS_VOICE_STEPS, ANDROID_VOICE_STEPS];
+}
+
+// Collapsible "Get more voices" box for the adult menu's Voice section.
+export function moreVoicesHelp() {
+  return h("details", { class: "vp-help", id: "voice-more-help" },
+    h("summary", { id: "voice-more-summary", text: "Get more voices" }),
+    h("div", { class: "vp-help-body", id: "voice-more-body" },
+      moreVoicesSteps().map((t) => h("p", { text: t })),
+      h("p", { text: VOICE_LIMIT_NOTE })));
+}
+
+// One short line for the setup screen.
+export function moreVoicesLine() {
+  let how = "see adult menu > Voice > Get more voices";
+  if (isIOS()) how = "add one in Settings → Accessibility → Spoken Content → Voices, then pick it in the adult menu > Voice";
+  else if (isAndroid()) how = "add one in Settings → General management → Text-to-speech → Install voice data, then pick it in the adult menu > Voice";
+  return h("p", { class: "muted setup-voices", id: "setup-voices", text: "Want a different voice? " + how[0].toUpperCase() + how.slice(1) + "." });
+}

@@ -589,6 +589,43 @@ button { font: inherit; touch-action: manipulation; }
 .phone-size-tip { margin: 8px 0 0; padding: 8px 12px; border-radius: 8px; background: #dbeafe; color: #1e3a8a; font-weight: 700; }
 .phone-size-tip[hidden] { display: none; }
 
+/* ---------- Voice picker (adult menu > Voice, beta) ---------- */
+.setup-voices { margin: 1.2vmin 0 0; font-size: max(13px, 1.9vmin); }
+.vp-current { margin: 0 0 6px; font-weight: 700; }
+.vp-notice { margin: 6px 0 10px; padding: 10px 12px; border-radius: 8px; background: #fffbeb; border: 1px solid #f59e0b; color: #78350f; }
+.vp-notice[hidden] { display: none; }
+.vp-status { margin: 4px 0 8px; }
+.vp-status:empty { display: none; }
+.vp-list { display: flex; flex-direction: column; gap: 8px; }
+.vp-group { border: 1px solid #d5dde6; border-radius: 10px; background: #f8fafc; }
+.vp-group > summary { cursor: pointer; padding: 14px 14px; min-height: 48px; font-weight: 700; box-sizing: border-box; }
+.vp-rows { display: flex; flex-direction: column; gap: 6px; padding: 0 8px 8px; }
+.vp-row { display: flex; gap: 8px; align-items: stretch; }
+.vp-auto { margin-bottom: 2px; }
+.vp-pick {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left; font-family: inherit; font-size: 1em;
+  min-height: 56px; padding: 8px 12px; border-radius: 10px; border: 2px solid #94a3b8; background: #fff; color: #1f2937; cursor: pointer;
+}
+.vp-row.on .vp-pick { border-color: #1d4ed8; background: #eff6ff; }
+.vp-check { flex: 0 0 1.2em; font-weight: 800; color: #1d4ed8; text-align: center; }
+.vp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.vp-name { font-weight: 700; overflow-wrap: anywhere; }
+.vp-lang { font-size: 0.85em; color: #64748b; }
+.vp-badges { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.vp-badge { padding: 2px 8px; border-radius: 999px; font-size: 0.75em; font-weight: 700; background: #e2e8f0; color: #334155; white-space: nowrap; }
+.vp-q-premium { background: #7c3aed; color: #fff; }
+.vp-q-enhanced { background: #16a34a; color: #fff; }
+.vp-q-standard { background: #e2e8f0; color: #475569; }
+.vp-fun { background: #f59e0b; color: #1f2937; }
+.vp-online { background: #fef3c7; color: #78350f; }
+.vp-preview { flex: 0 0 auto; min-height: 56px; }
+.vp-other-toggle { align-self: flex-start; margin-top: 4px; }
+.vp-others { display: flex; flex-direction: column; gap: 8px; }
+.vp-help { margin-top: 12px; border: 1px solid #d5dde6; border-radius: 10px; padding: 0 14px; background: #f8fafc; }
+.vp-help > summary { cursor: pointer; padding: 14px 0; min-height: 24px; font-weight: 700; }
+.vp-help-body { padding-bottom: 6px; line-height: 1.45; color: #334155; }
+.vp-help-body p { margin: 0 0 10px; }
+
 /* ======================================================================================================
    Teaching (Phase 2, Round A, beta). Nothing here is part of the board's grid: the choose-targets banner covers
    the message bar, the session controls live inside the (otherwise empty) context strip, and every prompt is a
