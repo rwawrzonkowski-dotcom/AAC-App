@@ -27,8 +27,9 @@ import { showSetup } from "./setup.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
 import {
-  runPrompt, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
+  runPrompt, sustainStep, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
 } from "./modelprompt.js";
+import { setPreviewHook } from "./ladderui.js";
 import { preloadCritterArt } from "./critters.js";
 import { CHANNEL } from "./channel.js";
 import * as teach from "./session.js";
@@ -423,6 +424,19 @@ function previewPrompt() {
   return new Promise((resolve) => setTimeout(() => { previewing = false; resolve(); },
     (usesCritter(getCurrent().model) ? CRITTER_TOTAL_MS : RING_MS) + 300));
 }
+
+// "Preview" on a step of a custom prompt ladder (adult menu > Teaching > Targets > Settings > Custom ladder): the step is shown on the
+// same button as "Preview on board" for a few seconds, then stops. Nothing is spoken, added to the message bar or recorded.
+const STEP_PREVIEW_MS = 3200;
+setPreviewHook((step) => {
+  const cell = document.querySelector('#board .cell[data-word="more"].tap:not(.ghost)') ||
+               document.querySelector("#board .cell.tap:not(.ghost):not(.type-home)");
+  if (!cell) return Promise.resolve();
+  previewing = true;
+  clearCritter();
+  const stop = sustainStep(cell, step, getCurrent().model, getPhotoUrl("critter"));
+  return new Promise((resolve) => setTimeout(() => { stop(); previewing = false; resolve(); }, STEP_PREVIEW_MS));
+});
 
 // ---------- Taps on the board ----------
 function onCellTap(cellEl) {

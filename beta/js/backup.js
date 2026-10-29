@@ -2,7 +2,7 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 12, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 14, exportedAt: "2026-10-09T12:00:00.000Z",
 //     teachingTemplates: { templateId: { clinical: {field: text}, parent: {field: text} } },     (optional: only in "all learners" files)
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
@@ -43,6 +43,12 @@
 // ("Include everyday use data", on by default); without it the field is missing. Restoring brings the raw rows and the daily
 // summaries, then rebuilds the summaries of the days that have raw events, so they always match. A backup older than 13 has no
 // `everyday` field and restores as before; restoring one over an existing learner leaves that learner's everyday data alone.
+// Version 14 (beta 2.3, prompt ladders) changed the targets inside `teaching`: instead of a numeric prompt level and "most help" ceiling a
+// target has `ladderMode` ("default" | "custom"), `stepSize` ("standard" | "medium" | "fine"), `customLadder` ([{ type, opacity }], most help
+// first) and `pos` (its starting step; the ladder's length means Independent), and every new trial has `promptStep`, `startStep`, `help`
+// and `startHelp` next to the old `promptLevel` / `startLevel`. A target without `ladderVersion: 1` (every backup of version 11 to 13) is
+// converted on the way in by cleanTarget (js/teaching.js: old level 7 -> Model 100%, 6 -> 75%, 5 -> 50%, 4 and 3 and 2 -> 25%, 1 and 0 ->
+// Independent, the change logged in its history as "ladder update"); an old trial keeps its data and gets a computed `help`.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -67,7 +73,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 13;
+export const BACKUP_VERSION = 14;
 
 // ---------------------------------------------------------------- saving
 

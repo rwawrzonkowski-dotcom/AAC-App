@@ -17,7 +17,7 @@ import { h, openOverlay, askConfirm } from "./ui.js";
 import { attachHold } from "./hold.js";
 import { getCurrent, getPhotoUrl } from "./profiles.js";
 import { getPage, pathToCore, resolvePage, posKey } from "./boardmodel.js";
-import { sustainPrompt } from "./modelprompt.js";
+import { sustainStep } from "./modelprompt.js";
 import * as T from "./teaching.js";
 import * as data from "./teachdata.js";
 import { openInstructionsCard } from "./instrcard.js";
@@ -148,7 +148,7 @@ function openPicker() {
 // What the prompt starts as for this target, in a few words.
 export function startText(t) {
   if (T.isProbe(t)) return "no prompts";
-  return t.direction === "ltm" ? "least-to-most" : T.levelShort(t.level);
+  return t.direction === "ltm" ? "least-to-most" : T.posName(t);
 }
 
 function paintBar() {
@@ -200,44 +200,57 @@ function startTrial(type) {
   // opportunity starts wherever the board happens to be.
   if (type === "planned" && hooks.getPageId() !== "core") hooks.goTo("core");
   const probe = T.isProbe(target);
-  const base = probe ? 0 : target.direction === "mtl" ? target.level : 0;
+  // The target's prompt ladder (most help first). A step number is an index into it; n (its length) means Independent.
+  const ladder = T.ladderOf(target), n = ladder.length;
+  const base = probe || target.direction !== "mtl" ? n : Math.min(n, Math.max(0, target.pos));
   const tr = {
-    id: data.newId("t"), type, target, chain, t0: Date.now(), probe, base, cur: base, shown: -1, maxShown: 0, maxStep: 0,
+    id: data.newId("t"), type, target, chain, t0: Date.now(), probe, ladder, n, custom: T.isCustom(target), ladderId: T.ladderId(target),
+    base, cur: base, shown: -1, minIdx: n, maxStep: 0,
     errors: [], firstResponse: null, steps: new Map(), timeline: [], ended: false,
     settleTimer: null, delayTimer: null, maxTimer: null,
   };
   S.trial = tr;
   tr.maxTimer = setTimeout(() => { if (S && S.trial === tr) endTrial(tr.errors.length ? "error" : "noResponse"); }, S.maxTrialMs);
-  // Unprompted probes (baseline, mastered, maintenance) never show a prompt. Teaching targets show their first level after a
-  // half-second settle (most-to-least) or start by waiting (least-to-most), then step up as the rules say.
-  if (!probe) tr.settleTimer = setTimeout(() => { if (S && S.trial === tr) showLevel(tr, tr.cur); }, T.SETTLE_MS);
+  // Unprompted probes (baseline, mastered, maintenance) never show a prompt. Teaching targets show their first step after a
+  // half-second settle (most-to-least) or start by waiting at Independent (least-to-most), then climb as the rules say.
+  if (!probe) tr.settleTimer = setTimeout(() => { if (S && S.trial === tr) showStep(tr, tr.cur); }, T.SETTLE_MS);
   paintBar();
 }
 
-// Show a level on the next button, remember it, and start the time delay before the next step up.
-function showLevel(tr, level) {
-  tr.shown = level;
-  tr.maxShown = Math.max(tr.maxShown, level);
-  tr.timeline.push({ level, time: Date.now() });
-  const info = stepInfo(tr);
-  if (level >= 2) {
-    const old = tr.steps.get(info.index);
-    tr.steps.set(info.index, { step: info.index, label: info.step.label, level: Math.max(level, old ? old.level : 0) });
+// The record of a place in the trial's ladder, saved with the trial (index n = Independent, nothing shown).
+function stepRecord(tr, i) {
+  return i >= tr.n ? { index: tr.n, type: "independent", opacity: 0, ladderLength: tr.n, ladderId: tr.ladderId }
+    : { index: i, type: tr.ladder[i].type, opacity: tr.ladder[i].opacity, ladderLength: tr.n, ladderId: tr.ladderId };
+}
+
+// Show a step (index i, or n for Independent = nothing) on the next button, remember it, and start the time delay before
+// the next step with more help.
+function showStep(tr, i) {
+  tr.shown = i;
+  const rec = stepRecord(tr, i);
+  tr.timeline.push({ level: T.legacyLevelOfStep(rec), time: Date.now(), index: rec.index, type: rec.type, opacity: rec.opacity });
+  if (i < tr.n) {
+    tr.minIdx = Math.min(tr.minIdx, i);
+    const info = stepInfo(tr), old = tr.steps.get(info.index);
+    const best = old ? Math.min(old.index, i) : i;
+    const br = stepRecord(tr, best);
+    tr.steps.set(info.index, { step: info.index, label: info.step.label, level: T.legacyLevelOfStep(br), index: br.index, type: br.type, opacity: br.opacity });
   }
   clearTimeout(tr.delayTimer);
-  if (!tr.probe && !(level >= 2 && level >= tr.target.ceiling)) {
+  if (!tr.probe && i > 0) {             // (the top of the ladder has no stronger step to go to)
     tr.delayTimer = setTimeout(() => { if (S && S.trial === tr) escalate(tr); }, tr.target.delaySec * 1000);
   }
   applyVisual();
   paintBar();
 }
 
-// One step more help (after the time delay, or right away after an error).
+// One step MORE help (after the time delay, or right away after an error): from Independent to the faintest step, then up the
+// ladder toward the first.
 function escalate(tr) {
   clearTimeout(tr.settleTimer);
-  const next = T.nextLevel(tr.cur, tr.target.ceiling);
+  const next = Math.max(0, tr.cur - 1);
   tr.cur = next;
-  if (next !== tr.shown) showLevel(tr, next);
+  if (next !== tr.shown) showStep(tr, next);
 }
 
 // Where the child is on the route: index of the current page in the chain, or -1 when off the route (then "Back" is next).
@@ -268,24 +281,14 @@ function clearVisual() {
   if (S && S.stopVisual) { S.stopVisual(); S.stopVisual = null; }
 }
 
-// Draw the prompt for the level showing now. Called after a level changes and after every redraw of the board.
+// Draw the prompt for the step showing now. Called after a step changes and after every redraw of the board.
 function applyVisual() {
   clearVisual();
   const tr = S && S.trial;
-  if (!tr || tr.probe || tr.shown < 2) return;
+  if (!tr || tr.probe || tr.shown < 0 || tr.shown >= tr.n) return;
   const el = nextElement(tr);
   if (!el) return;
-  const lvl = tr.shown;
-  if (lvl === 2) {
-    el.classList.add("teach-glow");
-    S.stopVisual = () => el.classList.remove("teach-glow");
-  } else if (lvl === 3) {
-    el.style.setProperty("--ring-a", "1");
-    el.classList.add("teach-ring");
-    S.stopVisual = () => { el.classList.remove("teach-ring"); el.style.removeProperty("--ring-a"); };
-  } else {
-    S.stopVisual = sustainPrompt(el, getCurrent().model, getPhotoUrl("critter"), T.levelOpacity(lvl));
-  }
+  S.stopVisual = sustainStep(el, tr.ladder[tr.shown], getCurrent().model, getPhotoUrl("critter"));
 }
 
 // app.js calls this after every redraw of the board (a page change, for instance).
@@ -294,11 +297,11 @@ export function onRender() {
   if (!tr) return;
   const info = stepInfo(tr);
   if (!tr.probe && info.index > tr.maxStep) {
-    // New progress along the route: the next button starts again at the trial's first level.
+    // New progress along the route: the next button starts again at the trial's first step.
     tr.maxStep = info.index;
     clearTimeout(tr.settleTimer);
     tr.cur = tr.base;
-    showLevel(tr, tr.base);
+    showStep(tr, tr.base);
   } else {
     if (info.index > tr.maxStep) tr.maxStep = info.index;
     applyVisual();
@@ -332,7 +335,10 @@ function endTrial(result) {
   const rec = {
     id: tr.id, sessionId: S.rec.id, learnerId: S.rec.learnerId, wordId: target.wordId, label: target.label, type: tr.type,
     start: tr.t0, end: now, latencyMs: tr.firstResponse === null ? null : tr.firstResponse - tr.t0, result,
-    promptLevel: tr.maxShown, startLevel: tr.base, direction: target.direction,
+    direction: target.direction,
+    promptStep: stepRecord(tr, tr.minIdx), startStep: stepRecord(tr, tr.base),          // the step actually shown (most help) and the one it started at
+    help: T.helpOfStep(tr.minIdx < tr.n ? tr.ladder[tr.minIdx] : null), startHelp: T.helpOfStep(tr.base < tr.n ? tr.ladder[tr.base] : null),
+    promptLevel: T.legacyLevelOfStep(stepRecord(tr, tr.minIdx)), startLevel: T.legacyLevelOfStep(stepRecord(tr, tr.base)),    // (old numbers, for older readers)
     errors: tr.errors, chainStepsPrompted: [...tr.steps.values()].sort((a, b) => a.step - b.step),
     chain: tr.chain.steps.map((s) => s.label), promptTimeline: tr.timeline,
   };
@@ -341,7 +347,7 @@ function endTrial(result) {
   if (change) S.levelChanges.push({ wordId: target.wordId, label: target.label, ...change });
   S.rec.levelChanges = S.levelChanges;
   const word = target.label;
-  S.last = result === "correct" ? `${word}: correct (${T.levelShort(rec.promptLevel)})` :
+  S.last = result === "correct" ? `${word}: correct (${T.trialStepName(rec)})` :
     result === "skipped" ? `${word}: skipped` : result === "error" ? `${word}: error` : `${word}: no response`;
   const sessionRec = S.rec;
   S.pending = S.pending.then(() => Promise.all([data.putTrial(rec), data.saveTarget(target), data.putSession(sessionRec)]))

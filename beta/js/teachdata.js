@@ -1,10 +1,12 @@
 // Saving and reading teaching data (Phase 2, Round A). Everything stays on this device, in IndexedDB (js/db.js).
 //
 // Three stores, one row per item, each keyed "<learnerId>|<id>" so a learner's rows are found, backed up and deleted by prefix:
-//   targets   one per word: its settings, status, the history of level changes and its teaching instructions (see newTarget in js/teaching.js)
+//   targets   one per word: its settings, prompt ladder and place in it, status, the history of step changes and its teaching instructions
+//             (see newTarget in js/teaching.js). A target saved before Beta 2.3 (old prompt levels) is converted to a ladder when it is read.
 //   sessions  { id, learnerId, start, end, who, where, targets: [wordId], notes, levelChanges }
-//   trials    { id, sessionId, learnerId, wordId, label, type, start, end, latencyMs, result, promptLevel, startLevel,
-//               direction, errors, chainStepsPrompted, chain, promptTimeline }
+//   trials    { id, sessionId, learnerId, wordId, label, type, start, end, latencyMs, result, promptStep, startStep, help, startHelp,
+//               promptLevel, startLevel (old 0-7 numbers), direction, errors, chainStepsPrompted, chain, promptTimeline }
+//             (a trial from before Beta 2.3 has no promptStep; listTrials still gives it a computed `help`)
 // Every trial is written the moment it ends, so nothing is lost if the iPad is closed in the middle of a session.
 // Rounds B (everyday recording) and C (reports) read these same rows.
 import * as db from "./db.js";
@@ -23,14 +25,21 @@ const cache = new Map();            // wordId -> target (including removed ones)
 export async function loadTeaching(learnerId) {
   cache.clear();
   cacheFor = learnerId;
+  const migrated = new Set();
   for (const { value } of await db.getPrefix("targets", learnerId + "|")) {
     const t = cleanTarget(value, learnerId);
-    if (t) cache.set(t.wordId, t);
+    if (!t) continue;
+    cache.set(t.wordId, t);
+    // Migration (beta 2.3): a target saved with the old prompt levels was turned into a prompt ladder by cleanTarget (and the change
+    // written into its history); save it now so that happens only once.
+    if (!value || value.ladderVersion !== 1) migrated.add(t.wordId);
   }
   // Migration (beta 2.1): a target from Round A, or from an older backup, has no teaching instructions yet. It gets the starting
   // template for its word and page; nothing else about the target changes.
   await Promise.all([loadTemplates(), loadBoardData()]);
-  for (const t of cache.values()) if (ensureInstructions(getBoardData(), t)) await db.put("targets", learnerId + "|" + t.wordId, t);
+  for (const t of cache.values()) {
+    if (ensureInstructions(getBoardData(), t) || migrated.has(t.wordId)) await db.put("targets", learnerId + "|" + t.wordId, t);
+  }
 }
 export const loadedFor = () => cacheFor;
 

@@ -9,6 +9,7 @@ import * as T from "./teaching.js";
 import * as data from "./teachdata.js";
 import { startText } from "./session.js";
 import { instructionsSection, openTemplatesList } from "./instrui.js";
+import { ladderSection } from "./ladderui.js";
 
 // A row "label  [-]  value  [+]" for a number setting. `fmt` turns the number into text.
 function stepper(id, label, { min, max, step = 1, value, fmt = (n) => String(n), onChange }) {
@@ -35,8 +36,6 @@ function segRow(idPrefix, values, current, label, onPick) {
   }
   return row;
 }
-
-const levelOptions = (min, max) => { const out = []; for (let n = min; n <= max; n++) out.push(h("option", { value: n, text: `${n}  ${T.levelName(n)}` })); return out; };
 
 // ---------- The Teaching section of the adult menu ----------
 // ctx: { refresh, closeMenu, sessionActive(), onChooseTargets(), onStartSession(opts), onResume() }
@@ -67,14 +66,15 @@ function statusPill(t) { return h("span", { class: "pill st-" + t.status, text: 
 function targetDetail(t) {
   const start = startText(t);
   const last = t.history.length ? t.history[t.history.length - 1] : null;
-  return `Starts at: ${start}  |  ${T.DIRECTION_LABELS[t.direction]}` + (last ? `  |  ${T.changeText(last.from, last.to)}` : "");
+  const ladder = T.isCustom(t) ? `Custom ladder (${T.ladderOf(t).length} steps)` : `Default ladder (${T.STEP_SIZES[t.stepSize]}% steps)`;
+  return `Starts at: ${start}  |  ${T.DIRECTION_LABELS[t.direction]}  |  ${ladder}` + (last ? `  |  ${T.changeText(last)}` : "");
 }
 
 export function openTargetsList(ctx) {
   const list = h("div", { class: "tgt-list", id: "tgt-list" });
   const o = openOverlay([
     h("h2", { text: "Targets" }),
-    h("p", { class: "muted", text: "Targets are the words you are teaching. Prompt levels from least to most help: independent, time delay, glow, path highlight, then the model prompt at 25, 50, 75 and 100 percent." }),
+    h("p", { class: "muted", text: "Targets are the words you are teaching. Each target has a prompt ladder: by default the Model prompt at 100, 75, 50 and 25 percent, then Independent; a custom ladder can also use critter, ring, glow and path highlight steps." }),
     list,
     h("div", { class: "btn-row" },
       h("button", { type: "button", class: "btn primary", id: "tgt-add", text: "Add targets",
@@ -123,17 +123,6 @@ export function openTargetSettings(t, onDone) {
         t.reward = true; await save(); paintReward();
       } catch (e) { rewardState.textContent = "That picture could not be read."; }
     } });
-  const levelSel = h("select", { id: "ts-level", class: "text-input", onchange: () => {
-    const to = Number(levelSel.value);
-    if (to !== t.level) { log(t.history, t.level, to, "changed by adult"); t.level = to; t.streakHits = 0; t.streakMisses = 0; save(); }
-  } }, levelOptions(0, 7));
-  levelSel.value = String(t.level);
-  const ceilSel = h("select", { id: "ts-ceiling", class: "text-input", onchange: () => {
-    t.ceiling = Number(ceilSel.value);
-    if (t.level > t.ceiling) { log(t.history, t.level, t.ceiling, "above the most help allowed"); t.level = t.ceiling; levelSel.value = String(t.level); }
-    save();
-  } }, levelOptions(2, 7));
-  ceilSel.value = String(t.ceiling);
   const m = t.mastery;
 
   const o = openOverlay([
@@ -145,9 +134,8 @@ export function openTargetSettings(t, onDone) {
       h("p", { class: "muted", text: "Only Teaching targets get prompts. Baseline, Mastered and Maintenance are tried with no prompts." })),
     h("div", { class: "field" }, h("label", { text: "Prompt direction" }),
       segRow("ts-dir", T.DIRECTIONS, t.direction, (v) => T.DIRECTION_LABELS[v], (v) => { t.direction = v; save(); }),
-      h("p", { class: "muted", text: "Most-to-least starts each trial with help and fades it automatically. Least-to-most starts with none and adds help step by step." })),
-    h("div", { class: "field" }, h("label", { for: "ts-level", text: "Starting prompt level (most-to-least)" }), levelSel),
-    h("div", { class: "field" }, h("label", { for: "ts-ceiling", text: "Most help allowed" }), ceilSel),
+      h("p", { class: "muted", text: "Most-to-least starts each trial at the target's step in the ladder and fades it automatically. Least-to-most starts with no prompt and adds help one step at a time, from the faintest step up." })),
+    ladderSection(t, { save }),
     stepper("ts-delay", "Time delay", { min: 1, max: 15, value: t.delaySec, fmt: (v) => v + " s", onChange: (v) => { t.delaySec = v; save(); } }),
     stepper("ts-fade", "Fade after correct in a row", { min: 1, max: 10, value: t.fadeAfter, onChange: (v) => { t.fadeAfter = v; save(); } }),
     stepper("ts-back", "Back up after misses in a row", { min: 1, max: 10, value: t.backUpAfter, onChange: (v) => { t.backUpAfter = v; save(); } }),
@@ -235,11 +223,11 @@ function showSummary({ session, trials, targets }) {
   return new Promise((resolve) => {
     const done = () => { o.close(); resolve(); };
     const table = h("table", { class: "sum-table", id: "sum-table" },
-      h("thead", {}, h("tr", {}, ["Target", "Trials", "Independent", "Prompt level"].map((c) => h("th", { text: c })))),
+      h("thead", {}, h("tr", {}, ["Target", "Trials", "Independent", "Prompt step"].map((c) => h("th", { text: c })))),
       h("tbody", {}, rows.map((r) => {
         const t = targets.find((x) => x.wordId === r.wordId);
-        const level = r.changes.length ? r.changes.map((c) => T.changeText(c.from, c.to)).join(", ")
-          : t && T.isProbe(t) ? "No prompts used" : t && t.direction === "ltm" ? "Least-to-most" : "Stayed at " + T.levelShort(t ? t.level : 0);
+        const level = r.changes.length ? r.changes.map((c) => T.changeText(c)).join(", ")
+          : t && T.isProbe(t) ? "No prompts used" : t && t.direction === "ltm" ? "Least-to-most" : "Stayed at " + (t ? T.posName(t) : T.INDEPENDENT_NAME);
         return h("tr", { "data-word": r.wordId },
           h("td", { class: "sum-name", text: r.label }),
           h("td", { class: "sum-trials", text: r.trials ? `${r.trials} (${r.planned} planned, ${r.net} NET)` : "0" + (r.skipped ? `, ${r.skipped} skipped` : "") }),

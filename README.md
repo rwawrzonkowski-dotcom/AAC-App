@@ -299,7 +299,7 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
   (board size, stage, button changes, pages you made, voice including Sentence speed and the pause, touch settings, Model prompt
   settings, the Words button, keyboard button and Speak-each-letter settings, the words-only setting, and photos, including the critter picture; never the passcode). Backups made by earlier versions still restore (they are upgraded: an older backup gets keyboard button Auto, letters not
   spoken, Sentence speed 0.9 and no pauses; a backup without the word-forms dial settings gets the defaults). In Beta 2.0 the backup file is version 11
-  (teaching data was added; see *Include teaching data* below) and in Beta 2.1 version 12 (teaching instructions); the stable app refuses version 11 and 12 files until this is promoted. On the
+  (teaching data was added; see *Include teaching data* below), in Beta 2.1 version 12 (teaching instructions) and in Beta 2.3 version 14 (prompt ladders); the stable app refuses version 11 and newer files until this is promoted. On the
   iPad a save sheet opens: choose **Save to Files**. *Restore from backup* reads a file,
   shows the learners and photo count inside, and for each learner asks whether to **add
   as a new learner** (default) or **replace** a learner with the same name (asks again
@@ -349,8 +349,9 @@ Each target has *Settings*:
 - *Status:* **Baseline**, **Teaching**, **Mastered** or **Maintenance**. Only Teaching targets are prompted; the others are tried with no prompts.
 - *Prompt direction:* **Most-to-least** (the default) starts each trial with help and the app fades it for you; **Least-to-most** starts with none and
   adds help step by step.
-- *Starting prompt level* (for most-to-least; the app moves it by itself), *Most help allowed* (the highest level, 7 unless you lower it) and the
-  *Time delay* (seconds to wait before more help, 3).
+- *Prompt ladder:* **Default** or **Custom** (see *Prompt ladders* below), the *Fading step size* of the default ladder (Standard 25% steps, Medium 10%,
+  Fine 5%), and the *Starting step* (for most-to-least; the app moves it by itself). Also the *Time delay* (seconds to wait before the next, stronger
+  step appears, 3).
 - *Fade after* N correct in a row (3) and *Back up after* M misses in a row (2).
 - *Mastery rule:* percent independent (80), across this many sessions (3), at least this many trials per session (3), with at least this many different
   people or settings (2).
@@ -369,36 +370,52 @@ unchanged and works as always. Model mode is off during a session (Edit board an
   longest trial time (30 seconds, adjustable in the Teaching section) with no correct answer ("no response", or "error" if the child only tapped
   other words). If the child taps a different word it still speaks (every tap talks), is logged as an error, and the prompt gets stronger.
 - For a word on a category or folder page, the prompt goes to the **next button the child needs**: first the category button, then the folder button,
-  then the word (forward chaining). Each new button starts again at the trial's first prompt level. If the child goes the wrong way, the Back button is
+  then the word (forward chaining). Each new button starts again at the trial's first step. If the child goes the wrong way, the Back button is
   prompted. The app logs which step was prompted.
 - The app speaks nothing during a trial except the child's own taps. Prompts are only pictures on the screen: they never block a tap and never move or
   resize a button. If you open the adult menu in the middle of a trial, that trial is skipped.
-- *End session* asks first, then shows a **session summary** (trials, percent independent for each target, and any prompt level changes) and saves the
+- *End session* asks first, then shows a **session summary** (trials, percent independent for each target, and any prompt step changes such as "Faded to Model 50%") and saves the
   session. A trial still running is skipped. Changing learner or board size also closes the session.
 
-**The prompt levels** (from least to most help):
+**Prompt ladders.** A ladder is a list of prompt **steps** from the MOST help (top) to the least. After the last step comes **Independent** (no prompt).
+Every step is a prompt type and a strength (1 to 100 percent), and a step only ever gets weaker as the target moves down the ladder, so fading is
+always a move to a fainter version of a prompt.
 
-| Level | Name | What the child sees |
-|---|---|---|
-| 0 | Independent | nothing |
-| 1 | Time delay | nothing; the app waits the time delay (a correct answer now still counts as independent) |
-| 2 | Glow | the next button pulses softly (amber) |
-| 3 | Path highlight | the next button gets the Model-mode ring (white and purple) |
-| 4 to 7 | Model | the learner's Model prompt (critter and/or ring, as set in *Model prompt*) at 25%, 50%, 75% and 100% strength |
+| Step type | What the child sees |
+|---|---|
+| Model | the learner's Model prompt (critter and/or ring, as set in *Model prompt*) at the step's strength |
+| Critter | the critter only |
+| Ring | the Model-mode ring only (white and purple) |
+| Glow | the next button pulses softly (amber); a custom-ladder step only |
+| Path highlight | the next button gets the Model-mode ring, kept on; a custom-ladder step only |
 
-At levels 4 to 7 the strength comes from the level, not from the learner's opacity sliders, and the critter hops in again every few seconds while the
-prompt stays on. Levels 0 and 1 look the same on the screen. A half-second pause comes before the first prompt appears.
+- **Default ladder** (every target starts with it): Model 100%, 75%, 50%, 25%, then Independent. *Fading step size* changes the steps: **Standard** (25% steps),
+  **Medium** (10%: 100, 90, ... 10) or **Fine** (5%: 100, 95, ... 5). Changing the step size keeps the target at the nearest strength (a target at Model 75%
+  moves to Model 80% on Medium); it never jumps back to the top or skips to Independent. Glow and path highlight are **not** in the default ladder.
+- **Custom ladder** (*Prompt ladder: Custom* opens the editor): add a step (choose the type and drag its strength), remove one (a ladder keeps at least one step),
+  move steps up and down, **Start from default ladder**, and **Preview** any step on a board button (nothing is spoken, added or recorded; the adult screens
+  hide for a few seconds). The strength setting also applies to Glow and Path highlight. Switching back to Default keeps the custom ladder for later.
+- The strength comes from the step, not from the learner's opacity sliders, and the critter hops in again every few seconds while a prompt stays on.
+  A half-second pause comes before the first prompt appears.
+- The **time delay** is not a step: it is the wait before the next, stronger step appears. A correct answer during that wait counts as independent.
 
-**How fading works.** For a **most-to-least** target the trial starts at the target's current level and shows it right away. If the child taps a wrong
-word, or does not answer within the time delay, the prompt steps up one level inside the trial (up to *Most help allowed*). The trial is scored at the
-most help that was shown. After the set number of correct trials in a row at the current level (3 by default; "correct" means no error and no more
-help than the level the trial started at) the target's starting level moves one step down (100% to 75% to 50% to 25% model, then path highlight,
-glow, time delay, independent). After the set number of misses in a row (2: a trial that needed more help, had an error, or got no response) it
-moves one step back up. The target list and the session summary say what changed ("Faded to 50% model", "Backed up to 75% model"). A **least-to-most**
-target starts at independent, waits the time delay, then shows Glow, Path highlight and the Model levels one at a time, each after another delay (an
-error steps up at once). Its starting level never changes, but its performance is still recorded.
+**How fading works.** For a **most-to-least** target the trial starts at the target's current step and shows it right away. If the child taps a wrong
+word, or does not answer within the time delay, the prompt moves one step toward MORE help inside the trial (up to the top step; from Independent it goes to
+the faintest step). The trial is scored at the most help that was shown. After the set number of correct trials in a row at the current step (3 by default;
+"correct" means no error and no more help than the step the trial started at) the target's starting step moves one step toward Independent. After the set
+number of misses in a row (2: a trial that needed more help, had an error, or got no response) it moves one step back toward more help. The target list and the
+session summary say what changed ("Faded to Model 25%", "Faded to Independent", "Backed up to Model 50%", "Faded to Custom: Glow 25%"). A **least-to-most**
+target starts at Independent, waits the time delay, then shows the faintest step, then the next stronger one, and so on up the ladder, each after another delay
+(an error steps up at once). Its starting step never changes, but its performance is still recorded.
 
-**How mastery works.** *Independent* means the child chose the target at level 1 or lower with no error first. When a session ends, for each Baseline or
+**Older targets (Beta 2.0 to 2.2).** The old prompt levels (0 independent, 1 time delay, 2 glow, 3 path highlight, 4 to 7 model 25 to 100 percent) were
+replaced by ladders. An existing target is converted the first time it is read, here or from an older backup: old level 7 becomes Model 100%, 6 Model 75%,
+5 Model 50%, 4 Model 25%, 3 (path highlight) and 2 (glow) Model 25% (the faintest default step), 1 and 0 Independent. If its *Most help allowed* had been lowered,
+the target gets a custom ladder of only the Model steps up to that strength. The change is written into the target's history ("ladder update"). Old trials are
+kept as they were; each one also gets a help value (0 to 1) worked out from its old level with the same mapping (Model 100% = 1, 75% = 0.75, 50% = 0.5,
+25%, glow and path = 0.25, independent = 0).
+
+**How mastery works.** *Independent* means the child chose the target with no prompt step shown (a correct answer during the time delay counts) and no error first. When a session ends, for each Baseline or
 Teaching target in it the app looks at the target's last sessions: if each of the last 3 (or the number in that target's rule) had at least 3 trials and
 at least 80% independent, and those sessions include at least 2 different people or at least 2 different settings, it asks "Mark <word> as mastered?"
 (you confirm; "Not yet" changes nothing). Skipped trials are not counted. When every target that is a word of the learner's current vocabulary stage (the
@@ -407,8 +424,9 @@ in their permanent spots).
 
 **Data kept.** Each learner's targets, sessions and trials are saved on the iPad as they happen (a session you do not end is closed at its last trial the
 next time the app opens). A session has its start, end, who, where and targets. A trial has the word, its type (planned or NET), start and end, how long
-until the first tap (latency), the result (correct, error, no response, skipped), the prompt level it reached, the level it started at, the direction, the
-wrong taps and the buttons prompted along the path. They go into backups (*Include teaching data*) and are never sent anywhere. Everyday recording is described
+until the first tap (latency), the result (correct, error, no response, skipped), the prompt step it reached (type, strength, place in the ladder and which ladder), the step it started at, a
+**help value** from 0 (independent) to 1 (for graphs: the strength of the step shown, so Model 25% is 0.25), the direction, the wrong taps and the buttons
+prompted along the path. (The old 0 to 7 prompt level is still saved, as a best-fit number, for older readers.) They go into backups (*Include teaching data*) and are never sent anywhere. Everyday recording is described
 below (*Everyday recording (beta)*); reports are planned for a later round.
 
 ## Everyday recording (beta)
@@ -517,7 +535,7 @@ The app comes in two copies on the same website, so clients never get an unteste
 - **Stable** (the main address, https://rwawrzonkowski-dotcom.github.io/AAC-App/) is what clients use. Its version label
   ("Stable 1.0"; it becomes "VOICE 1.1" and so on once VOICE is promoted) is shown small at the top of the adult menu and at the bottom of the setup screen.
 - **Beta** (https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/, folder `beta/`) is where new features are tried first.
-  It shows "VOICE Beta 2.2" in the same two places and a small orange **BETA** tag in the corner of the message bar.
+  It shows "VOICE Beta 2.3" in the same two places and a small orange **BETA** tag in the corner of the message bar.
   It can be added to the home screen as its own icon ("VOICE Beta", the VOICE icon with a BETA band).
 
 **Beta has completely separate storage.** Everything beta saves (learners, photos, passcode, "stay unlocked" time, settings)
@@ -527,9 +545,9 @@ To test with a real learner, make a backup in the stable app (adult menu > Backu
 (backup files work in both). Offline copies are kept apart the same way: stable's is `aac-vNN`, beta's is `beta-aac-vNN`;
 each service worker deletes only its own, and the stable one ignores everything under `beta/`.
 
-**Beta-only features waiting to be promoted (VOICE Beta 2.2):** teaching sessions: targets, prompt levels with automatic fading, mastery suggestions and
+**Beta-only features waiting to be promoted (VOICE Beta 2.3):** teaching sessions: targets, prompt ladders with automatic fading, mastery suggestions and
 saved session data (see *Teaching sessions (beta)* above), and teaching instructions for each target (see *Teaching instructions (beta)*). On an iPad the board looks and behaves as in VOICE 1.1 unless you start a session or choose
-targets. Because the backup file gained teaching data, Beta backups are version 11 (Beta 2.0), 12 (Beta 2.1) or 13 (Beta 2.2), which the stable app cannot read until this is promoted (the beta
+targets. Because the backup file gained teaching data, Beta backups are version 11 (Beta 2.0), 12 (Beta 2.1), 13 (Beta 2.2) or 14 (Beta 2.3), which the stable app cannot read until this is promoted (the beta
 reads every older backup).
 
 **Scripts** (run them from the project folder; they only change files on this computer and never commit or push):
@@ -594,9 +612,9 @@ Make sure the iPad is not on silent mode and the volume is up.
   `js/hold.js` press-and-hold; `js/ui.js` small dialog helpers;
   `js/events.js` in-memory tap list for a later phase.
 - Everyday recording (beta): `js/everyday.js` (what is saved, daily summaries, pruning, rebuild, backup support; no screen) and `js/datapanel.js` (the Data section of the adult menu).
-- Teaching (beta): `js/teaching.js` the rules (prompt levels, fading, mastery; no screen, no database), `js/teachdata.js` saving targets, sessions and
+- Teaching (beta): `js/teaching.js` the rules (prompt ladders, fading, mastery; no screen, no database), `js/teachdata.js` saving targets, sessions and
   trials, `js/session.js` the running session (strip controls, trials, prompts), `js/teachui.js` the adult screens (targets, settings, start form, summary,
-  mastery and stage suggestions); `js/modelprompt.js` also keeps a prompt on for a session.
+  mastery and stage suggestions); `js/modelprompt.js` also keeps a prompt step on for a session; `js/ladderui.js` the prompt ladder part of a target's settings and the custom ladder editor.
 - Teaching instructions (beta): `data/teaching-templates.json` the 10 approved templates, `js/templates.js` which template a target starts with, edited templates and the
   text shown, `js/instrcard.js` the card in a session and the Clinical/Parent switch, `js/instrui.js` the settings section, template picker, copy screens and the
   Teaching templates editor.

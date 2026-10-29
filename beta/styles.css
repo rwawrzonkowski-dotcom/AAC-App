@@ -649,13 +649,13 @@ button { font: inherit; touch-action: manipulation; }
 .sb-count small { font-size: 0.68em; font-weight: 600; color: #475569; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
 /* ---------- Prompts ---------- */
-/* Glow (level 2): a soft amber pulse around the next button. */
+/* Glow (a step of a custom ladder): a soft amber pulse around the next button. --glow-a (0 to 1) is the step's opacity. */
 .cell.teach-glow, .bar-btn.teach-glow { z-index: 4; animation: teach-glow 1.2s ease-in-out infinite alternate; }
 @keyframes teach-glow {
-  from { box-shadow: 0 0 0 0.5vmin rgba(245, 158, 11, 0.55), 0 0 2vmin 0.4vmin rgba(245, 158, 11, 0.40); }
-  to   { box-shadow: 0 0 0 0.9vmin rgba(245, 158, 11, 0.95), 0 0 3.5vmin 1.2vmin rgba(245, 158, 11, 0.70); }
+  from { box-shadow: 0 0 0 0.5vmin rgba(245, 158, 11, calc(0.55 * var(--glow-a, 1))), 0 0 2vmin 0.4vmin rgba(245, 158, 11, calc(0.40 * var(--glow-a, 1))); }
+  to   { box-shadow: 0 0 0 0.9vmin rgba(245, 158, 11, calc(0.95 * var(--glow-a, 1))), 0 0 3.5vmin 1.2vmin rgba(245, 158, 11, calc(0.70 * var(--glow-a, 1))); }
 }
-/* Path highlight (level 3) and the ring part of the model prompt (levels 4-7): the same ring as Model mode,
+/* Path highlight (a step of a custom ladder) and the ring part of a Model or Ring step: the same ring as Model mode,
    kept on until the child answers. --ring-a is the strength (0 to 1). */
 .cell.teach-ring, .bar-btn.teach-ring {
   z-index: 5;
@@ -729,3 +729,20 @@ textarea.instr-edit { display: block; resize: vertical; min-height: 56px; font-f
 .data-chip { display: inline-block; background: #e0e7ff; color: #1e1b4b; border-radius: 8px; padding: 2px 9px; margin: 2px 4px 2px 0; font-weight: 700; }
 .data-utts { margin: 0; padding-left: 22px; }
 .data-utts li { margin: 4px 0; }
+
+/* ---------- Prompt ladders (beta 2.3) ---------- */
+body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladder editor: the board shows alone for a moment */
+.lad-sub { margin: 10px 0 0; }
+.lad-sumrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0; }
+.lad-summary { margin: 0; font-weight: 700; color: #1e293b; line-height: 1.4; }
+.lad-list { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+.lad-row { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: center; gap: 8px 10px; border: 1px solid #d5dde6; border-radius: 10px; padding: 8px 10px; }
+.lad-num { font-weight: 800; text-align: center; color: #475569; }
+.lad-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.lad-type { flex: 0 0 11em; width: 11em; padding: 8px 10px; }
+.lad-slider { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.lad-slider input[type=range] { flex: 1 1 auto; width: 100%; min-width: 80px; height: 32px; }
+.lad-slider .lad-val { flex: 0 0 3.2em; }
+.lad-btns { grid-column: 2; display: flex; gap: 8px; justify-content: flex-end; }
+.lad-btns .btn { padding: 8px 12px; min-width: 44px; }
+.lad-indep { grid-template-columns: 28px 1fr; background: #f1f5f9; color: #475569; font-weight: 700; }
