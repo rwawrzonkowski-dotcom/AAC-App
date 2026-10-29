@@ -14,7 +14,10 @@ export const BOM = "﻿";
 /** One value as CSV text. */
 export function csvCell(v) {
   if (v === null || v === undefined) return "";
-  const s = typeof v === "number" ? (Number.isFinite(v) ? String(v) : "") : typeof v === "boolean" ? (v ? "yes" : "no") : String(v);
+  let s = typeof v === "number" ? (Number.isFinite(v) ? String(v) : "") : typeof v === "boolean" ? (v ? "yes" : "no") : String(v);
+  // Text that starts with = + - @ (or a tab/return) could run as a formula in Excel or Sheets.
+  // Put an apostrophe in front so it always shows as plain text. Numbers are left alone.
+  if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
   return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 /** Header row + rows -> CSV text (no byte order mark; downloadCsv adds it). */
