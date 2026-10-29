@@ -49,6 +49,11 @@
 // and `startHelp` next to the old `promptLevel` / `startLevel`. A target without `ladderVersion: 1` (every backup of version 11 to 13) is
 // converted on the way in by cleanTarget (js/teaching.js: old level 7 -> Model 100%, 6 -> 75%, 5 -> 50%, 4 and 3 and 2 -> 25%, 1 and 0 ->
 // Independent, the change logged in its history as "ladder update"); an old trial keeps its data and gets a computed `help`.
+// Version 15 (beta 3.0, camera scenes) added `scenes` to a learner: { active: sceneId | null, list: [ { id, name, order, created, showPhoto,
+// photoW, photoH, photo: "data:image/jpeg;base64,...", items: [ { id, kind, label, spoken, wordId, box?, crop?: dataUrl } ] } ] } (see
+// js/scenedata.js). The adult chooses in the backup section whether to include it ("Include scenes and photos", on by default); without
+// it the field is missing. A backup older than 15 has no `scenes` field and restores as before; restoring one over an existing learner
+// leaves that learner's scenes alone.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -64,6 +69,7 @@ import {
 } from "./profiles.js";
 import { exportTeaching } from "./teachdata.js";
 import { exportEveryday, cleanEverydayBackup } from "./everyday.js";
+import { exportScenes, cleanScenesBackup } from "./scenedata.js";
 import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
@@ -73,7 +79,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 14;
+export const BACKUP_VERSION = 15;
 
 // ---------------------------------------------------------------- saving
 
@@ -89,8 +95,9 @@ function blobToDataUrl(blob) {
 // Build the backup object for these learners (profile objects from profiles.js).
 // options.teaching (default true): include the learners' targets, sessions, trials and reward pictures.
 // options.everyday (default true): include the learners' everyday use data (word events, utterances, daily summaries, settings).
+// options.scenes (default true): include the learners' scenes with their photos (Beta 3.0).
 // options.templates (default false; the "all learners" button): include this device's edited teaching templates, if there are any.
-export async function buildBackup(learners, { teaching = true, templates = false, everyday = true } = {}) {
+export async function buildBackup(learners, { teaching = true, templates = false, everyday = true, scenes = true } = {}) {
   const out = [];
   for (const p of learners) {
     const photos = [];
@@ -116,6 +123,7 @@ export async function buildBackup(learners, { teaching = true, templates = false
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
       ...(everyday ? { everyday: await exportEveryday(p.id) } : {}),
+      ...(scenes ? { scenes: await exportScenes(p.id, p.activeScene) } : {}),
       photos,
     });
   }
@@ -318,7 +326,9 @@ function cleanLearner(raw, index, version) {
   }
   // Everyday use data exists only in version 13+ backups made with "Include everyday use data".
   const everyday = version >= 13 ? cleanEverydayBackup(raw.everyday) : null;
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, everyday, photos };
+  // Scenes exist only in version 15+ backups made with "Include scenes and photos".
+  const scenes = version >= 15 ? cleanScenesBackup(raw.scenes) : null;
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, everyday, scenes, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
@@ -393,7 +403,8 @@ export async function restoreFromFile(file) {
       if (repBtn) repBtn.addEventListener("click", () => { choice[i] = match.id; paint(); });
       const photoText = l.photos.length === 1 ? "1 photo" : `${l.photos.length} photos`;
       const tc = (l.teaching ? `, teaching data (${l.teaching.targets.length} targets, ${l.teaching.sessions.length} sessions)` : "") +
-        (l.everyday ? `, everyday use data (${l.everyday.events.length} words, ${l.everyday.utterances.length} messages)` : "");
+        (l.everyday ? `, everyday use data (${l.everyday.events.length} words, ${l.everyday.utterances.length} messages)` : "") +
+        (l.scenes ? `, ${l.scenes.list.length === 1 ? "1 scene" : l.scenes.list.length + " scenes"} with photos` : "");
       return h("div", { class: "restore-row" },
         h("div", { class: "restore-name", text: l.name }),
         h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}${tc}` }),

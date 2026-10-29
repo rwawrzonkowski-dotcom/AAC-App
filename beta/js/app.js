@@ -9,6 +9,9 @@
 //     ABC button (the keyboard overlay; the number pad opens from the Numbers page or the keyboard's 123 key)
 //   - playing the message bar (one utterance, or chip by chip with pauses: js/speech.js)
 //   - everyday recording (Beta 2.2, js/everyday.js): after a word is spoken, a small record of it is queued (never before speaking)
+//   - Scenes (Beta 3.0, js/scenestrip.js and js/sceneadult.js): an active scene's buttons stand in the context strip; a tap speaks like
+//     a board word (onSceneItem below) and the word's permanent board spot glows. The recognition library is loaded only when an adult
+//     makes a scene, never at app start.
 import {
   speak, speakMessage, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isMessagePlaying, pauseMs,
 } from "./speech.js";
@@ -38,6 +41,7 @@ import { loadTeaching, getTargets, isTarget, addTarget, removeTarget, closeOrpha
 import { loadForms, formsFor, dialFor, openFormsPopover } from "./forms.js";
 import { openDial } from "./dial.js";
 import * as everyday from "./everyday.js";
+import * as scenes from "./scenestrip.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
@@ -74,6 +78,7 @@ const state = {
   dial: null,         // the open press-and-hold word-forms dial, if any (js/dial.js)
   draft: null,        // what is being typed on the keyboard / number pad: { text, kind } or null
 };
+let started = false;  // true once the first board has been drawn
 let typing = null;    // the keyboard / number pad overlay (js/keyboard.js), created in start()
 
 // ---------- The Words button ----------
@@ -96,7 +101,7 @@ const $ = (id) => document.getElementById(id);
 const recMode = () => (state.modeling ? "model" : teach.isActive() ? "session" : "learner");
 // Record one selected word. `how` is "board" | "page" | "forms" | "dial" | "keyboard" | "numberpad"; the board and page cases are
 // told apart here: a word chosen on any page other than the main board is "page", with the page ids that lead to it.
-function recordTap({ id, label, spoken, how, form, base }) {
+function recordTap({ id, label, spoken, how, form, base, sceneId }) {
   try {
     const profile = getCurrent();
     if (!everyday.isRecording(profile.id)) return;
@@ -107,7 +112,7 @@ function recordTap({ id, label, spoken, how, form, base }) {
     }
     const ids = teach.recordIds();
     everyday.recordWord(profile.id, { wordId: id || null, label, spoken, how, pages, form, base, mode: recMode(),
-      gridSize: profile.gridSize, stage: profile.stage, sessionId: ids && ids.sessionId, trialId: ids && ids.trialId });
+      gridSize: profile.gridSize, stage: profile.stage, sessionId: ids && ids.sessionId, trialId: ids && ids.trialId, sceneId });
   } catch (e) { console.warn("Could not record a tap:", e); }
 }
 // The chips in the message bar changed (added = a chip was added or replaced, false = deleted): the utterance tracker
@@ -164,6 +169,7 @@ function renderAll() {
   if (typing && typing.isOpen() && typing.mode() === "letters" && !keyboardButtonShown(profile)) typing.close({ speak: false });
   updateBar();
   teach.onRender();                     // a running teaching trial re-draws its prompt on the new page
+  scenes.onRender(!state.editing && !state.choosing);     // the scene strip shows on the child's board only
 }
 
 // The Words, Forms and ABC buttons in the top bar. They only change themselves (and the message text's width):
@@ -237,6 +243,24 @@ function playMessage() {
   if (gap > 0) speakSequence(chunks, gap, { onChunk: highlightChip, onEnd: () => highlightChip(-1) });
   else speakMessage(chunks.join(" "));
   utteranceEnds("barSpeak");               // (after the speech has started)
+}
+
+// ---------- Scenes: a tap on a strip button or on the scene photo ----------
+// The same rules as a board word: speak first, then the chip, the event list and the everyday record (how: "scene" for a strip
+// button, "photo scene" for the full-screen photo; the record also keeps the scene id). In Model mode an adult's tap rings the strip button.
+// The word's board spot glows (js/scenestrip.js) after this returns.
+function onSceneItem(item, { how, sceneId, el }) {
+  if (returning || previewing) return;
+  lastSelectAt = performance.now();
+  const spoken = item.spoken || item.label;
+  speak(spoken);
+  const id = item.wordId || null;
+  state.sentence.push({ label: item.label, spoken, base: item.label, id: id || undefined, mode: recMode() });
+  drawMessage();
+  logWord(item.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id, source: how, scene: sceneId });
+  recordTap({ id, label: item.label, spoken, how, sceneId });
+  chipsChanged(true);
+  if (state.modeling && how === "scene" && el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), RING_MS);
 }
 
 // ---------- Keyboard and number pad ----------
@@ -613,6 +637,7 @@ async function startTeachingSession(opts) {
   closeForms(); closeDial(); stopSpeech(); clearCritter();
   state.editing = false; state.modeling = false; state.choosing = false;     // model mode and sessions are separate
   utteranceEnds("clear"); state.sentence.length = 0; drawMessage();
+  scenes.closePhotoScene(); scenes.clearGlow();
   await teach.startSession(opts);
   renderAll();
 }
@@ -633,6 +658,7 @@ function showAdultMenu(startAt) {
       utteranceEnds("clear");               // (the old learner's message, if any, is closed before the bar is emptied)
       closeSessionQuietly();
       everyday.prepare(getCurrent().id);
+      const scenesLoaded = scenes.load();   // the new learner's scenes (and their active one); the adult menu waits for this
       loadTeaching(getCurrent().id).then(() => renderAll());
       closeForms();
       closeDial();
@@ -642,6 +668,7 @@ function showAdultMenu(startAt) {
       state.page = "core";
       clearCritter();
       renderAll();
+      return scenesLoaded;
     },
     onVocabChanged: renderAll,
     onBoardSizeChanged: () => {
@@ -671,6 +698,7 @@ async function openAdult() {
   try {
     if (!(await requestAdultAccess())) return;
     if (typing.isOpen()) typing.close({ speak: false });   // keep what was typed as a chip, but say nothing
+    scenes.closePhotoScene(); scenes.clearGlow();
     teach.pauseForMenu();                                   // a teaching trial in progress is skipped
     showAdultMenu();
   } finally {
@@ -721,6 +749,14 @@ async function start() {
     runEndFlow: (result) => runEndFlow(result, { board: state.board, onVocabChanged: renderAll }),
   });
 
+  // Scenes (Beta 3.0): only reads this learner's scenes from the device now; the recognition library is NOT loaded here.
+  scenes.init({
+    appEl: $("app"), stripEl: $("context-strip"), onTap: onSceneItem,
+    holdMs, blocked: tapsBlocked, getPageId: () => state.page, wordsButtonShown: () => wordsButtonShown(getCurrent()),
+    onActiveChanged: () => { if (started) renderAll(); },
+  });
+  await scenes.load();
+
   typing = createTyping({
     host: $("app"),
     speakLetters: () => getCurrent().speakLetters,
@@ -759,6 +795,7 @@ async function start() {
   $("target-done").addEventListener("click", stopChoosing);
   $("target-words").addEventListener("click", toggleWords); // so an adult can choose targets on the Words pages too
 
+  started = true;
   renderAll();
 
   // Block pinch/double-tap zoom and rubber-band scrolling on iOS

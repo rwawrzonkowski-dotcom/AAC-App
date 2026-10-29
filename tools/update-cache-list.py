@@ -20,11 +20,16 @@ if not os.path.isfile(os.path.join(ROOT, "sw.js")):
 # "beta" is skipped so the stable service worker never lists the beta copy's files.
 SKIP_DIRS = {".git", "tools", "node_modules", "docs", "beta"}
 # (data/dolch.json is only read by tools/dolch-coverage.py, never by the app)
+# Beta only (Scenes, beta 3.0): the object-recognition library (vendor/) and model (models/) are big. They are NOT installed with the app;
+# the beta service worker keeps them in its own "models" cache the first time they are used (see beta/sw.js). Only the top-level
+# folders of that name are skipped.
+RUNTIME_ONLY_DIRS = {"vendor", "models"}
 SKIP_FILES = {"sw.js", "README.md", "CREDITS.md", ".gitignore", "data/dolch.json"}
 
 files = []
 for folder, dirs, names in os.walk(ROOT):
-    dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith("."))
+    dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")
+                     and not (folder == ROOT and d in RUNTIME_ONLY_DIRS))
     for n in sorted(names):
         rel = os.path.relpath(os.path.join(folder, n), ROOT).replace(os.sep, "/")
         if rel not in SKIP_FILES and not n.startswith("."):

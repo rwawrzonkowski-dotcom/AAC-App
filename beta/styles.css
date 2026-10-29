@@ -875,3 +875,106 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
   .rep-break { break-before: page; }
   .rep-svg svg, .rchart { break-inside: avoid; }
 }
+
+/* ======================================================================================================
+   Scenes (Phase 3, beta 3.0). The strip buttons live inside the (otherwise empty) context strip, the glow is a soft shadow
+   around a board button, and the scene photo is its own full-screen layer. None of it changes the size or position of a board cell.
+   ====================================================================================================== */
+#scene-bar { display: none; }
+#app.scene-on #scene-bar {
+  display: flex; align-items: stretch; gap: 5px; position: absolute; inset: 0.5vmin 0.6vmin 0.5vmin 8vmin;
+}
+#app.scene-on #page-title { display: none; }
+#app.in-session #scene-bar { display: none; }          /* a teaching session owns the strip; the scene comes back afterwards */
+/* the scene name at the left (hold 1 second to change scene) */
+.sc-switch { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; background: #fff; border-color: #0f766e; }
+.sc-name {
+  font-size: min(1.6vmin, 2.4dvh); line-height: 1.1; text-align: left; white-space: normal; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-width: 0;
+}
+.sc-items { flex: 1 1 0; min-width: 0; display: flex; gap: 5px; overflow: hidden; }
+/* a strip button reuses the board button look (.cell); fixed size, set from JS */
+.sc-item { flex: 0 0 auto; border: 0.35vmin solid #0f766e; background: #eefaf7; }
+.sc-item.sc-related { border-color: #d97706; background: #fff4dc; }
+.sc-item .cell-image { flex: 0 0 62%; }
+/* a photo button: the square crop fills the whole button and the label sits on a pale bar along the bottom */
+.sc-object .cell-image { position: absolute; inset: 0; flex: none; }
+.sc-object .cell-image img.photo { width: 100%; height: 100%; object-fit: cover; }
+.sc-object .cell-label { position: absolute; left: 0; right: 0; bottom: 0; height: 32%; flex: none; background: rgba(255, 255, 255, 0.9); z-index: 1; }
+.sc-object.text-only .cell-label { height: 100%; background: transparent; }
+.sc-item .cell-image img.symbol { padding: 2% 4%; }
+.sc-item .cell-label { font-size: min(1.55vmin, 2.3dvh); letter-spacing: -0.01em; padding: 0 0.2vmin; }
+.sc-item.text-only .cell-label { font-size: min(2.1vmin, 3dvh); letter-spacing: -0.02em; padding: 0 0.2vmin; }
+.sc-more {
+  flex: 0 0 auto; border: 0.3vmin solid #0f766e; background: #fff; border-radius: var(--radius); color: #0f766e;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 0; font-weight: 800;
+}
+.sc-arrow { font-size: 4.4vmin; line-height: 0.9; }
+.sc-more small { font-size: 1.3vmin; color: #475569; }
+.sc-photo { flex: 0 0 auto; flex-direction: column; gap: 0; background: #fff; border-color: #0f766e; color: #0f766e; }
+.sc-photo .sb-ring { position: absolute; top: 0.2vmin; right: 0.2vmin; width: 1.8vmin; height: 1.8vmin; }
+.sc-photo-icon svg { width: 4vmin; height: 4vmin; display: block; }
+/* the word's permanent spot glows gently for a moment (a soft teal shadow; nothing is resized) */
+.cell.scene-glow, .bar-btn.scene-glow { z-index: 4; animation: scene-glow 0.9s ease-in-out 3 alternate; }
+@keyframes scene-glow {
+  from { box-shadow: 0 0 0 0.3vmin rgba(13, 148, 136, 0.35), 0 0 1.4vmin 0.2vmin rgba(13, 148, 136, 0.25); }
+  to   { box-shadow: 0 0 0 0.6vmin rgba(13, 148, 136, 0.75), 0 0 2.8vmin 0.8vmin rgba(13, 148, 136, 0.5); }
+}
+
+/* the tappable scene photo: full screen over the board (the board underneath is not touched) */
+.photo-scene {
+  position: fixed; inset: 0; z-index: 36; background: #0b1220; display: flex; flex-direction: column;
+  padding: var(--safe-t) var(--safe-x) var(--safe-b);
+}
+.ps-top { flex: 0 0 auto; height: 11vmin; display: flex; align-items: center; gap: 2vmin; padding: 0 2vmin; color: #fff; }
+.ps-title { font-size: 3vmin; font-weight: 800; opacity: 0.85; }
+.ps-said { flex: 1; text-align: center; font-size: 4.2vmin; font-weight: 800; color: #fde68a; min-height: 1em; }
+.ps-close { min-width: 22vmin; height: 8.5vmin; font-size: 3.6vmin; font-weight: 800; background: #fff; color: #111; border: 0; border-radius: 1.5vmin; cursor: pointer; }
+.ps-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 1vmin 1.2vmin; }
+.ps-wrap { position: relative; }
+.ps-img { width: 100%; height: 100%; display: block; -webkit-user-drag: none; user-select: none; pointer-events: none; }
+.ps-spot { position: absolute; border-radius: 1vmin; cursor: pointer; touch-action: none; }
+.ps-spot.pressed { outline: 0.6vmin solid rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.18); }
+.ps-spot.ps-flash { animation: ps-flash 1.2s ease-out; }
+@keyframes ps-flash { from { outline: 0.7vmin solid rgba(253, 224, 71, 0.95); } to { outline: 0.7vmin solid rgba(253, 224, 71, 0); } }
+
+/* adult screens for scenes */
+.sheet.adult.scene { width: min(1100px, calc(96vw - 2 * var(--safe-x))); }
+.se-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.se-left { position: sticky; top: 0; }
+.se-photo { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; user-select: none; margin-bottom: 10px; }
+.se-photo img { width: 100%; height: 100%; display: block; object-fit: fill; pointer-events: none; }
+.se-boxes { position: absolute; inset: 0; }
+.se-box { position: absolute; border: 3px dashed #cbd5e1; background: rgba(148, 163, 184, 0.12); border-radius: 4px; cursor: pointer; }
+.se-box.on { border: 3px solid #14b8a6; background: rgba(20, 184, 166, 0.14); }
+.se-photo.drawing { touch-action: none; cursor: crosshair; outline: 3px solid #1d4ed8; }
+.se-photo.drawing .se-box { pointer-events: none; }
+.se-ghost { position: absolute; border: 3px solid #1d4ed8; background: rgba(29, 78, 216, 0.2); pointer-events: none; }
+.se-num { position: absolute; left: 2px; top: 2px; background: #0f766e; color: #fff; font-size: 13px; font-weight: 800; border-radius: 10px; min-width: 20px; text-align: center; padding: 0 4px; }
+.se-row .se-num, .se-row .se-pos { position: static; }
+.se-row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-bottom: 1px solid #e5eaf0; }
+.se-row.off { opacity: 0.8; }
+.se-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; flex: 0 0 auto; background: #f1f5f9; }
+.se-thumb.sym { object-fit: contain; }
+.se-thumb.txt { display: flex; align-items: center; justify-content: center; font-weight: 800; color: #475569; }
+.se-check { width: 26px; height: 26px; flex: 0 0 auto; }
+.se-label { flex: 1; min-width: 0; padding: 8px 10px; }
+.se-tag { font-size: 0.7em; color: #0f766e; font-weight: 700; }
+.se-rel-label { flex: 1; font-weight: 700; }
+.se-mv { min-height: 40px; padding: 4px 12px; }
+.se-pos { width: 22px; font-weight: 800; color: #475569; }
+.se-actions { position: sticky; bottom: -24px; background: #fff; padding: 10px 0 24px; margin: 10px 0 -24px; }
+.field-label { font-weight: 700; display: block; margin: 0 0 4px; }
+.scene-row { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #d5dde6; border-radius: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.scene-row.is-active { border-color: #0f766e; background: #ecfdf5; }
+.sl-thumb { width: 96px; height: 72px; object-fit: cover; border-radius: 8px; background: #e2e8f0; }
+.sl-main { flex: 1; min-width: 140px; }
+.sl-name { font-weight: 800; }
+.sl-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.sl-btns .btn { min-height: 44px; padding: 8px 14px; }
+.wp-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin: 12px 0; max-height: 46dvh; overflow-y: auto; }
+.wp-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; border: 2px solid #94a3b8; border-radius: 10px; background: #fff; font-weight: 700; font-size: 0.9em; cursor: pointer; color: #1f2937; }
+.wp-item img { width: 56px; height: 56px; object-fit: contain; }
+.wp-none { width: 56px; height: 56px; }
+.sheet.adult progress { width: 100%; height: 18px; }
+.scene-offline { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 10px; }

@@ -5,17 +5,19 @@
 // back to plain in-memory storage so the app still works for the current
 // session (but nothing is remembered after a reload).
 //
-// Nine "stores" (like tables): "profiles" and "photos", plus (Phase 2, teaching) "targets", "sessions" and "trials", plus
-// (Phase 2, everyday recording) "events", "utterances", "daily" and "firstseen" (see js/everyday.js).
+// Ten "stores" (like tables): "profiles" and "photos", plus (Phase 2, teaching) "targets", "sessions" and "trials", plus
+// (Phase 2, everyday recording) "events", "utterances", "daily" and "firstseen" (see js/everyday.js), plus (Phase 3, beta 3.0)
+// "scenes" (photo scenes, see js/scenedata.js).
 // Keys are strings. Teaching and everyday rows are keyed "<learnerId>|<id>" so one learner's rows are found (and deleted) by prefix.
 // Everyday event and utterance ids start with the time (zero-padded), so a time range of rows is also a key range.
 
 import { STORAGE_PREFIX } from "./channel.js";
 // Stable: "aac-board" (as always). Beta: "beta-aac-board" (its own database).
 const DB_NAME = STORAGE_PREFIX + "aac-board";
-// Version 2 added the three teaching stores, version 3 the four everyday stores. Opening an older database just creates the missing stores.
-const DB_VERSION = 3;
-export const STORES = ["profiles", "photos", "targets", "sessions", "trials", "events", "utterances", "daily", "firstseen"];
+// Version 2 added the three teaching stores, version 3 the four everyday stores, version 4 the "scenes" store. Opening an older database
+// just creates the missing stores and keeps every row that is already there (nothing is ever deleted or rewritten by an upgrade).
+const DB_VERSION = 4;
+export const STORES = ["profiles", "photos", "targets", "sessions", "trials", "events", "utterances", "daily", "firstseen", "scenes"];
 
 const memory = Object.fromEntries(STORES.map((s) => [s, new Map()]));
 let dbPromise = null;
@@ -40,9 +42,15 @@ function open() {
       req.onupgradeneeded = () => {
         for (const s of STORES) if (!req.result.objectStoreNames.contains(s)) req.result.createObjectStore(s);
       };
-      req.onsuccess = () => finish(req.result);
+      req.onsuccess = () => {
+        // If a later version of the app needs to upgrade this database, let go of it so that upgrade is not held up.
+        req.result.onversionchange = () => req.result.close();
+        finish(req.result);
+      };
       req.onerror = () => { fallback(req.error); finish(null); };
-      req.onblocked = () => { fallback("blocked"); finish(null); };
+      // "Blocked" means another open copy of the app (an old tab) still holds the older database. The open continues by itself as
+      // soon as that copy closes, so just wait: the 4-second timer above gives up and uses memory only if that never happens.
+      req.onblocked = () => console.warn("IndexedDB upgrade is waiting for another open copy of the app to close");
     } catch (e) { fallback(e); finish(null); }
   });
   return dbPromise;

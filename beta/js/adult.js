@@ -18,6 +18,7 @@ import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesHelp } from
 import { teachingSection } from "./teachui.js";
 import { dataSection } from "./datapanel.js";
 import { openReports } from "./reports.js";
+import { scenesSection } from "./sceneadult.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -58,7 +59,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     stopVoiceListener();
     body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
       modelSection({ refresh, closeMenu: close, onPreviewPrompt }),
-      teachingSection({ refresh, closeMenu: close, ...teach }), dataSection({ refresh, sessionActive: teach.sessionActive }), reportsSection(), voiceSection(),
+      teachingSection({ refresh, closeMenu: close, ...teach }), scenesSection({ refresh, closeMenu: close }), dataSection({ refresh, sessionActive: teach.sessionActive }), reportsSection(), voiceSection(),
       touchSection(), backupSection(), aboutSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
     body.scrollTop = top;
@@ -107,7 +108,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
           onclick: async () => {
             if (p.id === cur.id) return;
             await switchTo(p.id);
-            onLearnerChanged();
+            await onLearnerChanged();
             refresh();
           },
         }))),
@@ -117,14 +118,14 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
           if (!choice) return;
           const p = await addProfile(choice.name, choice);
           await switchTo(p.id);
-          onLearnerChanged();
+          await onLearnerChanged();
           refresh();
         } }),
         h("button", { type: "button", class: "btn", id: "learner-rename", text: "Rename", onclick: async () => {
           const name = await askText("Rename learner", cur.name, "Save");
           if (!name) return;
           await renameProfile(cur.id, name);
-          onLearnerChanged();
+          await onLearnerChanged();
           refresh();
         } }),
         h("button", { type: "button", class: "btn danger", id: "learner-delete", text: "Delete",
@@ -133,7 +134,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
               `Delete ${cur.name}? Their settings, changes and photos will be erased from this iPad. This cannot be undone.`,
               "Delete");
             if (!sure) return;
-            if (await deleteProfile(cur.id)) { onLearnerChanged(); refresh(); }
+            if (await deleteProfile(cur.id)) { await onLearnerChanged(); refresh(); }
           } })),
       list.length <= 1 ? h("p", { class: "muted", text: "The last learner cannot be deleted." }) : null);
   }
@@ -434,7 +435,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         fileIn.value = "";                     // so choosing the same file again still works
         if (!f) return;
         const msg = await restoreFromFile(f);
-        if (msg) { backupMessage = msg; onLearnerChanged(); refresh(); }
+        if (msg) { backupMessage = msg; await onLearnerChanged(); refresh(); }
       } });
     // Teaching data (targets, sessions and trials) is on by default; untick it to leave it out of the file.
     const teachBox = h("input", { type: "checkbox", id: "backup-teaching" });
@@ -442,7 +443,10 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     // Everyday use data (which words were used and when) is on by default too.
     const everydayBox = h("input", { type: "checkbox", id: "backup-everyday" });
     everydayBox.checked = true;
-    const opts = () => ({ teaching: teachBox.checked, everyday: everydayBox.checked });
+    // Scenes with their photos (Beta 3.0) are on by default too; the photos can make the file large, so it can be left out.
+    const scenesBox = h("input", { type: "checkbox", id: "backup-scenes" });
+    scenesBox.checked = true;
+    const opts = () => ({ teaching: teachBox.checked, everyday: everydayBox.checked, scenes: scenesBox.checked });
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
@@ -452,6 +456,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("span", { text: "Include teaching data (targets, sessions and trials)" })),
       h("label", { class: "check-line", for: "backup-everyday" }, everydayBox,
         h("span", { text: "Include everyday use data (words used and when, for progress reports)" })),
+      h("label", { class: "check-line", for: "backup-scenes" }, scenesBox,
+        h("span", { text: "Include scenes and photos (the photos you took for Scenes; they stay in the file only)" })),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
           onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name, opts()) + ". Keep it somewhere safe.") }),

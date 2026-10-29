@@ -1,0 +1,298 @@
+{
+ "_comment": [
+  "RELATED WORDS SUGGESTED FOR EACH SCENE OBJECT (Scenes, beta 3.0).",
+  "When an adult approves an object (for example 'cup'), the Scenes screen offers these words as checkboxes (all unchecked).",
+  "Approved ones become extra buttons on the strip, drawn with the board's own picture for that word.",
+  "Each entry is a VOICE word id (like \"drink\") or, if the word is not on the board, plain text (like \"pop\") that becomes a text-only word.",
+  "The key is the object's VOICE word id, or its label if it has no id. \"_generic\" is offered for every scene.",
+  "'all done' is suggested with the board's word \"finished\"."
+ ],
+ "_generic": [
+  "more",
+  "finished",
+  "help"
+ ],
+ "swing": [
+  "push",
+  "go",
+  "more",
+  "up"
+ ],
+ "slide": [
+  "go",
+  "down",
+  "again"
+ ],
+ "cup": [
+  "drink",
+  "more",
+  "finished"
+ ],
+ "bottle": [
+  "drink",
+  "open",
+  "more"
+ ],
+ "ball": [
+  "throw",
+  "catch",
+  "kick",
+  "roll",
+  "more"
+ ],
+ "book": [
+  "read",
+  "open",
+  "turn",
+  "more"
+ ],
+ "bubbles": [
+  "blow",
+  "pop",
+  "more"
+ ],
+ "car": [
+  "go",
+  "fast",
+  "stop"
+ ],
+ "truck": [
+  "go",
+  "fast",
+  "stop"
+ ],
+ "bus": [
+  "go",
+  "stop"
+ ],
+ "bike": [
+  "go",
+  "fast",
+  "stop"
+ ],
+ "dog": [
+  "pet",
+  "soft",
+  "bark"
+ ],
+ "cat": [
+  "pet",
+  "soft"
+ ],
+ "bed": [
+  "sleep",
+  "tired",
+  "book"
+ ],
+ "couch": [
+  "sit",
+  "tv"
+ ],
+ "chair": [
+  "sit",
+  "table"
+ ],
+ "table": [
+  "eat",
+  "sit",
+  "play"
+ ],
+ "tv": [
+  "watch",
+  "on",
+  "off",
+  "turn"
+ ],
+ "phone": [
+  "call",
+  "look",
+  "mom"
+ ],
+ "tablet": [
+  "watch",
+  "play",
+  "look"
+ ],
+ "toilet": [
+  "bathroom",
+  "wash",
+  "finished"
+ ],
+ "sink": [
+  "wash",
+  "water",
+  "hot",
+  "cold"
+ ],
+ "toothbrush": [
+  "brush-teeth",
+  "open",
+  "finished"
+ ],
+ "blocks": [
+  "build",
+  "more",
+  "knock down"
+ ],
+ "puzzle": [
+  "more",
+  "help",
+  "again"
+ ],
+ "music": [
+  "dance",
+  "sing",
+  "loud",
+  "more"
+ ],
+ "stuffed-animal": [
+  "hug",
+  "soft",
+  "sleep"
+ ],
+ "banana": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "apple": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "orange": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "pizza": [
+  "eat",
+  "more",
+  "yummy",
+  "finished",
+  "hot"
+ ],
+ "cake": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "donut": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "sandwich": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "hot-dog": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "broccoli": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "carrots": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "cookie": [
+  "eat",
+  "more",
+  "yummy",
+  "finished"
+ ],
+ "juice": [
+  "drink",
+  "more",
+  "finished"
+ ],
+ "milk": [
+  "drink",
+  "more",
+  "finished"
+ ],
+ "water": [
+  "drink",
+  "more",
+  "finished"
+ ],
+ "umbrella": [
+  "open",
+  "rain",
+  "hold"
+ ],
+ "backpack": [
+  "open",
+  "help",
+  "go"
+ ],
+ "scissors": [
+  "cut",
+  "help"
+ ],
+ "clock": [
+  "time",
+  "wait"
+ ],
+ "remote": [
+  "turn",
+  "on",
+  "off",
+  "tv"
+ ],
+ "airplane": [
+  "go",
+  "fly",
+  "up"
+ ],
+ "train": [
+  "go",
+  "stop",
+  "fast"
+ ],
+ "boat": [
+  "go",
+  "water",
+  "ride"
+ ],
+ "horse": [
+  "ride",
+  "go",
+  "pet"
+ ],
+ "cow": [
+  "moo",
+  "pet",
+  "milk"
+ ],
+ "sheep": [
+  "pet",
+  "soft"
+ ],
+ "bird": [
+  "fly",
+  "look",
+  "up"
+ ],
+ "person": [
+  "hi",
+  "help",
+  "look"
+ ]
+}

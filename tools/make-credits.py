@@ -59,6 +59,16 @@ The five animals (puppy, kitten, bunny, frog, owl) and the three accessories
 original shapes. They are not based on any existing character, mascot or
 brand. Shared under CC BY-SA 4.0.
 
+## Object recognition (Scenes)
+
+The Scenes feature finds everyday objects in a photo on the device itself (nothing is sent anywhere).
+It uses open-source software and a model, all licensed under the Apache License 2.0
+(`vendor/LICENSE-Apache-2.0.txt`):
+
+- **TensorFlow.js** 4.22.0 (c) Google LLC / TensorFlow authors - `vendor/tf.min.js`. https://github.com/tensorflow/tfjs
+- **COCO-SSD** 2.2.3 (c) Google LLC / TensorFlow authors - `vendor/coco-ssd.min.js` and the model files in `models/coco-ssd/`
+  (SSD with MobileNet v2, trained on the COCO dataset, whose labels are CC BY 4.0, (c) COCO Consortium). https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
+
 **License summary (CC BY-SA 4.0).** You may copy, share and adapt these
 pictures, including commercially, if you (1) give credit to the creators, as
 in this file, (2) say if you changed them, and (3) share anything you make from

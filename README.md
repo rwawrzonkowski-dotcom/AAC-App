@@ -497,6 +497,67 @@ How it stays fast: the graphs read the daily summaries (one small row per day), 
 total words in messages), so for those days only, Reports reads the raw rows; new days keep both counts. A seeded test with 50,000 taps, 5,000 messages and 1,000 trials opens in
 about a third of a second. The graphs are hand-written SVG: no chart library and no internet.
 
+## Scenes (beta)
+Beta 3.0 (Phase 3, camera scenes). A **scene** is a photo of a place or activity (Kitchen, Park, Bath) plus a row of buttons for the context strip under the message bar.
+The board never changes: the strip is its own row, and every board word keeps its permanent spot.
+
+**Making a scene** (adult menu > **Scenes** > **New scene**, behind the usual 3-second hold and passcode):
+1. **Take or choose a photo.** On an iPad you are offered the camera or the photo library. The photo is shrunk to at most 1280 pixels on its long side.
+2. **Finding things...** The app looks for everyday objects in the photo **on the iPad itself** (see "Object recognition" below). The first time it also gets ready (a progress bar shows).
+3. **Approve.** You see the photo with a numbered box around each thing and a checklist: tick the ones to keep, change a name (it is what the button says and speaks),
+   and **add anything it missed**: tap "Add a thing by hand", drag a rectangle on the photo, then search the board's own words (about 1,000) or type a new word.
+   Names the recognition model uses are turned into VOICE words by `data/scene-words.json` (for example "sports ball" becomes the board word ball, "dining table" becomes
+   table, "teddy bear" becomes stuffed animal, "potted plant" becomes the new word plant). A recognized "person" is suggested but starts unchecked. Anything not listed keeps the
+   model's own name. The file explains itself at the top and can be edited in any text editor.
+4. **Related words.** For every thing you keep, the app offers words that go with it from `data/scene-related.json` (swing: push, go, more, up; cup: drink, more, finished;
+   ball: throw, catch, kick, roll, more; book: read, open, turn, more; bubbles: blow, pop, more; car: go, fast, stop; dog: pet, soft, bark; food: eat, more, yummy, finished),
+   plus "more, finished, help" for any scene. Every one is a checkbox, **unchecked by default**. Ticked ones become strip buttons drawn with the board's own symbol for that word
+   (they are not photo crops). "Add another word" lets you pick any other word.
+5. **Order, name, save.** "Order on the strip" lists the buttons that will appear, left to right; use the arrows to reorder. Things from the photo start first, related words after.
+   The order is fixed once saved, so a child can learn where each button is inside the scene. Name the scene and tap Save: it starts showing on the strip at once.
+   Nothing is saved until Save.
+
+**Managing scenes** (same section; every learner has their own): **Use** (show on the strip), **Edit** (the same screen as above; ticked things, names, related words and order),
+**Rename**, up/down arrows to reorder the list, **Delete**, and **Clear scene** (hides the strip content; the scenes are kept). The active scene is remembered per learner, also after
+the app is closed. Deleting a learner deletes their scenes and photos.
+
+**The strip.** While a scene is active its buttons stand left to right in the strip, always in the saved order. A button made from the photo shows the cropped picture of that
+thing (a square of about 256 pixels) with its word; a related-word button shows the board's symbol and word. As many fit as the strip allows at the current screen size
+(about 12 on an iPad at 1180 pixels wide, 11 at 1024); with more, a small arrow at the right end shows the next set, in the same order (the 3rd press goes back to the first set).
+- **A tap speaks** the word (same speech settings as the board), adds it to the message bar and is recorded in everyday use (`how: "scene"`, with the scene id).
+  Touch supports (Hold to select, Ignore repeated taps) apply as on the board.
+- **The word's permanent spot glows** gently for about 2.5 seconds if the word is on the board and visible to this learner: a word on the main board glows its own button; a word on
+  a page glows the category (or the Words button) that leads to it on the main board; if the board is showing a category page, the glow follows the path one step at a time. Nothing
+  is opened and the board never navigates. A word that is not on the board (a typed word) just speaks.
+- **Adult controls use a 1-second hold with a filling ring** (like the teaching session controls). Hold the **scene name** at the left to switch scene or clear it.
+- During a **teaching session** the strip shows the session controls as before and the scene is hidden; it returns when the session ends. In **Model mode** an adult tap on a
+  strip button shows the learner's ring on that button (and the glow on the board). The strip is hidden while editing the board or choosing targets.
+- While a scene is active, the page title on category pages is not shown in the strip (the strip is busy); the orange page color and the Back button are unchanged.
+
+**Tappable photo scene (optional, per scene).** In the scene screen, tick **Show a photo button on the strip** (off by default). A small photo button then sits at the right end of the
+strip (hold it about half a second). It opens the photo full screen over the board (the board is not touched), with invisible hotspots over each thing from the photo; a touch outlines
+the hotspot softly, a tap speaks it, adds it to the message bar and records it (`how: "photo scene"`). Related words are not hotspots. The big **Close** button returns to the board.
+The strip is the main thing; the photo scene is an extra.
+
+**Object recognition (what and where).** TensorFlow.js 4.22.0 and COCO-SSD 2.2.3 with the COCO-SSD model (80 everyday object classes; detects things like cup, ball, bed, dog,
+book, bottle, chair, couch, tv, banana, pizza, cake, person; it does not know "swing", "slide" or "bubbles", which is what drawing a box by hand is for) run inside the page.
+Files: `vendor/tf.min.js` (1.5 MB), `vendor/coco-ssd.min.js` (9 KB), `models/coco-ssd/` (model.json and 5 weight files, 18 MB), all Apache 2.0 (see CREDITS.md and
+`vendor/LICENSE-Apache-2.0.txt`). **Photos and recognition stay on the iPad: no photo, crop or detection is ever sent anywhere, and there is no internet use at all** (the files are part of the app).
+- **Nothing is loaded when the app starts.** The library and model are loaded only when an adult starts a new scene, so the board opens and speaks exactly as fast as before.
+- They are **not** in the app's install cache (that stays small and fast to update). The service worker (`sw.js`) keeps them in a separate cache, `beta-aac-models-v1`, that an app update
+  never deletes: the first time they are used they are saved there, so scenes then work offline. **Scenes > "Download object recognition for offline use (18 MB)"** fetches them in
+  advance with a progress bar (useful while on Wi-Fi). "Remove the downloaded copy" frees the space. If recognition cannot load (no internet the very first time and not downloaded),
+  you can still make a scene by drawing the boxes yourself.
+- Recognition runs on the iPad's graphics chip (WebGL) when there is one, otherwise on the processor (slower, a few seconds). A detection below 40% confidence is not suggested
+  (`minConfidence` in `data/scene-words.json`).
+
+**Storage and backup.** Scenes live in the IndexedDB store `scenes` (database version 4; version 3 databases from VOICE 2.0 upgrade in place and keep every row), keyed
+`<learnerId>|<sceneId>`; the photo and the crops are stored as image Blobs. **Backup** has a checkbox **Include scenes and photos** (on by default; photos make the file larger);
+backup file version 15. A backup without scenes, or made before version 15, restores as before, and restoring it over an existing learner leaves that learner's scenes alone.
+Everyday events from a scene carry `sceneId`; Reports list the two new ways a word was reached ("Scene strip", "Scene photo"). Code: `js/scenedata.js` (saving, backup), `js/scenewords.js`
+(word lists, picture and spot lookup), `js/recognize.js` (loading and the offline copy), `js/scenestrip.js` (strip and photo scene on the child's screen), `js/sceneadult.js`
+(Scenes section, the approval screen, the word picker).
+
 ## Teaching instructions (beta)
 Each target carries written instructions for the adult (not the child): the cue to give, how to set up, when to teach, what reinforcement to deliver,
 how to correct an error, and notes. They come from 10 **templates** (Requesting items, Requesting actions and more, Help/break/finished, Social words,
@@ -673,6 +734,7 @@ Make sure the iPad is not on silent mode and the volume is up.
 - Teaching (beta): `js/teaching.js` the rules (prompt ladders, fading, mastery; no screen, no database), `js/teachdata.js` saving targets, sessions and
   trials, `js/session.js` the running session (strip controls, trials, prompts), `js/teachui.js` the adult screens (targets, settings, start form, summary,
   mastery and stage suggestions); `js/modelprompt.js` also keeps a prompt step on for a session; `js/ladderui.js` the prompt ladder part of a target's settings and the custom ladder editor.
+- Scenes (beta): `js/scenedata.js`, `js/scenewords.js`, `js/recognize.js`, `js/scenestrip.js`, `js/sceneadult.js`, `data/scene-words.json`, `data/scene-related.json`, `vendor/` and `models/` (object recognition; not in the install cache), see Scenes (beta).
 - Teaching instructions (beta): `data/teaching-templates.json` the 10 approved templates, `js/templates.js` which template a target starts with, edited templates and the
   text shown, `js/instrcard.js` the card in a session and the Clinical/Parent switch, `js/instrui.js` the settings section, template picker, copy screens and the
   Teaching templates editor.
@@ -684,7 +746,7 @@ Make sure the iPad is not on silent mode and the volume is up.
   (only read by `tools/dolch-coverage.py`, which writes `docs/dolch-coverage.md`).
 - `tools/make-credits.py` rewrites CREDITS.md from image-sources.json;
   `tools/update-cache-list.py` rewrites the file list in sw.js (run both after changing
-  pictures or files, then bump `CACHE_VERSION`).
+  pictures or files, then bump `CACHE_VERSION`; it leaves out the top-level `vendor/` and `models/` folders, which the service worker caches on first use).
 - `sw.js` caches the app for offline use. Change `CACHE_VERSION` whenever files change.
 - `js/channel.js` says whether this copy is stable or beta (version label and storage prefix); `beta/` is the generated test copy (see How updates are tested).
 

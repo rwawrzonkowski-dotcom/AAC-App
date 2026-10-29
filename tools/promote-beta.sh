@@ -36,6 +36,10 @@ OLD_N="$(sed -n 's/^const CACHE_VERSION = "aac-v\([0-9]*\)";.*/\1/p' sw.js)"
 cp beta/index.html beta/styles.css beta/sw.js .
 rm -rf js data images
 cp -R beta/js beta/data beta/images .
+# Object recognition for Scenes (beta 3.0): the library (vendor/) and model (models/) are NOT in the install cache; the service worker
+# keeps them in a separate "models" cache the first time they are used. They still have to be copied along with the app files.
+rm -rf vendor models
+for d in vendor models; do [ -d "beta/$d" ] && cp -R "beta/$d" . ; done
 cp "$BEFORE/js/channel.js" js/channel.js            # stable keeps its own channel file
 # Manifest: beta's (it lists the maskable icon) with stable's names. Icons: the unbanded VOICE ones, not beta's banded copies.
 cp beta/manifest.webmanifest manifest.webmanifest
@@ -53,6 +57,7 @@ $SETLINE index.html '<meta name="apple-mobile-web-app-title"' '<meta name="apple
 # 3. Stable service worker settings (the cache number goes up by one).
 $SETLINE sw.js 'const CACHE_VERSION' "const CACHE_VERSION = \"aac-v$((OLD_N + 1))\";"
 $SETLINE sw.js 'const CACHE_PREFIX' 'const CACHE_PREFIX = "aac-";'
+grep -q '^const MODELS_CACHE' sw.js && $SETLINE sw.js 'const MODELS_CACHE' 'const MODELS_CACHE = "aac-models-v1";'
 $SETLINE sw.js 'const OTHER_CHANNEL_FOLDER' 'const OTHER_CHANNEL_FOLDER = "beta/";   // stable: requests under /beta/ belong to the beta copy'
 
 # 4. New version label, and the stable file list.

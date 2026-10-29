@@ -61,6 +61,7 @@ import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 import { PAUSE_CHOICES } from "./speech.js";
 import { deleteTeaching, importTeaching } from "./teachdata.js";
 import { deleteEveryday, importEveryday } from "./everyday.js";
+import { deleteScenes, importScenes } from "./scenedata.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
@@ -240,6 +241,7 @@ export async function deleteProfile(id) {
   await db.delPrefix("photos", id + "|");
   for (const store of ["targets", "sessions", "trials"]) await db.delPrefix(store, id + "|");   // teaching data goes too
   await deleteEveryday(id);                                                                         // and the everyday use data
+  await deleteScenes(id);                                                                           // and the scenes with their photos (Beta 3.0)
   if (currentId === id) await switchTo(profiles[0].id);
   return true;
 }
@@ -347,6 +349,10 @@ export async function importLearner(data, replaceId = null) {
     await importTeaching(p.id, data.teaching);
   }
   if (data.everyday) await importEveryday(p.id, data.everyday);   // everyday use data (Beta 2.2) replaces this learner's; summaries are rebuilt
+  if (data.scenes) {                         // scenes (Beta 3.0) from the backup replace this learner's; a backup without them leaves them alone
+    p.activeScene = (await importScenes(p.id, data.scenes)) || null;
+    await saveProfile(p);
+  }
   if (p.id === currentId) await loadPhotos();   // the learner on screen changed: reload their photos
   return p;
 }

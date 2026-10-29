@@ -27,6 +27,7 @@ mkdir -p "$NEW"
 # 1. Copy the app files (no tools, docs, README, credits file or beta itself).
 cp index.html styles.css sw.js manifest.webmanifest "$NEW/"
 cp -R js data images icons "$NEW/"
+for d in vendor models; do [ -d "$d" ] && cp -R "$d" "$NEW/" ; done      # object recognition for Scenes (kept out of the install cache)
 find "$NEW" -name ".DS_Store" -delete
 
 # 2. Beta channel settings.
@@ -43,6 +44,7 @@ JS
 # 3. Beta service worker: its own cache name, only deletes beta- caches, and ignores no folder.
 #    (The cache number is filled in below once we know whether anything changed.)
 $SETLINE "$NEW/sw.js" 'const CACHE_PREFIX' 'const CACHE_PREFIX = "beta-aac-";'
+grep -q '^const MODELS_CACHE' "$NEW/sw.js" && $SETLINE "$NEW/sw.js" 'const MODELS_CACHE' 'const MODELS_CACHE = "beta-aac-models-v1";'
 $SETLINE "$NEW/sw.js" 'const OTHER_CHANNEL_FOLDER' 'const OTHER_CHANNEL_FOLDER = "";   // beta: nothing to ignore (the stable app does not use this copy)'
 
 # 4. Name, home-screen title and icons, so it installs as a separate "VOICE Beta" icon (the icons come from tools/beta-icons/).

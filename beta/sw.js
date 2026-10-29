@@ -1,6 +1,11 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v14";
+const CACHE_VERSION = "beta-aac-v15";
+// Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
+// below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
+// offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
+// (The name must match MODELS_CACHE in js/recognize.js.)
+const MODELS_CACHE = "beta-aac-models-v1";
 // The stable app and the beta copy live on the same website, so they share one cache storage.
 // Each copy only ever deletes caches that start with ITS OWN prefix, and ignores the other copy's folder.
 // (tools/make-beta.sh swaps these three lines in beta/sw.js: "beta-aac-v1", "beta-aac-" and "".)
@@ -13,6 +18,8 @@ const FILES = [
   "data/about.json",
   "data/core-board.json",
   "data/image-sources.json",
+  "data/scene-related.json",
+  "data/scene-words.json",
   "data/teaching-templates.json",
   "data/word-forms.json",
   "icons/apple-touch-icon.png",
@@ -1442,11 +1449,16 @@ const FILES = [
   "js/modelsettings.js",
   "js/numberwords.js",
   "js/profiles.js",
+  "js/recognize.js",
   "js/reportcharts.js",
   "js/reportdata.js",
   "js/reportdoc.js",
   "js/reportexport.js",
   "js/reports.js",
+  "js/sceneadult.js",
+  "js/scenedata.js",
+  "js/scenestrip.js",
+  "js/scenewords.js",
   "js/session.js",
   "js/setup.js",
   "js/speech.js",
@@ -1470,7 +1482,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE_VERSION).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE_VERSION && k !== MODELS_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -1481,6 +1493,16 @@ self.addEventListener("fetch", (e) => {
   // Stable only: leave anything under beta/ alone, so the network and the beta service worker handle it.
   if (OTHER_CHANNEL_FOLDER &&
       new URL(e.request.url).pathname.startsWith(new URL(OTHER_CHANNEL_FOLDER, self.registration.scope).pathname)) return;
+  // Object recognition files (vendor/ and models/): cache-first from the models cache; on a miss fetch once and keep a copy.
+  const scopePath = new URL(self.registration.scope).pathname;
+  const path = new URL(e.request.url).pathname;
+  if (path.startsWith(scopePath + "vendor/") || path.startsWith(scopePath + "models/")) {
+    e.respondWith(caches.open(MODELS_CACHE).then((cache) => cache.match(e.request.url).then((hit) => hit || fetch(e.request).then((res) => {
+      if (res.ok && res.status === 200) cache.put(e.request.url, res.clone());
+      return res;
+    }))));
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || fetch(e.request))
   );

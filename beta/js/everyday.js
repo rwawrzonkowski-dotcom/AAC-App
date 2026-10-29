@@ -9,7 +9,8 @@
 //                 base? (the base word's label, for forms), sessionId?, trialId? }
 //                 how   "board" (main board) | "page" (a category, folder or Words page; pages = page ids from the first page to the
 //                       page the word was on) | "forms" (Forms button: wordId = the base word, form = the form chosen) | "dial"
-//                       (press-and-hold dial: same) | "keyboard" | "numberpad"
+//                       (press-and-hold dial: same) | "keyboard" | "numberpad" | "scene" (a button on the scene strip; the event also has
+//                       sceneId, Beta 3.0) | "photo scene" (a hotspot on the full-screen scene photo)
 //                 mode  "learner" | "model" (an adult tapped in Model mode) | "session" (a tap during a teaching session; sessionId, and
 //                       trialId while a trial is running)
 //   utterances  one per message the learner built: { id, time (= end), start, end, chips: [{wordId, label}], spokenAsSentence,
@@ -19,7 +20,7 @@
 //   daily       one per learner per local day (key "<learnerId>|YYYY-MM-DD"), updated as taps happen, kept forever:
 //               { date, learnerTaps, uniqueWords: [keys], newWords, newWordList: [keys], utterances, multiWordUtterances,
 //                 longestUtterance, wordCounts: { key: n }, modelTaps, sessionTaps,
-//                 howCounts: { board|page|forms|dial|keyboard|numberpad: n } (learner taps by how they were reached; Beta 2.5),
+//                 howCounts: { board|page|forms|dial|keyboard|numberpad|scene|"photo scene": n } (learner taps by how they were reached; Beta 2.5),
 //                 utteranceWords: total words in all of the day's messages (for the average message length; Beta 2.5) }
 //               (howCounts and utteranceWords are null on a day saved before Beta 2.5: the reports then read that day's raw rows instead.)
 //               Only mode "learner" taps count in learnerTaps, uniqueWords, wordCounts and newWords. A "key" is the word id
@@ -140,7 +141,7 @@ async function loadDay(st, date) {
 // ---------------------------------------------------------------- recording words
 /**
  * Record one selected word. Call it AFTER speaking. All arguments are plain values, nothing is awaited.
- *   e: { time?, wordId, label, spoken, how, pages?, form?, mode, gridSize, stage, sessionId?, trialId? }
+ *   e: { time?, wordId, label, spoken, how, pages?, form?, mode, gridSize, stage, sessionId?, trialId?, sceneId? }
  */
 export function recordWord(learnerId, e) {
   if (!learnerId || !getSettings(learnerId).record) return;
@@ -153,6 +154,7 @@ export function recordWord(learnerId, e) {
   if (e.base) ev.base = e.base;
   if (e.sessionId) ev.sessionId = e.sessionId;
   if (e.trialId) ev.trialId = e.trialId;
+  if (e.sceneId) ev.sceneId = e.sceneId;
   enqueue(st, localDate(time), (row) => applyWord(st, ev, row));
 }
 
@@ -464,7 +466,7 @@ export async function exportEveryday(learnerId) {
     daily: await readAll("daily", learnerId), firstSeen: await readAll("firstseen", learnerId) };
 }
 
-const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad"];
+const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad", "scene", "photo scene"];
 const MODES = ["learner", "model", "session"];
 const ENDS = ["barSpeak", "clear", "idle"];
 const ID_RE = /^[A-Za-z0-9_:,@.+~-]{1,80}$/;
@@ -486,6 +488,7 @@ export function cleanEvent(raw) {
   if (typeof raw.base === "string" && raw.base) e.base = txt(raw.base, 60);
   if (typeof raw.sessionId === "string" && ID_RE.test(raw.sessionId)) e.sessionId = raw.sessionId;
   if (typeof raw.trialId === "string" && ID_RE.test(raw.trialId)) e.trialId = raw.trialId;
+  if (typeof raw.sceneId === "string" && ID_RE.test(raw.sceneId)) e.sceneId = raw.sceneId;      // (Beta 3.0: the scene a strip or photo-scene tap came from)
   return e;
 }
 export function cleanUtterance(raw) {
