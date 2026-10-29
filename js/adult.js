@@ -6,14 +6,18 @@ import {
   listProfiles, getCurrent, switchTo, addProfile, renameProfile, deleteProfile,
   saveProfile, CHILD_VOICE, ADULT_VOICE, DIAL_HOLD_MIN, DIAL_HOLD_MAX,
 } from "./profiles.js";
-import { setVoiceSettings, speak, speakSequence, stopSpeech, listVoices, onVoicesChanged, pauseMs, PAUSE_MS } from "./speech.js";
+import { setVoiceSettings, speak, speakSequence, stopSpeech, pauseMs, PAUSE_MS } from "./speech.js";
+import { createVoicePicker, newPickerState } from "./voicepicker.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
 import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 import { VERSION_LABEL } from "./channel.js";
 import { openAbout } from "./about.js";
-import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP } from "./devicetips.js";
+import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesHelp } from "./devicetips.js";
+import { teachingSection } from "./teachui.js";
+import { dataSection } from "./datapanel.js";
+import { openReports } from "./reports.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -27,10 +31,12 @@ const PREVIEW_WORD = "bubbles";                      // "Preview a word"
 //   onPreviewPrompt()   "Preview on board" in the Model prompt section (the menu closes first;
 //                       the app runs the prompt and then opens the menu again)
 //   startAt             id of a section to scroll to when the menu opens (optional)
+//   teach               the Teaching section (Phase 2): { sessionActive(), onChooseTargets(), onStartSession(opts) }
 export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel,
-  onPreviewPrompt }) {
+  onPreviewPrompt, teach }) {
   const body = h("div", { class: "menu-body" });
   let stopVoiceListener = () => {};
+  const pickerState = newPickerState();   // which voice groups are open; kept when the menu is rebuilt
   let backupMessage = "";   // result of the last save / restore, shown in the Backup section
 
   const o = openOverlay([
@@ -51,10 +57,22 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const top = body.scrollTop;
     stopVoiceListener();
     body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
-      modelSection({ refresh, closeMenu: close, onPreviewPrompt }), voiceSection(),
+      modelSection({ refresh, closeMenu: close, onPreviewPrompt }),
+      teachingSection({ refresh, closeMenu: close, ...teach }), dataSection({ refresh, sessionActive: teach.sessionActive }), reportsSection(), voiceSection(),
       touchSection(), backupSection(), aboutSection(),
       h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
     body.scrollTop = top;
+  }
+
+  // ---------- Reports (Beta 2.5) ----------
+  // Opens the Reports screen over the menu. Everything is worked out only while that screen is open.
+  function reportsSection() {
+    return h("section", { class: "panel", id: "sec-reports" },
+      h("h2", { text: "Reports" }),
+      h("p", { class: "muted", text: "Progress graphs for teaching and everyday use, a printable summary, a plain-language summary for the family, and spreadsheet (CSV) files. " +
+        "Nothing leaves this iPad unless you print a page or save a file." }),
+      h("div", { class: "btn-row left" },
+        h("button", { type: "button", class: "btn primary", id: "reports-open", text: "Open reports", onclick: () => openReports({ learnerId: getCurrent().id }) })));
   }
 
   // ---------- Notes about changes (only shown when there is something to tell the adult) ----------
@@ -269,13 +287,16 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
   }
 
   // ---------- Edit / Model ----------
+  // (Edit and Model mode are off while a teaching session is running: model mode and sessions are separate.)
   function actionSection() {
+    const busy = teach.sessionActive();
     return h("section", { class: "panel", id: "sec-actions" },
       h("div", { class: "action-row" },
-        h("button", { type: "button", class: "btn big", id: "menu-edit", text: "Edit board",
+        h("button", { type: "button", class: "btn big", id: "menu-edit", text: "Edit board", disabled: busy,
           onclick: () => { close(); onEdit(); } }),
-        h("button", { type: "button", class: "btn big", id: "menu-model", text: "Start modeling",
-          onclick: () => { close(); onModel(); } })));
+        h("button", { type: "button", class: "btn big", id: "menu-model", text: "Start modeling", disabled: busy,
+          onclick: () => { close(); onModel(); } })),
+      busy ? h("p", { class: "muted", text: "Editing and modeling are off while a teaching session is running." }) : null);
   }
 
   // ---------- Voice ----------
@@ -284,17 +305,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const v = cur.voice;
     const persist = () => { setVoiceSettings(v); return saveProfile(cur); };
 
-    const select = h("select", { id: "voice-select", class: "text-input",
-      onchange: () => { v.voiceURI = select.value; persist(); } });
-    function fillVoices() {
-      const voices = listVoices();
-      select.replaceChildren(
-        h("option", { value: "", text: "Automatic (best English voice)" }),
-        voices.map((x) => h("option", { value: x.voiceURI, text: `${x.name} (${x.lang})` })));
-      select.value = voices.some((x) => x.voiceURI === v.voiceURI) ? v.voiceURI : "";
-    }
-    fillVoices();
-    stopVoiceListener = onVoicesChanged(fillVoices);
+    // The voice picker lists the voices installed on this device (js/voicepicker.js)
+    const picker = createVoicePicker({ voice: v, persist, state: pickerState });
+    stopVoiceListener = picker.stop;
 
     // A slider with its current number shown beside it
     function slider(id, label, min, max, step, key, decimals) {
@@ -317,7 +330,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
 
     return h("section", { class: "panel", id: "sec-voice" },
       h("h2", { text: "Voice (for this learner)" }),
-      h("div", { class: "field" }, h("label", { for: "voice-select", text: "Voice" }), select),
+      h("div", { class: "field", id: "voice-field" }, picker.el, moreVoicesHelp()),
       slider("pitch", "Pitch", 0.5, 2, 0.1, "pitch", 1),
       slider("rate", "Speed", 0.5, 1.5, 0.05, "rate", 2),
       h("p", { class: "muted", text: "Speed is for a single word. Anything of two or more words (a phrase button, a phrase you added, " +
@@ -423,16 +436,27 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         const msg = await restoreFromFile(f);
         if (msg) { backupMessage = msg; onLearnerChanged(); refresh(); }
       } });
+    // Teaching data (targets, sessions and trials) is on by default; untick it to leave it out of the file.
+    const teachBox = h("input", { type: "checkbox", id: "backup-teaching" });
+    teachBox.checked = true;
+    // Everyday use data (which words were used and when) is on by default too.
+    const everydayBox = h("input", { type: "checkbox", id: "backup-everyday" });
+    everydayBox.checked = true;
+    const opts = () => ({ teaching: teachBox.checked, everyday: everydayBox.checked });
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
       h("p", { class: "muted", text:
         "A backup is one file with a learner's board size, stage, button changes, pages you made, voice and speech pacing, keyboard settings, touch settings, Model prompt settings and photos. " +
-        "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included." }),
+        "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included. A backup of all learners also keeps the teaching templates you edited." }),
+      h("label", { class: "check-line", for: "backup-teaching" }, teachBox,
+        h("span", { text: "Include teaching data (targets, sessions and trials)" })),
+      h("label", { class: "check-line", for: "backup-everyday" }, everydayBox,
+        h("span", { text: "Include everyday use data (words used and when, for progress reports)" })),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
-          onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name) + ". Keep it somewhere safe.") }),
+          onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name, opts()) + ". Keep it somewhere safe.") }),
         h("button", { type: "button", class: "btn", id: "backup-all", text: "Save backup of all learners",
-          onclick: () => run(async () => "Saved " + await saveBackup(listProfiles(), "all") + ". Keep it somewhere safe.") }),
+          onclick: () => run(async () => "Saved " + await saveBackup(listProfiles(), "all", { ...opts(), templates: true }) + ". Keep it somewhere safe.") }),
         h("label", { class: "btn", for: "restore-file", id: "restore-btn", text: "Restore from backup" }),
         fileIn),
       status);

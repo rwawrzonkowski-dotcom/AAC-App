@@ -42,6 +42,19 @@ export function listVoices() {
   return english.length ? english : voices.slice();
 }
 
+// Every voice the device offers, in every language (the voice picker sorts and groups them).
+export function allVoices() {
+  refreshVoices();
+  return voices.slice();
+}
+
+// The voice that WOULD speak for these settings (the chosen one if installed, else the fallback), or null.
+// The voice picker uses it to say which voice is really being used.
+export function currentVoice(s = settings) {
+  refreshVoices();
+  return pickVoice(s);
+}
+
 // Let other code (the voice picker) know when the voice list changes.
 export function onVoicesChanged(fn) {
   if (!synth) return () => {};

@@ -2,10 +2,13 @@
 //   - loads the word map and the current learner's profile
 //   - draws the main board (45 or 84 locations) or a category / adult-made page
 //   - handles taps (speak / navigate), the adult lock, Edit mode and Model mode
+//   - Teaching (beta, Phase 2): "choose targets" mode (tap words to make them targets) and teaching sessions
+//     (js/session.js: controls in the context strip, prompts on the next button; the rules are in js/teaching.js)
 //   - press-and-hold on a word: the word-forms dial (js/dial.js, slots in js/forms.js)
 //   - the top-bar Words button (Words pages), Forms button (other forms of the last word) and
 //     ABC button (the keyboard overlay; the number pad opens from the Numbers page or the keyboard's 123 key)
 //   - playing the message bar (one utterance, or chip by chip with pauses: js/speech.js)
+//   - everyday recording (Beta 2.2, js/everyday.js): after a word is spoken, a small record of it is queued (never before speaking)
 import {
   speak, speakMessage, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isMessagePlaying, pauseMs,
 } from "./speech.js";
@@ -14,7 +17,7 @@ import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js"
 import { buildModel, getPage, pathToCore, resolvePage, posKey, MAX_DEPTH } from "./boardmodel.js";
 import { loadBoardData } from "./boarddata.js";
 import {
-  initProfiles, hasProfiles, addProfile, chooseCurrent, getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto, newPageId, deleteAdultPage,
+  initProfiles, hasProfiles, listProfiles, addProfile, chooseCurrent, getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto, newPageId, deleteAdultPage,
 } from "./profiles.js";
 import { attachHold } from "./hold.js";
 import { requestAdultAccess } from "./lock.js";
@@ -24,12 +27,17 @@ import { showSetup } from "./setup.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
 import {
-  runPrompt, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
+  runPrompt, sustainStep, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
 } from "./modelprompt.js";
+import { setPreviewHook } from "./ladderui.js";
 import { preloadCritterArt } from "./critters.js";
 import { CHANNEL } from "./channel.js";
+import * as teach from "./session.js";
+import { runEndFlow } from "./teachui.js";
+import { loadTeaching, getTargets, isTarget, addTarget, removeTarget, closeOrphanSessions } from "./teachdata.js";
 import { loadForms, formsFor, dialFor, openFormsPopover } from "./forms.js";
 import { openDial } from "./dial.js";
+import * as everyday from "./everyday.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
@@ -41,7 +49,7 @@ let previewing = false;               // true while "Preview on board" runs (tap
 // ---------- Touch supports (adult menu > Touch), per learner ----------
 // Only the child's board uses these, and not in Edit mode.
 let lastSelectAt = -Infinity;        // when a word was last selected (ms)
-const touchActive = () => !state.editing;
+const touchActive = () => !state.editing && !state.choosing;
 
 // How long a finger must stay down on a button (0 = no hold needed).
 function holdMs() {
@@ -58,6 +66,7 @@ const state = {
   board: null,        // the word map (data/core-board.json)
   page: "core",       // "core", a category id such as "food", or an adult-made page id
   editing: false,     // Edit mode
+  choosing: false,    // "Add targets" mode (adult menu > Teaching): taps choose target words instead of speaking
   modeling: false,    // Model mode
   sentence: [],       // words in the message bar: {label, spoken, base} (base = the word tapped on the board)
   cells: new Map(),   // key -> description of each cell currently drawn
@@ -79,6 +88,35 @@ const onWordsPage = (pageId = state.page) => {
 };
 
 const $ = (id) => document.getElementById(id);
+
+// ---------- Everyday recording (Beta 2.2, js/everyday.js) ----------
+// Every call comes AFTER the word has been spoken, only changes memory (the writing to disk happens later) and can never throw
+// into a tap: speech is never delayed or stopped by recording.
+// mode: "model" (an adult tapped in Model mode), "session" (during a teaching session) or "learner".
+const recMode = () => (state.modeling ? "model" : teach.isActive() ? "session" : "learner");
+// Record one selected word. `how` is "board" | "page" | "forms" | "dial" | "keyboard" | "numberpad"; the board and page cases are
+// told apart here: a word chosen on any page other than the main board is "page", with the page ids that lead to it.
+function recordTap({ id, label, spoken, how, form, base }) {
+  try {
+    const profile = getCurrent();
+    if (!everyday.isRecording(profile.id)) return;
+    let pages;
+    if (how === "board" && state.page !== "core") {
+      how = "page";
+      pages = pathToCore(modelNow(), profile, state.page).reverse().slice(1);     // pages after the main board, ending at this page
+    }
+    const ids = teach.recordIds();
+    everyday.recordWord(profile.id, { wordId: id || null, label, spoken, how, pages, form, base, mode: recMode(),
+      gridSize: profile.gridSize, stage: profile.stage, sessionId: ids && ids.sessionId, trialId: ids && ids.trialId });
+  } catch (e) { console.warn("Could not record a tap:", e); }
+}
+// The chips in the message bar changed (added = a chip was added or replaced, false = deleted): the utterance tracker
+// decides what to record from the chips left in the bar.
+function chipsChanged(added) {
+  try { const p = getCurrent(); everyday.sentenceChanged(p.id, state.sentence, { gridSize: p.gridSize, stage: p.stage }, added); } catch (e) { /* never break a tap */ }
+}
+// The bar is spoken ("barSpeak"), cleared ("clear"), or left alone for 20 s ("idle", by the tracker itself).
+function utteranceEnds(source) { try { everyday.endUtterance(source); } catch (e) { /* ignore */ } }
 
 // ---------- Which page is showing ----------
 // The layout for the current learner's grid size (45 or 84).
@@ -113,6 +151,9 @@ function renderAll() {
   $("app").classList.toggle("editing", state.editing);
   $("edit-banner").hidden = !state.editing;
   $("model-banner").hidden = !state.modeling;
+  $("target-banner").hidden = !state.choosing;
+  $("app").classList.toggle("choosing", state.choosing);
+  if (state.choosing) markTargets();
 
   // Learner's first name, small, in the message-bar corner. ("Learner 1" stays whole.)
   const m = profile.name.trim().match(/^\S+(?:\s+\d+)?/);
@@ -122,6 +163,7 @@ function renderAll() {
   // The adult turned the keyboard off while it was open (the adult menu closes it first, so this is a safety net).
   if (typing && typing.isOpen() && typing.mode() === "letters" && !keyboardButtonShown(profile)) typing.close({ speak: false });
   updateBar();
+  teach.onRender();                     // a running teaching trial re-draws its prompt on the new page
 }
 
 // The Words, Forms and ABC buttons in the top bar. They only change themselves (and the message text's width):
@@ -136,6 +178,9 @@ function updateBar() {
   const ew = $("edit-words");
   ew.hidden = !shown;
   ew.textContent = shown && onWordsPage() ? "Close Words" : "Words";
+  const tw = $("target-words");
+  tw.hidden = !shown;
+  tw.textContent = shown && onWordsPage() ? "Close Words" : "Words";
   updateFormsButton();
 }
 
@@ -191,6 +236,7 @@ function playMessage() {
   const gap = pauseMs();
   if (gap > 0) speakSequence(chunks, gap, { onChunk: highlightChip, onEnd: () => highlightChip(-1) });
   else speakMessage(chunks.join(" "));
+  utteranceEnds("barSpeak");               // (after the speech has started)
 }
 
 // ---------- Keyboard and number pad ----------
@@ -217,11 +263,13 @@ function openNumberPad(d) {
 // A typed word or number is finalized: it becomes a normal chip, is spoken and (if it came from the
 // Numbers page) the board goes back to the main page, like any other word chosen on a page.
 function onTyped({ label, spoken, kind, speak: say, context }) {
-  state.sentence.push({ label, spoken, base: label });
+  state.sentence.push({ label, spoken, base: label, mode: recMode() });
   drawMessage();
   if (say) speak(spoken);
   logWord(label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined,
     kind === "number" ? { source: "numberpad", spoken } : { source: "keyboard" });
+  recordTap({ id: null, label, spoken, how: kind === "number" ? "numberpad" : "keyboard" });
+  chipsChanged(true);
   if (context && context.fromPage && kind === "number" && state.page !== "core") goTo("core");
 }
 
@@ -246,7 +294,7 @@ function closeDial() { if (state.dial) state.dial.close(); }
 // Only the word a family starts with has one (go, eat, big, dog, I), and only on the child's board:
 // not in Edit mode, not while the Forms popover, the keyboard or a Model-mode walk back is on screen.
 function dialSpecFor(cellEl) {
-  if (!wordDialOn(getCurrent()) || state.editing || state.dial || state.forms || returning || previewing) return null;
+  if (!wordDialOn(getCurrent()) || state.editing || state.choosing || state.dial || state.forms || returning || previewing) return null;
   if (typing && typing.isOpen()) return null;
   const d = state.cells.get(cellEl.dataset.key);
   if (!d || d.kind !== "word" || !d.visible || d.loadBoard || d.action || d.noForms || d.sentence) return null;
@@ -286,11 +334,13 @@ function openWordDial(cellEl, { pointer, afterSelect }) {
     onChoose: (entry, chip) => {
       lastSelectAt = performance.now();      // choosing counts as a selection for "Ignore repeated taps" (opening did not)
       speak(entry.word);
-      const item = { label: entry.word, spoken: entry.word, base: d.label, id };
+      const item = { label: entry.word, spoken: entry.word, base: d.label, id, mode: recMode() };
       const last = state.sentence[state.sentence.length - 1];
       if (afterSelect && last && last.id === id) state.sentence[state.sentence.length - 1] = item; else state.sentence.push(item);
       drawMessage();
       logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form: entry.word, id });
+      recordTap({ id, label: entry.word, spoken: entry.word, how: "dial", form: entry.word, base: d.label });
+      chipsChanged(true);
       if (state.modeling) {
         // The adult's ring / critter shows on the chosen form for a moment, then the dial closes (and, from a
         // category page, the board steps back out one page at a time, as for any word).
@@ -327,9 +377,11 @@ function openForms() {
       lastSelectAt = performance.now();
       speak(form);
       const base = last.base || last.label;
-      state.sentence[state.sentence.length - 1] = { label: form, spoken: form, base, id: last.id };
+      state.sentence[state.sentence.length - 1] = { label: form, spoken: form, base, id: last.id, mode: recMode() };
       drawMessage();
       logWord(base, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form, id: last.id });
+      recordTap({ id: last.id, label: form, spoken: form, how: "forms", form, base });
+      chipsChanged(true);
       if (state.modeling) {
         // Let the adult's ring show on the chosen form for a moment, then close.
         const pop = state.forms;
@@ -373,6 +425,19 @@ function previewPrompt() {
     (usesCritter(getCurrent().model) ? CRITTER_TOTAL_MS : RING_MS) + 300));
 }
 
+// "Preview" on a step of a custom prompt ladder (adult menu > Teaching > Targets > Settings > Custom ladder): the step is shown on the
+// same button as "Preview on board" for a few seconds, then stops. Nothing is spoken, added to the message bar or recorded.
+const STEP_PREVIEW_MS = 3200;
+setPreviewHook((step) => {
+  const cell = document.querySelector('#board .cell[data-word="more"].tap:not(.ghost)') ||
+               document.querySelector("#board .cell.tap:not(.ghost):not(.type-home)");
+  if (!cell) return Promise.resolve();
+  previewing = true;
+  clearCritter();
+  const stop = sustainStep(cell, step, getCurrent().model, getPhotoUrl("critter"));
+  return new Promise((resolve) => setTimeout(() => { stop(); previewing = false; resolve(); }, STEP_PREVIEW_MS));
+});
+
 // ---------- Taps on the board ----------
 function onCellTap(cellEl) {
   const d = state.cells.get(cellEl.dataset.key);
@@ -380,24 +445,34 @@ function onCellTap(cellEl) {
 
   // Back button: up ONE level (a page opened from another page goes back to that
   // page; a page opened from the main board goes back to the main board). Never speaks.
-  if (d.kind === "home") { goTo(currentPageDef().parent || "core"); return; }
+  if (d.kind === "home") { teach.onSelect({ type: "back" }); goTo(currentPageDef().parent || "core"); return; }
 
   if (state.editing) { editCell(d); return; }
 
+  // "Add targets" mode: a tap on a word makes it a target (or removes it); a category button still opens its page.
+  if (state.choosing) { chooseCell(d); return; }
+
   // Category / page button: open its page. No speech, nothing added.
-  if (d.loadBoard) { goTo(d.loadBoard); return; }
+  if (d.loadBoard) {
+    teach.onSelect({ type: "category", id: d.wordId || d.key, label: d.label, opens: d.loadBoard });
+    goTo(d.loadBoard);
+    return;
+  }
 
   // The Number pad button: opens the number pad. No speech, nothing added until a number is finalized.
-  if (d.action === "numberpad") { openNumberPad(d); return; }
+  if (d.action === "numberpad") { teach.onSelect({ type: "other" }); openNumberPad(d); return; }
 
   // A normal word: speak immediately, add to the message bar.
   lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on
   speak(d.spoken);
   const shown = d.sentence ? d.spoken : d.label;
   const id = d.wordId || d.key;           // a built-in word's id ("fall-season"), or the cell key of a word the adult added
-  state.sentence.push({ label: shown, spoken: d.spoken, base: shown, noForms: d.noForms, id });
+  state.sentence.push({ label: shown, spoken: d.spoken, base: shown, noForms: d.noForms, id, mode: recMode() });
   drawMessage();
   logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id });
+  recordTap({ id, label: d.label, spoken: d.spoken, how: "board" });
+  chipsChanged(true);
+  teach.onSelect({ type: "word", id, label: d.label });     // (a no-op unless a teaching trial is running)
 
   if (state.page !== "core") returnToMain(d);
   else if (state.modeling) promptCell(d.key, RING_MS);
@@ -493,10 +568,56 @@ async function editCell(d) {
   renderAll();
 }
 
-function startEditing() { closeForms(); closeDial(); stopSpeech(); state.modeling = false; state.editing = true; renderAll(); }
+function startEditing() { closeForms(); closeDial(); stopSpeech(); state.modeling = false; state.choosing = false; state.editing = true; renderAll(); }
 function stopEditing() { state.editing = false; renderAll(); }
-function startModeling() { closeForms(); closeDial(); stopSpeech(); state.editing = false; state.modeling = true; renderAll(); }
+function startModeling() { closeForms(); closeDial(); stopSpeech(); state.editing = false; state.choosing = false; state.modeling = true; renderAll(); }
 function stopModeling() { state.modeling = false; clearCritter(); renderAll(); }
+
+// ---------- Teaching: choosing targets ----------
+// Adult menu > Teaching > Targets > Add targets. The board (and its pages and folders) is shown as usual with a banner over the
+// message bar; tapping a word makes it a target (tap again to remove it) and says nothing. Category and folder buttons open
+// their pages and Back goes up, so a word on a folder page is chosen with the page chain it sits on.
+function startChoosing() {
+  closeForms(); closeDial(); stopSpeech(); clearCritter();
+  state.editing = false; state.modeling = false; state.choosing = true;
+  renderAll();
+}
+function stopChoosing() {
+  state.choosing = false;
+  renderAll();
+  showAdultMenu("sec-teaching");        // back to the Teaching section (the adult is already signed in)
+}
+function markTargets() {
+  for (const el of document.querySelectorAll("#board .cell")) {
+    const d = state.cells.get(el.dataset.key);
+    el.classList.toggle("is-target", !!d && d.kind === "word" && d.visible && !d.loadBoard && isTarget(d.wordId || d.key));
+  }
+  const n = getTargets().length;
+  $("target-count").textContent = n === 1 ? "1 target" : n + " targets";
+}
+async function chooseCell(d) {
+  if (d.loadBoard) { goTo(d.loadBoard); return; }
+  if (d.kind !== "word" || !d.visible || d.action) return;
+  const profile = getCurrent();
+  const id = d.wordId || d.key;
+  if (isTarget(id)) await removeTarget(id);
+  else {
+    const path = pathToCore(modelNow(), profile, state.page).reverse().slice(1);     // pages after the main board
+    await addTarget(profile.id, { wordId: id, label: d.label, pageId: state.page, path });
+  }
+  markTargets();
+}
+
+// ---------- Teaching: sessions ----------
+async function startTeachingSession(opts) {
+  closeForms(); closeDial(); stopSpeech(); clearCritter();
+  state.editing = false; state.modeling = false; state.choosing = false;     // model mode and sessions are separate
+  utteranceEnds("clear"); state.sentence.length = 0; drawMessage();
+  await teach.startSession(opts);
+  renderAll();
+}
+// A session cannot carry on when the learner or the board size changes: it is saved and closed.
+function closeSessionQuietly() { if (teach.isActive()) teach.endSession(); }
 
 // ---------- Adult lock ----------
 let adultBusy = false;
@@ -509,6 +630,10 @@ function showAdultMenu(startAt) {
     startAt,
     onLearnerChanged: () => {
       // A different learner: start clean on the main board.
+      utteranceEnds("clear");               // (the old learner's message, if any, is closed before the bar is emptied)
+      closeSessionQuietly();
+      everyday.prepare(getCurrent().id);
+      loadTeaching(getCurrent().id).then(() => renderAll());
       closeForms();
       closeDial();
       stopSpeech();
@@ -520,6 +645,8 @@ function showAdultMenu(startAt) {
     },
     onVocabChanged: renderAll,
     onBoardSizeChanged: () => {
+      utteranceEnds("clear");
+      closeSessionQuietly();
       closeDial();
       // Different grid: word locations changed, so start clean on the main board.
       state.sentence.length = 0;
@@ -529,6 +656,7 @@ function showAdultMenu(startAt) {
     },
     onEdit: startEditing,
     onModel: startModeling,
+    teach: { sessionActive: teach.isActive, onChooseTargets: startChoosing, onStartSession: startTeachingSession },
     // The menu has closed itself; run the prompt on the board, then bring the menu back.
     onPreviewPrompt: async () => {
       await previewPrompt();
@@ -543,6 +671,7 @@ async function openAdult() {
   try {
     if (!(await requestAdultAccess())) return;
     if (typing.isOpen()) typing.close({ speak: false });   // keep what was typed as a chip, but say nothing
+    teach.pauseForMenu();                                   // a teaching trial in progress is skipped
     showAdultMenu();
   } finally {
     adultBusy = false;
@@ -575,6 +704,23 @@ async function start() {
   }
   preloadCritterArt();      // so the critter can appear instantly the first time
 
+  // Everyday recording (Beta 2.2): read this learner's known words ahead of the first tap, write on hide, and a few seconds
+  // after start prune raw events older than each learner's retention setting (one key-range delete per learner, off the tap path).
+  everyday.initEveryday();
+  everyday.prepare(getCurrent().id);
+  setTimeout(() => everyday.maintain(listProfiles().map((p) => p.id)), 4000);
+
+  // Teaching (beta): this learner's targets, and any session left open when the app was closed is closed now.
+  for (const p of listProfiles()) await closeOrphanSessions(p.id);
+  await loadTeaching(getCurrent().id);
+  teach.initSession({
+    strip: $("context-strip"), appEl: $("app"), boardEl: $("board"), wordsBtn: $("words-btn"),
+    modelNow, getPageId: () => state.page, getCells: () => state.cells, goTo,
+    wordsButtonAvailable: () => wordsButtonShown(getCurrent()),
+    onSessionChange: () => renderAll(),
+    runEndFlow: (result) => runEndFlow(result, { board: state.board, onVocabChanged: renderAll }),
+  });
+
   typing = createTyping({
     host: $("app"),
     speakLetters: () => getCurrent().speakLetters,
@@ -592,9 +738,15 @@ async function start() {
   attachPressHandling($("message-bar"), (el) => {
     if (el.disabled) return;
     if (el.id === "message-text") playMessage();
-    else if (el.id === "delete-btn") { stopSpeech(); state.sentence.pop(); drawMessage(); }   // removes a whole chip
-    else if (el.id === "clear-btn") { stopSpeech(); state.sentence.length = 0; typing.clearDraft(); drawMessage(); }
-    else if (el.id === "words-btn") { if (!returning && !previewing && !typing.isOpen()) toggleWords(); }
+    else if (el.id === "delete-btn") { stopSpeech(); state.sentence.pop(); drawMessage(); chipsChanged(false); }   // removes a whole chip
+    else if (el.id === "clear-btn") { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; typing.clearDraft(); drawMessage(); }
+    else if (el.id === "words-btn") {
+      if (!returning && !previewing && !typing.isOpen()) {
+        // (Opening the Words menu is a choice the teaching trial must classify before the page changes.)
+        teach.onSelect(onWordsPage() ? { type: "back" } : { type: "category", id: "words-btn", label: "Words", opens: "words" });
+        toggleWords();
+      }
+    }
     else if (el.id === "forms-btn") { if (!typing.isOpen()) openForms(); }
     else if (el.id === "abc-btn") toggleKeyboard();
   }, "#message-text, .bar-btn");
@@ -604,6 +756,8 @@ async function start() {
   attachHold($("model-end"), HOLD_TO_END_MODEL_MS, stopModeling);
   $("edit-done").addEventListener("click", stopEditing);
   $("edit-words").addEventListener("click", toggleWords);   // so an adult can edit the Words pages too
+  $("target-done").addEventListener("click", stopChoosing);
+  $("target-words").addEventListener("click", toggleWords); // so an adult can choose targets on the Words pages too
 
   renderAll();
 

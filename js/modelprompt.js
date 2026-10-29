@@ -149,3 +149,53 @@ export function runPrompt(cell, m, customUrl, ringMs) {
 export function ringBriefly(el, m, ms = 350) {
   if (el && usesRing(m)) showRing(el, ms, m.ringOpacity);
 }
+
+// ---------- A prompt that stays on (teaching sessions, Phase 2) ----------
+// In a teaching session the prompt must stay on the next button until the child answers or the adult
+// moves on, instead of showing once like Model mode. This keeps the learner's own Model prompt (ring and/or
+// critter, their animal, color and arrival) going, but at the strength of the prompt LEVEL (25 / 50 / 75 / 100
+// percent) instead of the learner's opacity sliders. The ring is the class "teach-ring" (a sustained copy of the
+// model ring, see styles.css) and the critter hops in again every few seconds. Like Model mode, none of it takes
+// room or catches a tap. Returns a function that stops it.
+const CRITTER_REPEAT_MS = CRITTER_TOTAL_MS + 900;
+export function sustainPrompt(cell, m, customUrl, pct, style) {
+  if (!cell) return () => {};
+  const em = { ...m, ...(style ? { style } : {}), ringOpacity: pct, critterOpacity: pct };
+  let timer = null;
+  if (usesRing(em)) {
+    cell.style.setProperty("--ring-a", String(pct / 100));
+    cell.classList.add("teach-ring");
+  }
+  if (usesCritter(em)) {
+    showCritter(cell, em, customUrl);
+    timer = setInterval(() => { if (cell.isConnected) showCritter(cell, em, customUrl); }, CRITTER_REPEAT_MS);
+  }
+  return () => {
+    clearInterval(timer);
+    cell.classList.remove("teach-ring");
+    cell.style.removeProperty("--ring-a");
+    if (usesCritter(em)) clearCritter();
+  };
+}
+
+// One STEP of a prompt ladder (js/teaching.js), kept on the button `cell` until the returned function is called:
+//   model    the learner's own Model prompt (ring and/or critter, as chosen in Model prompt) at the step's opacity
+//   critter  the critter only          ring   the ring only (both ignore the learner's Model prompt style)
+//   glow     the amber pulse (class teach-glow; --glow-a is its strength 0 to 1)
+//   path     the Model-mode ring (class teach-ring; --ring-a is its strength 0 to 1)
+// Every step is drawn outside the button (a shadow, or the see-through critter layer): nothing moves, resizes or catches a tap.
+export function sustainStep(cell, step, m, customUrl) {
+  if (!cell || !step) return () => {};
+  const pct = step.opacity;
+  if (step.type === "glow") {
+    cell.style.setProperty("--glow-a", String(pct / 100));
+    cell.classList.add("teach-glow");
+    return () => { cell.classList.remove("teach-glow"); cell.style.removeProperty("--glow-a"); };
+  }
+  if (step.type === "path") {
+    cell.style.setProperty("--ring-a", String(pct / 100));
+    cell.classList.add("teach-ring");
+    return () => { cell.classList.remove("teach-ring"); cell.style.removeProperty("--ring-a"); };
+  }
+  return sustainPrompt(cell, m, customUrl, pct, step.type === "critter" ? "critter" : step.type === "ring" ? "ring" : undefined);
+}

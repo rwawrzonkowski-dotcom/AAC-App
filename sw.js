@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "aac-v16";
+const CACHE_VERSION = "aac-v17";
 // The stable app and the beta copy live on the same website, so they share one cache storage.
 // Each copy only ever deletes caches that start with ITS OWN prefix, and ignores the other copy's folder.
 // (tools/make-beta.sh swaps these three lines in beta/sw.js: "beta-aac-v1", "beta-aac-" and "".)
@@ -13,6 +13,7 @@ const FILES = [
   "data/about.json",
   "data/core-board.json",
   "data/image-sources.json",
+  "data/teaching-templates.json",
   "data/word-forms.json",
   "icons/apple-touch-icon.png",
   "icons/icon-180.png",
@@ -1422,24 +1423,40 @@ const FILES = [
   "js/boardmodel.js",
   "js/channel.js",
   "js/critters.js",
+  "js/datapanel.js",
   "js/db.js",
   "js/devicetips.js",
   "js/dial.js",
   "js/editor.js",
   "js/events.js",
+  "js/everyday.js",
   "js/forms.js",
   "js/hold.js",
+  "js/instrcard.js",
+  "js/instrui.js",
   "js/keyboard.js",
+  "js/ladderui.js",
   "js/lock.js",
   "js/migrate.js",
   "js/modelprompt.js",
   "js/modelsettings.js",
   "js/numberwords.js",
   "js/profiles.js",
+  "js/reportcharts.js",
+  "js/reportdata.js",
+  "js/reportdoc.js",
+  "js/reportexport.js",
+  "js/reports.js",
+  "js/session.js",
   "js/setup.js",
   "js/speech.js",
   "js/storage.js",
+  "js/teachdata.js",
+  "js/teaching.js",
+  "js/teachui.js",
+  "js/templates.js",
   "js/ui.js",
+  "js/voicepicker.js",
   "manifest.webmanifest",
   "styles.css",
 ];

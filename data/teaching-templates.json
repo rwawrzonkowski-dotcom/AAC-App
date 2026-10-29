@@ -1,0 +1,238 @@
+{
+  "version": 1,
+  "source": "VOICE Teaching Templates (draft), approved Oct 28 2026; adapted from Richard Wawrzonkowski's RBT Teaching Templates and Activity Skill Groups",
+  "fields": [
+    {"id": "cue", "label": "Cue"},
+    {"id": "setup", "label": "Set up"},
+    {"id": "when", "label": "When to teach"},
+    {"id": "reinforcement", "label": "Reinforcement"},
+    {"id": "errorCorrection", "label": "Error correction"},
+    {"id": "notes", "label": "Notes"}
+  ],
+  "templates": [
+    {
+      "id": "request-items",
+      "name": "Requesting items",
+      "clinical": {
+        "cue": "No spoken SD. Place {word} in view and out of reach, look at {name} expectantly, and wait 3–5 seconds. Do not ask \"What do you want?\"",
+        "setup": "Quick preference check first. Keep VOICE within reach and never remove it as a consequence. Model {word} on the device while saying it once, without requiring imitation.",
+        "when": "Snack Time, Bubbles, Pop-Up and Cause-and-Effect Toys, Car Ramp Races, Play-Doh, or any moment {name} reaches for {word}.",
+        "reinforcement": "Deliver {word} immediately on selection and restate the word (\"{word}!\"). Brief access, then set up the next opportunity. Save the highest-value items for independent responses.",
+        "errorCorrection": "A different word still speaks. Respond to it (\"You want that? Let's find {word}\"), model {word}, and deliver after {name} selects it. Do not deliver for the wrong word. If {name} reaches or grabs, keep the item out of reach, model, and deliver on the tap. If {name} is distressed, honor any communication attempt.",
+        "notes": "Correct responses: selects {word} with or without prompts; from a new adult or room; \"want\" or \"more\" + {word}. Next step: two-word requests."
+      },
+      "parent": {
+        "cue": "Hold up the {word} where {name} can see it but can't reach it. Don't ask a question; just smile and wait a few seconds.",
+        "setup": "Keep VOICE close to {name}. Show how it works: tap {word} yourself while saying it. Then hold the item and wait.",
+        "when": "Snack, play and bath time, or any time {name} wants the {word}.",
+        "reinforcement": "Give the {word} right away and say the word back. Getting the item is the reward: the button worked!",
+        "errorCorrection": "If {name} taps a different word, that's okay; answer it (\"Oh, you said ball!\"). Then show {word} again and give it when they tap it. If {name} is upset, give it anyway and try again later.",
+        "notes": "Next step: help {name} put two words together, like \"want {word}\" or \"more {word}.\""
+      }
+    },
+    {
+      "id": "request-actions",
+      "name": "Requesting actions and more",
+      "clinical": {
+        "cue": "No spoken SD. Start a preferred activity, then interrupt it (stop the swing, close the bubbles, hold the toy mid-action). Look expectantly and wait 3–5 seconds.",
+        "setup": "Model {word} on VOICE several times during the activity before expecting it (aided language input). Plan 5–10 interruptions per activity.",
+        "when": "Bubbles, Peekaboo and Tickle Games, Pop-Up Toys, Ball Ramp and Drop Tube, Song Time, Playground Time (swing, slide).",
+        "reinforcement": "Resume or deliver the action immediately and narrate it (\"{word}! Here we go!\").",
+        "errorCorrection": "Wrong word: respond to what was said, model {word}, and resume only after {word} is selected. If {name} protests with behavior, prompt {word} immediately (errorless) and resume on the tap.",
+        "notes": "Expand to two words (\"more bubbles,\" \"go swing\"). Probe generalization across activities and partners."
+      },
+      "parent": {
+        "cue": "Start something {name} loves, then stop in the middle and wait. Look at {name} like \"your turn.\"",
+        "setup": "Before stopping, tap {word} yourself a few times as you play (\"{word}!\"). Then pause and let {name} try.",
+        "when": "Swings, tickles, songs, bubbles, opening containers: anything {name} wants to keep going.",
+        "reinforcement": "Start the fun again right away and say the word back.",
+        "errorCorrection": "If {name} taps something else, answer it, then show {word} again and start the fun when they tap it. If {name} gets upset, help them tap it and start right away.",
+        "notes": "When {word} is easy, try two words: \"more swing,\" \"open snack.\""
+      }
+    },
+    {
+      "id": "help-break",
+      "name": "Help, break and finished",
+      "clinical": {
+        "cue": "No spoken SD. For help: present a blocked task (tight lid, item out of reach, missing piece). For break, finished, stop or no: present a mildly non-preferred demand. Wait 3 seconds and prompt {word} before problem behavior begins. Follow the BCBA's FCR plan.",
+        "setup": "Plan 5–10 opportunities per session. Start easy, then slightly harder. Early on, prompt immediately (errorless) and honor every request. Thin the schedule only per the BCBA plan.",
+        "when": "Snack Time (sealed containers), Inset Puzzle, Getting Dressed, Cleanup Time, Arrival Routine, work tasks.",
+        "reinforcement": "Deliver the help, break or end of task immediately. For break: a short timed break, then return to the task.",
+        "errorCorrection": "If problem behavior occurs first, do not deliver the help or break for it. Calmly model {word} and deliver only after {name} selects it.",
+        "notes": "Never remove VOICE. Treat \"stop\" and \"no\" as real communication and an assent signal: honor them, then problem-solve."
+      },
+      "parent": {
+        "cue": "For \"help\": give {name} something they can't do alone, like a closed snack container, and wait. For \"break\" or \"finished\": start a task {name} doesn't love, and show the button before they get upset. Don't ask \"Do you need help?\"",
+        "setup": "Plan a few chances a day. At first, show the {word} button right away so {name} learns it works.",
+        "when": "Snacks, getting dressed, puzzles, clean-up, homework.",
+        "reinforcement": "Help right away, or give the break right away. That's the reward.",
+        "errorCorrection": "If {name} cries, throws or pushes away, stay calm, show the {word} button, and help as soon as they tap it.",
+        "notes": "\"Stop\" and \"no\" are real words. Listen to them, even when you can't give {name} what they want right then."
+      }
+    },
+    {
+      "id": "social",
+      "name": "Social words",
+      "clinical": {
+        "cue": "Greetings: a familiar partner approaches, says \"Hi, {name}!\" or \"Bye, {name}!\" once with a wave, and waits 3–5 seconds. Turns: during a turn-taking game, pause when it's {name}'s turn. Manners: when handing an item. No \"Say {word}.\"",
+        "setup": "Plan 5–10 natural chances (staff or peers entering and leaving, game turns). The prompter stands behind {name} so prompts fade easily.",
+        "when": "Arrival Routine, Circle Time, Turn-Taking Board Game, Peekaboo, end of session.",
+        "reinforcement": "The partner responds warmly and keeps the interaction going (smile, high five, a quick chat).",
+        "errorCorrection": "No response within 5 seconds: model {word} while the partner is still present, let {name} select it, and the partner responds warmly. Don't repeat the greeting several times.",
+        "notes": "Don't require \"please\" or \"thank you\" before giving a requested item; it can become a generic request word."
+      },
+      "parent": {
+        "cue": "When someone arrives or leaves, have them say \"Hi, {name}!\" or \"Bye!\" once and wait. Don't tell {name} \"say hi.\"",
+        "setup": "Ask family members to greet {name} at the door and wait a moment for an answer.",
+        "when": "Coming home, leaving school, visitors, board games.",
+        "reinforcement": "Answer happily and keep playing or talking with {name}.",
+        "errorCorrection": "If {name} doesn't answer, tap {word} for them while the person is still there, and let {name} try. Don't keep repeating \"hi.\"",
+        "notes": "It's fine to give {name} what they asked for even without \"please.\""
+      }
+    },
+    {
+      "id": "labeling",
+      "name": "Labeling",
+      "clinical": {
+        "cue": "Hold up or point to {word} (object or picture), gain attention, and ask \"What is it?\" once. Wait 3–5 seconds.",
+        "setup": "One target item at a time; mix in a mastered label every 2–3 trials. Move from pictures to real items to the natural environment.",
+        "when": "Farm Animal Barn, Shared Storybook, Mystery Bag, Show and Tell, walks, Circle Time.",
+        "reinforcement": "Praise and social interaction (or token). Do not hand over the item, which turns the label into a request.",
+        "errorCorrection": "Incorrect or no response: \"Listen, it's a {word},\" model on VOICE, wait for {name} to select it, then repeat the trial once and reinforce.",
+        "notes": "Probe across exemplars (different pictures, colors, sizes of {word})."
+      },
+      "parent": {
+        "cue": "Point to the {word} (in a book, on a walk, a toy) and ask once, \"What is it?\" Then wait.",
+        "setup": "Look at books and real things together. Ask about {word} now and then, mixed with words {name} already knows.",
+        "when": "Books, walks, the zoo, toy animals, pictures on the phone.",
+        "reinforcement": "Cheer and talk about it (\"Yes, a {word}! It says moo!\").",
+        "errorCorrection": "If {name} picks another word, say \"It's a {word},\" tap it, and let them try again.",
+        "notes": "Use different examples: big and small, real and pictures."
+      }
+    },
+    {
+      "id": "commenting",
+      "name": "Commenting",
+      "clinical": {
+        "cue": "No spoken SD. Create something interesting (a surprise, a new toy, an unexpected event), then pause and look at {name} expectantly for 3–5 seconds. Don't ask a question.",
+        "setup": "Model 2–3 comments on VOICE first (\"Wow!\" \"Look!\"), then reduce your own comments over the session.",
+        "when": "Pop-Up Toys, Magna-Tile Tower, Car Ramp Races, Sensory Bin, Joke Book Time, Show and Tell.",
+        "reinforcement": "Respond with excitement to any comment and expand it by 1–2 words (\"Wow! Big tower!\").",
+        "errorCorrection": "No comment: model {word}, wait for {name} to select it, respond enthusiastically. Don't treat a request (\"more\") as a comment; honor the request, then model the comment.",
+        "notes": "Comments are shared enjoyment, not a request; nothing is delivered."
+      },
+      "parent": {
+        "cue": "Make something fun or surprising happen (a tower falls, a toy pops up), then pause and look at {name}. Don't ask anything.",
+        "setup": "Tap {word} yourself a few times when fun things happen, then give {name} a turn.",
+        "when": "Knocking down towers, funny faces, bubbles popping, silly books.",
+        "reinforcement": "React with excitement and add a word: \"Wow, so tall!\"",
+        "errorCorrection": "If {name} stays quiet, tap {word} for them, wait, and celebrate when they copy it.",
+        "notes": "There's no prize here; the fun of sharing is the reward."
+      }
+    },
+    {
+      "id": "feelings-body",
+      "name": "Feelings and body",
+      "clinical": {
+        "cue": "Two contexts. Labeling: show one clear face or picture and ask \"How does he feel?\" once; wait 5 seconds. In the moment: when {name} shows the feeling or need, pause and model {word} on VOICE.",
+        "setup": "Start with 2 contrasting feelings (happy, sad), then add more. Move from cartoons to photos to real people. For body parts, pair with \"my\" and \"hurt\" (\"my tummy hurt\").",
+        "when": "Feelings Charades, Shared Storybook, Bath and Lotion Time (body parts), Calm down routines, any real moment of the feeling.",
+        "reinforcement": "In the moment: respond to the message functionally (\"You're tired. Let's rest.\"). Labeling: praise.",
+        "errorCorrection": "Labeling: show the same card, model {word}, have {name} select it, then present a mastered card. In the moment: model only; don't quiz a child who is upset.",
+        "notes": "Always take reports of hurt, sick or pain seriously and check, even during teaching."
+      },
+      "parent": {
+        "cue": "When {name} looks tired, happy or upset, say what you see and tap {word} (\"You look {word}\"). You can also look at faces in books and ask \"How does he feel?\"",
+        "setup": "Start with happy and sad. Use real moments as often as you can.",
+        "when": "When {name} is happy, upset, tired or hurt; bath time for body parts; books.",
+        "reinforcement": "Answer what {name} told you: \"You're hungry? Let's get a snack.\"",
+        "errorCorrection": "If {name} picks a different feeling, gently show {word}. If {name} is upset, just show the word and comfort them; don't quiz.",
+        "notes": "Always check when {name} says \"hurt\" or \"sick,\" even if you're practicing."
+      }
+    },
+    {
+      "id": "yes-no-questions",
+      "name": "Yes, no and questions",
+      "clinical": {
+        "cue": "Yes/no: offer a clearly preferred or clearly non-preferred item (\"Do you want ___?\"), wait 3–5 seconds. Question words: contrive an information gap (hide a favorite item for \"where,\" a new person for \"who,\" a mystery bag for \"what\") and pause.",
+        "setup": "Yes/no: alternate preferred and non-preferred items so both answers are reinforced. Question words: model the question on VOICE yourself during play first.",
+        "when": "Snack Time choices, Mystery Bag, Dollhouse, hide-and-find games, Weather and Calendar Routine.",
+        "reinforcement": "Honor the answer exactly: \"yes\" gets the item, \"no\" removes it. For questions, answer and give access to what was hidden.",
+        "errorCorrection": "If the answer doesn't match behavior (says yes, pushes away), model the matching word and honor it. Don't test \"no\" with items the learner actually wants.",
+        "notes": "Honoring \"no\" is an assent practice; respect it in all sessions."
+      },
+      "parent": {
+        "cue": "For yes and no: hold up something {name} loves or dislikes and ask \"Do you want it?\" For question words: hide a favorite toy and wait for \"where.\"",
+        "setup": "Mix things {name} wants and doesn't want, so both \"yes\" and \"no\" get practice.",
+        "when": "Snack choices, hide-and-seek with toys, \"what's in the bag?\"",
+        "reinforcement": "Do what {name} said: give it for \"yes,\" take it away for \"no.\" Answer their questions and show them.",
+        "errorCorrection": "If {name} says \"yes\" but pushes it away, show \"no\" and take it away.",
+        "notes": "When {name} says \"no,\" listen whenever you can."
+      }
+    },
+    {
+      "id": "concepts",
+      "name": "Concept words",
+      "clinical": {
+        "cue": "Present 2–3 preferred items that differ only on the target concept (a red and a blue car). Ask \"Which one?\" once or wait expectantly; the learner selects {word} to get that item.",
+        "setup": "One concept dimension per block (color, size, or number). Rotate positions. Mix in mastered concepts between new trials.",
+        "when": "Car Ramp Races, Magna-Tile Tower, Counting-Bear Snack, Coloring and Drawing, Play-Doh, Mr. Potato Head.",
+        "reinforcement": "Deliver the chosen item (the {word} one) immediately and restate (\"The {word} one!\").",
+        "errorCorrection": "If {name} selects the item word without the concept, model {word} + item and deliver after the concept word. If the wrong concept is selected, deliver that item (honor it) and model {word} on the next trial.",
+        "notes": "Combine with the item for two-word requests (\"big cookie,\" \"red car\")."
+      },
+      "parent": {
+        "cue": "Hold up two of the same thing that differ in one way (a big and a little cookie). Ask \"Which one?\" and wait.",
+        "setup": "Practice one kind of word at a time, like colors one day and sizes another.",
+        "when": "Snack (big or little piece), crayons, cars, building blocks.",
+        "reinforcement": "Give {name} the one they picked and say the word back.",
+        "errorCorrection": "If {name} picks the other color or size, give them that one (they asked for it!), then show {word} next time.",
+        "notes": "Next step: two words together, like \"{word} car.\""
+      }
+    },
+    {
+      "id": "general",
+      "name": "General word",
+      "clinical": {
+        "cue": "No specific SD. Model {word} on VOICE frequently during natural conversation and activities, and create chances where {word} is useful.",
+        "setup": "Use aided language input: say and tap {word} together during real interactions, several times per activity.",
+        "when": "Any routine or play where {word} naturally fits.",
+        "reinforcement": "Respond to the message {name} sent and keep the interaction going.",
+        "errorCorrection": "Respond to whatever {name} said, then model {word} in a short phrase.",
+        "notes": "Accept {word} in any natural use."
+      },
+      "parent": {
+        "cue": "Use {word} yourself on VOICE often while you talk and play.",
+        "setup": "Say and tap {word} together during everyday moments.",
+        "when": "Any time {word} fits what you're doing.",
+        "reinforcement": "Answer what {name} said and keep talking or playing.",
+        "errorCorrection": "Answer whatever {name} said, then show {word} in a short phrase.",
+        "notes": "Any natural use of {word} counts."
+      }
+    }
+  ],
+  "assignment": {
+    "description": "Starting template per word; adult can switch any target to another template.",
+    "byWordId": {
+      "request-actions": ["more", "want", "get", "go", "open", "put", "turn", "make", "do", "again"],
+      "help-break": ["help", "break", "finished", "stop", "no", "wait", "all done", "i need a break"],
+      "social": ["hi", "bye", "please", "thank you", "sorry"],
+      "commenting": ["look", "see", "like"],
+      "yes-no-questions": ["yes", "no", "what", "where", "who", "when", "why", "how"],
+      "concepts": ["big", "little", "hot", "cold", "same", "different", "up", "down", "in", "on", "off", "out"]
+    },
+    "byPage": {
+      "request-items": ["Food and its folders", "Drinks and its folders", "Play and its folders", "Favorites", "Things page and its folders"],
+      "request-actions": ["Actions page and its folders"],
+      "social": ["Chat page and its folders (greetings, turns, manners)"],
+      "commenting": ["Chat comments (wow, uh oh, cool, yuck, I like it, that's funny)"],
+      "yes-no-questions": ["Chat Questions folder"],
+      "help-break": ["Chat help and protest words"],
+      "labeling": ["Animals and its folders", "People and its folders", "Places and its folders", "Body parts", "Clothes and its folders", "Outside and its folders"],
+      "feelings-body": ["Feelings page and its folders"],
+      "concepts": ["Colors", "Numbers and its folders", "Describing and its folders", "Time and its folders", "Little words", "More little words"]
+    },
+    "fallback": "general",
+    "note": "Word-level assignments (byWordId) take priority over page assignments. Match by the app's real word ids; 'no' appears in both help-break and yes-no-questions: use help-break."
+  }
+}

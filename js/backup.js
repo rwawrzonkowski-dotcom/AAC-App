@@ -2,10 +2,12 @@
 //
 // A backup is ONE .json file you can keep in the Files app. It looks like:
 //   {
-//     app: "AAC-App", version: 10, exportedAt: "2026-10-09T12:00:00.000Z",
+//     app: "AAC-App", version: 14, exportedAt: "2026-10-09T12:00:00.000Z",
+//     teachingTemplates: { templateId: { clinical: {field: text}, parent: {field: text} } },     (optional: only in "all learners" files)
 //     learners: [
 //       { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly,
 //         keyboardButton, speakLetters, wordDial,
+//         teaching: { targets: [...], sessions: [...], trials: [...] },     (optional: see below)
 //         photos: [ { key: "w:want", dataUrl: "data:image/jpeg;base64,..." } ] }
 //     ]
 //   }
@@ -25,6 +27,28 @@
 // `wordDial` ({ mode, holdSec, markers }: the press-and-hold word-forms dial) came with version 10 (beta). A backup without it
 // (every version 9 and older backup, including ones made by the stable app) restores with the defaults: Auto, 0.5 s, markers on.
 // Version 10 changed no layout, so the version 9 checks still apply to older backups.
+// `teaching` (Phase 2, version 11, beta) holds the learner's targets, teaching sessions and trials (see js/teachdata.js). The adult
+// chooses in the backup section whether to include it ("Include teaching data", on by default); without it the field is simply
+// missing. A reward picture of a target is one of the photos, with the key "reward:<word id>", and travels with the teaching
+// data. Every older backup (version 10 and below) has no `teaching` field and restores as before; restoring one over an
+// existing learner leaves that learner's teaching data alone. A version 11 file is too new for the stable app, so it can only
+// be restored in the beta.
+// Version 12 (beta 2.1, teaching instructions) added `instructions` to every target ({ templateId, overrides }) and, in a backup of
+// ALL learners, `teachingTemplates`: the wording of the templates this device has edited (device-wide, not per learner; only the
+// changed fields). Version 11 backups restore with the starting template assigned to every target (js/templates.js); restoring a
+// file with `teachingTemplates` asks before replacing this device's own edited templates. The template wording itself is in
+// data/teaching-templates.json and is not saved in backups.
+// Version 13 (beta 2.2, everyday recording) added `everyday` to a learner: { settings: { record, retentionDays }, events, utterances,
+// daily, firstSeen } (see js/everyday.js for what each row holds). The adult chooses in the backup section whether to include it
+// ("Include everyday use data", on by default); without it the field is missing. Restoring brings the raw rows and the daily
+// summaries, then rebuilds the summaries of the days that have raw events, so they always match. A backup older than 13 has no
+// `everyday` field and restores as before; restoring one over an existing learner leaves that learner's everyday data alone.
+// Version 14 (beta 2.3, prompt ladders) changed the targets inside `teaching`: instead of a numeric prompt level and "most help" ceiling a
+// target has `ladderMode` ("default" | "custom"), `stepSize` ("standard" | "medium" | "fine"), `customLadder` ([{ type, opacity }], most help
+// first) and `pos` (its starting step; the ladder's length means Independent), and every new trial has `promptStep`, `startStep`, `help`
+// and `startHelp` next to the old `promptLevel` / `startLevel`. A target without `ladderVersion: 1` (every backup of version 11 to 13) is
+// converted on the way in by cleanTarget (js/teaching.js: old level 7 -> Model 100%, 6 -> 75%, 5 -> 50%, 4 and 3 and 2 -> 25%, 1 and 0 ->
+// Independent, the change logged in its history as "ladder update"); an old trial keeps its data and gets a computed `help`.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -38,6 +62,10 @@ import { h, openOverlay, askConfirm } from "./ui.js";
 import {
   listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES,
 } from "./profiles.js";
+import { exportTeaching } from "./teachdata.js";
+import { exportEveryday, cleanEverydayBackup } from "./everyday.js";
+import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
+import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE } from "./migrate.js";
@@ -45,7 +73,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 10;
+export const BACKUP_VERSION = 14;
 
 // ---------------------------------------------------------------- saving
 
@@ -59,11 +87,15 @@ function blobToDataUrl(blob) {
 }
 
 // Build the backup object for these learners (profile objects from profiles.js).
-export async function buildBackup(learners) {
+// options.teaching (default true): include the learners' targets, sessions, trials and reward pictures.
+// options.everyday (default true): include the learners' everyday use data (word events, utterances, daily summaries, settings).
+// options.templates (default false; the "all learners" button): include this device's edited teaching templates, if there are any.
+export async function buildBackup(learners, { teaching = true, templates = false, everyday = true } = {}) {
   const out = [];
   for (const p of learners) {
     const photos = [];
     for (const ph of await getPhotoBlobs(p.id)) {
+      if (!teaching && ph.key.startsWith("reward:")) continue;      // reward pictures belong to the teaching data
       photos.push({ key: ph.key, dataUrl: await blobToDataUrl(ph.blob) });
     }
     out.push({
@@ -82,10 +114,13 @@ export async function buildBackup(learners) {
       keyboardButton: p.keyboardButton,
       speakLetters: p.speakLetters,
       wordDial: p.wordDial,
+      ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
+      ...(everyday ? { everyday: await exportEveryday(p.id) } : {}),
       photos,
     });
   }
-  return { app: BACKUP_APP, version: BACKUP_VERSION, exportedAt: new Date().toISOString(), learners: out };
+  return { app: BACKUP_APP, version: BACKUP_VERSION, exportedAt: new Date().toISOString(),
+    ...(templates && hasEdits() ? { teachingTemplates: getEdits() } : {}), learners: out };
 }
 
 // "Sam R." -> "Sam-R"; used inside the file name.
@@ -114,8 +149,8 @@ export function downloadBackup(backup, filename) {
 }
 
 // Save one learner, or everyone. Returns the file name used.
-export async function saveBackup(learners, label) {
-  const backup = await buildBackup(learners);
+export async function saveBackup(learners, label, options) {
+  const backup = await buildBackup(learners, options);
   const filename = backupFilename(label);
   downloadBackup(backup, filename);
   return filename;
@@ -142,7 +177,8 @@ function validCellKey(key) {
   return +m[1] < g.rows && +m[2] < g.cols;
 }
 // A photo key: a built-in word ("w:want"), a cell, or the learner's own critter picture.
-const validKey = (key) => typeof key === "string" && (key === "critter" || WORD_KEY.test(key) || validCellKey(key));
+const REWARD_KEY = /^reward:[A-Za-z0-9_:,@.|-]{1,80}$/;
+const validKey = (key) => typeof key === "string" && (key === "critter" || WORD_KEY.test(key) || REWARD_KEY.test(key) || validCellKey(key));
 
 // Turn base64 text into a Blob (works offline, no network).
 function dataUrlToBlob(dataUrl) {
@@ -269,7 +305,20 @@ function cleanLearner(raw, index, version) {
     const key = version < 2 ? photoKey(ph.key) : ph.key;
     photos.push({ key: moved[key] || key, blob });          // a moved word's photo moves with it
   }
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, photos };
+  // Teaching data exists only in version 11+ backups made with "Include teaching data". Anything unreadable is skipped.
+  let teaching = null;
+  if (version >= 11 && isObj(raw.teaching)) {
+    const list = (v, max) => (Array.isArray(v) ? v.slice(0, max) : []);
+    const seen = new Set();
+    teaching = {
+      targets: list(raw.teaching.targets, 500).map((t) => cleanTarget(t, "")).filter((t) => t && !seen.has(t.wordId) && seen.add(t.wordId)),
+      sessions: list(raw.teaching.sessions, 20000).map((s) => cleanSession(s, "")).filter(Boolean),
+      trials: list(raw.teaching.trials, 400000).map((t) => cleanTrial(t, "")).filter(Boolean),
+    };
+  }
+  // Everyday use data exists only in version 13+ backups made with "Include everyday use data".
+  const everyday = version >= 13 ? cleanEverydayBackup(raw.everyday) : null;
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, everyday, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
@@ -284,7 +333,8 @@ export async function readBackupFile(file) {
   if (!Array.isArray(data.learners) || data.learners.length === 0) bad("This backup does not contain any learners.");
   if (data.learners.length > 50) bad("This backup has too many learners.");
   const learners = data.learners.map((l, i) => cleanLearner(l, i, data.version));
-  return { exportedAt: typeof data.exportedAt === "string" ? data.exportedAt : "", learners };
+  const teachingTemplates = data.version >= 12 ? cleanEdits(data.teachingTemplates) : {};
+  return { exportedAt: typeof data.exportedAt === "string" ? data.exportedAt : "", learners, teachingTemplates };
 }
 
 // ---------------------------------------------------------------- restoring
@@ -342,9 +392,11 @@ export async function restoreFromFile(file) {
       addBtn.addEventListener("click", () => { choice[i] = "add"; paint(); });
       if (repBtn) repBtn.addEventListener("click", () => { choice[i] = match.id; paint(); });
       const photoText = l.photos.length === 1 ? "1 photo" : `${l.photos.length} photos`;
+      const tc = (l.teaching ? `, teaching data (${l.teaching.targets.length} targets, ${l.teaching.sessions.length} sessions)` : "") +
+        (l.everyday ? `, everyday use data (${l.everyday.events.length} words, ${l.everyday.utterances.length} messages)` : "");
       return h("div", { class: "restore-row" },
         h("div", { class: "restore-name", text: l.name }),
-        h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}` }),
+        h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}${tc}` }),
         h("div", { class: "seg-row" }, addBtn, repBtn),
         match ? null : h("div", { class: "muted", text: "No learner with this name here yet." }));
     });
@@ -361,6 +413,15 @@ export async function restoreFromFile(file) {
           `Replace ${names}? Their current settings, changes and photos on this iPad will be erased and swapped for the ones in the backup.`,
           "Replace");
         if (!sure) return;
+      }
+      // Edited teaching templates in the file (a backup of all learners): ask before replacing this device's own edits.
+      const tn = Object.keys(backup.teachingTemplates).length;
+      let templatesNote = "";
+      if (tn) {
+        const ok = !hasEdits() || await askConfirm(
+          `This backup has ${tn} edited teaching ${tn === 1 ? "template" : "templates"}. This device already has ${editedCount()} of its own. ` +
+          "Replace this device's edited templates with the ones in the backup? (Cancel keeps this device's; the learners are still restored.)", "Replace");
+        if (ok) { replaceEdits(backup.teachingTemplates); templatesNote = " Edited teaching templates restored."; }
       }
       const taken = listProfiles().map((p) => p.name);
       let added = 0, replaced = 0;
@@ -379,7 +440,7 @@ export async function restoreFromFile(file) {
       const parts = [];
       if (added) parts.push(added === 1 ? "1 learner added" : `${added} learners added`);
       if (replaced) parts.push(replaced === 1 ? "1 learner replaced" : `${replaced} learners replaced`);
-      finish("Restored: " + parts.join(", ") + ".");
+      finish("Restored: " + parts.join(", ") + "." + templatesNote);
     }
 
     const total = backup.learners.reduce((n, l) => n + l.photos.length, 0);
@@ -389,6 +450,7 @@ export async function restoreFromFile(file) {
       h("p", { class: "muted",
         text: `This file has ${backup.learners.length === 1 ? "1 learner" : backup.learners.length + " learners"} ` +
           `and ${total === 1 ? "1 photo" : total + " photos"}` +
+          (Object.keys(backup.teachingTemplates).length ? " and edited teaching templates" : "") +
           (when && !isNaN(when) ? `, saved ${when.toLocaleDateString()}.` : ".") +
           " Choose what to do with each learner. Nothing changes until you tap Restore." }),
       h("div", { class: "restore-list" }, rows),
