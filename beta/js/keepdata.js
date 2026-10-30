@@ -55,17 +55,21 @@ export function homeScreenSteps() {
 const SHOWN_KEY = "keepdata.noticeShown";          // the date the notice last showed (YYYY-MM-DD)
 const today = () => new Date().toISOString().slice(0, 10);
 
-/** At start: show the notice when needed, at most once a day. busy(): true while it must not show (e.g. a teaching session). */
+/** At start: show the notice when needed, at most once a day. busy(): true while it must not show (e.g. a teaching session).
+ *  Returns a promise that resolves once the notice is closed (or at once when it does not show). */
 export function maybeShowNotice({ busy } = {}) {
-  if (!needsHomeScreen()) return;
-  if (store.load(SHOWN_KEY, "") === today()) return;
-  if (busy && busy()) return;
+  if (!needsHomeScreen()) return Promise.resolve();
+  if (store.load(SHOWN_KEY, "") === today()) return Promise.resolve();
+  if (busy && busy()) return Promise.resolve();
   store.save(SHOWN_KEY, today());
+  let resolveClosed;
+  const closed = new Promise((r) => { resolveClosed = r; });
   const o = openOverlay([
     h("h2", { text: "Keep VOICE's words and data safe" }),
     h("p", { text: "VOICE is open in a Safari tab. Safari may erase a website's saved data (learners, button changes, photos, teaching data) after about a week without use. VOICE opened from the Home Screen is kept." }),
     homeScreenSteps(),
     h("div", { class: "btn-row" },
-      h("button", { class: "btn primary", type: "button", text: "Got it", onclick: () => o.close() })),
+      h("button", { class: "btn primary", type: "button", text: "Got it", onclick: () => { o.close(); resolveClosed(); } })),
   ], { sheetClass: "small keep-notice" });
+  return closed;            // resolves when the adult taps "Got it" (so the next hint waits its turn)
 }

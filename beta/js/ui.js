@@ -74,3 +74,14 @@ export function askConfirm(message, okLabel = "OK") {
     ], { sheetClass: "small" });
   });
 }
+
+// A short note at the bottom of the screen for adults (no sound; it ignores touches and goes away by itself).
+// Used by the camera button and the adult-menu circle. Uses the .cam-toast look in styles.css.
+let toastTimer = null;
+export function toast(text, ms = 2600) {
+  document.querySelectorAll(".cam-toast").forEach((t) => t.remove());
+  const t = h("div", { class: "cam-toast", role: "status", text });
+  document.body.append(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.remove(), ms);
+}

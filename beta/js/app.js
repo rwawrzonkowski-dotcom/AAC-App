@@ -28,6 +28,7 @@ import { openAdultMenu } from "./adult.js";
 import { askConfirm } from "./ui.js";
 import { showSetup } from "./setup.js";
 import { requestPersistence, maybeShowNotice } from "./keepdata.js";
+import { initAdultHint, maybeShowCoach } from "./adulthint.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
 import {
@@ -174,6 +175,14 @@ function renderAll() {
   updateBar();
   teach.onRender();                     // a running teaching trial re-draws its prompt on the new page
   scenes.onRender(!state.editing && !state.choosing);     // the scene strip shows on the child's board only
+  if (hintsReady) setTimeout(coachCheck, 600);           // "This is the adult menu", once per learner (js/adulthint.js)
+}
+
+// The adult-menu pointer shows once per learner, only on the child's plain board (no menu, session, edit, Model mode or keyboard open).
+let hintsReady = false;      // set after the start-up Home Screen notice (if any) is closed, so the two never stack
+function coachCheck() {
+  maybeShowCoach(getCurrent().id, () => !state.editing && !state.choosing && !state.modeling && !teach.isActive()
+    && !(typing && typing.isOpen()) && !document.querySelector(".overlay"));
 }
 
 // The Words, Forms and ABC buttons in the top bar. They only change themselves (and the message text's width):
@@ -802,6 +811,7 @@ async function start() {
 
   fitLabelsOnResize($("board"));
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
+  initAdultHint($("adult-hold"));          // a quick tap shows "Adults: hold 3 seconds to open the menu"
   attachHold($("model-end"), HOLD_TO_END_MODEL_MS, stopModeling);
   $("edit-done").addEventListener("click", stopEditing);
   $("edit-words").addEventListener("click", toggleWords);   // so an adult can edit the Words pages too
@@ -818,7 +828,12 @@ async function start() {
   document.addEventListener("contextmenu", (e) => e.preventDefault());
 
   // iPad / iPhone in a Safari tab: once a day, explain how to add VOICE to the Home Screen so Safari can't erase its data (js/keepdata.js).
-  setTimeout(() => maybeShowNotice({ busy: () => teach.isActive() || !!document.querySelector(".overlay") }), 1500);
+  // Then (Beta 3.5) the once-per-learner "This is the adult menu" pointer.
+  setTimeout(async () => {
+    await maybeShowNotice({ busy: () => teach.isActive() || !!document.querySelector(".overlay") });
+    hintsReady = true;
+    coachCheck();
+  }, 1500);
 }
 
 start();

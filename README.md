@@ -219,6 +219,7 @@
 - Several learners can share one iPad. Each has their own stage, hidden/shown
   words, renamed words, photos, added words and voice settings.
 - Works offline. Nothing is sent anywhere: no accounts, no ads, no tracking.
+- **Adult menu (beta 3.5):** the small gear circle at the top-left of the strip under the message bar. Hold it 3 seconds (a quick tap only shows a reminder). Adult menu > About > "Show where the adult menu is" points it out again.
 - **Keep your data (beta 3.4): add VOICE to the Home Screen on an iPad.** Safari may erase a website's saved data after about a week without use; the Home Screen app is kept. The Home Screen copy has its own storage, so back up in Safari first and restore in the new icon. Adult menu > Backup shows whether this device's data is protected. Updates download only the files that changed.
   Photos and settings stay on the device.
 

@@ -1,4 +1,4 @@
-// The camera button in the top bar (Beta 3.1, fixed in 3.2): HOLD it for 1 second (a ring fills, like the session controls), then TAP it once to
+// The camera button at the right end of the context strip (Beta 3.1, fixed in 3.2, moved in 3.3): HOLD it for 1 second (a ring fills, like the session controls), then TAP it once to
 // open the iPad's camera (or the photo picker where there is no camera). A quick tap on its own does nothing, so a child can't open the camera.
 // Then the quick scene sheet opens (js/sceneadult.js, "quick" mode): everything found, including remembered things, is pre-ticked; "Use now" saves
 // the scene named "Scene <date, time>" and shows it on the strip. No passcode (an adult decision). During a teaching session the button is dimmed
@@ -8,20 +8,12 @@
 // the end of a long press (our first try) is silently blocked on iPad, although desktop browsers allow it. So after the 1-second hold the button is
 // "armed" for 5 seconds: the real (invisible) photo control is laid exactly over the button, the button turns green and reads "Tap", and the next
 // tap lands on that control, which Safari always allows.
-import { h } from "./ui.js";
+import { h, toast } from "./ui.js";
 import { startFromPhoto } from "./sceneadult.js";
 
 export const HOLD_MS = 1000;
 export const ARMED_MS = 5000;
 
-let toastTimer = null;
-function toast(text) {
-  document.querySelectorAll(".cam-toast").forEach((t) => t.remove());
-  const t = h("div", { class: "cam-toast", role: "status", text });
-  document.body.append(t);
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.remove(), 2600);
-}
 
 // button: the #camera-btn element; blocked(): a message (string) when the camera must not open now, else null.
 export function initCameraButton({ button, blocked }) {

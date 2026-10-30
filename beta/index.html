@@ -44,7 +44,9 @@
          During a teaching session js/session.js puts the adult's small controls here (Phase 2).
          While a scene is active js/scenestrip.js puts the scene's buttons here (Phase 3, beta 3.0). -->
     <section id="context-strip">
-      <button id="adult-hold" type="button" aria-label="Adult menu (press and hold)">
+      <button id="adult-hold" type="button" aria-label="Adult menu (press and hold 3 seconds)">
+        <!-- Beta 3.5: a muted gear so adults can tell what the circle is (js/adulthint.js) -->
+        <svg class="adult-gear" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(45 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(90 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(135 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(180 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(225 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(270 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(315 12 12)"/></g><circle cx="12" cy="12" r="5.2" fill="none" stroke="currentColor" stroke-width="3.4"/></svg>
         <svg class="hold-ring" viewBox="0 0 40 40" aria-hidden="true">
           <circle class="ring-bg" cx="20" cy="20" r="16"/>
           <circle class="ring-fg" cx="20" cy="20" r="16" pathLength="100"/>

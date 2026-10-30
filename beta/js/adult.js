@@ -10,6 +10,7 @@ import { setVoiceSettings, speak, speakSequence, stopSpeech, pauseMs, PAUSE_MS }
 import { createVoicePicker, newPickerState } from "./voicepicker.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
 import { dataSafetyLine, needsHomeScreen, homeScreenSteps } from "./keepdata.js";
+import { showCoach } from "./adulthint.js";
 import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
@@ -493,7 +494,10 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("section", { class: "panel", id: "sec-about" },
       h("h2", { text: "About" }),
       h("div", { class: "btn-row left" },
-        h("button", { type: "button", class: "btn", id: "about-open", text: "About VOICE", onclick: () => openAbout() })));
+        h("button", { type: "button", class: "btn", id: "about-open", text: "About VOICE", onclick: () => openAbout() }),
+        // Beta 3.5: for new staff or parents, point at the adult-menu circle again (js/adulthint.js)
+        h("button", { type: "button", class: "btn", id: "show-adult-hint", text: "Show where the adult menu is",
+          onclick: () => { close(); setTimeout(() => showCoach(), 250); } })));
   }
 
   refresh();
