@@ -27,6 +27,7 @@ import { requestAdultAccess } from "./lock.js";
 import { openAdultMenu } from "./adult.js";
 import { askConfirm } from "./ui.js";
 import { showSetup } from "./setup.js";
+import { requestPersistence, maybeShowNotice } from "./keepdata.js";
 import { openCellEditor } from "./editor.js";
 import { logWord } from "./events.js";
 import {
@@ -728,6 +729,7 @@ async function start() {
     navigator.serviceWorker.register("sw.js", { scope: "./" }).catch((e) =>
       console.warn("Offline support unavailable:", e));
   }
+  requestPersistence();     // ask the browser to keep VOICE's data (quiet; js/keepdata.js)
   state.board = await loadBoardData();
   await loadForms();
   await initProfiles(state.board);
@@ -814,6 +816,9 @@ async function start() {
   document.addEventListener("gesturestart", (e) => e.preventDefault());
   document.addEventListener("touchmove", (e) => { if (!e.target.closest(".sheet")) e.preventDefault(); }, { passive: false });
   document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  // iPad / iPhone in a Safari tab: once a day, explain how to add VOICE to the Home Screen so Safari can't erase its data (js/keepdata.js).
+  setTimeout(() => maybeShowNotice({ busy: () => teach.isActive() || !!document.querySelector(".overlay") }), 1500);
 }
 
 start();

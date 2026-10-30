@@ -9,6 +9,7 @@ import {
 import { setVoiceSettings, speak, speakSequence, stopSpeech, pauseMs, PAUSE_MS } from "./speech.js";
 import { createVoicePicker, newPickerState } from "./voicepicker.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
+import { dataSafetyLine, needsHomeScreen, homeScreenSteps } from "./keepdata.js";
 import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
@@ -465,6 +466,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const opts = () => ({ teaching: teachBox.checked, everyday: everydayBox.checked, scenes: scenesBox.checked });
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
+      // Beta 3.4: how safe this device's data is (js/keepdata.js), with the Home Screen steps when VOICE is in a Safari tab.
+      (() => { const d = dataSafetyLine(); return h("p", { class: "keep-line " + (d.ok === true ? "ok" : d.ok === false ? "warn" : ""), text: d.text }); })(),
+      needsHomeScreen() ? homeScreenSteps() : null,
       h("p", { class: "muted", text:
         "A backup is one file with a learner's board size, stage, button changes, pages you made, voice and speech pacing, keyboard settings, touch settings, Model prompt settings and photos. " +
         "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included. A backup of all learners also keeps the teaching templates you edited." }),

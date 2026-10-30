@@ -1023,3 +1023,11 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 .my-things { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
 .thing-row .sl-thumb { width: 72px; height: 72px; }
 .sheet.adult .btn[hidden], .sheet.adult [hidden] { display: none !important; }
+
+/* ---------- Keeping this device's data (Beta 3.4, js/keepdata.js) ---------- */
+.keep-line { padding: 1vmin 1.4vmin; border-radius: 1vmin; background: #f1f5f9; border: 0.2vmin solid #cbd5e1; font-weight: 700; }
+.keep-line.ok { background: #e7f6ec; border-color: #86c79d; color: #14532d; }
+.keep-line.warn { background: #fff4dc; border-color: #e0a83a; color: #7a4b00; }
+.keep-steps { margin: 0.6em 0 0.8em 1.2em; padding: 0; line-height: 1.45; }
+.keep-steps li { margin: 0.3em 0; }
+.keep-notice h2 { margin-top: 0; }
