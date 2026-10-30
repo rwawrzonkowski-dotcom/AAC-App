@@ -93,6 +93,19 @@ button { font: inherit; touch-action: manipulation; }
 #abc-btn { flex: 0 0 11vw; background: #ffe08a; }
 #app.typing #abc-btn { background: #f5b82e; box-shadow: inset 0 0 0 0.5vmin #7a4b00; }   /* ABC is "on" while typing; tap it to close */
 #app.typing #words-btn, #app.typing #forms-btn { opacity: 0.38; }                            /* not usable behind the keyboard */
+/* Camera button (Beta 3.1): same size as ABC, right next to it; only the message text shrinks. Hold 1 second (the ring fills), then lift. */
+#camera-btn { flex: 0 0 11vw; background: #cfe3f7; position: relative; display: flex; align-items: center; justify-content: center; padding: 0; touch-action: none; color: #1e3a5f; }
+#camera-btn[hidden] { display: none; }
+#camera-btn .cam-icon { width: 5.4vmin; height: 5.4vmin; }
+#camera-btn .cam-ring { position: absolute; inset: 8%; width: 84%; height: 84%; pointer-events: none; }
+#camera-btn .hold-ring .ring-bg { stroke: rgba(30, 58, 95, 0.14); }
+#camera-btn .hold-ring .ring-fg { stroke: #1e3a5f; stroke-width: 3.4; }
+#camera-btn.ready { background: #8fd8a8; }                      /* the ring is full: lift your finger to open the camera */
+#camera-btn.ready .ring-fg { stroke-dashoffset: 0; opacity: 1; }
+#camera-btn.off { opacity: 0.38; }                              /* a teaching session is running */
+#app.typing #camera-btn { opacity: 0.38; }
+.cam-toast { position: fixed; left: 50%; bottom: 8vmin; transform: translateX(-50%); z-index: 60; background: #1f2937; color: #fff; font-weight: 800; font-size: 3vmin;
+  padding: 1.4vmin 3vmin; border-radius: 2vmin; box-shadow: 0 0.6vmin 2vmin rgba(0,0,0,.35); pointer-events: none; }
 .bar-btn[hidden] { display: none; }
 .bar-btn:disabled { opacity: 0.38; cursor: default; }
 .bar-btn:disabled.pressed { filter: none; }
@@ -949,6 +962,7 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 .se-box.on { border: 3px solid #14b8a6; background: rgba(20, 184, 166, 0.14); }
 .se-photo.drawing { touch-action: none; cursor: crosshair; outline: 3px solid #1d4ed8; }
 .se-photo.drawing .se-box { pointer-events: none; }
+.se-photo canvas { width: 100%; height: 100%; display: block; pointer-events: none; }
 .se-ghost { position: absolute; border: 3px solid #1d4ed8; background: rgba(29, 78, 216, 0.2); pointer-events: none; }
 .se-num { position: absolute; left: 2px; top: 2px; background: #0f766e; color: #fff; font-size: 13px; font-weight: 800; border-radius: 10px; min-width: 20px; text-align: center; padding: 0 4px; }
 .se-row .se-num, .se-row .se-pos { position: static; }
@@ -978,3 +992,20 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 .wp-none { width: 56px; height: 56px; }
 .sheet.adult progress { width: 100%; height: 18px; }
 .scene-offline { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+
+/* ---------- Beta 3.1: remembered things, place words and the quick scene sheet ---------- */
+.se-labelcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.se-labelcol .se-label { flex: none; }
+.se-remembered { color: #7c2d12; background: #ffedd5; border-radius: 6px; padding: 1px 8px; font-weight: 800; align-self: flex-start; }
+.se-row.remembered { background: #fff7ed; }
+.se-remlabel { display: flex; align-items: center; gap: 6px; font-size: 0.8em; font-weight: 700; color: #334155; flex: 0 0 auto; max-width: 9.5em; line-height: 1.15; }
+.se-remember { width: 24px; height: 24px; flex: 0 0 auto; }
+.se-row.place { cursor: pointer; }
+#scene-place-box h3 { margin-bottom: 2px; }
+.sheet.adult.scene.quick { width: min(980px, calc(94vw - 2 * var(--safe-x))); }
+.se-grid.quick .qhide { display: none; }
+.se-grid.quick { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.btn.big { min-height: 64px; font-size: 1.25em; padding: 12px 36px; }
+.my-things { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+.thing-row .sl-thumb { width: 72px; height: 72px; }
+.sheet.adult .btn[hidden], .sheet.adult [hidden] { display: none !important; }

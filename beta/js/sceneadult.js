@@ -6,58 +6,20 @@
 //     them, draws a box by hand around anything it missed, picks related words, names the scene, and saves.
 //
 // Nothing is saved until the adult taps Save. The photo and the recognition never leave this iPad.
+//
+// Beta 3.1 added to this file: words that fit the scene's NAME (js/scenewords.js placeWordsFor, data/scene-places.json); "Remember this"
+// (My things: js/things.js, js/thingsui.js) with remembered things found again in new photos; and the QUICK sheet (the camera button in the
+// top bar, js/camerabtn.js) which is this same editor in a compact mode: everything suggested is pre-ticked, "Use now" saves and shows the
+// scene, "More options" turns the compact sheet into the full editor.
 import { h, openOverlay, askText, askConfirm } from "./ui.js";
 import { getCurrent } from "./profiles.js";
 import * as store from "./scenedata.js";
 import * as strip from "./scenestrip.js";
 import { loadRecognizer, offlineReady, downloadForOffline, removeOfflineCopy } from "./recognize.js";
-import { loadSceneConfig, suggestionFor, relatedFor, genericRelated, searchWords, wordByLabel, wordInfo, minConfidence } from "./scenewords.js";
-
-const MAX_SIDE = 1280;            // the longest side of a stored photo, in pixels
-const CROP_PX = 256;              // the square picture on a strip button
-
-// ---------------------------------------------------------------- pictures
-function canvasBlob(canvas, quality = 0.85) {
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Could not make the picture"))), "image/jpeg", quality));
-}
-function loadImage(blob) {
-  return new Promise((resolve, reject) => {
-    const u = URL.createObjectURL(blob);
-    const im = new Image();
-    im.onload = () => { URL.revokeObjectURL(u); resolve(im); };
-    im.onerror = () => { URL.revokeObjectURL(u); reject(new Error("That picture could not be opened.")); };
-    im.src = u;
-  });
-}
-// Draw a chosen photo (a File or Blob) onto a canvas no bigger than MAX_SIDE. The camera's rotation is applied.
-async function photoToCanvas(file) {
-  let src, w, h2;
-  try {
-    src = await createImageBitmap(file, { imageOrientation: "from-image" });
-    w = src.width; h2 = src.height;
-  } catch (e) {
-    src = await loadImage(file);                 // (browsers without createImageBitmap options: the picture element applies the rotation)
-    w = src.naturalWidth; h2 = src.naturalHeight;
-  }
-  const k = Math.min(1, MAX_SIDE / Math.max(w, h2));
-  const c = document.createElement("canvas");
-  c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h2 * k));
-  c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
-  if (src.close) src.close();
-  return c;
-}
-// A square crop of the photo around a box (box in fractions 0..1), CROP_PX or `size` pixels wide.
-function cropCanvas(photo, box, size = CROP_PX) {
-  const W = photo.width, H = photo.height;
-  const bw = box.w * W, bh = box.h * H;
-  const side = Math.min(Math.max(bw, bh) * 1.06, Math.min(W, H));
-  const sx = Math.min(W - side, Math.max(0, box.x * W + bw / 2 - side / 2));
-  const sy = Math.min(H - side, Math.max(0, box.y * H + bh / 2 - side / 2));
-  const c = document.createElement("canvas");
-  c.width = c.height = size;
-  c.getContext("2d").drawImage(photo, sx, sy, side, side, 0, 0, size, size);
-  return c;
-}
+import { loadSceneConfig, suggestionFor, relatedFor, genericRelated, placeWordsFor, searchWords, wordByLabel, wordInfo, minConfidence } from "./scenewords.js";
+import { photoToCanvas, cropCanvas, canvasBlob, attachBoxDrawing } from "./photoboxes.js";
+import * as things from "./things.js";
+import { thingsSection } from "./thingsui.js";
 
 // ---------------------------------------------------------------- the Scenes section of the adult menu
 // ctx: { refresh() rebuilds the menu, closeMenu() }
@@ -114,6 +76,7 @@ export function scenesSection(ctx) {
       h("button", { type: "button", class: "btn primary", id: "scene-new", text: "New scene", onclick: () => newScene(changed) }),
       h("button", { type: "button", class: "btn", id: "scene-clear", text: "Clear scene", disabled: !active,
         onclick: async () => { await strip.setActive(null); ctx.refresh(); } })),
+    thingsSection(ctx),
     offlineBlock(ctx));
 }
 
@@ -165,11 +128,13 @@ function newScene(onDone) {
     input.value = "";
     if (!f) return;
     o.close();
-    await findThings(f, onDone);
+    await startFromPhoto(f, { onDone });
   });
 }
 
-async function findThings(file, onDone) {
+// A photo has been chosen (File or Blob): find things (and the learner's remembered things) in it, then open the editor.
+// quick: the compact camera-button sheet (everything suggested is pre-ticked); otherwise the full editor.
+export async function startFromPhoto(file, { quick = false, onDone = async () => {} } = {}) {
   const msg = h("p", { class: "confirm-text", id: "scene-finding", text: "Finding things…" });
   const bar = h("progress", { max: "100", value: "0", id: "scene-finding-progress" });
   let skipped = false, wake = () => {};
@@ -182,48 +147,84 @@ async function findThings(file, onDone) {
   try { canvas = await photoToCanvas(file); }
   catch (e) { o.close(); await askConfirm("That picture could not be opened. " + (e && e.message ? e.message : ""), "OK"); return; }
   await loadSceneConfig();
-  let found = [], note = "";
+  const cur = getCurrent();
+  const W = canvas.width, H = canvas.height;
+  let rows = [], note = "";
   const work = (async () => {
     msg.textContent = "Getting object recognition ready (the first time only)…";
     const det = await loadRecognizer((f) => { bar.value = Math.round(f * 100); });
     msg.textContent = "Finding things…";
     bar.removeAttribute("value");                 // an unfilled bar means "working"
-    return det.detect(canvas);
+    const found = await det.detect(canvas);
+    // The things the detector found, as boxes (fractions of the photo).
+    const detRows = [];
+    for (const d of found) {
+      if (d.score < minConfidence()) continue;
+      const x = Math.max(0, d.box.x / W), y = Math.max(0, d.box.y / H);
+      const box = { x, y, w: Math.min(1 - x, d.box.w / W), h: Math.min(1 - y, d.box.h / H) };
+      if (box.w < 0.03 || box.h < 0.03) continue;
+      const sug = suggestionFor(d.label);
+      const r = makeRow("object", sug, box, quick ? true : sug.checked, d.score);
+      r.cocoClass = d.label;                     // (the model's own name; kept for the place suggestions)
+      detRows.push(r);
+    }
+    // This learner's remembered things (My things): their fingerprints are compared with every part of this photo, using the two feature
+    // maps that came with the object search (no extra model run; js/things.js). Needs the recognizer and the mean (data/embed-mean.json).
+    let matches = [];
+    const mine = await things.listThings(cur.id);
+    if (mine.length) {
+      msg.textContent = "Looking for your remembered things…";
+      try {
+        await things.loadMean();
+        const maps = found.maps || (det.features ? await det.features(canvas) : null);
+        matches = things.findRemembered(maps, mine, detRows.map((r) => r.box), W, H, cur.matchStrictness);
+      } catch (e) { console.warn("Could not look for remembered things:", e); }
+    }
+    return { detRows, matches };
   })();
   work.catch(() => {});                           // (a failure is reported below; this stops a second, unhandled report)
   const gaveUp = new Promise((r) => { wake = r; });
   try {
     const res = await Promise.race([work, gaveUp]);
-    if (!skipped) found = res;
+    if (!skipped && res) rows = mergeRemembered(res.detRows, res.matches);
   } catch (e) {
     note = "Object recognition could not start (it needs to download once while online). You can still make the scene by drawing a box around each thing.";
     console.warn("Object recognition not available:", e);
   }
   o.close();
-  const rows = [];
-  for (const d of found) {
-    if (d.score < minConfidence()) continue;
-    const W = canvas.width, H = canvas.height;
-    const x = Math.max(0, d.box.x / W), y = Math.max(0, d.box.y / H);
-    const box = { x, y, w: Math.min(1 - x, d.box.w / W), h: Math.min(1 - y, d.box.h / H) };
-    if (box.w < 0.03 || box.h < 0.03) continue;
-    const sug = suggestionFor(d.label);
-    rows.push(makeRow("object", sug, box, sug.checked, d.score));
-  }
   rows.sort((a, b) => (a.box.x + a.box.w / 2) - (b.box.x + b.box.w / 2));       // left to right in the photo
-  await openEditor({ canvas, rows, note: note || (skipped ? "" : found.length ? "" : "Nothing was found. Draw a box around each thing instead."), onDone });
+  await openEditor({ canvas, rows, quick, note: note || (skipped ? "" : rows.length ? "" : "Nothing was found. Draw a box around each thing instead."), onDone });
+}
+
+// A remembered match outranks the generic recognition label on the same spot ("Remembered: Sam's dinosaur" instead of "teddy bear"):
+// detected rows that cover the same region are replaced by the remembered row (which keeps the detector's box when it was found there).
+const centerIn = (a, b) => { const cx = b.x + b.w / 2, cy = b.y + b.h / 2; return cx >= a.x && cx <= a.x + a.w && cy >= a.y && cy <= a.y + a.h; };
+const sameRegion = (a, b) => things.iou(a, b) > 0.25 || centerIn(a, b) || centerIn(b, a);
+export function mergeRemembered(detRows, matches) {
+  let rows = detRows.slice();
+  for (const m of matches) {
+    const hit = rows.filter((r) => !r.remembered && sameRegion(m.box, r.box));
+    const box = hit.length ? (m.detectedIndex >= 0 && detRows[m.detectedIndex] && hit.includes(detRows[m.detectedIndex]) ? detRows[m.detectedIndex].box : hit[0].box) : m.box;
+    rows = rows.filter((r) => !hit.includes(r));
+    const row = makeRow("object", { label: m.thing.label, spoken: m.thing.spoken, wordId: m.thing.wordId }, box, true, m.score);
+    row.remembered = { thingId: m.thing.id, score: m.score, replaced: hit.map((r) => r.label) };
+    row.remember = false;                         // ("Teach again" with this photo is off unless the adult ticks it)
+    rows.push(row);
+  }
+  return rows;
 }
 
 async function editScene(scene, onDone) {
   await loadSceneConfig();
   const canvas = await photoToCanvas(scene.photo);
-  const rows = scene.items.map((it) => ({ id: it.id, kind: it.kind, label: it.label, spoken: it.spoken, wordId: it.wordId || null, box: it.box || null, on: true, crop: it.crop || null, from: [] }));
+  const rows = scene.items.map((it) => ({ id: it.id, kind: it.kind, label: it.label, spoken: it.spoken, wordId: it.wordId || null, box: it.box || null, on: true, crop: it.crop || null, from: [], remember: false }));
   await openEditor({ scene, canvas, rows, onDone });
 }
 
 let rowSeq = 0;
+// remember: the "Remember this" box (My things). Things from the detector start OFF; things drawn by hand start ON (set where they are drawn).
 function makeRow(kind, sug, box, on, score) {
-  return { id: "r" + Date.now().toString(36) + (rowSeq++), kind, label: sug.label, spoken: sug.spoken || sug.label, wordId: sug.wordId || null, box: box || null, on, crop: null, from: [], score };
+  return { id: "r" + Date.now().toString(36) + (rowSeq++), kind, label: sug.label, spoken: sug.spoken || sug.label, wordId: sug.wordId || null, box: box || null, on, crop: null, from: [], score, remember: false };
 }
 const keyOf = (r) => r.wordId || "t:" + r.label.toLowerCase();
 
@@ -240,6 +241,7 @@ async function openEditor(init) {
     objects: init.rows.filter((r) => r.kind === "object"),
     related: new Map(init.rows.filter((r) => r.kind === "related").map((r) => [keyOf(r), r])),
     order: [], drawing: false, dirty: false, thumbs: new Map(),
+    quick: !!init.quick,            // the compact camera-button sheet; "More options" turns it into the full editor
   };
   // The strip order starts as the ticked rows: a new scene's suggestions left to right in the photo, or an existing scene's saved order.
   st.order = init.rows.filter((r) => r.on).map((r) => r.id);
@@ -264,7 +266,7 @@ async function openEditor(init) {
 
   // ----- layout
   const nameInput = h("input", { type: "text", class: "text-input", id: "scene-name", maxlength: 40, placeholder: "Kitchen, Park, Bath…", value: st.name });
-  nameInput.addEventListener("input", () => { st.dirty = true; });
+  nameInput.addEventListener("input", () => { st.dirty = true; drawRelatedOnly(); });     // (renaming updates the place words at once)
   const note = h("p", { class: "muted", id: "scene-note", text: init.note || "" });
   const photoEl = h("div", { class: "se-photo", id: "scene-photo" });
   photoEl.style.aspectRatio = W + " / " + H;
@@ -276,6 +278,10 @@ async function openEditor(init) {
     st.drawing = !st.drawing; paintDraw(); } });
   const hint = h("p", { class: "muted", id: "scene-draw-hint", hidden: true, text: "Drag a rectangle around the thing, then choose its word." });
   const objectsEl = h("div", { class: "se-list", id: "scene-objects" });
+  const placeHead = h("h3", { id: "scene-place-head" });
+  const placeNote = h("p", { class: "muted", id: "scene-place-note" });
+  const placeEl = h("div", { class: "se-list", id: "scene-place" });
+  const placeBox = h("div", { class: "qhide", id: "scene-place-box", hidden: true }, placeHead, placeNote, placeEl);
   const relatedEl = h("div", { class: "se-list", id: "scene-related" });
   const orderEl = h("div", { class: "se-list", id: "scene-order" });
   const msg = h("p", { class: "backup-status", id: "scene-msg", role: "status" });
@@ -283,24 +289,47 @@ async function openEditor(init) {
   photoToggle.checked = st.showPhoto;
   photoToggle.addEventListener("change", () => { st.showPhoto = photoToggle.checked; st.dirty = true; });
 
-  const body = h("div", { class: "se-grid" },
+  const nameBlock = h("div", { class: "qhide", id: "scene-name-block" },
+    h("label", { class: "field-label", for: "scene-name", text: "Scene name" }), nameInput, note);
+  const body = h("div", { class: "se-grid" + (st.quick ? " quick" : ""), id: "scene-grid" },
     h("div", { class: "se-left" }, photoEl, drawBtn, hint),
     h("div", { class: "se-right" },
-      h("label", { class: "field-label", for: "scene-name", text: "Scene name" }), nameInput, note,
-      h("h3", { text: "Things in the photo" }), h("p", { class: "muted", text: "Tick the ones to keep. You can change a name: it is what the button says." }), objectsEl,
-      h("h3", { text: "Related words" }), h("p", { class: "muted", text: "Words that go with these things. Tick any you want as buttons (they use the board’s pictures)." }), relatedEl,
-      h("div", { class: "btn-row left" }, h("button", { type: "button", class: "btn", id: "scene-add-related", text: "Add another word…", onclick: async () => {
-        const w = await pickWord("Add a related word");
-        if (!w) return;
-        addRelated(w, true); drawAll();
-      } })),
-      h("h3", { text: "Order on the strip" }), h("p", { class: "muted", text: "The strip always shows these left to right in this order. Keep it the same so the child can learn where each one is." }), orderEl,
-      h("label", { class: "check-line", for: "scene-showphoto" }, photoToggle, h("span", { text: "Show a photo button on the strip (opens the photo; tapping a thing in it speaks)" })),
+      nameBlock,
+      st.quick && init.note ? h("p", { class: "muted", id: "scene-quick-note", text: init.note }) : null,
+      h("h3", { text: "Things in the photo" }),
+      h("p", { class: "muted", id: "scene-things-help", text: st.quick ? "Everything found is ticked. Untick what you do not want, or draw a box around anything it missed."
+        : "Tick the ones to keep. You can change a name: it is what the button says." }), objectsEl,
+      placeBox,
+      h("div", { class: "qhide" },
+        h("h3", { text: "Related words" }), h("p", { class: "muted", text: "Words that go with these things. Tick any you want as buttons (they use the board’s pictures)." }), relatedEl,
+        h("div", { class: "btn-row left" }, h("button", { type: "button", class: "btn", id: "scene-add-related", text: "Add another word…", onclick: async () => {
+          const w = await pickWord("Add a related word");
+          if (!w) return;
+          addRelated(w, true); drawAll();
+        } })),
+        h("h3", { text: "Order on the strip" }), h("p", { class: "muted", text: "The strip always shows these left to right in this order. Keep it the same so the child can learn where each one is." }), orderEl,
+        h("label", { class: "check-line", for: "scene-showphoto" }, photoToggle, h("span", { text: "Show a photo button on the strip (opens the photo; tapping a thing in it speaks)" }))),
       msg));
   const saveBtn = h("button", { type: "button", class: "btn primary", id: "scene-save", text: "Save scene" });
   const cancelBtn = h("button", { type: "button", class: "btn", id: "scene-cancel", text: "Cancel" });
-  const o = openOverlay([h("h2", { text: scene ? "Edit scene" : "New scene" }), body,
-    h("div", { class: "btn-row se-actions" }, cancelBtn, saveBtn)], { sheetClass: "scene" });
+  const useBtn = h("button", { type: "button", class: "btn primary big", id: "scene-use-now", text: "Use now" });
+  const moreBtn = h("button", { type: "button", class: "btn", id: "scene-more-options", text: "More options" });
+  const title = h("h2", { id: "scene-title" });
+  const o = openOverlay([title, body,
+    h("div", { class: "btn-row se-actions" }, cancelBtn, moreBtn, useBtn, saveBtn)], { sheetClass: "scene" + (st.quick ? " quick" : "") });
+  // Compact (quick) mode shows only the photo, the things and Use now / More options; the full editor shows everything and Save scene.
+  const paintMode = () => {
+    body.classList.toggle("quick", st.quick);
+    o.sheet.classList.toggle("quick", st.quick);
+    title.textContent = st.quick ? "New scene from this photo" : scene ? "Edit scene" : "New scene";
+    useBtn.hidden = moreBtn.hidden = !st.quick;
+    saveBtn.hidden = st.quick;
+    drawBtn.textContent = st.drawing ? "Done drawing" : st.quick ? "Add a thing by hand" : "Add a thing by hand: drag a box on the photo";
+    const help = $q("scene-things-help");
+    if (help) help.textContent = st.quick ? "Everything found is ticked. Untick what you do not want, or draw a box around anything it missed."
+      : "Tick the ones to keep. You can change a name: it is what the button says.";
+  };
+  function $q(id) { return o.sheet.querySelector("#" + id); }
 
   const finish = () => { URL.revokeObjectURL(photoUrl); o.close(); };
 
@@ -312,13 +341,34 @@ async function openEditor(init) {
     if (on && !r.on) setOn(r, true);
     return r;
   }
+  // Words for the place (Beta 3.1): the scene's name ("Park", "Bath time"...) and the things found in the photo ("oven", "toilet", "bed")
+  // suggest the words of a place from data/scene-places.json. They are checkboxes, unchecked; a ticked one stays in the list even if the
+  // name is changed later. Returns the rows (shared with the related words: one row per word).
+  function placeRows() {
+    const objKeys = new Set(st.objects.filter((r) => r.on).map(keyOf));
+    const names = st.objects.flatMap((r) => [r.cocoClass, r.wordId, r.label]).filter(Boolean);
+    const hit = placeWordsFor(nameInput.value, names);
+    const out = new Map();
+    for (const w of hit.words) {
+      const info = wordInfo(w.wordId);
+      if (!info || objKeys.has(info.id)) continue;
+      let r = st.related.get(info.id);
+      if (!r) { r = makeRow("related", { label: info.label, spoken: info.spoken, wordId: info.id }, null, false); st.related.set(info.id, r); }
+      r.placeWhy = w.why;
+      out.set(info.id, r);
+    }
+    for (const [k, r] of st.related) if (r.on && r.placeWhy && !out.has(k)) out.set(k, r);       // (stays once ticked)
+    st.placeInfo = hit;
+    return [...out.values()];
+  }
   // Suggestions for the objects that are ticked, plus the generic ones. Rows stay in the list once they are ticked.
   function relatedRows() {
     const out = new Map();
+    const placeKeys = new Set(placeRows().map(keyOf));
     const objKeys = new Set(st.objects.filter((r) => r.on).map(keyOf));
     const offer = (e, from) => {
       const k = e.wordId || "t:" + e.label.toLowerCase();
-      if (objKeys.has(k)) return;
+      if (objKeys.has(k) || placeKeys.has(k)) return;
       let r = st.related.get(k);
       if (!r) { r = makeRow("related", e, null, false); st.related.set(k, r); }
       r.from = r.from || [];
@@ -327,7 +377,7 @@ async function openEditor(init) {
     };
     for (const o2 of st.objects.filter((r) => r.on)) for (const e of relatedFor(o2)) offer(e, o2.label);
     for (const e of genericRelated()) offer(e, "any scene");
-    for (const [k, r] of st.related) if (r.on && !out.has(k)) { r.from = r.from || []; out.set(k, r); }
+    for (const [k, r] of st.related) if (r.on && !out.has(k) && !placeKeys.has(k)) { r.from = r.from || []; out.set(k, r); }
     return [...out.values()];
   }
 
@@ -353,13 +403,22 @@ async function openEditor(init) {
         drawOrder(); drawBoxes();
       });
       label.addEventListener("change", () => { if (!label.value.trim()) { label.value = r.label = r.label || "thing"; } drawRelatedOnly(); });
-      return h("div", { class: "se-row" + (r.on ? "" : " off"), "data-row": r.id }, cb, h("span", { class: "se-num", text: String(i + 1) }),
-        h("img", { class: "se-thumb", alt: "", src: thumb(r) }), label,
-        r.wordId ? h("span", { class: "se-tag", title: "This word is on the board", text: "board word" }) : null);
+      // "Remember this": teach VOICE this thing (My things). For a thing that is already remembered it reads "Teach again" (adds this photo to it).
+      const rem = h("input", { type: "checkbox", class: "se-remember", "aria-label": (r.remembered ? "Teach again: " : "Remember ") + r.label, checked: !!r.remember,
+        onchange: () => { r.remember = rem.checked; st.dirty = true; } });
+      return h("div", { class: "se-row" + (r.on ? "" : " off") + (r.remembered ? " remembered" : ""), "data-row": r.id }, cb, h("span", { class: "se-num", text: String(i + 1) }),
+        h("img", { class: "se-thumb", alt: "", src: thumb(r) }),
+        h("div", { class: "se-labelcol" },
+          r.remembered ? h("small", { class: "se-remembered", text: "Remembered: " + r.label }) : null,
+          label),
+        r.wordId && !r.remembered ? h("span", { class: "se-tag", title: "This word is on the board", text: "board word" }) : null,
+        h("label", { class: "se-remlabel", title: "VOICE learns this thing from your photo, on this iPad only" }, rem,
+          h("span", { text: r.remembered ? "Teach again" : "Remember this" })));
     }) : [h("p", { class: "muted", text: "Nothing yet. Use “Add a thing by hand”." })]));
   }
   function drawRelatedOnly() {
     const rows = relatedRows();
+    drawPlace();
     relatedEl.replaceChildren(...rows.map((r) => {
       const cb = h("input", { type: "checkbox", class: "se-check", "aria-label": "Add " + r.label, checked: r.on, onchange: () => { setOn(r, cb.checked); drawOrder(); } });
       const wi = r.wordId ? wordInfo(r.wordId) : null;
@@ -367,6 +426,23 @@ async function openEditor(init) {
         wi && wi.image ? h("img", { class: "se-thumb sym", alt: "", src: wi.image }) : h("span", { class: "se-thumb txt", text: r.label.charAt(0).toUpperCase() }),
         h("span", { class: "se-rel-label", text: r.label }),
         h("small", { class: "muted", text: r.from.length ? "for " + r.from.join(", ") : "" }));
+    }));
+  }
+  // The "Words for <name>" group.
+  function drawPlace() {
+    const rows = placeRows();
+    const name = nameInput.value.trim();
+    placeBox.hidden = !rows.length;
+    if (!rows.length) { placeEl.replaceChildren(); return; }
+    placeHead.textContent = "Words for " + (name || "this place");
+    const pl = (st.placeInfo && st.placeInfo.places || []).map((p) => p.name);
+    placeNote.textContent = "Words that go with " + (pl.length ? pl.join(" and ") : "this place") + ". Tick any you want as buttons; none are ticked for you.";
+    placeEl.replaceChildren(...rows.map((r) => {
+      const cb = h("input", { type: "checkbox", class: "se-check", "aria-label": "Add " + r.label, checked: r.on, onchange: () => { setOn(r, cb.checked); drawOrder(); } });
+      const wi = r.wordId ? wordInfo(r.wordId) : null;
+      return h("label", { class: "se-row rel place" + (r.on ? "" : " off"), "data-place": r.wordId || r.label }, cb,
+        wi && wi.image ? h("img", { class: "se-thumb sym", alt: "", src: wi.image }) : h("span", { class: "se-thumb txt", text: r.label.charAt(0).toUpperCase() }),
+        h("span", { class: "se-rel-label", text: r.label }));
     }));
   }
   function drawOrder() {
@@ -389,53 +465,62 @@ async function openEditor(init) {
   // ----- drawing a box by hand
   function paintDraw() {
     drawBtn.classList.toggle("primary", st.drawing);
-    drawBtn.textContent = st.drawing ? "Done drawing" : "Add a thing by hand: drag a box on the photo";
+    drawBtn.textContent = st.drawing ? "Done drawing" : st.quick ? "Add a thing by hand" : "Add a thing by hand: drag a box on the photo";
     hint.hidden = !st.drawing;
     photoEl.classList.toggle("drawing", st.drawing);
   }
-  let start = null, ghost = null;
-  const pt = (e) => {
-    const r = photoEl.getBoundingClientRect();
-    return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) };
-  };
-  photoEl.addEventListener("pointerdown", (e) => {
-    if (!st.drawing) return;
-    e.preventDefault();
-    start = pt(e);
-    ghost = h("div", { class: "se-ghost" });
-    boxesEl.append(ghost);
-    try { photoEl.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-  });
-  const rect = (a, b) => ({ x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) });
-  photoEl.addEventListener("pointermove", (e) => {
-    if (!start || !ghost) return;
-    const r = rect(start, pt(e));
-    Object.assign(ghost.style, { left: r.x * 100 + "%", top: r.y * 100 + "%", width: r.w * 100 + "%", height: r.h * 100 + "%" });
-  });
-  const endDraw = async (e) => {
-    if (!start) return;
-    const r = rect(start, pt(e));
-    start = null;
-    if (ghost) { ghost.remove(); ghost = null; }
-    if (r.w < 0.03 || r.h < 0.03) return;             // too small: a stray touch
+  attachBoxDrawing(photoEl, boxesEl, () => st.drawing, async (r) => {
     const w = await pickWord("What is this?");
     if (!w) return;
     const row = makeRow("object", { label: w.label, spoken: w.spoken || w.label, wordId: w.wordId || null }, r, true);
+    row.remember = true;                                  // a thing the adult points out by hand starts with "Remember this" ON
     st.objects.push(row); setOn(row, true); st.dirty = true;
     drawAll();
-  };
-  photoEl.addEventListener("pointerup", endDraw);
-  photoEl.addEventListener("pointercancel", () => { start = null; if (ghost) { ghost.remove(); ghost = null; } });
+  });
 
   // ----- save / cancel
   cancelBtn.addEventListener("click", async () => {
     if (st.dirty && !(await askConfirm("Leave without saving? Your changes to this scene will be lost.", "Leave"))) return;
     finish();
   });
-  saveBtn.addEventListener("click", async () => {
+  // The name a quick scene gets, e.g. "Scene Oct 29, 4:05 PM" (it can be renamed in Scenes).
+  const quickName = () => "Scene " + new Date().toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  // Teach VOICE the things whose "Remember this" box is ticked (My things). Never stops the scene from being saved.
+  async function rememberTicked() {
+    const wanted = st.objects.filter((r) => r.on && r.remember);
+    if (!wanted.length) return "";
+    try {
+      const det = await loadRecognizer();
+      if (!det || !det.features) return "VOICE could not remember the things (recognition is not available).";
+      await things.loadMean();
+      const mine = await things.listThings(cur.id);
+      let n = 0;
+      for (const r of wanted) {
+        const views = await things.fingerprintsFor(det, canvas, r.box);
+        const same = (t) => (r.remembered && t.id === r.remembered.thingId) || (!r.remembered && ((r.wordId && t.wordId === r.wordId) || t.label.toLowerCase() === r.label.toLowerCase()));
+        let t = mine.find(same);
+        if (t) things.addViews(t, views);
+        else {
+          if (mine.length >= things.MAX_THINGS) return "VOICE is already remembering " + things.MAX_THINGS + " things. Delete one in Scenes > My things first.";
+          t = { id: things.newThingId(), learnerId: cur.id, label: r.label, spoken: r.spoken || r.label, wordId: r.wordId || null, created: Date.now(), photos: 1,
+            picture: await canvasBlob(cropCanvas(canvas, r.box), 0.85), views };
+          mine.push(t);
+        }
+        await things.putThing(t);
+        n++;
+      }
+      return "";
+    } catch (e) {
+      console.warn("Could not remember the things:", e);
+      return "The scene was saved, but VOICE could not remember the things (" + (e && e.message ? e.message : "unknown problem") + ").";
+    }
+  }
+  // Save the scene. `quickSave`: the "Use now" button (auto name, ends by showing the scene on the strip, nothing else changes).
+  async function save(quickSave) {
+    const btn = quickSave ? useBtn : saveBtn;
     const ids = st.order.filter((id) => rowById(id));
     if (!ids.length) { msg.textContent = "Tick at least one thing or word first."; return; }
-    saveBtn.disabled = true;
+    btn.disabled = true;
     try {
       const items = [];
       for (const id of ids) {
@@ -449,22 +534,39 @@ async function openEditor(init) {
         items.push(it);
       }
       const all = await store.listScenes(cur.id);
-      if (!scene && all.length >= store.MAX_SCENES) { msg.textContent = "There are too many scenes. Delete one first."; saveBtn.disabled = false; return; }
+      if (!scene && all.length >= store.MAX_SCENES) { msg.textContent = "There are too many scenes. Delete one first."; btn.disabled = false; return; }
+      const typed = nameInput.value.trim();
       const rec = {
-        id: scene ? scene.id : store.newSceneId(), learnerId: cur.id, name: nameInput.value.trim() || `Scene ${all.length + 1}`,
+        id: scene ? scene.id : store.newSceneId(), learnerId: cur.id,
+        name: typed || (init.quick ? quickName() : `Scene ${all.length + 1}`),
         order: scene ? scene.order : all.length, created: scene ? scene.created : Date.now(), showPhoto: st.showPhoto,
         photo: photoBlob, photoW: W, photoH: H, items,
       };
       await store.putScene(rec);
+      const problem = await rememberTicked();
       finish();
       await strip.load();
       if (!scene) await strip.setActive(rec.id);        // a new scene starts showing on the strip right away
       await init.onDone();
+      if (problem) await notice(problem);
     } catch (e) {
       console.warn("Could not save the scene:", e);
       msg.textContent = "The scene could not be saved: " + (e && e.message ? e.message : "unknown problem");
-      saveBtn.disabled = false;
+      btn.disabled = false;
     }
+  }
+  saveBtn.addEventListener("click", () => save(false));
+  useBtn.addEventListener("click", () => save(true));
+  moreBtn.addEventListener("click", () => { st.quick = false; paintMode(); drawAll(); });
+  paintMode();
+  drawAll();
+}
+
+// A message with one OK button.
+function notice(text) {
+  return new Promise((resolve) => {
+    const o = openOverlay([h("p", { class: "confirm-text", id: "scene-notice", text }),
+      h("div", { class: "btn-row" }, h("button", { type: "button", class: "btn primary", id: "scene-notice-ok", text: "OK", onclick: () => { o.close(); resolve(); } }))], { sheetClass: "small" });
   });
 }
 

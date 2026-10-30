@@ -38,6 +38,8 @@
 //     wordsOnly: false,                 // reading stage: no pictures at all, only large words
 //     keyboardButton: "auto",           // the top-bar ABC (keyboard) button: "auto" (from stage 3),
 //                                       // "always" or "never"  (adult menu > Vocabulary stage)
+//     cameraButton: "auto",             // the top-bar camera button (hold 1 s: quick scene): "auto" (from stage 3), "always" or "never"
+//     matchStrictness: "medium",        // Scenes > My things: "low" | "medium" | "high" (js/things.js)
 //     speakLetters: false,              // the keyboard says each letter's name as it is typed
 //     wordDial: {                       // press-and-hold word-forms dial (beta; adult menu > Vocabulary stage)
 //       mode: "auto",                   //   "auto" (from stage 3), "always" or "never"
@@ -62,6 +64,7 @@ import { PAUSE_CHOICES } from "./speech.js";
 import { deleteTeaching, importTeaching } from "./teachdata.js";
 import { deleteEveryday, importEveryday } from "./everyday.js";
 import { deleteScenes, importScenes } from "./scenedata.js";
+import { deleteThings, importThings } from "./things.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
@@ -74,6 +77,8 @@ function newId() { return "p" + Date.now().toString(36) + Math.random().toString
 
 export const WORDS_BUTTON_CHOICES = ["auto", "always", "never"];
 export const KEYBOARD_BUTTON_CHOICES = ["auto", "always", "never"];   // same three choices for the ABC button
+export const CAMERA_BUTTON_CHOICES = ["auto", "always", "never"];     // and for the top-bar camera button (Beta 3.1)
+export const MATCH_STRICTNESS_CHOICES = ["low", "medium", "high"];    // how sure VOICE must be to suggest one of "My things" (Beta 3.1)
 
 export const WORD_DIAL_CHOICES = ["auto", "always", "never"];
 export const DEFAULT_WORD_DIAL = { mode: "auto", holdSec: 0.5, markers: true };
@@ -98,6 +103,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
     wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
+    cameraButton: "auto", matchStrictness: "medium",
     wordDial: { ...DEFAULT_WORD_DIAL },
   };
 }
@@ -182,6 +188,11 @@ export async function initProfiles(board) {
     p.speakLetters = p.speakLetters === true;
     p.voice = cleanVoice(p.voice);
   }
+  // Learners saved before the camera button and My things (Beta 3.1): camera button on Auto, match strictness Medium.
+  for (const p of profiles) {
+    if (!CAMERA_BUTTON_CHOICES.includes(p.cameraButton)) p.cameraButton = "auto";
+    if (!MATCH_STRICTNESS_CHOICES.includes(p.matchStrictness)) p.matchStrictness = "medium";
+  }
   // Learners saved before the word-forms dial: Auto (from stage 3), hold 0.5 s, markers on.
   for (const p of profiles) p.wordDial = cleanWordDial(p.wordDial);
   for (const p of profiles) await upgradeProfile(p, board);
@@ -242,6 +253,7 @@ export async function deleteProfile(id) {
   for (const store of ["targets", "sessions", "trials"]) await db.delPrefix(store, id + "|");   // teaching data goes too
   await deleteEveryday(id);                                                                         // and the everyday use data
   await deleteScenes(id);                                                                           // and the scenes with their photos (Beta 3.0)
+  await deleteThings(id);                                                                           // and "My things" (Beta 3.1)
   if (currentId === id) await switchTo(profiles[0].id);
   return true;
 }
@@ -307,6 +319,7 @@ export async function getPhotoBlobs(profileId) {
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
 // `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial,
+//            cameraButton, matchStrictness, things: null | { list },
 //            notices, teaching: null | { targets, sessions, trials }, everyday: null | { settings, events, utterances, daily, firstSeen },
 //            photos: [{ key, blob }] }
 // Returns the saved profile.
@@ -325,6 +338,7 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
     p.wordDial = cleanWordDial(data.wordDial);
     // Reward pictures belong to the teaching data: when the backup has none, the learner keeps theirs.
     if (!data.teaching) keepRewards = (await db.getPrefix("photos", p.id + "|reward:")).filter((r) => r.value && r.value.blob);
@@ -338,6 +352,7 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
     p.wordDial = cleanWordDial(data.wordDial);
     profiles.push(p);
   }
@@ -353,6 +368,7 @@ export async function importLearner(data, replaceId = null) {
     p.activeScene = (await importScenes(p.id, data.scenes)) || null;
     await saveProfile(p);
   }
+  if (data.things) await importThings(p.id, data.things);        // My things (Beta 3.1) from the backup replace this learner's
   if (p.id === currentId) await loadPhotos();   // the learner on screen changed: reload their photos
   return p;
 }

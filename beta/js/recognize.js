@@ -33,10 +33,13 @@ export const MODELS_CACHE = STORAGE_PREFIX + "aac-models-v1";
 const abs = (path) => new URL(path, document.baseURI).href;
 
 let detectorPromise = null;      // the loaded model, kept for the rest of this visit
+let grab = false, grabbed = null; // see "feature maps" below
 export const isLoaded = () => !!detectorPromise;
 // Test hook: a page can replace the detector (the tests use this to feed in made-up detections). Never used by the app itself.
-let override = null;
-export function setDetectorForTests(fn) { override = fn; }
+let override = null, overrideKeepsModel = false, overrideFeatures = null;
+// `real: true` keeps loading the real model (so the feature maps are real) and only replaces the detections;
+// `features` supplies made-up feature maps instead (the tests).
+export function setDetectorForTests(fn, { real = false, features = null } = {}) { override = fn; overrideKeepsModel = real; overrideFeatures = features; }
 
 function loadScript(path) {
   return new Promise((resolve, reject) => {
@@ -51,7 +54,11 @@ function loadScript(path) {
 // Load the libraries and the model. onProgress(fraction 0..1) is called while the model downloads. Resolves to a detector:
 // an object with detect(canvas) -> [{ label: "cup", score: 0.9, box: {x, y, w, h} }] (box in pixels of the canvas).
 export function loadRecognizer(onProgress = () => {}) {
-  if (override) return Promise.resolve({ detect: override });
+  if (override && !overrideKeepsModel) return Promise.resolve({ detect: override, features: overrideFeatures });
+  if (override) return loadReal(onProgress).then((r) => ({ ...r, detect: override }));
+  return loadReal(onProgress);
+}
+function loadReal(onProgress) {
   if (detectorPromise) return detectorPromise;
   detectorPromise = (async () => {
     if (!window.tf) await loadScript("vendor/tf.min.js");
@@ -67,6 +74,15 @@ export function loadRecognizer(onProgress = () => {}) {
     const url = abs(MODEL_DIR + "model.json");
     const od = new window.cocoSsd.ObjectDetection("lite_mobilenet_v2", url);   // (the name only matters when no url is given)
     od.model = await tf.loadGraphModel(url, { onProgress: (f) => onProgress(0.05 + 0.9 * f) });
+    // While `grab` is on, the model run that finds objects also hands back the two feature maps (extra outputs of the same run, so no extra work).
+    const model = od.model, run = model.executeAsync.bind(model);
+    model.executeAsync = async (x, outs) => {
+      if (!grab) return run(x, outs);
+      const r = await run(x, [...model.outputNodes, MAP_NODES.f16, MAP_NODES.f32]);
+      const t32 = r.pop(), t16 = r.pop();
+      try { grabbed = { f16: await mapOf(tf, t16), f32: await mapOf(tf, t32) }; } finally { t16.dispose(); t32.dispose(); }
+      return r;
+    };
     // Warm-up run, exactly as COCO-SSD's own load() does, so the first real photo is not slower.
     const zero = tf.zeros([1, 300, 300, 3], "int32");
     const out = await od.model.executeAsync(zero);
@@ -76,13 +92,55 @@ export function loadRecognizer(onProgress = () => {}) {
     onProgress(1);
     return {
       backend: tf.getBackend(),
-      // maxBoxes 20, minimum score 0.3 (the Scenes screen applies the adult-facing threshold from data/scene-words.json)
-      detect: async (canvas) => (await od.detect(canvas, 20, 0.3)).map((d) => ({
-        label: d.class, score: d.score, box: { x: d.bbox[0], y: d.bbox[1], w: d.bbox[2], h: d.bbox[3] } })),
+      // maxBoxes 20, minimum score 0.3 (the Scenes screen applies the adult-facing threshold from data/scene-words.json).
+      // The returned list also carries `.maps`: the two feature maps of the very same run (see above), for My things.
+      detect: async (canvas) => {
+        grab = true; grabbed = null;
+        let list;
+        try { list = await od.detect(canvas, 20, 0.3); } finally { grab = false; }
+        const out = list.map((d) => ({ label: d.class, score: d.score, box: { x: d.bbox[0], y: d.bbox[1], w: d.bbox[2], h: d.bbox[3] } }));
+        out.maps = grabbed;
+        grabbed = null;
+        return out;
+      },
+      // Only the feature maps (no object search): used when teaching, on mirrored and re-framed copies of a photo.
+      features: (canvas) => mapsOf(tf, od.model, canvas),
     };
   })();
   detectorPromise.catch(() => { detectorPromise = null; });      // a failed load can be tried again
   return detectorPromise;
+}
+
+// ---------------------------------------------------------------- feature maps for My things ("Teach VOICE your things")
+// Teach VOICE your things reuses the COCO-SSD model that is already bundled (no new download). Its first half is a MobileNetV2 "backbone" that turns
+// the picture into grids of numbers. We read two of its layers, both from the SAME run that finds the objects (so recognizing remembered things
+// costs no extra model run, which matters on a slow machine):
+//   f32  "Conv_1/Relu6": the backbone's last feature layer, a 10 x 10 grid with 1280 numbers per square (what the picture is of);
+//   f16  "expanded_conv_13/expand/Relu6": the layer before it, a 19 x 19 grid with 576 numbers per square (finer: colors, textures, parts).
+// js/things.js averages these grids over a box (global average pooling over the box), subtracts the average everyday picture and scales
+// the result to length 1 (L2 normalization): that list of numbers is the thing's "fingerprint".
+export const MAP_NODES = {
+  f16: "FeatureExtractor/MobilenetV2/expanded_conv_13/expand/Relu6",
+  f32: "FeatureExtractor/MobilenetV2/Conv_1/Relu6",
+};
+export const MAP_PX = 300;       // the model resizes every picture to 300 x 300 first
+
+async function mapOf(tf, t) {    // [1, h, w, c] tensor -> { data: Float32Array(h*w*c), h, w, c }
+  const data = await t.data();
+  const [, h, w, c] = t.shape;
+  return { data: Float32Array.from(data), h, w, c };
+}
+// The feature maps of a picture, without looking for objects (used when teaching, on a mirrored or re-framed copy of the photo).
+async function mapsOf(tf, model, canvas) {
+  const x = tf.tidy(() => tf.browser.fromPixels(canvas).expandDims(0));
+  let outs = null;
+  try {
+    outs = await model.executeAsync(x, [MAP_NODES.f16, MAP_NODES.f32]);
+    return { f16: await mapOf(tf, outs[0]), f32: await mapOf(tf, outs[1]) };
+  } finally {
+    x.dispose();
+    if (outs) outs.forEach((t) => t.dispose());
+  }
 }
 
 // ---------------------------------------------------------------- offline copy

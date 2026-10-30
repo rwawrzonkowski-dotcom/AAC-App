@@ -7,17 +7,17 @@
 //
 // Ten "stores" (like tables): "profiles" and "photos", plus (Phase 2, teaching) "targets", "sessions" and "trials", plus
 // (Phase 2, everyday recording) "events", "utterances", "daily" and "firstseen" (see js/everyday.js), plus (Phase 3, beta 3.0)
-// "scenes" (photo scenes, see js/scenedata.js).
+// "scenes" (photo scenes, see js/scenedata.js), plus (Beta 3.1) "things" (My things: the objects a learner's adults taught VOICE, see js/things.js).
 // Keys are strings. Teaching and everyday rows are keyed "<learnerId>|<id>" so one learner's rows are found (and deleted) by prefix.
 // Everyday event and utterance ids start with the time (zero-padded), so a time range of rows is also a key range.
 
 import { STORAGE_PREFIX } from "./channel.js";
 // Stable: "aac-board" (as always). Beta: "beta-aac-board" (its own database).
 const DB_NAME = STORAGE_PREFIX + "aac-board";
-// Version 2 added the three teaching stores, version 3 the four everyday stores, version 4 the "scenes" store. Opening an older database
+// Version 2 added the three teaching stores, version 3 the four everyday stores, version 4 the "scenes" store, version 5 the "things" store. Opening an older database
 // just creates the missing stores and keeps every row that is already there (nothing is ever deleted or rewritten by an upgrade).
-const DB_VERSION = 4;
-export const STORES = ["profiles", "photos", "targets", "sessions", "trials", "events", "utterances", "daily", "firstseen", "scenes"];
+const DB_VERSION = 5;
+export const STORES = ["profiles", "photos", "targets", "sessions", "trials", "events", "utterances", "daily", "firstseen", "scenes", "things"];
 
 const memory = Object.fromEntries(STORES.map((s) => [s, new Map()]));
 let dbPromise = null;

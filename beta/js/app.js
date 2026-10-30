@@ -42,6 +42,7 @@ import { loadForms, formsFor, dialFor, openFormsPopover } from "./forms.js";
 import { openDial } from "./dial.js";
 import * as everyday from "./everyday.js";
 import * as scenes from "./scenestrip.js";
+import { initCameraButton } from "./camerabtn.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 const HOLD_TO_END_MODEL_MS = 2000;
@@ -86,6 +87,8 @@ let typing = null;    // the keyboard / number pad overlay (js/keyboard.js), cre
 const wordsButtonShown = (p) => p.wordsButton === "always" || (p.wordsButton !== "never" && p.stage >= 3);
 // The ABC (keyboard) button works the same way, with its own setting: Auto = from stage 3.
 const keyboardButtonShown = (p) => p.keyboardButton === "always" || (p.keyboardButton !== "never" && p.stage >= 3);
+// The camera button (Beta 3.1, js/camerabtn.js) works the same way, with its own setting: Auto = from stage 3.
+const cameraButtonShown = (p) => p.cameraButton === "always" || (p.cameraButton !== "never" && p.stage >= 3);
 // True while the Words menu or any page opened from it is showing.
 const onWordsPage = (pageId = state.page) => {
   const profile = getCurrent();
@@ -180,6 +183,8 @@ function updateBar() {
   $("words-btn").hidden = !shown;
   $("forms-btn").hidden = !shown;
   $("abc-btn").hidden = !keyboardButtonShown(profile);
+  $("camera-btn").hidden = !cameraButtonShown(profile);
+  $("camera-btn").classList.toggle("off", teach.isActive());       // disabled during a teaching session
   $("words-btn").textContent = shown && onWordsPage() ? "Close" : "Words";
   const ew = $("edit-words");
   ew.hidden = !shown;
@@ -785,7 +790,11 @@ async function start() {
     }
     else if (el.id === "forms-btn") { if (!typing.isOpen()) openForms(); }
     else if (el.id === "abc-btn") toggleKeyboard();
-  }, "#message-text, .bar-btn");
+  }, "#message-text, .bar-btn:not(#camera-btn)");     // (the camera button has its own 1-second hold: js/camerabtn.js)
+  initCameraButton({
+    button: $("camera-btn"),
+    blocked: () => (teach.isActive() ? "Finish the session first" : null),   // no camera during a teaching session
+  });
 
   fitLabelsOnResize($("board"));
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);

@@ -54,6 +54,10 @@
 // js/scenedata.js). The adult chooses in the backup section whether to include it ("Include scenes and photos", on by default); without
 // it the field is missing. A backup older than 15 has no `scenes` field and restores as before; restoring one over an existing learner
 // leaves that learner's scenes alone.
+// Version 16 (beta 3.1) added `cameraButton` ("auto" | "always" | "never") and `matchStrictness` ("low" | "medium" | "high") to a learner, and
+// `things` ({ list: [ { id, label, spoken, wordId, created, photos, picture: dataUrl, views: [base64 of 1280 float32 numbers] } ] }: "My things",
+// see js/things.js), written with the scenes under "Include scenes and photos". Older backups get Auto / Medium and no things; restoring one
+// over an existing learner leaves that learner's things alone.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -65,11 +69,12 @@
 // until you move it yourself.
 import { h, openOverlay, askConfirm } from "./ui.js";
 import {
-  listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES,
+  listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES, CAMERA_BUTTON_CHOICES, MATCH_STRICTNESS_CHOICES,
 } from "./profiles.js";
 import { exportTeaching } from "./teachdata.js";
 import { exportEveryday, cleanEverydayBackup } from "./everyday.js";
 import { exportScenes, cleanScenesBackup } from "./scenedata.js";
+import { exportThings, cleanThingsBackup } from "./things.js";
 import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
@@ -79,7 +84,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 15;
+export const BACKUP_VERSION = 16;
 
 // ---------------------------------------------------------------- saving
 
@@ -120,10 +125,12 @@ export async function buildBackup(learners, { teaching = true, templates = false
       wordsOnly: p.wordsOnly,
       keyboardButton: p.keyboardButton,
       speakLetters: p.speakLetters,
+      cameraButton: p.cameraButton,
+      matchStrictness: p.matchStrictness,
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
       ...(everyday ? { everyday: await exportEveryday(p.id) } : {}),
-      ...(scenes ? { scenes: await exportScenes(p.id, p.activeScene) } : {}),
+      ...(scenes ? { scenes: await exportScenes(p.id, p.activeScene), things: await exportThings(p.id) } : {}),
       photos,
     });
   }
@@ -328,7 +335,11 @@ function cleanLearner(raw, index, version) {
   const everyday = version >= 13 ? cleanEverydayBackup(raw.everyday) : null;
   // Scenes exist only in version 15+ backups made with "Include scenes and photos".
   const scenes = version >= 15 ? cleanScenesBackup(raw.scenes) : null;
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, everyday, scenes, photos };
+  // Camera button, match strictness and My things exist only in version 16+ backups.
+  const cameraButton = version >= 16 && CAMERA_BUTTON_CHOICES.includes(raw.cameraButton) ? raw.cameraButton : "auto";
+  const matchStrictness = version >= 16 && MATCH_STRICTNESS_CHOICES.includes(raw.matchStrictness) ? raw.matchStrictness : "medium";
+  const things = version >= 16 ? cleanThingsBackup(raw.things) : null;
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
@@ -404,7 +415,8 @@ export async function restoreFromFile(file) {
       const photoText = l.photos.length === 1 ? "1 photo" : `${l.photos.length} photos`;
       const tc = (l.teaching ? `, teaching data (${l.teaching.targets.length} targets, ${l.teaching.sessions.length} sessions)` : "") +
         (l.everyday ? `, everyday use data (${l.everyday.events.length} words, ${l.everyday.utterances.length} messages)` : "") +
-        (l.scenes ? `, ${l.scenes.list.length === 1 ? "1 scene" : l.scenes.list.length + " scenes"} with photos` : "");
+        (l.scenes ? `, ${l.scenes.list.length === 1 ? "1 scene" : l.scenes.list.length + " scenes"} with photos` : "") +
+        (l.things && l.things.list.length ? `, ${l.things.list.length === 1 ? "1 remembered thing" : l.things.list.length + " remembered things"}` : "");
       return h("div", { class: "restore-row" },
         h("div", { class: "restore-name", text: l.name }),
         h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}${tc}` }),

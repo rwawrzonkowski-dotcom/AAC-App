@@ -196,6 +196,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       wordsButtonSetting(cur),
       wordDialSetting(cur),
       keyboardButtonSetting(cur),
+      cameraButtonSetting(cur),
       speakLettersSetting(cur),
       wordsOnlySetting(cur));
   }
@@ -261,6 +262,21 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("p", { class: "muted", text: "The ABC button in the top bar opens a large keyboard over the board. The child types a word; Space or Done " +
         "turns it into a chip and says it. The keyboard has a 123 key for the number pad (the Numbers page has its own Number pad button). " +
         "The keyboard uses ordinary taps: Hold to select and Ignore repeated taps do not apply to it." }));
+  }
+
+  // The top-bar camera button (Beta 3.1): hold 1 second to make a quick scene from a photo. Auto shows it from stage 3, like ABC.
+  function cameraButtonSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (cur.cameraButton === value ? " on" : ""), id: `cambtn-${value}`, text,
+      onclick: async () => { cur.cameraButton = value; await saveProfile(cur); onVocabChanged(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-camera-button" },
+      h("label", { text: "Show camera button" }),
+      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("p", { class: "muted", text: "The camera button in the top bar (next to ABC) makes a scene from a photo in one step: hold it for 1 second until the ring is full, " +
+        "then lift your finger. A quick tap does nothing. The camera opens, everything VOICE finds in the photo (and anything it remembers from My things) is ticked, " +
+        "and “Use now” puts the scene on the strip. It needs no passcode and is switched off while a teaching session runs. " +
+        "Scenes made this way are named with the date and time and can be renamed in Scenes." }));
   }
 
   // Say each letter's name as it is typed (default off).

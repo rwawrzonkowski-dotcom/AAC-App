@@ -11,8 +11,9 @@ let cfg = null;
 export async function loadSceneConfig() {
   if (cfg) return cfg;
   const get = async (p) => { try { const r = await fetch(p); return r.ok ? await r.json() : {}; } catch (e) { return {}; } };
-  const [words, related] = await Promise.all([get("data/scene-words.json"), get("data/scene-related.json")]);
-  cfg = { classes: words.classes || {}, minConfidence: typeof words.minConfidence === "number" ? words.minConfidence : 0.4, related };
+  const [words, related, places] = await Promise.all([get("data/scene-words.json"), get("data/scene-related.json"), get("data/scene-places.json")]);
+  cfg = { classes: words.classes || {}, minConfidence: typeof words.minConfidence === "number" ? words.minConfidence : 0.4, related,
+    places: places.places || {}, fromObjects: places.fromObjects || {} };
   return cfg;
 }
 export const minConfidence = () => (cfg ? cfg.minConfidence : 0.4);
@@ -83,6 +84,49 @@ export function relatedFor(item) {
   return list.map(relatedEntry);
 }
 export function genericRelated() { return ((cfg && cfg.related._generic) || []).map(relatedEntry); }
+
+// ---------- Words for the place (Beta 3.1) ----------
+// An adult names the scene "Park": words that go with a park (swing, slide, push...) are offered, unchecked, in a group called "Words for Park".
+// data/scene-places.json says which words go with which place. Two ways a place is found:
+//   1. a keyword of the place is one of the words in the scene's name (not case sensitive; "parks" matches "park"; "bath time" matches "bathtime");
+//   2. a thing in the photo implies it ("oven" or "dining table" -> Kitchen and food; "toilet" or "sink" -> Bath; "bed" -> Bedroom), even when the name has no keyword.
+// Several places can match; their words are merged and a word is listed once. Returns
+//   { places: [ { key, name, via } ], words: [ { wordId, why: ["Park and outside", ...] } ] }  (only words that are on the board)
+const norm = (t) => " " + String(t || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " ";
+export function placeWordsFor(sceneName, thingNames = []) {
+  const places = cfg ? cfg.places : {};
+  const text = norm(sceneName);
+  const compact = text.replace(/ /g, "");
+  const found = new Map();          // place key -> { key, name, via: Set }
+  const hit = (key, via) => {
+    const pl = places[key];
+    if (!pl) return;
+    if (!found.has(key)) found.set(key, { key, name: pl.name || key, via: new Set() });
+    found.get(key).via.add(via);
+  };
+  for (const [key, pl] of Object.entries(places)) {
+    for (const kw of pl.keywords || []) {
+      const k = norm(kw);
+      const kc = k.replace(/ /g, "");
+      // a whole word, with or without a plural s ("park", "parks"), or (for longer keywords such as "bath-time") run together ("bathtime")
+      if (text.includes(k) || text.includes(k.trimEnd() + "s ") || (kc.length >= 7 && compact.includes(kc))) hit(key, "name");
+    }
+  }
+  const objs = cfg ? cfg.fromObjects : {};
+  for (const nm of thingNames) {
+    const key = objs[String(nm).toLowerCase()];
+    if (key) hit(key, nm);
+  }
+  const words = new Map();
+  for (const f of found.values()) {
+    for (const id of places[f.key].words || []) {
+      if (!getBoardData().words[id]) continue;
+      if (!words.has(id)) words.set(id, []);
+      if (!words.get(id).includes(f.name)) words.get(id).push(f.name);
+    }
+  }
+  return { places: [...found.values()].map((f) => ({ key: f.key, name: f.name, via: [...f.via] })), words: [...words].map(([wordId, why]) => ({ wordId, why })) };
+}
 
 // ---------- Where is a word on the board? ----------
 // The cell to glow for a word, given the page the board is showing now. Nothing moves and nothing is opened:
