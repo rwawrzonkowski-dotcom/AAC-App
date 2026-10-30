@@ -83,6 +83,10 @@ button { font: inherit; touch-action: manipulation; }
 }
 #delete-btn { background: #ffd9a0; }
 #clear-btn  { background: #ffb3b3; }
+/* Beta 3.3: Delete and Clear are narrow (icon over a small word) so the message text has more room for words. */
+.small-btn { flex: 0 0 7vw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2vmin; padding: 0; line-height: 1; }
+.small-btn .bb-icon { font-size: min(3.4vw, 5.2dvh); font-weight: 700; }
+.small-btn .bb-text { font-size: min(1.5vw, 2.4dvh); font-weight: 800; }
 .bar-btn.pressed { filter: brightness(0.8); }
 /* Words and Forms sit between the message text and Delete. They take their room from the message
    text (which shrinks); the grid below is not affected. The word "Close" replaces "Words" while a
@@ -93,15 +97,21 @@ button { font: inherit; touch-action: manipulation; }
 #abc-btn { flex: 0 0 11vw; background: #ffe08a; }
 #app.typing #abc-btn { background: #f5b82e; box-shadow: inset 0 0 0 0.5vmin #7a4b00; }   /* ABC is "on" while typing; tap it to close */
 #app.typing #words-btn, #app.typing #forms-btn { opacity: 0.38; }                            /* not usable behind the keyboard */
-/* Camera button (Beta 3.1): same size as ABC, right next to it; only the message text shrinks. Hold 1 second (the ring fills), then lift. */
-#camera-btn { flex: 0 0 11vw; background: #cfe3f7; position: relative; display: flex; align-items: center; justify-content: center; padding: 0; touch-action: none; color: #1e3a5f; }
+/* Camera button (Beta 3.1; moved to the right end of the context strip in Beta 3.3 so the message text keeps its room).
+   Hold 1 second (the ring fills, the button turns green and reads "Tap"), let go, then tap. Nothing on the board moves. */
+#camera-btn { position: absolute; top: 0.5vmin; bottom: 0.5vmin; right: 0.6vmin; width: 9vw; border: 0.3vmin solid #6b7480; border-radius: var(--radius);
+  background: #cfe3f7; display: flex; align-items: center; justify-content: center; padding: 0; touch-action: none; color: #1e3a5f; cursor: pointer; z-index: 2; }
+#camera-btn.pressed { filter: brightness(0.8); }
+#app.in-session #camera-btn { display: none; }                   /* a teaching session owns the strip */
+/* with the camera showing, the scene buttons stop short of it */
+#app.cam-on.scene-on #scene-bar { right: calc(9vw + 1.2vmin); }
 #camera-btn[hidden] { display: none; }
-#camera-btn .cam-icon { width: 5.4vmin; height: 5.4vmin; }
+#camera-btn .cam-icon { width: 4.8vmin; height: 4.8vmin; }
 #camera-btn .cam-ring { position: absolute; inset: 8%; width: 84%; height: 84%; pointer-events: none; }
 #camera-btn .hold-ring .ring-bg { stroke: rgba(30, 58, 95, 0.14); }
 #camera-btn .hold-ring .ring-fg { stroke: #1e3a5f; stroke-width: 3.4; }
 #camera-btn.ready { background: #8fd8a8; }                      /* the ring is full: now TAP to open the camera */
-#camera-btn .cam-tap { display: none; position: absolute; bottom: 6%; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 2.2vmin; color: #14532d; }
+#camera-btn .cam-tap { display: none; position: absolute; bottom: 2%; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 2.2vmin; color: #14532d; }
 #camera-btn.armed .cam-tap { display: block; }
 /* While armed, the real photo control lies exactly over the camera button so the adult's tap lands on it (iPad Safari requires this). */
 .cam-input.cam-armed { position: fixed; opacity: 0.01; pointer-events: auto; z-index: 70; cursor: pointer; }

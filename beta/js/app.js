@@ -183,7 +183,9 @@ function updateBar() {
   $("words-btn").hidden = !shown;
   $("forms-btn").hidden = !shown;
   $("abc-btn").hidden = !keyboardButtonShown(profile);
-  $("camera-btn").hidden = !cameraButtonShown(profile);
+  const cam = cameraButtonShown(profile) && !state.editing && !state.choosing;    // in the context strip (Beta 3.3), child's board only
+  $("camera-btn").hidden = !cam;
+  $("app").classList.toggle("cam-on", cam);
   $("camera-btn").classList.toggle("off", teach.isActive());       // disabled during a teaching session
   $("words-btn").textContent = shown && onWordsPage() ? "Close" : "Words";
   const ew = $("edit-words");

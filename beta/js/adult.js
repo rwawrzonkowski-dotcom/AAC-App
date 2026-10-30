@@ -273,7 +273,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("div", { class: "field touch-setting", id: "setting-camera-button" },
       h("label", { text: "Show camera button" }),
       h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
-      h("p", { class: "muted", text: "The camera button in the top bar (next to ABC) makes a scene from a photo in one step: hold it for 1 second until it turns green and reads “Tap”, " +
+      h("p", { class: "muted", text: "The camera button at the right end of the strip under the message bar makes a scene from a photo in one step: hold it for 1 second until it turns green and reads “Tap”, " +
         "then tap it once. A quick tap on its own does nothing. The camera opens, everything VOICE finds in the photo (and anything it remembers from My things) is ticked, " +
         "and “Use now” puts the scene on the strip. It needs no passcode and is switched off while a teaching session runs. " +
         "Scenes made this way are named with the date and time and can be renamed in Scenes." }));
