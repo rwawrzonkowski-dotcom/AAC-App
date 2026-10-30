@@ -9,7 +9,7 @@
 | What | Where |
 |---|---|
 | Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 2.0" (promoted Oct 29) |
-| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 3.1": VOICE 2.0 plus **camera scenes** (Phase 3), **scene-name vocabulary**, **My things** and the **camera button** (see below) |
+| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 3.2": VOICE 2.0 plus **camera scenes** (Phase 3), **scene-name vocabulary**, **My things** and the **camera button** (see below) |
 | Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE) `stable-1.1` (VOICE 1.1) and `stable-2.0` (VOICE 2.0) |
 | Planning doc (source of truth for decisions) | https://claude.ai/code/artifact/133274d9-e0f2-4009-8086-6f527aebe3af |
 | Website plan | https://claude.ai/code/artifact/35106cdc-bca5-4b24-8e2f-c5c6a34d44d0 |
@@ -97,7 +97,7 @@ Scene switcher = 1-second hold on the scene name; session hides the strip, Model
   (rename, Teach again, delete) and holds **Match strictness** (Low / Medium / High, per learner). Included in backups (file version 16). On-device only. **No new download:** the fingerprints come from the COCO-SSD MobileNet
   backbone already bundled (nodes `Conv_1/Relu6` 10x10x1280 and `expanded_conv_13/expand/Relu6` 19x19x576, read from the same model run that finds objects). See README "Scenes (beta)".
 - **How well it works (honest):** on 7 real things in stereo photo pairs plus zoomed, small and dim versions (25 findable cases, 12 photos without the things) the default (Medium, 0.70) found 25/25 with 0 wrong suggestions; this set was also used to tune, so expect lower on real clinic photos. Thresholds Low 0.62 / Medium 0.70 / High 0.78. Not yet tried on real iPad photos of the learners' own things: do that in the pilot.
-- **Camera button.** Top bar, right of ABC (Auto = stage 3 and up, Always, Never per learner). Hold 1 second until the ring fills, then lift: the camera opens, a compact sheet shows everything found pre-ticked, "Use now" makes a scene named
+- **Camera button.** Top bar, right of ABC (Auto = stage 3 and up, Always, Never per learner). **Beta 3.2 fix:** hold 1 second until the button turns green and reads "Tap", let go, then tap it once within 5 seconds: the camera opens (iPad Safari blocks opening the camera straight from a long press, so the tap is required), a compact sheet shows everything found pre-ticked, "Use now" makes a scene named
   "Scene <Mon D, h:mm AM/PM>" and shows it on the strip; "More options" opens the full editor. No passcode. Dimmed during a teaching session.
 - **TODO (not built, decision C):** a broader 1,000-class recognizer (an ImageNet-style classifier so "toy", "swing", "slide" and more things are named automatically) could not be obtained offline from this environment
   (only the 80-class COCO-SSD graph is available; no new model can be downloaded here). Options when a network is available: bundle MobileNet-v2 ImageNet (about 14 MB) or an open-vocabulary CLIP-style model (much bigger); until then, My things
