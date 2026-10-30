@@ -16,10 +16,17 @@ import { getCurrent } from "./profiles.js";
 import * as store from "./scenedata.js";
 import * as strip from "./scenestrip.js";
 import { loadRecognizer, offlineReady, downloadForOffline, removeOfflineCopy } from "./recognize.js";
-import { loadSceneConfig, suggestionFor, relatedFor, genericRelated, placeWordsFor, searchWords, wordByLabel, wordInfo, minConfidence } from "./scenewords.js";
+import { loadSceneConfig, suggestionFor, relatedFor, genericRelated, placeWordsFor, searchWords, wordByLabel, wordInfo, minConfidence, placeTag } from "./scenewords.js";
 import { photoToCanvas, cropCanvas, canvasBlob, attachBoxDrawing } from "./photoboxes.js";
 import * as things from "./things.js";
 import { thingsSection } from "./thingsui.js";
+
+// Beta 3.6: the tag that says where a word lives ("On board · Animals", "Hidden for now", "Scene only"). See scenewords.js placeTag.
+const wordsBtnOn = () => { const p = getCurrent(); return p.wordsButton === "always" || (p.wordsButton !== "never" && p.stage >= 3); };
+function tagEl(wordId) {
+  const t = placeTag(wordId, { wordsButtonShown: wordsBtnOn() });
+  return h("span", { class: "se-tag " + t.cls, title: t.title, text: t.text });
+}
 
 // ---------------------------------------------------------------- the Scenes section of the adult menu
 // ctx: { refresh() rebuilds the menu, closeMenu() }
@@ -400,6 +407,8 @@ async function openEditor(init) {
         r.label = text; st.dirty = true;
         const w = text ? wordByLabel(text) : null;
         r.wordId = w ? w.id : null; r.spoken = w ? w.spoken : text;
+        const oldTag = label.parentNode && label.parentNode.querySelector(".se-tag");
+        if (oldTag) oldTag.replaceWith(tagEl(r.wordId));
         drawOrder(); drawBoxes();
       });
       label.addEventListener("change", () => { if (!label.value.trim()) { label.value = r.label = r.label || "thing"; } drawRelatedOnly(); });
@@ -410,8 +419,8 @@ async function openEditor(init) {
         h("img", { class: "se-thumb", alt: "", src: thumb(r) }),
         h("div", { class: "se-labelcol" },
           r.remembered ? h("small", { class: "se-remembered", text: "Remembered: " + r.label }) : null,
-          label),
-        r.wordId && !r.remembered ? h("span", { class: "se-tag", title: "This word is on the board", text: "board word" }) : null,
+          label,
+          r.remembered ? null : tagEl(r.wordId)),           // where the word lives, under its name (Beta 3.6)
         h("label", { class: "se-remlabel", title: "VOICE learns this thing from your photo, on this iPad only" }, rem,
           h("span", { text: r.remembered ? "Teach again" : "Remember this" })));
     }) : [h("p", { class: "muted", text: "Nothing yet. Use “Add a thing by hand”." })]));
@@ -425,7 +434,7 @@ async function openEditor(init) {
       return h("label", { class: "se-row rel" + (r.on ? "" : " off"), "data-rel": r.label }, cb,
         wi && wi.image ? h("img", { class: "se-thumb sym", alt: "", src: wi.image }) : h("span", { class: "se-thumb txt", text: r.label.charAt(0).toUpperCase() }),
         h("span", { class: "se-rel-label", text: r.label }),
-        h("small", { class: "muted", text: r.from.length ? "for " + r.from.join(", ") : "" }));
+        h("small", { class: "muted", text: r.from.length ? "for " + r.from.join(", ") : "" }), tagEl(r.wordId));
     }));
   }
   // The "Words for <name>" group.
@@ -442,7 +451,7 @@ async function openEditor(init) {
       const wi = r.wordId ? wordInfo(r.wordId) : null;
       return h("label", { class: "se-row rel place" + (r.on ? "" : " off"), "data-place": r.wordId || r.label }, cb,
         wi && wi.image ? h("img", { class: "se-thumb sym", alt: "", src: wi.image }) : h("span", { class: "se-thumb txt", text: r.label.charAt(0).toUpperCase() }),
-        h("span", { class: "se-rel-label", text: r.label }));
+        h("span", { class: "se-rel-label", text: r.label }), tagEl(r.wordId));
     }));
   }
   function drawOrder() {

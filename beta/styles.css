@@ -111,8 +111,13 @@ button { font: inherit; touch-action: manipulation; }
 #camera-btn .hold-ring .ring-bg { stroke: rgba(30, 58, 95, 0.14); }
 #camera-btn .hold-ring .ring-fg { stroke: #1e3a5f; stroke-width: 3.4; }
 #camera-btn.ready { background: #8fd8a8; }                      /* the ring is full: now TAP to open the camera */
-#camera-btn .cam-tap { display: none; position: absolute; bottom: 2%; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 2.2vmin; color: #14532d; }
-#camera-btn.armed .cam-tap { display: block; }
+/* Beta 3.6: armed = solid green with a big white TAP (the icon and ring step aside), gently pulsing so it is easy to see. */
+#camera-btn .cam-tap { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-weight: 900; font-size: min(4.2vmin, 3.6vw); letter-spacing: 0.08em; color: #fff; pointer-events: none; }
+#camera-btn.armed { background: #15803d; border-color: #0b4d24; animation: cam-armed-pulse 0.8s ease-in-out infinite alternate; }
+#camera-btn.armed .cam-icon, #camera-btn.armed .cam-ring { visibility: hidden; }
+@keyframes cam-armed-pulse { from { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.55); } to { box-shadow: 0 0 0 0.9vmin rgba(21, 128, 61, 0.25); } }
+#camera-btn { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+#camera-btn.armed .cam-tap { display: flex; }
 /* While armed, the real photo control lies exactly over the camera button so the adult's tap lands on it (iPad Safari requires this). */
 .cam-input.cam-armed { position: fixed; opacity: 0.01; pointer-events: auto; z-index: 70; cursor: pointer; }
 #camera-btn.ready .ring-fg { stroke-dashoffset: 0; opacity: 1; }
@@ -990,7 +995,12 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 .se-thumb.txt { display: flex; align-items: center; justify-content: center; font-weight: 800; color: #475569; }
 .se-check { width: 26px; height: 26px; flex: 0 0 auto; }
 .se-label { flex: 1; min-width: 0; padding: 8px 10px; }
-.se-tag { font-size: 0.7em; color: #0f766e; font-weight: 700; }
+/* Beta 3.6: where the word lives. Green: on the board now; amber: has a spot but is hidden at this stage; gray: scene strip only. */
+.se-labelcol .se-tag { align-self: flex-start; margin-top: 0.3em; }
+.se-tag { flex: 0 0 auto; font-size: 0.72em; font-weight: 800; padding: 0.3em 0.7em; border-radius: 999px; white-space: nowrap; max-width: 16em; overflow: hidden; text-overflow: ellipsis; }
+.se-tag.on { background: #dcfce7; color: #14532d; border: 1px solid #86c79d; }
+.se-tag.hidden { background: #fff4dc; color: #7a4b00; border: 1px solid #e0a83a; }
+.se-tag.only { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 .se-rel-label { flex: 1; font-weight: 700; }
 .se-mv { min-height: 40px; padding: 4px 12px; }
 .se-pos { width: 22px; font-weight: 800; color: #475569; }

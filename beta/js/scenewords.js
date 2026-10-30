@@ -172,3 +172,58 @@ export function spotFor(wordId, currentPageId, { wordsButtonShown }) {
   }
   return null;
 }
+
+// ---------- Where does a word live, for the tags on the Scenes screens (Beta 3.6)? ----------
+// { status: "visible" | "hidden" | "none", where: "" | "Animals" | "Animals › Pets" | "Words menu › ..." }
+//  visible: the child can reach the word now (the word and every folder button on the way are showing);
+//  hidden:  the word has a permanent spot on this board but it is not revealed yet at this stage (or a folder on the way is hidden);
+//  none:    the word is not on this board size at all.
+export function whereIs(wordId, { wordsButtonShown = true } = {}) {
+  if (!wordId) return { status: "none", where: "" };
+  const profile = getCurrent();
+  const model = buildModel(getBoardData(), profile.gridSize);
+  const cache = new Map();
+  const cellsOf = (pid) => {
+    if (!cache.has(pid)) cache.set(pid, resolvePage(getPage(model, profile, pid), profile, model));
+    return cache.get(pid);
+  };
+  const nameOf = (chain) => chain.slice(0, -1).reverse().map((pid) => {
+    const pg = getPage(model, profile, pid);
+    return pg && !pg.at ? "Words menu" : (pg && pg.name) || "";   // the Words menu opens from the top bar
+  }).filter(Boolean).join(" › ");
+  let hidden = null;
+  const found = [];
+  for (const pid of ["core", ...Object.keys(model.pages)]) {
+    const page = getPage(model, profile, pid);
+    if (!page || !page.items.some((it) => it.id === wordId)) continue;
+    const chain = pathToCore(model, profile, pid);
+    if (chain[chain.length - 1] !== "core") continue;
+    const word = cellsOf(pid).find((d) => d.kind === "word" && d.wordId === wordId);
+    if (!word) continue;
+    let ok = !!word.visible;
+    for (let i = 0; i < chain.length - 1 && ok; i++) {
+      const child = getPage(model, profile, chain[i]);
+      if (!child.at) { ok = wordsButtonShown; continue; }
+      ok = cellsOf(chain[i + 1]).some((d) => d.row === child.at.row && d.col === child.at.col && d.kind === "word" && d.visible);
+    }
+    if (ok) found.push(chain);
+    else if (!hidden || chain.length < hidden.length) hidden = chain;
+  }
+  if (found.length) {
+    found.sort((a, b) => a.length - b.length);
+    return { status: "visible", where: nameOf(found[0]) };
+  }
+  if (hidden) return { status: "hidden", where: nameOf(hidden) };
+  return { status: "none", where: "" };
+}
+
+// The tag for a scene row: { text, cls, title }.
+export function placeTag(wordId, opts) {
+  if (!wordId) return { text: "Scene only", cls: "only", title: "Not a board word: this button lives in the scene strip only" };
+  const w = whereIs(wordId, opts);
+  if (w.status === "visible") return { text: w.where ? "On board · " + w.where : "On board", cls: "on",
+    title: w.where ? "On the board inside " + w.where + ". Tapping it in the strip makes that folder button glow." : "On the main board. Tapping it in the strip makes its button glow." };
+  if (w.status === "hidden") return { text: w.where ? "Hidden for now · " + w.where : "Hidden for now", cls: "hidden",
+    title: "This word has a permanent spot on the board but is not revealed at this stage yet. It still works in the scene strip; nothing glows." };
+  return { text: "Not on this board", cls: "only", title: "This VOICE word is not on this board size. It works in the scene strip only." };
+}
