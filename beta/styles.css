@@ -100,7 +100,11 @@ button { font: inherit; touch-action: manipulation; }
 #camera-btn .cam-ring { position: absolute; inset: 8%; width: 84%; height: 84%; pointer-events: none; }
 #camera-btn .hold-ring .ring-bg { stroke: rgba(30, 58, 95, 0.14); }
 #camera-btn .hold-ring .ring-fg { stroke: #1e3a5f; stroke-width: 3.4; }
-#camera-btn.ready { background: #8fd8a8; }                      /* the ring is full: lift your finger to open the camera */
+#camera-btn.ready { background: #8fd8a8; }                      /* the ring is full: now TAP to open the camera */
+#camera-btn .cam-tap { display: none; position: absolute; bottom: 6%; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 2.2vmin; color: #14532d; }
+#camera-btn.armed .cam-tap { display: block; }
+/* While armed, the real photo control lies exactly over the camera button so the adult's tap lands on it (iPad Safari requires this). */
+.cam-input.cam-armed { position: fixed; opacity: 0.01; pointer-events: auto; z-index: 70; cursor: pointer; }
 #camera-btn.ready .ring-fg { stroke-dashoffset: 0; opacity: 1; }
 #camera-btn.off { opacity: 0.38; }                              /* a teaching session is running */
 #app.typing #camera-btn { opacity: 0.38; }
