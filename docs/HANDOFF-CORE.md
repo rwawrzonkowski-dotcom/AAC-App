@@ -27,6 +27,7 @@ Give this file to Claude at the start of the new project, together with `docs/VO
 | `lock.js` | 4-digit adult lock. Child-proofing only, not security. |
 | `speech.js` | Web Speech wrapper: queueing, rate/pitch, pauses between words, iOS quirks handled. |
 | `voicepicker.js` | Lists installed voices grouped by accent, including novelty voices. No bundled audio. |
+| `keepdata.js` | Asks the browser to keep the data, detects the Home Screen app, shows the once-a-day notice and the Backup status line. |
 | `devicetips.js` | Device detection, "Test the volume", tips for phones. |
 | `backup.js` + `migrate.js` | One-file JSON backup/restore with versioning (beta about v16) and upgrades of old saved data. Copy the *pattern*; change the stores. |
 | `reportcharts.js` | Inline-SVG charts, no library, prints crisply. |
@@ -67,8 +68,8 @@ Give this file to Claude at the start of the new project, together with `docs/VO
 ## 4. Hard-won lessons (do not relearn these)
 
 1. **iPad camera:** Safari opens the camera from a file input only on a real tap that lands on the input itself. Opening it from `input.click()` after a long press is silently blocked. Fix: arm the button, lay the input over it after the finger lifts, and let the next tap open it.
-2. **Storage eviction (fix before the pilot):** iPad Safari may erase a website's stored data after about 7 days without use, unless the app was added to the Home Screen. VOICE does not yet call `navigator.storage.persist()` or check that it is running from the Home Screen. The new app should do both from day one.
-3. **Service worker updates:** install with `cache: "reload"`. Each copy deletes only caches with its own prefix. Every version bump currently re-downloads every file (about 13 MB). Better: put content hashes in the file list and copy unchanged files from the old cache.
+2. **Storage eviction (fix before the pilot):** iPad Safari may erase a website's stored data after about 7 days without use, unless the app was added to the Home Screen. Fixed in VOICE Beta 3.4: `js/keepdata.js` calls `navigator.storage.persist()` and shows the Home Screen notice. Copy it on day one. Note that the Home Screen copy has separate storage from Safari.
+3. **Service worker updates:** install with `cache: "reload"`. Each copy deletes only caches with its own prefix. Since Beta 3.4, the file list carries content fingerprints (`file?v=hash`), and install copies unchanged files from the old cache, so only changed files download.
 4. **Board geometry:** test cell boxes before and after every layout change with Playwright (headless Chromium, 1180×820 and 1024×768, 45 and 84 grids). The test serves the parent folder with an `AAC-App` symlink.
 5. **Safe areas:** on iPhone, equal side margins keep buttons clear of the notch, and centering keeps the board still when the phone rotates.
 6. **Speech:** iPad voices differ by device. Show only installed voices, offer "Test the volume", and remember that the silent switch and Bluetooth routing affect output.
@@ -80,7 +81,7 @@ Give this file to Claude at the start of the new project, together with `docs/VO
 
 1. Make a new repo. Copy the "take as is" files plus `tools/`, `sw.js`, `CREDITS.md` and a minimal `index.html`/`styles.css`.
 2. Set a new storage prefix, DB name and cache prefix in `channel.js` and `sw.js` so the two apps never share data on one device.
-3. Add `navigator.storage.persist()` plus a "please add to Home Screen" check on first run.
+3. Copy `keepdata.js` (data persistence plus the Home Screen notice) and wire it into start-up.
 4. Copy the teaching engine (`teaching.js` and `teachdata.js` first, since they are pure and testable). Rename the target type and keep the fading and mastery rules.
 5. Copy `reportdata.js` and `reportcharts.js`, then build screens on top of them.
 6. Decide early whether the two apps should share learners (the same child on one iPad). If so, agree on one export format between them now.
