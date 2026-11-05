@@ -53,6 +53,18 @@
         </svg>
       </button>
       <div id="page-title"></div>
+      <!-- Beta 3.14: the Edit and Add-targets buttons live HERE, in the strip under the banner, not in the banner at the top of the
+           screen: on an iPhone or iPad the top edge belongs to the system's swipe-down gesture, which can swallow taps there. -->
+      <div id="edit-actions" class="strip-actions" hidden>
+        <button id="edit-words" type="button" hidden>Words</button>
+        <button id="edit-done" type="button">Done</button>
+      </div>
+      <div id="target-actions" class="strip-actions" hidden>
+        <button id="target-words" type="button" hidden>Words</button>
+        <!-- Add a sentence (Beta 3.12): take the last word off the sentence being built -->
+        <button id="target-undo" type="button" hidden>Undo</button>
+        <button id="target-done" type="button">Done</button>
+      </div>
       <!-- Camera (Beta 3.1; in the strip since Beta 3.3): hold 1 second, let go, then tap, to take a photo for a quick scene (js/camerabtn.js). A quick tap does nothing.
            Per-learner setting "Show camera button": Auto (from stage 3), Always or Never. -->
       <button id="camera-btn" type="button" hidden aria-label="Camera: hold for one second, then tap, to make a scene from a photo">
@@ -67,18 +79,12 @@
     <!-- Edit mode banner: covers the message bar only, so no cell moves -->
     <div id="edit-banner" hidden>
       <span>Editing &mdash; tap any button to change it</span>
-      <button id="edit-words" type="button" hidden>Words</button>
-      <button id="edit-done" type="button">Done</button>
     </div>
 
     <!-- Choose-targets banner (Teaching): covers the message bar only, so no cell moves -->
     <div id="target-banner" hidden>
       <span id="target-banner-text">Tap words to add as targets</span>
       <span id="target-count"></span>
-      <button id="target-words" type="button" hidden>Words</button>
-      <!-- Add a sentence (Beta 3.12): take the last word off the sentence being built -->
-      <button id="target-undo" type="button" hidden>Undo</button>
-      <button id="target-done" type="button">Done</button>
     </div>
   </main>
 

@@ -1,13 +1,14 @@
 # VOICE changelog and code map
 
-*Updated Nov 4, 2026, at VOICE Beta 3.13. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
+*Updated Nov 4, 2026, at VOICE Beta 3.14. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
 *Paths are inside `beta/` (the stable copy in the repo root has the same layout).*
 
 ## Part 1: Versions
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
-| **Beta 3.13** | Nov 5 | **Done always works:** banner Done/Undo (Add targets, Add a sentence, Edit) act on click with a finger-lift fallback; leaving the mode always completes; holding the gear also ends Add targets / Edit (a sentence of 2+ words is saved). | `app.js` (`onBannerTap`, `stopChoosing`, `openAdult`) |
+| **Beta 3.14** | Nov 5 | **Edit / Add-targets buttons moved into the context strip:** Words, Undo and Done sit under the banner instead of in it, away from the top edge where iOS swallows taps. | `index.html` (`#edit-actions`, `#target-actions`), `styles.css`, `app.js` (`renderAll`) |
+| Beta 3.13 | Nov 5 | **Done always works:** banner Done/Undo (Add targets, Add a sentence, Edit) act on click with a finger-lift fallback; leaving the mode always completes; holding the gear also ends Add targets / Edit (a sentence of 2+ words is saved). | `app.js` (`onBannerTap`, `stopChoosing`, `openAdult`) |
 | Beta 3.12 | Nov 5 | **Sentence targets:** chains of 2–6 words taught by total task, forward or backward chaining; each word has its own prompt step and fades on its own; forward chaining has the app model the rest, backward fills in the first words; optional "say the sentence" step; next-word suggestion at session end; task-analysis table in Reports; Sentence words CSV. Backup v18. | `teaching.js`, `session.js`, `teachui.js`, `teachdata.js`, `ladderui.js`, `app.js`, `reportdata.js`, `reportdoc.js`, `reportexport.js`, `reports.js`, `backup.js`, `index.html`, `styles.css` |
 | Beta 3.11 | Nov 4 | **End modeling button:** the top banner is only a label now (iPadOS delays or cancels touches at the top edge when opened from the Home Screen, so the banner hold could not finish). A large End modeling button at the right end of the message bar ends Model mode with two taps (tap, then "Tap again to end" within 3 s). | `index.html`, `styles.css`, `app.js` (`initModelEnd`, `placeModelEnd`, `resetModelEnd`) |
 | Beta 3.10 | Nov 4 | **Ending Model mode:** the whole purple banner is the 2-second hold target (with an invisible margin to reach 44 px), it sits above the scene photo and Forms popover, and the adult menu shows "Stop modeling" while modeling. | `index.html`, `styles.css`, `app.js` (`attachHold` on `#model-banner`, `isModeling` / `onStopModel`), `adult.js` |

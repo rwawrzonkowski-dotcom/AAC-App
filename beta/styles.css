@@ -1157,3 +1157,12 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 .ta-off { color: #94a3b8; font-style: italic; font-size: 0.85em; }
 .ta-phase td:first-child { color: #b45309; font-weight: 800; }
 .ta-note { font-size: 0.8em; }
+
+/* ---------- Edit / Add-targets buttons in the context strip (Beta 3.14) ----------
+   Away from the screen's top edge (the system's swipe-down gesture can swallow taps there). The strip is empty in these modes. */
+.strip-actions { position: absolute; top: 0.5vmin; bottom: 0.5vmin; right: 0.6vmin; display: flex; align-items: stretch; gap: 1vmin; z-index: 3; }
+.strip-actions[hidden] { display: none; }
+#edit-actions button, #target-actions button { height: auto; min-height: 0; margin: 0; padding: 0 3.6vmin; border: 0; border-radius: 1.2vmin; font-weight: 800;
+  font-size: min(3.2vmin, 4.6dvh); cursor: pointer; touch-action: manipulation; }
+#edit-actions #edit-done, #target-actions #target-done { background: #22c55e; color: #052e16; padding: 0 5vmin; }
+#app.editing #page-title, #app.choosing #page-title { position: absolute; left: 9vmin; right: 45%; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

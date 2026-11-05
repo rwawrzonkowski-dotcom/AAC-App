@@ -167,6 +167,8 @@ function renderAll() {
   $("model-banner").hidden = !state.modeling;
   placeModelEnd();
   $("target-banner").hidden = !state.choosing;
+  $("edit-actions").hidden = !state.editing;       // (the buttons sit in the strip under the banners, Beta 3.14)
+  $("target-actions").hidden = !state.choosing;
   $("app").classList.toggle("choosing", state.choosing);
   if (state.choosing) markTargets();
 
