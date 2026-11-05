@@ -107,6 +107,11 @@ Scene switcher = 1-second hold on the scene name; session hides the strip, Model
   (only the 80-class COCO-SSD graph is available; no new model can be downloaded here). Options when a network is available: bundle MobileNet-v2 ImageNet (about 14 MB) or an open-vocabulary CLIP-style model (much bigger); until then, My things
   and drawing a box by hand cover what COCO does not know.
 
+## Decided, not built yet
+
+- **Little-word strip (Nov 4):** a fixed row of about 8 little words (e.g. a, the, and, is, am, are, to, of) in permanent slots in the context strip, so each is one tap. **When a scene is active, the scene takes over the strip** (learners who rely on scenes are unlikely to use little words fluently). Details to settle before building: see the Nov 4 questions (word list, stage reveal, sessions, per-learner switch).
+- **Broader object recognition** stays planned for the native app (Apple Vision), not the web app.
+
 ## Next steps
 
 1. **Done Oct 27:** VOICE 1.1 promoted to clients. Pilot iPads update after the app is fully closed and reopened; the home-screen label changes to "VOICE" only if the icon is removed and re-added (save a backup first).
