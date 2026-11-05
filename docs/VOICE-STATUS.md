@@ -115,6 +115,7 @@ Scene switcher = 1-second hold on the scene name; session hides the strip, Model
 ## Decided, not built yet
 
 - **Broader object recognition** stays planned for the native app (Apple Vision), not the web app.
+- **Personal / matched voices: shelved (Nov 4) because of privacy concerns.** May revisit as a native-app feature. Options discussed: matching pitch and pace from a sample (on-device), Apple Personal Voice (native only; belongs to the recorder's Apple account), blending a child's own vocalizations with a donor voice (VocaliD-style; usually server-based), open-source cloning models (large; check licenses). Concerns: voice recordings are biometric data, consent, and a child's voice changes as they grow.
 
 ## Next steps
 
