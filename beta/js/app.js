@@ -721,18 +721,46 @@ function startChoosing(kind = "words") {
   if (state.page !== "core") state.page = "core";
   renderAll();
 }
-async function stopChoosing() {
+// Leaving always finishes (Beta 3.13): the mode is switched off first, whatever happens after (saving, the menu). reopenMenu = false
+// when the adult menu is being opened anyway (the gear was held while choosing).
+async function stopChoosing({ reopenMenu = true } = {}) {
+  if (!state.choosing) return;
   const kind = state.chooseKind, draft = state.chainDraft || [];
   state.choosing = false; state.chooseKind = "words"; state.chainDraft = [];
   if (state.page !== "core") state.page = "core";
-  renderAll();
-  if (kind === "sentence") {
-    if (draft.length >= 2) {
-      const t = await addChainTarget(getCurrent().id, draft);
-      toast(`Sentence target added: “${t.label}”. Choose its chaining in Targets > Settings.`, 4000);
-    } else if (draft.length === 1) toast("A sentence needs at least 2 words. Nothing was saved.", 3500);
-  }
-  showAdultMenu("sec-teaching");        // back to the Teaching section (the adult is already signed in)
+  try { renderAll(); } catch (e) { console.warn("Redraw after choosing targets:", e); }
+  try {
+    if (kind === "sentence") {
+      if (draft.length >= 2) {
+        const t = await addChainTarget(getCurrent().id, draft);
+        toast(`Sentence target added: “${t.label}”. Choose its chaining in Targets > Settings.`, 4000);
+      } else if (draft.length === 1) toast("A sentence needs at least 2 words. Nothing was saved.", 3500);
+    }
+  } catch (e) { console.warn("Could not save the sentence target:", e); toast("Sorry, the sentence could not be saved.", 3500); }
+  if (reopenMenu) showAdultMenu("sec-teaching");        // back to the Teaching section (the adult is already signed in)
+}
+
+// The Done / Undo buttons on the Edit and Add-targets banners (Beta 3.13). The ordinary click does it; if iPad Safari lifts the finger on
+// the button but sends no click, the lift does it a moment later instead. (Acting on the lift straight away would let that same tap's
+// click land on whatever opens under the finger, such as the adult menu's Close button.)
+const BANNER_FALLBACK_MS = 350;
+function onBannerTap(btn, fn) {
+  let downOn = false, last = 0, pending = null;
+  const fire = () => {
+    clearTimeout(pending); pending = null;
+    const now = Date.now();
+    if (now - last < 600 || btn.disabled) return;
+    last = now; fn();
+  };
+  btn.addEventListener("pointerdown", () => { downOn = true; });
+  btn.addEventListener("pointerup", (e) => {
+    if (!downOn) return;
+    downOn = false;
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    if (under && btn.contains(under)) { clearTimeout(pending); pending = setTimeout(fire, BANNER_FALLBACK_MS); }
+  });
+  btn.addEventListener("pointercancel", () => { downOn = false; });
+  btn.addEventListener("click", fire);
 }
 function undoSentenceWord() {
   if (state.chooseKind !== "sentence" || !state.chainDraft.length) return;
@@ -881,6 +909,8 @@ async function openAdult() {
   adultBusy = true;
   try {
     if (!(await requestAdultAccess())) return;
+    if (state.choosing) await stopChoosing({ reopenMenu: false });   // the gear is a way out of Add targets / Add a sentence too (Beta 3.13)
+    if (state.editing) stopEditing();                                 // ... and out of Edit mode
     if (typing.isOpen()) typing.close({ speak: false });   // keep what was typed as a chip, but say nothing
     scenes.closePhotoScene(); scenes.clearGlow();
     teach.pauseForMenu();                                   // a teaching trial in progress is skipped
@@ -990,10 +1020,10 @@ async function start() {
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
   initAdultHint($("adult-hold"));          // a quick tap shows "Adults: hold 3 seconds to open the menu"
   initModelEnd();                          // End modeling: two taps on a button inside the message bar (Beta 3.11)
-  $("edit-done").addEventListener("click", stopEditing);
+  onBannerTap($("edit-done"), stopEditing);
   $("edit-words").addEventListener("click", toggleWords);   // so an adult can edit the Words pages too
-  $("target-done").addEventListener("click", stopChoosing);
-  $("target-undo").addEventListener("click", undoSentenceWord);
+  onBannerTap($("target-done"), () => stopChoosing());
+  onBannerTap($("target-undo"), undoSentenceWord);
   $("target-words").addEventListener("click", toggleWords); // so an adult can choose targets on the Words pages too
 
   started = true;
