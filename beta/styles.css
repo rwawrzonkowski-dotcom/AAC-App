@@ -1056,3 +1056,26 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 .coach-bubble p { margin: 0.4vmin 0; }
 .coach-bubble .muted { color: #475569; font-size: 0.9em; }
 .coach-bubble .btn-row { margin-top: 1.4vmin; }
+
+/* ---------- Little-word strip (Beta 3.7, js/littlewords.js) ----------
+   Eight buttons in permanent slots, left-aligned after the adult circle, the same on every page. A scene takes the strip over
+   (#app.scene-on), and a teaching session, Edit mode and Add targets hide it (js/app.js updateLittle). */
+#little-bar { display: none; }
+#app.little-on #little-bar { display: flex; align-items: stretch; gap: 5px; position: absolute; inset: 0.5vmin 0.6vmin 0.5vmin 8vmin; right: 0.6vmin; }
+#app.little-on.cam-on #little-bar { right: calc(9vw + 1.2vmin); }
+.lw-item { flex: 0 0 auto; position: relative; background: #f8f5ff; border: 0.35vmin solid #6d5bd0; }
+.lw-item.text-only .cell-label { font-size: min(2.6vmin, 3.6dvh); font-weight: 800; }
+.lw-item .cell-label { font-size: min(1.7vmin, 2.4dvh); }
+/* four small dots in the middle of each edge: "hold me for more" */
+.lw-dots { position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) 50% 0.5vmin / 1.2vmin 1.2vmin no-repeat,
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) calc(100% - 0.5vmin) 50% / 1.2vmin 1.2vmin no-repeat,
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) 50% calc(100% - 0.5vmin) / 1.2vmin 1.2vmin no-repeat,
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) 0.5vmin 50% / 1.2vmin 1.2vmin no-repeat;
+  opacity: 0.55; }
+#app.typing #little-bar { opacity: 0.38; pointer-events: none; }   /* finish typing first */
+/* On a category page the page name moves to a small label at the right of the strip, so the little words keep their spots. */
+#app.little-on #page-title { position: absolute; right: 1.2vmin; top: 50%; transform: translateY(-50%); font-size: min(2.6vmin, 3.6dvh);
+  max-width: 18vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#app.little-on.cam-on #page-title { right: calc(9vw + 1.8vmin); }

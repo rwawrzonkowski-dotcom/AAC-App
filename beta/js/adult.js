@@ -199,6 +199,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       wordDialSetting(cur),
       keyboardButtonSetting(cur),
       cameraButtonSetting(cur),
+      littleStripSetting(cur),
       speakLettersSetting(cur),
       wordsOnlySetting(cur));
   }
@@ -279,6 +280,22 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "then tap it once. A quick tap on its own does nothing. The camera opens, everything VOICE finds in the photo (and anything it remembers from My things) is ticked, " +
         "and “Use now” puts the scene on the strip. It needs no passcode and is switched off while a teaching session runs. " +
         "Scenes made this way are named with the date and time and can be renamed in Scenes." }));
+  }
+
+  // The little-word strip (Beta 3.7, js/littlewords.js): eight little words in the strip, each holding a dial of four more.
+  function littleStripSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (cur.littleStrip === value ? " on" : ""), id: `littlestrip-${value}`, text,
+      onclick: async () => { cur.littleStrip = value; await saveProfile(cur); onVocabChanged(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-little-strip" },
+      h("label", { text: "Show little-word strip" }),
+      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("p", { class: "muted", text: "Eight little words (a, is, and, to, will, has, him, there) in the strip under the message bar, always in the same spots. " +
+        "Tap one to say it. Press and hold one to open a dial of four more, each always in the same direction: a → an, the, any, every; " +
+        "is → was, are, am, were; and → but, or, so, because; to → of, for, with, from; will → would, could, may, must; " +
+        "has → had, does, did, been; him → her, us, them, their; there → here, these, those, which. " +
+        "When a scene is showing, the scene uses the strip instead. The strip is hidden during teaching sessions. The words also stay on the Little words pages." }));
   }
 
   // Say each letter's name as it is typed (default off).

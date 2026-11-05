@@ -58,6 +58,7 @@
 // `things` ({ list: [ { id, label, spoken, wordId, created, photos, picture: dataUrl, views: [base64 of 1280 float32 numbers] } ] }: "My things",
 // see js/things.js), written with the scenes under "Include scenes and photos". Older backups get Auto / Medium and no things; restoring one
 // over an existing learner leaves that learner's things alone.
+// Version 17 (beta 3.7) added `littleStrip` ("auto" | "always" | "never": the little-word strip). Older backups get Auto.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -84,7 +85,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 16;
+export const BACKUP_VERSION = 17;
 
 // ---------------------------------------------------------------- saving
 
@@ -126,6 +127,7 @@ export async function buildBackup(learners, { teaching = true, templates = false
       keyboardButton: p.keyboardButton,
       speakLetters: p.speakLetters,
       cameraButton: p.cameraButton,
+      littleStrip: p.littleStrip,
       matchStrictness: p.matchStrictness,
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
@@ -339,7 +341,8 @@ function cleanLearner(raw, index, version) {
   const cameraButton = version >= 16 && CAMERA_BUTTON_CHOICES.includes(raw.cameraButton) ? raw.cameraButton : "auto";
   const matchStrictness = version >= 16 && MATCH_STRICTNESS_CHOICES.includes(raw.matchStrictness) ? raw.matchStrictness : "medium";
   const things = version >= 16 ? cleanThingsBackup(raw.things) : null;
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, wordDial, notices, teaching, everyday, scenes, things, photos };
+  const littleStrip = version >= 17 && CAMERA_BUTTON_CHOICES.includes(raw.littleStrip) ? raw.littleStrip : "auto";
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

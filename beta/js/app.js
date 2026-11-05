@@ -44,6 +44,7 @@ import { loadForms, formsFor, dialFor, openFormsPopover } from "./forms.js";
 import { openDial } from "./dial.js";
 import * as everyday from "./everyday.js";
 import * as scenes from "./scenestrip.js";
+import * as little from "./littlewords.js";
 import { initCameraButton } from "./camerabtn.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
@@ -90,6 +91,8 @@ const wordsButtonShown = (p) => p.wordsButton === "always" || (p.wordsButton !==
 // The ABC (keyboard) button works the same way, with its own setting: Auto = from stage 3.
 const keyboardButtonShown = (p) => p.keyboardButton === "always" || (p.keyboardButton !== "never" && p.stage >= 3);
 // The camera button (Beta 3.1, js/camerabtn.js) works the same way, with its own setting: Auto = from stage 3.
+// The little-word strip (Beta 3.7): Auto shows it from stage 3, like the camera and ABC.
+const littleStripShown = (p) => p.littleStrip === "always" || (p.littleStrip !== "never" && p.stage >= 3);
 const cameraButtonShown = (p) => p.cameraButton === "always" || (p.cameraButton !== "never" && p.stage >= 3);
 // True while the Words menu or any page opened from it is showing.
 const onWordsPage = (pageId = state.page) => {
@@ -175,6 +178,7 @@ function renderAll() {
   updateBar();
   teach.onRender();                     // a running teaching trial re-draws its prompt on the new page
   scenes.onRender(!state.editing && !state.choosing);     // the scene strip shows on the child's board only
+  updateLittle();                                           // the little-word strip (Beta 3.7), unless a scene has the strip
   if (hintsReady) setTimeout(coachCheck, 600);           // "This is the adult menu", once per learner (js/adulthint.js)
 }
 
@@ -278,6 +282,69 @@ function onSceneItem(item, { how, sceneId, el }) {
   recordTap({ id, label: item.label, spoken, how, sceneId });
   chipsChanged(true);
   if (state.modeling && how === "scene" && el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), RING_MS);
+}
+
+// ---------- The little-word strip (Beta 3.7, js/littlewords.js) ----------
+// It shows only on the child's board: not while a scene has the strip, a teaching session runs, or the adult edits or chooses targets.
+let littleKey = "";
+function updateLittle() {
+  const p = getCurrent();
+  const on = littleStripShown(p) && !state.editing && !state.choosing && !teach.isActive() && !$("app").classList.contains("scene-on");
+  $("app").classList.toggle("little-on", on);
+  if (!on) return;
+  // Redraw the buttons when the learner (or their stage) changed, so a renamed word shows its new label.
+  const key = p.id + "|" + p.stage + "|" + JSON.stringify(p.words || {}).length;
+  if (key !== littleKey) { littleKey = key; little.refresh(); } else little.layout();
+}
+
+// A tap on a strip button: the group's head word, with the same rules as a board word (speak first, then the chip and the records).
+function onLittleTap(el) {
+  if (returning || previewing) return;
+  const g = little.groupOf(el);
+  if (!g) return;
+  addLittleWord(little.info(g.head), { how: "little", el });
+}
+function addLittleWord(w, { how, el, afterSelect = false, base }) {
+  lastSelectAt = performance.now();
+  speak(w.spoken || w.label);
+  const item = { label: w.label, spoken: w.spoken || w.label, base: w.label, id: w.id, mode: recMode() };
+  const last = state.sentence[state.sentence.length - 1];
+  // Hold to select already added the head word during this press: the dial word replaces it.
+  if (afterSelect && last && base && last.id === base.id) state.sentence[state.sentence.length - 1] = item; else state.sentence.push(item);
+  drawMessage();
+  logWord(w.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id: w.id, source: how });
+  recordTap({ id: w.id, label: w.label, spoken: w.spoken || w.label, how, ...(base ? { base: base.label } : {}) });
+  chipsChanged(true);
+  if (state.modeling && el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), RING_MS);
+}
+// Press and hold a strip button: its group's dial (the same dial as word forms; the same hold time).
+function littleDialMs(el) {
+  if (!little.groupOf(el) || state.dial || state.forms || returning || previewing || (typing && typing.isOpen())) return 0;
+  const hold = holdMs();
+  return hold > 0 ? hold + 800 : Math.round(getCurrent().wordDial.holdSec * 1000);
+}
+function openLittleDial(el, { pointer, afterSelect }) {
+  const g = little.groupOf(el);
+  const r = el.getBoundingClientRect();
+  if (!g || !el.isConnected || !r.width) return false;
+  const head = little.info(g.head);
+  state.dial = openDial({
+    anchor: { rect: { left: r.left, top: r.top, width: r.width, height: r.height }, label: head.label,
+              bg: getComputedStyle(el).backgroundColor, imgSrc: null },
+    entries: little.entriesFor(g),
+    markers: false,
+    pointer,
+    onClose: () => { state.dial = null; },
+    onChoose: (entry, chip) => {
+      addLittleWord({ id: entry.id, label: entry.word, spoken: entry.spoken }, { how: "little dial", afterSelect, base: head });
+      if (state.modeling) {
+        const dial = state.dial;
+        runPrompt(chip, getCurrent().model, getPhotoUrl("critter"), RING_MS);
+        setTimeout(() => { if (state.dial === dial) closeDial(); }, 700);
+      } else closeDial();
+    },
+  });
+  return true;
 }
 
 // ---------- Keyboard and number pad ----------
@@ -810,6 +877,9 @@ async function start() {
   });
 
   fitLabelsOnResize($("board"));
+  // The little-word strip (Beta 3.7): tap = the head word, press and hold = its dial. Touch supports apply as on the board.
+  attachPressHandling(little.init($("context-strip")), onLittleTap, ".lw-item",
+    { holdMs, blocked: tapsBlocked, dialMs: littleDialMs, openDial: openLittleDial });
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
   initAdultHint($("adult-hold"));          // a quick tap shows "Adults: hold 3 seconds to open the menu"
   attachHold($("model-end"), HOLD_TO_END_MODEL_MS, stopModeling);

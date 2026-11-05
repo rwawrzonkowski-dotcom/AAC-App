@@ -10,7 +10,8 @@
 //                 how   "board" (main board) | "page" (a category, folder or Words page; pages = page ids from the first page to the
 //                       page the word was on) | "forms" (Forms button: wordId = the base word, form = the form chosen) | "dial"
 //                       (press-and-hold dial: same) | "keyboard" | "numberpad" | "scene" (a button on the scene strip; the event also has
-//                       sceneId, Beta 3.0) | "photo scene" (a hotspot on the full-screen scene photo)
+//                       sceneId, Beta 3.0) | "photo scene" (a hotspot on the full-screen scene photo) | "little" (a tap on
+//                       the little-word strip, Beta 3.7) | "little dial" (a word chosen from a little-word dial)
 //                 mode  "learner" | "model" (an adult tapped in Model mode) | "session" (a tap during a teaching session; sessionId, and
 //                       trialId while a trial is running)
 //   utterances  one per message the learner built: { id, time (= end), start, end, chips: [{wordId, label}], spokenAsSentence,
@@ -466,7 +467,7 @@ export async function exportEveryday(learnerId) {
     daily: await readAll("daily", learnerId), firstSeen: await readAll("firstseen", learnerId) };
 }
 
-const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad", "scene", "photo scene"];
+const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad", "scene", "photo scene", "little", "little dial"];
 const MODES = ["learner", "model", "session"];
 const ENDS = ["barSpeak", "clear", "idle"];
 const ID_RE = /^[A-Za-z0-9_:,@.+~-]{1,80}$/;

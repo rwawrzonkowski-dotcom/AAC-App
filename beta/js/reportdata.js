@@ -13,7 +13,8 @@ import { localDate, dayStart } from "./everyday.js";
 
 const DAY = 86400000;
 export const HOW_NAMES = { board: "Main board", page: "Category and Words pages", forms: "Forms button", dial: "Press-and-hold dial",
-  keyboard: "Keyboard (ABC)", numberpad: "Number pad", scene: "Scene strip", "photo scene": "Scene photo" };
+  keyboard: "Keyboard (ABC)", numberpad: "Number pad", scene: "Scene strip", "photo scene": "Scene photo",
+  little: "Little-word strip", "little dial": "Little-word dial" };
 export const HOW_IDS = Object.keys(HOW_NAMES);
 
 // ---------------------------------------------------------------- dates
