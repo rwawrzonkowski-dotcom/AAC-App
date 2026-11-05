@@ -55,10 +55,33 @@ export function targetBlock(tm, shapes, { plotH = 170, helpH = 92, withTable = t
     svgBox(C.teachingChart(tm, { plotH, shapes }), "teach-graph"),
     svgBox(C.helpChart(tm, { plotH: helpH }), "help-graph"),
     svgBox(C.teachingKey(shapes, wheres), "key-graph")));
+  if (tm.chain) card.append(chainTable(tm));
   card.append(h("details", { class: "tbl-view no-print" }, h("summary", { text: "Show as table" }),
     tableEl(["Session", "Date", "Who", "Where", "Trials", "Independent", "% independent", "Average help", "Status"],
       tm.series.map((p) => [p.n, p.date, p.who, p.where, p.trials, p.independent, n0(p.pct) + "%", n0(p.help * 100) + "%", T.STATUS_LABELS[p.status]]))));
   return card;
+}
+
+/** A sentence target's task-analysis table (Beta 3.12): one row per session, one column per word, % independent in each cell (shaded:
+ *  darker green = more independent; "modeled" = the app modeled or filled in that word). A ▲ marks a session where a word was added. */
+export function chainTable(tm) {
+  const { words, rows } = tm.chain;
+  const nWords = tm.target.links.length;
+  const cell = (v, i) => {
+    const td = h("td", { class: "ta-cell" + (v === null ? " ta-off" : ""), text: v === null ? (i < nWords ? "modeled" : "–") : Math.round(v) + "%" });
+    if (v !== null) td.style.background = `rgba(22, 163, 74, ${0.08 + 0.5 * (v / 100)})`;
+    return td;
+  };
+  const methodShort = { total: "Total task", forward: "Forward", backward: "Backward" };
+  return h("div", { class: "rep-ta" },
+    h("h4", { text: "Each word (task analysis)" }),
+    h("table", { class: "rep-table ta-table", "data-word": tm.wordId },
+      h("thead", {}, h("tr", {}, h("th", { text: "Session" }), h("th", { text: "Date" }), h("th", { text: "Words done" }), ...words.map((w) => h("th", { text: w })))),
+      h("tbody", {}, rows.map((r) => h("tr", { class: r.phaseChanged ? "ta-phase" : "" },
+        h("td", { text: (r.phaseChanged ? "▲ " : "") + r.n }), h("td", { text: r.date }),
+        h("td", { text: r.phase === null ? "-" : `${methodShort[r.method] || ""} ${r.phase} of ${tm.target.links.length}` }),
+        ...r.cells.map((v, i) => cell(v, i)))))),
+    h("p", { class: "muted ta-note", text: "% independent for each word, over the trials in which the learner did that word. “modeled”: the app modeled the word or put it in the message bar. ▲ a word was added or taken away from the learner's part before this session." }));
 }
 
 /** The shapes for everybody in the report (the same person always has the same shape on every graph). */

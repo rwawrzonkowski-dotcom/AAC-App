@@ -29,7 +29,14 @@ let hooks = null;                   // set by initSession(): what this file need
 let S = null;                       // the running session, or null
 
 // hooks: { strip, appEl, boardEl, wordsBtn, modelNow(), getPageId(), getCells(), goTo(pageId), wordsButtonAvailable(),
-//          onSessionChange(), runEndFlow(result) }
+//          onSessionChange(), runEndFlow(result),
+//          clearMessage(), addWords([{ wordId, label, spoken }]), modelWords([{ wordId, label, steps }]) -> Promise }   (sentence targets)
+//
+// SENTENCE TARGETS (Beta 3.12; rules in js/teaching.js). A trial clears the message bar and starts on the main board. The learner's words
+// (all of them, the first ones, or the last ones: total task, forward, backward) are prompted one at a time, each starting at its own
+// step of the ladder and climbing after the time delay or an error, exactly like a word target. In backward chaining the words before
+// the learner's part are put in the message bar first; in forward chaining the app models the words after it (hooks.modelWords). With
+// "say the sentence" on, tapping the message bar is one more step. The trial is correct when the whole sentence is done.
 export function initSession(h2) { hooks = h2; }
 export const isActive = () => !!S;
 // The ids everyday recording stores with a tap made during a session (js/everyday.js): the session, and the trial if one is running.
@@ -69,7 +76,8 @@ export async function endSession() {
   await data.putSession(s.rec);
   teardown();
   hooks.onSessionChange();
-  return { session: s.rec, trials: s.trials, targets: s.targets };
+  // phaseReady: sentence targets whose next word the end of the session suggests adding (the adult confirms)
+  return { session: s.rec, trials: s.trials, targets: s.targets, phaseReady: [...(s.phaseReady || [])] };
 }
 
 function teardown() {
@@ -146,6 +154,7 @@ function openPicker() {
 // What the prompt starts as for this target, in a few words.
 export function startText(t) {
   if (T.isProbe(t)) return "no prompts";
+  if (T.isChain(t)) return (t.method === "total" ? "total task" : t.method + " " + T.taughtLinks(t).length + "/" + t.links.length) + (t.direction === "ltm" ? ", least-to-most" : "");
   return t.direction === "ltm" ? "least-to-most" : T.posName(t);
 }
 
@@ -192,6 +201,7 @@ function flash(text) { S.last = text; paintBar(); }
 function startTrial(type) {
   if (!S || S.trial || S.cardOpen) return;
   const target = S.targets[S.idx];
+  if (T.isChain(target)) { startSentenceTrial(type, target); return; }
   const chain = buildChain(target);
   if (!chain) { flash(`"${target.label}" is not on this board`); return; }
   // A planned trial starts from the main board, like a verbal cue from the top of the chain. A natural-environment
@@ -208,11 +218,96 @@ function startTrial(type) {
     settleTimer: null, delayTimer: null, maxTimer: null,
   };
   S.trial = tr;
-  tr.maxTimer = setTimeout(() => { if (S && S.trial === tr) endTrial(tr.errors.length ? "error" : "noResponse"); }, S.maxTrialMs);
+  armMaxTimer(tr);
   // Unprompted probes (baseline, mastered, maintenance) never show a prompt. Teaching targets show their first step after a
   // half-second settle (most-to-least) or start by waiting at Independent (least-to-most), then climb as the rules say.
   if (!probe) tr.settleTimer = setTimeout(() => { if (S && S.trial === tr) showStep(tr, tr.cur); }, T.SETTLE_MS);
   paintBar();
+}
+
+// The longest a trial can run. (While the app is modeling words of a sentence, the clock waits.)
+function armMaxTimer(tr, ms = S.maxTrialMs) {
+  clearTimeout(tr.maxTimer);
+  tr.maxTimer = setTimeout(() => {
+    if (!S || S.trial !== tr) return;
+    if (tr.busy) { armMaxTimer(tr, 2000); return; }
+    endTrial(tr.errors.length ? "error" : "noResponse");
+  }, ms);
+}
+
+// ---------- A sentence trial (Beta 3.12) ----------
+const SPEAK = -1;                                   // the "say the sentence" step's index
+const SPEAK_ROUTE = { pages: ["core"], steps: [{ pageId: "core", speak: true, label: "say the sentence" }] };
+function startSentenceTrial(type, target) {
+  const links = target.links;
+  const routes = links.map((l) => buildChain({ pageId: l.pageId, label: l.label, wordId: l.wordId }));
+  const missing = links.find((l, i) => !routes[i]);
+  if (missing) { flash(`"${missing.label}" is not on this board`); return; }
+  if (hooks.getPageId() !== "core") hooks.goTo("core");
+  hooks.clearMessage();
+  const taught = T.taughtLinks(target), probe = T.isProbe(target);
+  const ladder = T.ladderOf(target), n = ladder.length;
+  const baseOf = (pos) => (probe || target.direction !== "mtl" ? n : Math.min(n, Math.max(0, pos)));
+  const before = links.map((_, i) => i).filter((i) => i < taught[0]);
+  const after = links.map((_, i) => i).filter((i) => i > taught[taught.length - 1]);
+  const recs = links.map((l, i) => ({ index: i, wordId: l.wordId, label: l.label, taught: taught.includes(i), done: false,
+    startIndex: taught.includes(i) ? baseOf(target.linkPos[i]) : n, minIndex: n, ladderLength: n, errors: 0 }));
+  const speakRec = target.speakStep ? { index: SPEAK, wordId: T.SPEAK_ID, label: "say the sentence", taught: true, done: false,
+    startIndex: baseOf(target.pos), minIndex: n, ladderLength: n, errors: 0 } : null;
+  const tr = {
+    id: data.newId("t"), type, target, chain: routes[taught[0]], t0: Date.now(), probe, ladder, n, custom: T.isCustom(target), ladderId: T.ladderId(target),
+    base: recs[taught[0]].startIndex, cur: recs[taught[0]].startIndex, shown: -1, minIdx: n, maxStep: 0,
+    errors: [], firstResponse: null, steps: new Map(), timeline: [], ended: false, busy: false,
+    settleTimer: null, delayTimer: null, maxTimer: null,
+    cx: { routes, order: taught, k: 0, cur: taught[0], recs, speakRec, after, modeled: false, spoke: false },
+  };
+  S.trial = tr;
+  // Backward chaining: the words before the learner's part go into the message bar first (silently).
+  if (before.length) hooks.addWords(before.map((i) => { recs[i].done = true; return wordOf(links[i]); }));
+  armMaxTimer(tr);
+  beginLink(tr, taught[0]);
+}
+const wordOf = (l) => ({ wordId: l.wordId, label: l.label, spoken: l.label });
+const curRec = (tr) => (tr.cx.cur === SPEAK ? tr.cx.speakRec : tr.cx.recs[tr.cx.cur]);
+// The word (or step) the learner must choose now.
+const curWordId = (tr) => (!tr.cx ? tr.target.wordId : tr.cx.cur === SPEAK ? T.SPEAK_ID : tr.target.links[tr.cx.cur].wordId);
+
+// Start prompting one word of the sentence (or the "say the sentence" step): its own route, its own starting step.
+function beginLink(tr, i) {
+  const cx = tr.cx;
+  cx.cur = i;
+  tr.chain = i === SPEAK ? SPEAK_ROUTE : cx.routes[i];
+  tr.maxStep = 0; tr.shown = -1;
+  tr.base = curRec(tr).startIndex; tr.cur = tr.base;
+  clearTimeout(tr.settleTimer); clearTimeout(tr.delayTimer);
+  clearVisual();
+  if (!tr.probe) tr.settleTimer = setTimeout(() => { if (S && S.trial === tr) showStep(tr, tr.cur); }, T.SETTLE_MS);
+  paintBar();
+}
+// The current word was chosen: on to the next one, then the app's modeled words, then "say the sentence", then the end.
+function linkDone(tr) {
+  const cx = tr.cx;
+  curRec(tr).done = true;
+  if (cx.cur !== SPEAK) cx.k++;
+  nextPart(tr);
+}
+function nextPart(tr) {
+  const cx = tr.cx;
+  if (cx.k < cx.order.length) { beginLink(tr, cx.order[cx.k]); return; }
+  if (cx.after.length && !cx.modeled) {
+    cx.modeled = true; tr.busy = true;
+    clearTimeout(tr.settleTimer); clearTimeout(tr.delayTimer); clearVisual();
+    const items = cx.after.map((i) => ({ ...wordOf(tr.target.links[i]), steps: cx.routes[i].steps }));
+    Promise.resolve(hooks.modelWords(items)).catch(() => {}).then(() => {
+      if (!S || S.trial !== tr) return;
+      for (const i of cx.after) cx.recs[i].done = true;
+      tr.busy = false;
+      nextPart(tr);
+    });
+    return;
+  }
+  if (cx.speakRec && !cx.spoke) { cx.spoke = true; beginLink(tr, SPEAK); return; }
+  endTrial("correct");
 }
 
 // The record of a place in the trial's ladder, saved with the trial (index n = Independent, nothing shown).
@@ -229,6 +324,7 @@ function showStep(tr, i) {
   tr.timeline.push({ level: T.legacyLevelOfStep(rec), time: Date.now(), index: rec.index, type: rec.type, opacity: rec.opacity });
   if (i < tr.n) {
     tr.minIdx = Math.min(tr.minIdx, i);
+    if (tr.cx) { const r = curRec(tr); r.minIndex = Math.min(r.minIndex, i); }
     const info = stepInfo(tr), old = tr.steps.get(info.index);
     const best = old ? Math.min(old.index, i) : i;
     const br = stepRecord(tr, best);
@@ -268,8 +364,9 @@ function nextElement(tr) {
     return home ? cellEl(home.key) : hooks.wordsBtn;      // the Words menu has no Back cell: its top-bar button reads "Close"
   }
   const st = info.step;
+  if (st.speak) return document.getElementById("message-text");
   if (st.word) {
-    const d = cells.find((c) => c.kind === "word" && c.visible && (c.wordId || c.key) === tr.target.wordId);
+    const d = cells.find((c) => c.kind === "word" && c.visible && (c.wordId || c.key) === curWordId(tr));
     return d ? cellEl(d.key) : null;
   }
   return st.bar ? hooks.wordsBtn : cellEl(st.key);
@@ -310,15 +407,20 @@ export function onRender() {
 //   { type: "word" | "category" | "back" | "other", id, label, opens }
 export function onSelect(ev) {
   const tr = S && S.trial;
-  if (!tr || ev.type === "back" || ev.type === "other") return;
+  if (!tr || tr.busy || ev.type === "back" || ev.type === "other") return;
+  if (ev.type === "speak") {                       // a tap on the message bar: only the "say the sentence" step cares
+    if (tr.cx && tr.cx.cur === SPEAK) linkDone(tr);
+    return;
+  }
   const now = Date.now();
   if (tr.firstResponse === null) tr.firstResponse = now;
-  if (ev.type === "word" && ev.id === tr.target.wordId) { endTrial("correct"); return; }
+  if (ev.type === "word" && ev.id === curWordId(tr)) { if (tr.cx) linkDone(tr); else endTrial("correct"); return; }
   if (ev.type === "category") {
     const i = tr.chain.pages.indexOf(hooks.getPageId());
     if (i >= 0 && i < tr.chain.pages.length - 1 && tr.chain.pages[i + 1] === ev.opens) return;    // the right button: progress
   }
   tr.errors.push({ wordId: ev.id, label: ev.label, time: now });
+  if (tr.cx) curRec(tr).errors++;
   if (!tr.probe) escalate(tr);
 }
 
@@ -340,9 +442,29 @@ function endTrial(result) {
     errors: tr.errors, chainStepsPrompted: [...tr.steps.values()].sort((a, b) => a.step - b.step),
     chain: tr.chain.steps.map((s) => s.label), promptTimeline: tr.timeline,
   };
+  if (tr.cx) {
+    // A sentence: one record per word (and the "say the sentence" step); the trial's start step is its first learner word's.
+    const cx = tr.cx, all = [...cx.recs, ...(cx.speakRec ? [cx.speakRec] : [])];
+    rec.links = all.map((r) => ({ ...r }));
+    rec.method = target.method; rec.phase = T.taughtLinks(target).length;
+    rec.chain = target.links.map((l) => l.label);
+    rec.startStep = stepRecord(tr, cx.recs[cx.order[0]].startIndex);
+    rec.startHelp = T.helpOfStep(rec.startStep.index < tr.n ? tr.ladder[rec.startStep.index] : null);
+    rec.startLevel = T.legacyLevelOfStep(rec.startStep);
+    rec.chainStepsPrompted = all.filter((r) => r.taught && r.minIndex < tr.n).map((r) => {
+      const sr = stepRecord(tr, r.minIndex);
+      return { step: r.index, label: r.label, level: T.legacyLevelOfStep(sr), index: sr.index, type: sr.type, opacity: sr.opacity };
+    });
+  }
   S.trials.push(rec);
-  const change = T.applyTrialToTarget(target, rec, now);
-  if (change) S.levelChanges.push({ wordId: target.wordId, label: target.label, ...change });
+  if (tr.cx) {
+    const res = T.applyTrialToChain(target, rec, now);
+    for (const c of res.changes) S.levelChanges.push({ wordId: target.wordId, label: target.label, time: c.time, from: c.from, to: c.to, reason: c.reason, dir: c.dir });
+    if (res.phaseReady) (S.phaseReady || (S.phaseReady = new Set())).add(target.wordId);
+  } else {
+    const change = T.applyTrialToTarget(target, rec, now);
+    if (change) S.levelChanges.push({ wordId: target.wordId, label: target.label, ...change });
+  }
   S.rec.levelChanges = S.levelChanges;
   const word = target.label;
   S.last = result === "correct" ? `${word}: correct (${T.trialStepName(rec)})` :

@@ -213,6 +213,7 @@ export async function openReports({ learnerId = getCurrent().id } = {}) {
     const d = st.data, tm = st.tm, range = st.range;
     const scopeIds = new Set(tm.sessions.map((s) => s.id));
     const trialCount = d.trials.filter((t) => scopeIds.has(t.sessionId)).length;
+    const sentenceN = d.trials.filter((t) => scopeIds.has(t.sessionId) && Array.isArray(t.links)).reduce((n, t) => n + t.links.length, 0);
     const dailyN = X.dailyRows(d.daily, range).length;
     const status = h("p", { class: "muted", id: "rp-export-status", role: "status", text: st.msg });
     const say = (m) => { st.msg = m; status.textContent = m; };
@@ -240,6 +241,9 @@ export async function openReports({ learnerId = getCurrent().id } = {}) {
       h("p", { class: "muted", text: "Each button saves one spreadsheet (CSV) that opens in Excel, Numbers or Google Sheets. The file is only made when you tap the button, and goes wherever you choose in the share sheet. Who and Where apply to trials and sessions." }),
       card("trials", "Trials", "One row per trial: date, time, session, who, where, target word, planned or NET, result, prompt step, help (0 to 1), response time, errors.", trialCount,
         async () => ({ headers: X.TRIAL_HEADERS, rows: X.trialRows(tm.sessions, d.trials) })),
+      // Sentence targets (Beta 3.12): only shown when the range has sentence trials.
+      ...(sentenceN ? [card("sentence-words", "Sentence words", "One row per word per sentence trial: who did the word (learner, app modeled, filled in), the most help shown, independent or not, errors.", sentenceN,
+        async () => ({ headers: X.SENTENCE_HEADERS, rows: X.sentenceRows(tm.sessions, d.trials) }))] : []),
       card("sessions", "Sessions", "One row per teaching session with its targets and percent independent.", tm.sessions.length,
         async () => ({ headers: X.SESSION_HEADERS, rows: X.sessionRows(tm.sessions, d.trials, d.targets) })),
       card("targets", "Targets", "Every target with its status, prompt ladder and rules. (Not limited by the date range.)", d.targets.length,

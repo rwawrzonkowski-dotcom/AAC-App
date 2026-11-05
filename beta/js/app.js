@@ -25,7 +25,8 @@ import {
 import { attachHold } from "./hold.js";
 import { requestAdultAccess } from "./lock.js";
 import { openAdultMenu } from "./adult.js";
-import { askConfirm } from "./ui.js";
+import { askConfirm, toast } from "./ui.js";
+import { MAX_CHAIN } from "./teaching.js";
 import { showSetup } from "./setup.js";
 import { requestPersistence, maybeShowNotice } from "./keepdata.js";
 import { initAdultHint, maybeShowCoach } from "./adulthint.js";
@@ -38,7 +39,7 @@ import { preloadCritterArt } from "./critters.js";
 import { CHANNEL } from "./channel.js";
 import * as teach from "./session.js";
 import { runEndFlow } from "./teachui.js";
-import { loadTeaching, getTargets, isTarget, addTarget, removeTarget, closeOrphanSessions } from "./teachdata.js";
+import { loadTeaching, getTargets, isTarget, addTarget, addChainTarget, removeTarget, closeOrphanSessions } from "./teachdata.js";
 import { loadForms, formsFor, dialFor, openFormsPopover } from "./forms.js";
 import { openDial } from "./dial.js";
 import * as everyday from "./everyday.js";
@@ -73,6 +74,8 @@ const state = {
   page: "core",       // "core", a category id such as "food", or an adult-made page id
   editing: false,     // Edit mode
   choosing: false,    // "Add targets" mode (adult menu > Teaching): taps choose target words instead of speaking
+  chooseKind: "words", // "words" (each tap adds or removes a word target) or "sentence" (taps build one sentence target, Beta 3.12)
+  chainDraft: [],     // the sentence being built: [{ wordId, label, pageId, path }]
   modeling: false,    // Model mode
   sentence: [],       // words in the message bar: {label, spoken, base} (base = the word tapped on the board)
   cells: new Map(),   // key -> description of each cell currently drawn
@@ -708,35 +711,107 @@ function initModelEnd() {
 // Adult menu > Teaching > Targets > Add targets. The board (and its pages and folders) is shown as usual with a banner over the
 // message bar; tapping a word makes it a target (tap again to remove it) and says nothing. Category and folder buttons open
 // their pages and Back goes up, so a word on a folder page is chosen with the page chain it sits on.
-function startChoosing() {
+// Beta 3.12, "Add a sentence": the same mode, but each word tapped is ADDED to a sentence in order (2 to 6 words); Undo takes the last
+// one off; Done saves the sentence as one target (js/teaching.js "Sentence targets"). After a word on a page, the board goes back to the
+// main page, ready for the next word.
+function startChoosing(kind = "words") {
   closeForms(); closeDial(); stopSpeech(); clearCritter();
   state.editing = false; state.modeling = false; state.choosing = true;
+  state.chooseKind = kind; state.chainDraft = [];
+  if (state.page !== "core") state.page = "core";
   renderAll();
 }
-function stopChoosing() {
-  state.choosing = false;
+async function stopChoosing() {
+  const kind = state.chooseKind, draft = state.chainDraft || [];
+  state.choosing = false; state.chooseKind = "words"; state.chainDraft = [];
+  if (state.page !== "core") state.page = "core";
   renderAll();
+  if (kind === "sentence") {
+    if (draft.length >= 2) {
+      const t = await addChainTarget(getCurrent().id, draft);
+      toast(`Sentence target added: “${t.label}”. Choose its chaining in Targets > Settings.`, 4000);
+    } else if (draft.length === 1) toast("A sentence needs at least 2 words. Nothing was saved.", 3500);
+  }
   showAdultMenu("sec-teaching");        // back to the Teaching section (the adult is already signed in)
 }
+function undoSentenceWord() {
+  if (state.chooseKind !== "sentence" || !state.chainDraft.length) return;
+  state.chainDraft.pop();
+  markTargets();
+}
 function markTargets() {
+  const sentence = state.chooseKind === "sentence";
+  const draftIds = new Set((state.chainDraft || []).map((l) => l.wordId));
   for (const el of document.querySelectorAll("#board .cell")) {
     const d = state.cells.get(el.dataset.key);
-    el.classList.toggle("is-target", !!d && d.kind === "word" && d.visible && !d.loadBoard && isTarget(d.wordId || d.key));
+    const word = !!d && d.kind === "word" && d.visible && !d.loadBoard;
+    el.classList.toggle("is-target", word && !sentence && isTarget(d.wordId || d.key));
+    el.classList.toggle("in-sentence", word && sentence && draftIds.has(d.wordId || d.key));
   }
-  const n = getTargets().length;
-  $("target-count").textContent = n === 1 ? "1 target" : n + " targets";
+  $("target-undo").hidden = !sentence;
+  $("target-undo").disabled = !sentence || !state.chainDraft.length;
+  if (sentence) {
+    const words = state.chainDraft.map((l) => l.label).join(" ");
+    $("target-banner-text").textContent = words ? "Sentence: " + words : "Tap the words of the sentence in order";
+    $("target-count").textContent = `${state.chainDraft.length} of ${MAX_CHAIN}`;
+  } else {
+    $("target-banner-text").textContent = "Tap words to add as targets";
+    const n = getTargets().length;
+    $("target-count").textContent = n === 1 ? "1 target" : n + " targets";
+  }
 }
 async function chooseCell(d) {
   if (d.loadBoard) { goTo(d.loadBoard); return; }
   if (d.kind !== "word" || !d.visible || d.action) return;
   const profile = getCurrent();
   const id = d.wordId || d.key;
+  if (state.chooseKind === "sentence") {
+    if (state.chainDraft.length >= MAX_CHAIN) { toast(`A sentence can have up to ${MAX_CHAIN} words. Tap Done.`); return; }
+    const path = pathToCore(modelNow(), profile, state.page).reverse().slice(1);
+    state.chainDraft.push({ wordId: id, label: d.label, pageId: state.page, path });
+    speak(d.spoken);                     // so the adult hears which word was added
+    if (state.page !== "core") goTo("core"); else markTargets();
+    return;
+  }
   if (isTarget(id)) await removeTarget(id);
   else {
     const path = pathToCore(modelNow(), profile, state.page).reverse().slice(1);     // pages after the main board
     await addTarget(profile.id, { wordId: id, label: d.label, pageId: state.page, path });
   }
   markTargets();
+}
+
+// Forward chaining (Beta 3.12): the app models the rest of the sentence. For each word it shows the learner's Model prompt (ring
+// and/or critter) on each button along the word's route (category, folder, word), opens the pages, adds the word and says it, then
+// goes back to the main board. items = [{ wordId, label, steps }] (steps = the route from js/session.js buildChain).
+const MODEL_STEP_MS = 900;
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+async function modelChainWords(items) {
+  returning = true;                                   // the child's taps are ignored while the app models
+  try {
+    for (const it of items) {
+      if (state.page !== "core") { goTo("core"); await wait(250); }
+      for (const st of it.steps) {
+        const cells = [...state.cells.values()];
+        let el = null;
+        if (st.word) { const d = cells.find((c) => c.kind === "word" && c.visible && (c.wordId || c.key) === it.wordId); el = d && document.querySelector(`#board .cell[data-key="${d.key}"]`); }
+        else if (st.bar) el = $("words-btn");
+        else el = document.querySelector(`#board .cell[data-key="${st.key}"]`);
+        if (el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), MODEL_STEP_MS);
+        await wait(MODEL_STEP_MS);
+        if (st.word) {
+          const d = cells.find((c) => c.kind === "word" && (c.wordId || c.key) === it.wordId);
+          const spoken = (d && d.spoken) || it.label;
+          speak(spoken);
+          state.sentence.push({ label: d && d.sentence ? spoken : it.label, spoken, base: it.label, id: it.wordId, mode: "model" });
+          drawMessage(); chipsChanged(false);
+          await wait(500);
+        } else if (st.opens) { if (st.bar) toggleWords(); else goTo(st.opens); await wait(300); }
+      }
+      clearCritter();
+    }
+    if (state.page !== "core") goTo("core");
+  } finally { returning = false; }
 }
 
 // ---------- Teaching: sessions ----------
@@ -791,7 +866,8 @@ function showAdultMenu(startAt) {
     onEdit: startEditing,
     onModel: startModeling,
     isModeling: () => state.modeling, onStopModel: stopModeling,      // the menu's quick action reads "Stop modeling" while modeling
-    teach: { sessionActive: teach.isActive, onChooseTargets: startChoosing, onStartSession: startTeachingSession },
+    teach: { sessionActive: teach.isActive, onChooseTargets: () => startChoosing("words"), onChooseSentence: () => startChoosing("sentence"),
+      onStartSession: startTeachingSession },
     // The menu has closed itself; run the prompt on the board, then bring the menu back.
     onPreviewPrompt: async () => {
       await previewPrompt();
@@ -856,6 +932,13 @@ async function start() {
     wordsButtonAvailable: () => wordsButtonShown(getCurrent()),
     onSessionChange: () => renderAll(),
     runEndFlow: (result) => runEndFlow(result, { board: state.board, onVocabChanged: renderAll }),
+    // Sentence targets (Beta 3.12):
+    clearMessage: () => { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; drawMessage(); },
+    addWords: (items) => {                        // backward chaining: the first words, put in the message bar silently
+      for (const w of items) state.sentence.push({ label: w.label, spoken: w.spoken, base: w.label, id: w.wordId, mode: "model" });
+      drawMessage(); chipsChanged(false);
+    },
+    modelWords: modelChainWords,                  // forward chaining: the app models the words after the learner's part
   });
 
   // Scenes (Beta 3.0): only reads this learner's scenes from the device now; the recognition library is NOT loaded here.
@@ -882,7 +965,7 @@ async function start() {
   // Message bar: tap text to speak the sentence; Delete / Clear
   attachPressHandling($("message-bar"), (el) => {
     if (el.disabled) return;
-    if (el.id === "message-text") playMessage();
+    if (el.id === "message-text") { playMessage(); teach.onSelect({ type: "speak" }); }   // (a sentence target's "say the sentence" step)
     else if (el.id === "delete-btn") { stopSpeech(); state.sentence.pop(); drawMessage(); chipsChanged(false); }   // removes a whole chip
     else if (el.id === "clear-btn") { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; typing.clearDraft(); drawMessage(); }
     else if (el.id === "words-btn") {
@@ -910,6 +993,7 @@ async function start() {
   $("edit-done").addEventListener("click", stopEditing);
   $("edit-words").addEventListener("click", toggleWords);   // so an adult can edit the Words pages too
   $("target-done").addEventListener("click", stopChoosing);
+  $("target-undo").addEventListener("click", undoSentenceWord);
   $("target-words").addEventListener("click", toggleWords); // so an adult can choose targets on the Words pages too
 
   started = true;

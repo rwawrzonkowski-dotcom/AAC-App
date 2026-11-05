@@ -84,7 +84,32 @@ export function ladderLabel(id) {
   return m ? `${m[1]}% steps` : "custom ladder";
 }
 /** What the target's prompt is now, in a few words. */
-export const stepNow = (t) => (T.isProbe(t) ? "No prompts" : t.direction === "ltm" ? "Least-to-most" : T.posName(t));
+export const stepNow = (t) => (T.isProbe(t) ? "No prompts" : t.direction === "ltm" ? "Least-to-most" : T.isChain(t) ? T.chainStepsText(t) : T.posName(t));
+
+// The task-analysis view of a sentence target (Beta 3.12): for each session, each word's percent independent over the trials in which
+// the learner did that word (null = the learner did not do it that session: the app modeled it or filled it in), and how many words the
+// learner did (a change from the session before is a phase change: a word was added or taken away).
+// Returns { words: [labels (+ "say the sentence" when used)], rows: [{ n, date, who, where, method, phase, phaseChanged, trials, cells: [pct|null] }] }.
+export function chainModel(target, series, per) {
+  const words = target.links.map((l) => l.label);
+  const withSpeak = [...per.values()].some((list) => list.some((t) => (t.links || []).some((l) => l.wordId === T.SPEAK_ID)));
+  if (withSpeak) words.push("say the sentence");
+  let lastPhase = null;
+  const rows = series.map((p) => {
+    const list = (per.get(p.sessionId) || []).filter((t) => Array.isArray(t.links));
+    const cells = words.map((_, i) => {
+      const recs = list.map((t) => (i < target.links.length ? t.links.find((l) => l.index === i) : t.links.find((l) => l.wordId === T.SPEAK_ID)))
+        .filter((l) => l && l.taught);
+      return recs.length ? (recs.filter(T.linkIndependent).length / recs.length) * 100 : null;
+    });
+    const phase = list.length ? Math.max(...list.map((t) => t.phase || 0)) : null;
+    const method = list.length ? list[list.length - 1].method : null;
+    const row = { n: p.n, date: p.date, who: p.who, where: p.where, method, phase, phaseChanged: lastPhase !== null && phase !== null && phase !== lastPhase, trials: list.length, cells };
+    if (phase !== null) lastPhase = phase;
+    return row;
+  });
+  return { words, rows };
+}
 
 /**
  * Teaching numbers for the chosen range and filters.
@@ -160,6 +185,7 @@ function targetModel(target, inScope, per, allSessions, allTrials, range) {
     stepText: stepNow(target), masteryPct: target.mastery.pct,
     mastery: masteryProgress(target, allSessions.filter((s) => s.start < range.to), allTrials),
     trailing: lines.some((l) => l.x > series.length + 0.25),
+    chain: T.isChain(target) ? chainModel(target, series, per) : null,
   };
 }
 

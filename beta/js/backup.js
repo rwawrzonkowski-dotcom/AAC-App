@@ -58,6 +58,8 @@
 // `things` ({ list: [ { id, label, spoken, wordId, created, photos, picture: dataUrl, views: [base64 of 1280 float32 numbers] } ] }: "My things",
 // see js/things.js), written with the scenes under "Include scenes and photos". Older backups get Auto / Medium and no things; restoring one
 // over an existing learner leaves that learner's things alone.
+// Version 18 (beta 3.12) can hold SENTENCE targets in the teaching data (kind "chain": links, method, phase, linkPos... see js/teaching.js)
+// and sentence trials (links, method, phase). An older app would turn them into broken word targets, so it refuses a version 18 file.
 // Version 17 (beta 3.7) added `littleStrip` ("auto" | "always" | "never": the little-word strip). Older backups get Auto.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
@@ -85,7 +87,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 17;
+export const BACKUP_VERSION = 18;
 
 // ---------------------------------------------------------------- saving
 

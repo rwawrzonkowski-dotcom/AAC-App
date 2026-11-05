@@ -1,13 +1,14 @@
 # VOICE changelog and code map
 
-*Updated Nov 4, 2026, at VOICE Beta 3.11. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
+*Updated Nov 4, 2026, at VOICE Beta 3.12. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
 *Paths are inside `beta/` (the stable copy in the repo root has the same layout).*
 
 ## Part 1: Versions
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
-| **Beta 3.11** | Nov 4 | **End modeling button:** the top banner is only a label now (iPadOS delays or cancels touches at the top edge when opened from the Home Screen, so the banner hold could not finish). A large End modeling button at the right end of the message bar ends Model mode with two taps (tap, then "Tap again to end" within 3 s). | `index.html`, `styles.css`, `app.js` (`initModelEnd`, `placeModelEnd`, `resetModelEnd`) |
+| **Beta 3.12** | Nov 5 | **Sentence targets:** chains of 2–6 words taught by total task, forward or backward chaining; each word has its own prompt step and fades on its own; forward chaining has the app model the rest, backward fills in the first words; optional "say the sentence" step; next-word suggestion at session end; task-analysis table in Reports; Sentence words CSV. Backup v18. | `teaching.js`, `session.js`, `teachui.js`, `teachdata.js`, `ladderui.js`, `app.js`, `reportdata.js`, `reportdoc.js`, `reportexport.js`, `reports.js`, `backup.js`, `index.html`, `styles.css` |
+| Beta 3.11 | Nov 4 | **End modeling button:** the top banner is only a label now (iPadOS delays or cancels touches at the top edge when opened from the Home Screen, so the banner hold could not finish). A large End modeling button at the right end of the message bar ends Model mode with two taps (tap, then "Tap again to end" within 3 s). | `index.html`, `styles.css`, `app.js` (`initModelEnd`, `placeModelEnd`, `resetModelEnd`) |
 | Beta 3.10 | Nov 4 | **Ending Model mode:** the whole purple banner is the 2-second hold target (with an invisible margin to reach 44 px), it sits above the scene photo and Forms popover, and the adult menu shows "Stop modeling" while modeling. | `index.html`, `styles.css`, `app.js` (`attachHold` on `#model-banner`, `isModeling` / `onStopModel`), `adult.js` |
 | **Beta 3.9** | Nov 4 | **Adult menu redesign** (iPad Settings style): on iPad a list on the left (learner card, quick actions, search, grouped rows showing current values) and the chosen page on the right; on a phone one column at a time with "‹ Settings". **Parent / Clinician view** (device-wide, chosen on the first setup screen, switchable in the menu's top bar; Parent hides Targets and sessions, Everyday data and "Start a session"). **Settings search** (title + keywords, start-of-word matching, "N more results in Clinician view"). The five Auto/Always/Never choices moved to one "Buttons on the board" page; "Reading and typing" got its own page. **Code review:** removed `events.js` (an in-memory tap list that was never read and grew all session; everyday recording already saves every tap) and 16 unused functions; removed one unused style. | `settingsnav.js` (new), `adult.js`, `setup.js`, `styles.css` |
 | Beta 3.8 | Nov 4 | Six built-in phrase buttons now show the same words they say (I don't understand, I don't know, I don't like it, what's your name?, I use this device to talk, Please give me time to answer). | `data/core-board.json` |
@@ -70,6 +71,11 @@
 | Model mode prompt (ring and critter, opacity) | `modelprompt.js`, `critters.js`, `modelsettings.js` |
 | Starting and ending Model mode (End modeling button, menu quick action) | `app.js` (`startModeling`, `stopModeling`, `initModelEnd`, `placeModelEnd`), `adult.js`, `#model-banner` and `#model-end` in `index.html` |
 | Teaching rules: ladders, fading, mastery (pure, testable) | `teaching.js` |
+| Sentence targets: rules (phases, per-word fading, next-word suggestion) | `teaching.js` ("Sentence targets" section) |
+| Sentence targets: building one on the board (Add a sentence) | `app.js` (`startChoosing("sentence")`, `chooseCell`, `markTargets`) |
+| Sentence targets: running a trial (fill-in, app modeling, say-the-sentence step) | `session.js` (`startSentenceTrial`, `beginLink`, `nextPart`), `app.js` (`modelChainWords`) |
+| Sentence targets: settings and the "Add the next word?" question | `teachui.js` (`chainSection`, `askPhase`) |
+| Sentence targets: task-analysis table and CSV | `reportdata.js` (`chainModel`), `reportdoc.js` (`chainTable`), `reportexport.js` (`sentenceRows`) |
 | Targets, sessions and trials storage | `teachdata.js` |
 | A running session (strip controls, trials, prompts) | `session.js` |
 | Teaching screens (targets, start a session, summary) | `teachui.js`, `ladderui.js` |

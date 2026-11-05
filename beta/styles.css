@@ -732,10 +732,14 @@ button { font: inherit; touch-action: manipulation; }
 }
 #target-banner[hidden] { display: none; }
 #target-count { margin-left: auto; font-size: 0.7em; font-weight: 600; opacity: 0.9; }
-#target-words, #target-done {
+#target-words, #target-done, #target-undo {
   border: 0; border-radius: 1.2vmin; height: 80%; cursor: pointer; font-size: min(3.4vmin, 5dvh); font-weight: 800; padding: 0 4vmin;
 }
 #target-words { background: #b9e6d6; color: #052e16; }
+#target-undo { background: #fde68a; color: #422006; }
+#target-undo[hidden] { display: none; }
+#target-banner-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cell.in-sentence { outline: 0.6vmin solid #f59e0b; outline-offset: -0.6vmin; }
 #target-words[hidden] { display: none; }
 #target-done { background: #22c55e; color: #052e16; padding: 0 5vmin; }
 /* A target word: an amber frame and a star in the corner (drawn inside the button, so nothing moves). */
@@ -785,7 +789,7 @@ button { font: inherit; touch-action: manipulation; }
 }
 /* Path highlight (a step of a custom ladder) and the ring part of a Model or Ring step: the same ring as Model mode,
    kept on until the child answers. --ring-a is the strength (0 to 1). */
-.cell.teach-ring, .bar-btn.teach-ring {
+.cell.teach-ring, .bar-btn.teach-ring, #message-text.teach-ring {
   z-index: 5;
   animation: model-pulse 0.5s ease-in-out infinite alternate;
   box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
@@ -1135,3 +1139,21 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 #app.little-on #page-title { position: absolute; right: 1.2vmin; top: 50%; transform: translateY(-50%); font-size: min(2.6vmin, 3.6dvh);
   max-width: 18vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #app.little-on.cam-on #page-title { right: calc(9vw + 1.8vmin); }
+
+/* ---------- Sentence targets (Beta 3.12) ---------- */
+.chain-words { display: flex; flex-direction: column; gap: 6px; }
+.chain-word { display: grid; grid-template-columns: 2em minmax(5em, 1fr) auto minmax(9em, 14em); align-items: center; gap: 8px; }
+.chain-word.off .chain-label { color: #64748b; }
+.chain-num { width: 1.6em; height: 1.6em; border-radius: 50%; background: #1d4ed8; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 0.85em; }
+.chain-word.off .chain-num { background: #94a3b8; }
+.chain-label { font-weight: 800; }
+.chain-role { margin: 0; }
+.tgt-steps { font-size: 0.85em; }
+.rep-ta { margin-top: 10px; }
+.rep-ta h4 { margin: 4px 0 6px; }
+.ta-table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+.ta-table th, .ta-table td { border: 1px solid #e2e8f0; padding: 4px 8px; text-align: center; }
+.ta-table th:nth-child(-n+3), .ta-table td:nth-child(-n+3) { text-align: left; white-space: nowrap; }
+.ta-off { color: #94a3b8; font-style: italic; font-size: 0.85em; }
+.ta-phase td:first-child { color: #b45309; font-weight: 800; }
+.ta-note { font-size: 0.8em; }
