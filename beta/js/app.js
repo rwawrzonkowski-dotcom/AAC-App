@@ -30,7 +30,6 @@ import { showSetup } from "./setup.js";
 import { requestPersistence, maybeShowNotice } from "./keepdata.js";
 import { initAdultHint, maybeShowCoach } from "./adulthint.js";
 import { openCellEditor } from "./editor.js";
-import { logWord } from "./events.js";
 import {
   runPrompt, sustainStep, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
 } from "./modelprompt.js";
@@ -267,7 +266,7 @@ function playMessage() {
 }
 
 // ---------- Scenes: a tap on a strip button or on the scene photo ----------
-// The same rules as a board word: speak first, then the chip, the event list and the everyday record (how: "scene" for a strip
+// The same rules as a board word: speak first, then the chip and the everyday record (how: "scene" for a strip
 // button, "photo scene" for the full-screen photo; the record also keeps the scene id). In Model mode an adult's tap rings the strip button.
 // The word's board spot glows (js/scenestrip.js) after this returns.
 function onSceneItem(item, { how, sceneId, el }) {
@@ -278,7 +277,6 @@ function onSceneItem(item, { how, sceneId, el }) {
   const id = item.wordId || null;
   state.sentence.push({ label: item.label, spoken, base: item.label, id: id || undefined, mode: recMode() });
   drawMessage();
-  logWord(item.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id, source: how, scene: sceneId });
   recordTap({ id, label: item.label, spoken, how, sceneId });
   chipsChanged(true);
   if (state.modeling && how === "scene" && el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), RING_MS);
@@ -312,7 +310,6 @@ function addLittleWord(w, { how, el, afterSelect = false, base }) {
   // Hold to select already added the head word during this press: the dial word replaces it.
   if (afterSelect && last && base && last.id === base.id) state.sentence[state.sentence.length - 1] = item; else state.sentence.push(item);
   drawMessage();
-  logWord(w.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id: w.id, source: how });
   recordTap({ id: w.id, label: w.label, spoken: w.spoken || w.label, how, ...(base ? { base: base.label } : {}) });
   chipsChanged(true);
   if (state.modeling && el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), RING_MS);
@@ -374,8 +371,6 @@ function onTyped({ label, spoken, kind, speak: say, context }) {
   state.sentence.push({ label, spoken, base: label, mode: recMode() });
   drawMessage();
   if (say) speak(spoken);
-  logWord(label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined,
-    kind === "number" ? { source: "numberpad", spoken } : { source: "keyboard" });
   recordTap({ id: null, label, spoken, how: kind === "number" ? "numberpad" : "keyboard" });
   chipsChanged(true);
   if (context && context.fromPage && kind === "number" && state.page !== "core") goTo("core");
@@ -446,7 +441,6 @@ function openWordDial(cellEl, { pointer, afterSelect }) {
       const last = state.sentence[state.sentence.length - 1];
       if (afterSelect && last && last.id === id) state.sentence[state.sentence.length - 1] = item; else state.sentence.push(item);
       drawMessage();
-      logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form: entry.word, id });
       recordTap({ id, label: entry.word, spoken: entry.word, how: "dial", form: entry.word, base: d.label });
       chipsChanged(true);
       if (state.modeling) {
@@ -487,7 +481,6 @@ function openForms() {
       const base = last.base || last.label;
       state.sentence[state.sentence.length - 1] = { label: form, spoken: form, base, id: last.id, mode: recMode() };
       drawMessage();
-      logWord(base, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { form, id: last.id });
       recordTap({ id: last.id, label: form, spoken: form, how: "forms", form, base });
       chipsChanged(true);
       if (state.modeling) {
@@ -512,12 +505,6 @@ function promptCell(key, ringMs) {
 // The same prompt on the top-bar Words button (the "opener" of the Words menu).
 function promptWordsButton(ringMs) {
   runPrompt($("words-btn"), getCurrent().model, getPhotoUrl("critter"), ringMs);
-}
-
-// What to remember about the prompt in the event list (for Phase 2 data).
-function promptInfo() {
-  const m = getCurrent().model;
-  return { style: m.style, ringOpacity: m.ringOpacity, critterOpacity: m.critterOpacity };
 }
 
 // "Preview on board" (adult menu > Model prompt): run the prompt once on the "more"
@@ -577,7 +564,6 @@ function onCellTap(cellEl) {
   const id = d.wordId || d.key;           // a built-in word's id ("fall-season"), or the cell key of a word the adult added
   state.sentence.push({ label: shown, spoken: d.spoken, base: shown, noForms: d.noForms, id, mode: recMode() });
   drawMessage();
-  logWord(d.label, state.modeling ? "model" : "learner", state.modeling ? promptInfo() : undefined, { id });
   recordTap({ id, label: d.label, spoken: d.spoken, how: "board" });
   chipsChanged(true);
   teach.onSelect({ type: "word", id, label: d.label });     // (a no-op unless a teaching trial is running)

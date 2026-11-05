@@ -203,7 +203,6 @@ function openSwitcher() {
 
 // ---------------------------------------------------------------- the tappable scene photo
 let ps = null;      // the open scene photo: { layer, url, close }
-export const photoSceneOpen = () => !!ps;
 
 export function openPhotoScene() {
   const sc = getActive();

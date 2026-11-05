@@ -293,11 +293,6 @@ async function readAll(store, learnerId, keep = () => true) {
   }
   return out;
 }
-/** Raw word events with time in [from, to), oldest first. */
-export async function listEvents(learnerId, from = 0, to = Infinity) {
-  await flushAll();
-  return readAll("events", learnerId, (e) => e.time >= from && e.time < to);
-}
 // Rows with a time in [from, to), oldest first, read straight from the key range (the id starts with the time), so a short period
 // does not read the whole store. Used by the reports (Beta 2.5).
 async function readTimeRange(store, learnerId, from, to) {
@@ -322,10 +317,6 @@ export async function countEventsBetween(learnerId, from, to) {
 export async function listFirstSeen(learnerId) {
   await flushAll();
   return (await db.getPrefix("firstseen", P(learnerId))).map((r) => r.value).filter((f) => f && f.key);
-}
-export async function listUtterances(learnerId, from = 0, to = Infinity) {
-  await flushAll();
-  return readAll("utterances", learnerId, (u) => u.time >= from && u.time < to);
 }
 /** Words first used in learner mode at or after `since` (ms), oldest first. */
 export async function newWordsSince(learnerId, since) {

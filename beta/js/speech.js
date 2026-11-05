@@ -35,13 +35,6 @@ function refreshVoices() {
   if (synth) voices = synth.getVoices();
 }
 
-// English voices only; if the device has none, offer every voice.
-export function listVoices() {
-  refreshVoices();
-  const english = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith("en"));
-  return english.length ? english : voices.slice();
-}
-
 // Every voice the device offers, in every language (the voice picker sorts and groups them).
 export function allVoices() {
   refreshVoices();
@@ -161,7 +154,6 @@ export function speakMessage(text) {
 let seq = null;   // the playback in progress: { id, polls }
 let seqId = 0;
 
-export const isSequencePlaying = () => !!seq;
 
 // True while the message bar is being played, with pauses ON (a chip-by-chip sequence) or OFF (one
 // utterance). The single utterance is trusted for as long as the speech engine also says it is busy;

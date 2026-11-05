@@ -34,7 +34,6 @@ const abs = (path) => new URL(path, document.baseURI).href;
 
 let detectorPromise = null;      // the loaded model, kept for the rest of this visit
 let grab = false, grabbed = null; // see "feature maps" below
-export const isLoaded = () => !!detectorPromise;
 // Test hook: a page can replace the detector (the tests use this to feed in made-up detections). Never used by the app itself.
 let override = null, overrideKeepsModel = false, overrideFeatures = null;
 // `real: true` keeps loading the real model (so the feature maps are real) and only replaces the detections;
@@ -123,7 +122,6 @@ export const MAP_NODES = {
   f16: "FeatureExtractor/MobilenetV2/expanded_conv_13/expand/Relu6",
   f32: "FeatureExtractor/MobilenetV2/Conv_1/Relu6",
 };
-export const MAP_PX = 300;       // the model resizes every picture to 300 x 300 first
 
 async function mapOf(tf, t) {    // [1, h, w, c] tensor -> { data: Float32Array(h*w*c), h, w, c }
   const data = await t.data();

@@ -50,7 +50,6 @@ export function cleanLadder(raw) {
 export const isCustom = (t) => t.ladderMode === "custom" && !!cleanLadder(t.customLadder);
 // The ladder a target uses now (a copy, most help first).
 export const ladderOf = (t) => (isCustom(t) ? cloneLadder(cleanLadder(t.customLadder)) : defaultLadder(t.stepSize));
-export const posIndependent = (t) => ladderOf(t).length;      // the pos that means "Independent"
 
 // "Model 50%"; in a custom ladder "Custom: Glow 25%".
 export const stepName = (step, custom) => (custom ? "Custom: " : "") + STEP_TYPE_NAMES[step.type] + " " + step.opacity + "%";

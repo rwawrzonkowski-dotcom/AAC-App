@@ -30,7 +30,6 @@ export async function listScenes(learnerId) {
   const rows = await db.getPrefix("scenes", learnerId + "|");
   return rows.map((r) => r.value).filter((s) => s && s.id).sort((a, b) => (a.order - b.order) || (a.created - b.created));
 }
-export const getScene = (learnerId, id) => db.get("scenes", key(learnerId, id));
 export const putScene = (scene) => db.put("scenes", key(scene.learnerId, scene.id), scene);
 export const deleteScene = (learnerId, id) => db.del("scenes", key(learnerId, id));
 export const deleteScenes = (learnerId) => db.delPrefix("scenes", learnerId + "|");

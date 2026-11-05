@@ -11,7 +11,6 @@
 import * as T from "./teaching.js";
 import { localDate, dayStart } from "./everyday.js";
 
-const DAY = 86400000;
 export const HOW_NAMES = { board: "Main board", page: "Category and Words pages", forms: "Forms button", dial: "Press-and-hold dial",
   keyboard: "Keyboard (ABC)", numberpad: "Number pad", scene: "Scene strip", "photo scene": "Scene photo",
   little: "Little-word strip", "little dial": "Little-word dial" };
@@ -22,7 +21,6 @@ export function addDays(date, n) {
   const [y, m, d] = date.split("-").map(Number);
   return localDate(new Date(y, m - 1, d + n).getTime());
 }
-export const daysBetween = (a, b) => Math.round((dayStart(b) - dayStart(a)) / DAY);
 /** The Monday (local) of the week a "YYYY-MM-DD" day is in. */
 export function weekStart(date) {
   const [y, m, d] = date.split("-").map(Number);

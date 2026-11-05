@@ -41,7 +41,6 @@ export async function loadTeaching(learnerId) {
     if (ensureInstructions(getBoardData(), t) || migrated.has(t.wordId)) await db.put("targets", learnerId + "|" + t.wordId, t);
   }
 }
-export const loadedFor = () => cacheFor;
 
 // Targets currently in use (not removed), oldest first.
 export const getTargets = () => [...cache.values()].filter((t) => !t.removed).sort((a, b) => a.added - b.added);
