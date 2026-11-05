@@ -314,7 +314,7 @@ photos. Keep a recent backup (see Backup below), then restore it after resetting
 - **Start modeling:** a purple "Modeling" bar appears. Your taps work normally and the
   tapped button gets the learner's *Model prompt* (see below); after a category item, the
   page stays up briefly so the prompt on the item is seen, then each button that opened a
-  page gets the prompt in turn, so the whole path is shown. Hold **End** for 2 seconds to stop.
+  page gets the prompt in turn, so the whole path is shown. To stop, tap **End modeling** (at the right end of the message bar), then tap it again within 3 seconds; or use the adult menu's **Stop modeling** (beta 3.11).
 - **Model prompt (for this learner):** what Model mode shows on each modeled button.
   - *Prompt style:* **Ring only** (the default), **Critter only**, or **Critter and ring**.
   - *Ring opacity* and *Critter opacity*, 0 to 100% in steps of 5 (default 100%). At 0% that

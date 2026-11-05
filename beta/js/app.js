@@ -47,7 +47,6 @@ import * as little from "./littlewords.js";
 import { initCameraButton } from "./camerabtn.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
-const HOLD_TO_END_MODEL_MS = 2000;
 // Model mode: how long to pause on each page while stepping back out (ring only: 600 ms;
 // with the critter it is longer, so the critter has time to arrive, stay and fade: see js/modelprompt.js).
 let returning = false;                // true during those pauses
@@ -163,6 +162,7 @@ function renderAll() {
   $("app").classList.toggle("editing", state.editing);
   $("edit-banner").hidden = !state.editing;
   $("model-banner").hidden = !state.modeling;
+  placeModelEnd();
   $("target-banner").hidden = !state.choosing;
   $("app").classList.toggle("choosing", state.choosing);
   if (state.choosing) markTargets();
@@ -667,6 +667,43 @@ function stopEditing() { state.editing = false; renderAll(); }
 function startModeling() { closeForms(); closeDial(); stopSpeech(); state.editing = false; state.choosing = false; state.modeling = true; renderAll(); }
 function stopModeling() { state.modeling = false; clearCritter(); renderAll(); }
 
+// End modeling (Beta 3.11). A large button over the right end of the message bar, away from the screen's top edge (iPadOS keeps that
+// edge for its swipe-down gesture and delays or cancels touches there). Two ordinary taps: the first asks "Tap again to end"
+// for 3 seconds, the second ends Model mode. (The adult menu's "Stop modeling" quick action is a second way out.)
+const END_CONFIRM_MS = 3000;
+let endTimer = null;
+function placeModelEnd() {
+  const btn = $("model-end");
+  btn.hidden = !state.modeling;
+  if (!state.modeling) { resetModelEnd(); return; }
+  const r = $("message-text").getBoundingClientRect();
+  // Always below the purple banner (so never at the screen's top edge), as tall as the room left in the message bar, at least 44 px.
+  const top = Math.round(Math.max(r.top + (r.height * 0.19), $("model-banner").getBoundingClientRect().bottom + 6));
+  const hgt = Math.max(44, Math.round(Math.min(r.height * 0.62, r.bottom - 4 - top)));
+  btn.style.height = hgt + "px";
+  btn.style.top = top + "px";
+  btn.style.right = Math.round(window.innerWidth - r.right + 8) + "px";
+}
+function resetModelEnd() {
+  clearTimeout(endTimer); endTimer = null;
+  const btn = $("model-end");
+  btn.classList.remove("confirm");
+  btn.textContent = "End modeling";
+}
+function initModelEnd() {
+  const btn = $("model-end");
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!state.modeling) return;
+    if (btn.classList.contains("confirm")) { resetModelEnd(); stopModeling(); return; }
+    btn.classList.add("confirm");
+    btn.textContent = "Tap again to end";
+    clearTimeout(endTimer);
+    endTimer = setTimeout(resetModelEnd, END_CONFIRM_MS);
+  });
+  window.addEventListener("resize", placeModelEnd);
+}
+
 // ---------- Teaching: choosing targets ----------
 // Adult menu > Teaching > Targets > Add targets. The board (and its pages and folders) is shown as usual with a banner over the
 // message bar; tapping a word makes it a target (tap again to remove it) and says nothing. Category and folder buttons open
@@ -869,7 +906,7 @@ async function start() {
     { holdMs, blocked: tapsBlocked, dialMs: littleDialMs, openDial: openLittleDial });
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
   initAdultHint($("adult-hold"));          // a quick tap shows "Adults: hold 3 seconds to open the menu"
-  attachHold($("model-banner"), HOLD_TO_END_MODEL_MS, stopModeling);   // the whole banner (Beta 3.10)
+  initModelEnd();                          // End modeling: two taps on a button inside the message bar (Beta 3.11)
   $("edit-done").addEventListener("click", stopEditing);
   $("edit-words").addEventListener("click", toggleWords);   // so an adult can edit the Words pages too
   $("target-done").addEventListener("click", stopChoosing);

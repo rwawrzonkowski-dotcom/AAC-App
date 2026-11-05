@@ -80,12 +80,13 @@
     </div>
   </main>
 
-  <!-- Model mode banner: a strip across the very top. Beta 3.10: the WHOLE banner is the "hold 2 seconds to end" target (the small
-       End button alone was too hard to hit), with an invisible extra margin below it; the bar fills across the whole banner. -->
-  <div id="model-banner" class="hold-bar" role="button" aria-label="Modeling. Hold here for 2 seconds to end" hidden>
-    <span class="mb-label">Modeling</span>
-    <span id="model-end" class="mb-end">Hold here 2 sec to end</span>
-  </div>
+  <!-- Model mode banner: a thin label across the very top (it ignores touches). Beta 3.11: ending is NOT done up here any more:
+       on an iPad opened from the Home Screen the top edge belongs to the system's swipe-down gesture, which delays or cancels
+       touches there, so a hold on the banner could never finish. -->
+  <div id="model-banner" hidden><span class="mb-label">Modeling</span></div>
+  <!-- End modeling: a large button at the right end of the message bar, well away from the screen edge (js/app.js places it).
+       Two ordinary taps: the first turns it into "Tap again to end" for 3 seconds, the second ends Model mode. -->
+  <button id="model-end" type="button" hidden>End modeling</button>
 
   <script type="module" src="js/app.js"></script>
 </body>
