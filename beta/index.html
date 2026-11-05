@@ -80,10 +80,11 @@
     </div>
   </main>
 
-  <!-- Model mode banner: a thin strip across the very top -->
-  <div id="model-banner" hidden>
-    <span>Modeling</span>
-    <button id="model-end" type="button" class="hold-bar">End (hold 2 sec)</button>
+  <!-- Model mode banner: a strip across the very top. Beta 3.10: the WHOLE banner is the "hold 2 seconds to end" target (the small
+       End button alone was too hard to hit), with an invisible extra margin below it; the bar fills across the whole banner. -->
+  <div id="model-banner" class="hold-bar" role="button" aria-label="Modeling. Hold here for 2 seconds to end" hidden>
+    <span class="mb-label">Modeling</span>
+    <span id="model-end" class="mb-end">Hold here 2 sec to end</span>
   </div>
 
   <script type="module" src="js/app.js"></script>

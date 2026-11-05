@@ -47,7 +47,7 @@ const PREVIEW_WORD = "bubbles";                      // "Preview a word"
 //   startAt             id of a section to scroll to when the menu opens (optional)
 //   teach               the Teaching section (Phase 2): { sessionActive(), onChooseTargets(), onStartSession(opts) }
 export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel,
-  onPreviewPrompt, teach }) {
+  onPreviewPrompt, teach, isModeling = () => false, onStopModel = () => {} }) {
   let stopVoiceListener = () => {};
   const pickerState = newPickerState();   // which voice groups are open; kept when the menu is rebuilt
   let backupMessage = "";   // result of the last save / restore, shown in the Backup section
@@ -154,7 +154,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("span", { class: "set-chev", "aria-hidden": "true", text: "›" }));
     const actions = h("div", { class: "set-actions" },
       h("button", { type: "button", class: "btn", id: "menu-edit", text: "Edit board", disabled: busy, onclick: () => { close(); onEdit(); } }),
-      h("button", { type: "button", class: "btn", id: "menu-model", text: "Start modeling", disabled: busy, onclick: () => { close(); onModel(); } }),
+      isModeling()
+        ? h("button", { type: "button", class: "btn primary", id: "menu-model-stop", text: "Stop modeling", onclick: () => { close(); onStopModel(); } })
+        : h("button", { type: "button", class: "btn", id: "menu-model", text: "Start modeling", disabled: busy, onclick: () => { close(); onModel(); } }),
       view === "clinician" ? h("button", { type: "button", class: "btn", id: "menu-session", text: "Start a session", disabled: busy,
         onclick: () => openStartSession({ refresh, closeMenu: close, ...teach }) }) : null);
     navBody.replaceChildren(...[card, actions,

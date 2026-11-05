@@ -753,6 +753,7 @@ function showAdultMenu(startAt) {
     },
     onEdit: startEditing,
     onModel: startModeling,
+    isModeling: () => state.modeling, onStopModel: stopModeling,      // the menu's quick action reads "Stop modeling" while modeling
     teach: { sessionActive: teach.isActive, onChooseTargets: startChoosing, onStartSession: startTeachingSession },
     // The menu has closed itself; run the prompt on the board, then bring the menu back.
     onPreviewPrompt: async () => {
@@ -868,7 +869,7 @@ async function start() {
     { holdMs, blocked: tapsBlocked, dialMs: littleDialMs, openDial: openLittleDial });
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
   initAdultHint($("adult-hold"));          // a quick tap shows "Adults: hold 3 seconds to open the menu"
-  attachHold($("model-end"), HOLD_TO_END_MODEL_MS, stopModeling);
+  attachHold($("model-banner"), HOLD_TO_END_MODEL_MS, stopModeling);   // the whole banner (Beta 3.10)
   $("edit-done").addEventListener("click", stopEditing);
   $("edit-words").addEventListener("click", toggleWords);   // so an adult can edit the Words pages too
   $("target-done").addEventListener("click", stopChoosing);

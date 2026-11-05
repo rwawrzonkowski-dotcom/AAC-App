@@ -1,12 +1,13 @@
 # VOICE changelog and code map
 
-*Updated Nov 4, 2026, at VOICE Beta 3.9. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
+*Updated Nov 4, 2026, at VOICE Beta 3.10. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
 *Paths are inside `beta/` (the stable copy in the repo root has the same layout).*
 
 ## Part 1: Versions
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
+| **Beta 3.10** | Nov 4 | **Ending Model mode:** the whole purple banner is the 2-second hold target (with an invisible margin to reach 44 px), it sits above the scene photo and Forms popover, and the adult menu shows "Stop modeling" while modeling. | `index.html`, `styles.css`, `app.js` (`attachHold` on `#model-banner`, `isModeling` / `onStopModel`), `adult.js` |
 | **Beta 3.9** | Nov 4 | **Adult menu redesign** (iPad Settings style): on iPad a list on the left (learner card, quick actions, search, grouped rows showing current values) and the chosen page on the right; on a phone one column at a time with "‹ Settings". **Parent / Clinician view** (device-wide, chosen on the first setup screen, switchable in the menu's top bar; Parent hides Targets and sessions, Everyday data and "Start a session"). **Settings search** (title + keywords, start-of-word matching, "N more results in Clinician view"). The five Auto/Always/Never choices moved to one "Buttons on the board" page; "Reading and typing" got its own page. **Code review:** removed `events.js` (an in-memory tap list that was never read and grew all session; everyday recording already saves every tap) and 16 unused functions; removed one unused style. | `settingsnav.js` (new), `adult.js`, `setup.js`, `styles.css` |
 | Beta 3.8 | Nov 4 | Six built-in phrase buttons now show the same words they say (I don't understand, I don't know, I don't like it, what's your name?, I use this device to talk, Please give me time to answer). | `data/core-board.json` |
 | Beta 3.7 | Nov 4 | **Little-word strip:** 8 little words in fixed strip slots, each with a hold dial of 4 more (40 words). Scene takes the strip over; per-learner Auto/Always/Never. Backup v17. | `littlewords.js` (new), `app.js`, `adult.js`, `profiles.js`, `backup.js`, `everyday.js`, `reportdata.js`, `reportexport.js` |
@@ -66,6 +67,7 @@
 | Feature | Code |
 |---|---|
 | Model mode prompt (ring and critter, opacity) | `modelprompt.js`, `critters.js`, `modelsettings.js` |
+| Starting and ending Model mode (banner hold, menu quick action) | `app.js` (`startModeling`, `stopModeling`), `adult.js`, `#model-banner` in `index.html` |
 | Teaching rules: ladders, fading, mastery (pure, testable) | `teaching.js` |
 | Targets, sessions and trials storage | `teachdata.js` |
 | A running session (strip controls, trials, prompts) | `session.js` |

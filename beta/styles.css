@@ -303,22 +303,24 @@ button { font: inherit; touch-action: manipulation; }
 }
 
 /* ---------- Model mode ---------- */
+/* Above the scene photo (36) and the Forms popover (40), below adult sheets (50): ending Model mode is always reachable. */
 #model-banner {
-  position: fixed; top: 0; left: 0; right: 0; height: calc(3.6dvh + var(--safe-t)); z-index: 30;
-  display: flex; align-items: center; justify-content: space-between;
+  position: fixed; top: 0; left: 0; right: 0; height: calc(4.2dvh + var(--safe-t)); z-index: 45;
+  display: flex; align-items: center; justify-content: space-between; overflow: visible;
   padding: var(--safe-t) calc(2vmin + var(--safe-x)) 0;
-  background: rgba(109, 40, 217, 0.92); color: #fff; font-weight: 800;
-  font-size: 2.4dvh; letter-spacing: 0.08em;
+  background: rgba(109, 40, 217, 0.94); color: #fff; font-weight: 800;
+  font-size: 2.4dvh; letter-spacing: 0.08em; cursor: pointer; touch-action: none;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
 #model-banner[hidden] { display: none; }
-#model-end {
-  position: relative; overflow: hidden; height: 80%; border: 0.2vmin solid #fff; border-radius: 1vmin;
-  background: transparent; color: #fff; font-size: 2.2dvh; font-weight: 700; padding: 0 2vmin; cursor: pointer;
-  touch-action: none;
-}
+/* invisible extra touch area under the banner, so the target is at least 44 px tall (Apple's minimum) */
+#model-banner::before { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: max(0px, calc(44px - 4.2dvh)); }
+#model-banner > span { position: relative; z-index: 1; pointer-events: none; }
+.mb-end { border: 0.2vmin solid #fff; border-radius: 1vmin; padding: 0.3dvh 2vmin; font-size: 2.1dvh; font-weight: 700; letter-spacing: 0.02em; }
 .hold-bar::after {            /* progress bar that fills while holding */
   content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255,255,255,0.45);
 }
+#model-banner.hold-bar::after { background: rgba(255,255,255,0.35); }
 .hold-bar.holding::after { animation: fill-bar var(--hold-ms) linear forwards; }
 @keyframes fill-bar { from { width: 0; } to { width: 100%; } }
 /* The ring is a glow around the button: it takes no room. --ring-a (0 to 1) is the
