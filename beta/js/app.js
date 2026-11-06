@@ -45,6 +45,8 @@ import { openDial } from "./dial.js";
 import * as everyday from "./everyday.js";
 import * as scenes from "./scenestrip.js";
 import * as little from "./littlewords.js";
+import { openModelSentence } from "./modelsentence.js";
+import { MODEL_STEP_MS as STEP_MS_BY_SPEED } from "./critters.js";
 import { initCameraButton } from "./camerabtn.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
@@ -680,6 +682,7 @@ let endTimer = null;
 function placeModelEnd() {
   const btn = $("model-end");
   btn.hidden = !state.modeling;
+  $("model-type").hidden = !state.modeling;
   if (!state.modeling) { resetModelEnd(); return; }
   const r = $("message-text").getBoundingClientRect();
   // Always below the purple banner (so never at the screen's top edge), as tall as the room left in the message bar, at least 44 px.
@@ -688,6 +691,12 @@ function placeModelEnd() {
   btn.style.height = hgt + "px";
   btn.style.top = top + "px";
   btn.style.right = Math.round(window.innerWidth - r.right + 8) + "px";
+  // "Model a sentence" sits just left of End modeling, same height (Beta 3.15).
+  const mt = $("model-type");
+  mt.hidden = false;
+  mt.style.height = hgt + "px";
+  mt.style.top = top + "px";
+  mt.style.right = Math.round(window.innerWidth - r.right + 8 + btn.getBoundingClientRect().width + 8) + "px";
 }
 function resetModelEnd() {
   clearTimeout(endTimer); endTimer = null;
@@ -707,6 +716,32 @@ function initModelEnd() {
     endTimer = setTimeout(resetModelEnd, END_CONFIRM_MS);
   });
   window.addEventListener("resize", placeModelEnd);
+  $("model-type").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!state.modeling || modelingSentence) return;
+    resetModelEnd();
+    openModelSentence({ wordsButtonShown: wordsButtonShown(getCurrent()), onModel: modelTypedSentence });
+  });
+}
+
+// Model a sentence (Beta 3.15): the typed words the child can see, modeled in order along their real paths (js/modelsentence.js).
+// A word that is a head of the little-word strip (and the strip is showing) is modeled right there, one tap. "End modeling" stops it.
+let modelingSentence = false;
+async function modelTypedSentence(words) {
+  const stripOn = $("app").classList.contains("little-on");
+  const heads = new Set(little.GROUPS.map((g) => g.head));
+  const items = [];
+  for (const w of words) {
+    if (stripOn && heads.has(w.wordId)) { items.push({ wordId: w.wordId, label: w.label, spoken: w.spoken, chipLabel: w.text, steps: [{ strip: true, word: true }] }); continue; }
+    const route = teach.routeTo(w.wordId, w.label, w.pageId);
+    if (route) items.push({ wordId: w.wordId, label: w.label, spoken: w.spoken, chipLabel: w.viaForm ? w.text : null, steps: route.steps });
+  }
+  if (!items.length) return;
+  modelingSentence = true;
+  $("model-type").disabled = true;
+  try {
+    await modelChainWords(items, { stepMs: STEP_MS_BY_SPEED[getCurrent().model.speed] || STEP_MS_BY_SPEED.medium, keepGoing: () => state.modeling });
+  } finally { modelingSentence = false; $("model-type").disabled = false; }
 }
 
 // ---------- Teaching: choosing targets ----------
@@ -814,34 +849,40 @@ async function chooseCell(d) {
 // Forward chaining (Beta 3.12): the app models the rest of the sentence. For each word it shows the learner's Model prompt (ring
 // and/or critter) on each button along the word's route (category, folder, word), opens the pages, adds the word and says it, then
 // goes back to the main board. items = [{ wordId, label, steps }] (steps = the route from js/session.js buildChain).
+// Also used by "Model a sentence" (Beta 3.15): opts.stepMs (the learner's Model speed), opts.keepGoing() (false = stop now, e.g. the
+// adult ended Model mode), item.spoken / item.chipLabel (what to say and show when it differs from the button, e.g. "wanted"), and
+// steps [{ strip: true, word: true }] for a word modeled on the little-word strip.
 const MODEL_STEP_MS = 900;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function modelChainWords(items) {
+async function modelChainWords(items, { stepMs = MODEL_STEP_MS, keepGoing = () => true } = {}) {
   returning = true;                                   // the child's taps are ignored while the app models
   try {
-    for (const it of items) {
+    outer: for (const it of items) {
       if (state.page !== "core") { goTo("core"); await wait(250); }
       for (const st of it.steps) {
+        if (!keepGoing()) break outer;
         const cells = [...state.cells.values()];
         let el = null;
-        if (st.word) { const d = cells.find((c) => c.kind === "word" && c.visible && (c.wordId || c.key) === it.wordId); el = d && document.querySelector(`#board .cell[data-key="${d.key}"]`); }
+        if (st.strip) el = document.querySelector(`#little-bar .lw-item[data-id="${it.wordId}"]`);
+        else if (st.word) { const d = cells.find((c) => c.kind === "word" && c.visible && (c.wordId || c.key) === it.wordId); el = d && document.querySelector(`#board .cell[data-key="${d.key}"]`); }
         else if (st.bar) el = $("words-btn");
         else el = document.querySelector(`#board .cell[data-key="${st.key}"]`);
-        if (el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), MODEL_STEP_MS);
-        await wait(MODEL_STEP_MS);
+        if (el) runPrompt(el, getCurrent().model, getPhotoUrl("critter"), stepMs);
+        await wait(stepMs);
+        if (!keepGoing()) break outer;
         if (st.word) {
           const d = cells.find((c) => c.kind === "word" && (c.wordId || c.key) === it.wordId);
-          const spoken = (d && d.spoken) || it.label;
+          const spoken = it.spoken || (d && d.spoken) || it.label;
           speak(spoken);
-          state.sentence.push({ label: d && d.sentence ? spoken : it.label, spoken, base: it.label, id: it.wordId, mode: "model" });
+          state.sentence.push({ label: it.chipLabel || (d && d.sentence ? spoken : it.label), spoken, base: it.label, id: it.wordId, mode: "model" });
           drawMessage(); chipsChanged(false);
-          await wait(500);
+          await wait(Math.round(stepMs * 0.55));
         } else if (st.opens) { if (st.bar) toggleWords(); else goTo(st.opens); await wait(300); }
       }
       clearCritter();
     }
     if (state.page !== "core") goTo("core");
-  } finally { returning = false; }
+  } finally { returning = false; clearCritter(); }
 }
 
 // ---------- Teaching: sessions ----------

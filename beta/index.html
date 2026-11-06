@@ -95,6 +95,8 @@
   <!-- End modeling: a large button at the right end of the message bar, well away from the screen edge (js/app.js places it).
        Two ordinary taps: the first turns it into "Tap again to end" for 3 seconds, the second ends Model mode. -->
   <button id="model-end" type="button" hidden>End modeling</button>
+  <!-- Model a sentence (Beta 3.15): type what you said; VOICE models it on the board (js/modelsentence.js). Placed left of End modeling. -->
+  <button id="model-type" type="button" aria-label="Model a sentence: type what you said" title="Model a sentence" hidden>&#x2328; Type</button>
 
   <script type="module" src="js/app.js"></script>
 </body>

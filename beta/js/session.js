@@ -196,6 +196,9 @@ function buildChain(target) {
   return { pages, steps };
 }
 
+/** The route to a word on the board (Beta 3.15, for "Model a sentence"): { pages, steps } or null when it cannot be reached now. */
+export const routeTo = (wordId, label, pageId) => buildChain({ wordId, label, pageId });
+
 function flash(text) { S.last = text; paintBar(); }
 
 function startTrial(type) {

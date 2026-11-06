@@ -219,6 +219,7 @@
 - Several learners can share one iPad. Each has their own stage, hidden/shown
   words, renamed words, photos, added words and voice settings.
 - Works offline. Nothing is sent anywhere: no accounts, no ads, no tracking.
+- **Model a sentence (beta 3.15):** in Model mode tap **⌨ Type** (next to End modeling), type what you said, and VOICE models each word the child can see along its real path, saying it and adding it to the message bar. Speed: Adult menu > Model prompt.
 - **Sentence targets (beta 3.12):** Adult menu > Targets and sessions > Targets > **Add a sentence**: tap 2 to 6 words in order, then Done. In the sentence's Settings choose Total task, Forward or Backward chaining (each word fades on its own; forward has the app model the rest; backward fills in the first words) and, optionally, Say the sentence at the end. Reports show a task-analysis table per sentence; Export has a Sentence words file.
 - **Little-word strip (beta 3.7):** eight little words (a, is, and, to, will, has, him, there) in fixed spots in the strip under the message bar. Tap one to say it; press and hold for a dial of four more (e.g. is → was, are, am, were). Adult menu > Vocabulary stage > Show little-word strip (Auto from stage 3, Always, Never). A scene uses the strip instead while it is showing.
 - **Adult menu (beta 3.5):** the small gear circle at the top-left of the strip under the message bar. Hold it 3 seconds (a quick tap only shows a reminder). Adult menu > About > "Show where the adult menu is" points it out again.

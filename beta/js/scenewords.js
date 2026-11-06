@@ -43,6 +43,11 @@ function vocabulary() {
     .map(([id, w]) => ({ id, label: w.label, lower: w.label.toLowerCase() }));
   return vocab;
 }
+/** Every word id whose label is exactly this text (lower case), e.g. "fly" (the verb and the insect). Beta 3.15. */
+export function idsByLabel(lower) { return vocabulary().filter((w) => w.lower === lower).map((w) => w.id); }
+/** The longest label in words (for matching phrases like "thank you"). */
+export function maxLabelWords() { return Math.max(1, ...vocabulary().map((w) => w.lower.split(/\s+/).length)); }
+
 // Search by what the adult typed: words that start with it first, then words that contain it. At most `limit` results.
 export function searchWords(query, limit = 40) {
   const q = query.trim().toLowerCase();
@@ -211,9 +216,9 @@ export function whereIs(wordId, { wordsButtonShown = true } = {}) {
   }
   if (found.length) {
     found.sort((a, b) => a.length - b.length);
-    return { status: "visible", where: nameOf(found[0]) };
+    return { status: "visible", where: nameOf(found[0]), pageId: found[0][0] };
   }
-  if (hidden) return { status: "hidden", where: nameOf(hidden) };
+  if (hidden) return { status: "hidden", where: nameOf(hidden), pageId: hidden[0] };
   return { status: "none", where: "" };
 }
 

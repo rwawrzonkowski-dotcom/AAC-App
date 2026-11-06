@@ -317,7 +317,13 @@ button { font: inherit; touch-action: manipulation; }
   font-weight: 800; font-size: min(2.6vmin, 3.8dvh); white-space: nowrap;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
 }
-#model-end[hidden] { display: none; }
+#model-end[hidden], #model-type[hidden] { display: none; }
+#model-type {
+  position: fixed; z-index: 46; min-height: 44px; padding: 0 2vmin; border-radius: 1.4vmin; cursor: pointer;
+  background: #fff; color: #5b21b6; border: 0.35vmin solid #6d28d9; box-shadow: 0 0.4vmin 1.6vmin rgba(0,0,0,0.2);
+  font-weight: 800; font-size: min(2.4vmin, 3.6dvh); white-space: nowrap; touch-action: manipulation;
+}
+#model-type:disabled { opacity: 0.5; }
 #model-end.confirm { background: #dc2626; }
 .hold-bar::after {            /* progress bar that fills while holding */
   content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255,255,255,0.45);
@@ -1166,3 +1172,10 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
   font-size: min(3.2vmin, 4.6dvh); cursor: pointer; touch-action: manipulation; }
 #edit-actions #edit-done, #target-actions #target-done { background: #22c55e; color: #052e16; padding: 0 5vmin; }
 #app.editing #page-title, #app.choosing #page-title { position: absolute; left: 9vmin; right: 45%; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Model a sentence (Beta 3.15, js/modelsentence.js) ---------- */
+.ms-input { width: 100%; box-sizing: border-box; font-size: 1.15em; }
+.ms-review { display: flex; flex-wrap: wrap; gap: 6px; min-height: 2.4em; margin: 10px 0; align-items: center; }
+.ms-word { padding: 4px 10px; border-radius: 999px; font-weight: 700; border: 1px solid; }
+.ms-model { background: #dcfce7; color: #14532d; border-color: #86c79d; }
+.ms-hidden, .ms-none { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; text-decoration: line-through; }

@@ -7,7 +7,7 @@ import { h } from "./ui.js";
 import { getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto } from "./profiles.js";
 import { downscaleImage } from "./editor.js";
 import {
-  ANIMALS, COLORS, ACCESSORIES, SIZES, ARRIVALS, SIZE_PCT, buildCritter, critterSvg, critterTop,
+  ANIMALS, COLORS, ACCESSORIES, SIZES, ARRIVALS, SIZE_PCT, MODEL_SPEEDS, buildCritter, critterSvg, critterTop,
 } from "./critters.js";
 import { usesRing } from "./modelprompt.js";
 
@@ -112,6 +112,10 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
 
     h("div", { class: "field" }, h("label", { text: "Prompt style" }),
       choices("mp-style", ["ring", "critter", "both"], m.style, (v) => STYLE_LABELS[v], (v) => { m.style = v; })),
+
+    h("div", { class: "field" }, h("label", { text: "Model a sentence: speed" }),
+      choices("mp-speed", MODEL_SPEEDS, m.speed || "medium", cap, (v) => { m.speed = v; })),
+    h("p", { class: "muted", text: "In Model mode, “Model a sentence” lets you type what you said; VOICE then models each word on the board along its real path, says it, and adds it to the message bar. Medium is about one step per second. (In Model mode it is the “⌨ Type” button next to End modeling.)" }),
 
     opacitySlider("mp-ring-op", "Ring opacity", "ringOpacity", m.style !== "critter"),
     opacitySlider("mp-critter-op", "Critter opacity", "critterOpacity", m.style !== "ring"),
