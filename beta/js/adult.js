@@ -12,11 +12,12 @@ import {
   listProfiles, getCurrent, switchTo, addProfile, renameProfile, deleteProfile,
   saveProfile, CHILD_VOICE, ADULT_VOICE, DIAL_HOLD_MIN, DIAL_HOLD_MAX,
 } from "./profiles.js";
-import { setVoiceSettings, speak, speakSequence, stopSpeech, pauseMs, PAUSE_MS } from "./speech.js";
+import { setVoiceSettings, speak, speakSequence, speakMessage, stopSpeech, pauseMs, PAUSE_MS } from "./speech.js";
 import { createVoicePicker, newPickerState } from "./voicepicker.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
 import { dataSafetyLine, needsHomeScreen, homeScreenSteps } from "./keepdata.js";
 import { showCoach } from "./adulthint.js";
+import { TONES } from "./tones.js";
 import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
@@ -434,6 +435,24 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "Scenes made this way are named with the date and time and can be renamed in Scenes." }));
   }
 
+  // The tone wheel (Beta 3.16, js/tones.js + js/tonewheel.js): press and hold the message bar to say it happy, sad, as a question...
+  function toneWheelSetting(cur) {
+    const set = (v) => async () => { cur.toneWheel = v; await saveProfile(cur); onVocabChanged(); refresh(); };
+    const sample = (t) => h("button", { type: "button", class: "btn tone-sample", "data-tone": t.id, text: t.label, onclick: () => speakMessage(SAMPLE_TONE_TEXT, t) });
+    return h("div", { class: "field touch-setting", id: "setting-tone-wheel" },
+      h("label", { text: "Tone wheel and mood" }),
+      h("div", { class: "seg-row" },
+        h("button", { type: "button", class: "seg" + (cur.toneWheel === "on" ? "" : " on"), id: "tone-wheel-off", text: "Off", onclick: set("off") }),
+        h("button", { type: "button", class: "seg" + (cur.toneWheel === "on" ? " on" : ""), id: "tone-wheel-on", text: "On", onclick: set("on") })),
+      h("p", { class: "muted", text: "For learners at stage 4. Press and hold the message bar: 8 feelings appear around the finger (happy, excited, silly, " +
+        "question, calm, sad, mad, scared), always in the same spots. Pick one to say the message once in that tone. Rest on one for 1 second (a lock fills in) " +
+        "to set it as the learner's mood: every message is said in it until it is changed or VOICE is reopened, and a small face shows in the message bar. " +
+        "The centre, Normal, clears the mood. Tones change pitch, speed and the ending of the sentence; Enhanced or Premium voices sound best." +
+        (cur.stage < 4 ? " This learner is at stage " + cur.stage + ", so the wheel will start working at stage 4." : "") }),
+      h("div", { class: "btn-row left tone-samples" }, h("span", { class: "muted", text: "Hear the tones:" }), TONES.map(sample)));
+  }
+  const SAMPLE_TONE_TEXT = "I want to go outside";
+
   // The little-word strip (Beta 3.7, js/littlewords.js): eight little words in the strip, each holding a dial of four more.
   function littleStripSetting(cur) {
     const btn = (value, text) => h("button", {
@@ -513,6 +532,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "so Sentence speed is its own, slower setting (0.9 to start)." }),
       slider("sentence-rate", "Sentence speed", 0.5, 1.5, 0.05, "sentenceRate", 2),
       pauseSetting(v, persist),
+      toneWheelSetting(cur),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "voice-preview", text: "Preview a word",
           onclick: () => speak(PREVIEW_WORD) }),

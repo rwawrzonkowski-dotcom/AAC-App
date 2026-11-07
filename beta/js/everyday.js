@@ -161,6 +161,7 @@ export function recordWord(learnerId, e) {
 
 function applyWord(st, ev, row) {
   st.out.events.push(ev);
+  if (ev.how === "tone" || ev.how === "mood") { touch(st, row); return; }       // not a word (Beta 3.16)
   if (ev.mode === "learner") {
     const key = wordKeyOf(ev);
     row.learnerTaps++;
@@ -216,7 +217,8 @@ export function sentenceChanged(learnerId, sentence, meta, added) {
 }
 
 /** The utterance ends: source = "barSpeak" | "clear" | "idle". Records it if recording is on and it has a learner chip. */
-export function endUtterance(source) {
+// extra (Beta 3.16): { tone, toneFrom: "wheel" | "mood" } when the message was said in a tone.
+export function endUtterance(source, extra = null) {
   clearTimeout(U.timer);
   const lid = U.learnerId;
   const chips = U.snap.slice(U.base);
@@ -227,6 +229,7 @@ export function endUtterance(source) {
       const u = { id: newKeyId(end), time: end, start: Math.min(U.start ?? end, end), end,
         chips: mine.map((c) => ({ wordId: c.wordId, label: c.label })), spokenAsSentence: source === "barSpeak", endedBy: source,
         mixed: mine.length !== chips.length, gridSize: U.meta.gridSize, stage: U.meta.stage };
+      if (extra && TONE_IDS.includes(extra.tone)) { u.tone = extra.tone; u.toneFrom = extra.toneFrom === "mood" ? "mood" : "wheel"; }
       const st = stateFor(lid);
       enqueue(st, localDate(end), (row) => applyUtterance(st, u, row));
     }
@@ -458,7 +461,10 @@ export async function exportEveryday(learnerId) {
     daily: await readAll("daily", learnerId), firstSeen: await readAll("firstseen", learnerId) };
 }
 
-const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad", "scene", "photo scene", "little", "little dial"];
+// "tone" (a message said in a tone from the tone wheel or the mood) and "mood" (the learner set or cleared a mood) are recorded as
+// events too (Beta 3.16), but they are not words: they are not counted in taps, words or new words.
+const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad", "scene", "photo scene", "little", "little dial", "tone", "mood"];
+const TONE_IDS = ["happy", "excited", "silly", "question", "calm", "sad", "mad", "scared"];
 const MODES = ["learner", "model", "session"];
 const ENDS = ["barSpeak", "clear", "idle"];
 const ID_RE = /^[A-Za-z0-9_:,@.+~-]{1,80}$/;
@@ -491,7 +497,8 @@ export function cleanUtterance(raw) {
   return { id: typeof raw.id === "string" && KEYID_RE.test(raw.id) ? raw.id : newKeyId(end), time: end,
     start: typeof raw.start === "number" && raw.start <= end ? Math.floor(raw.start) : end, end, chips,
     spokenAsSentence: raw.endedBy === "barSpeak", endedBy: raw.endedBy, mixed: raw.mixed === true,
-    gridSize: raw.gridSize === 84 ? 84 : 45, stage: stageOf(raw.stage) };
+    gridSize: raw.gridSize === 84 ? 84 : 45, stage: stageOf(raw.stage),
+    ...(TONE_IDS.includes(raw.tone) ? { tone: raw.tone, toneFrom: raw.toneFrom === "mood" ? "mood" : "wheel" } : {}) };
 }
 export function cleanDay(raw, date) {
   if (!isObj(raw) || typeof raw.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date)) return null;

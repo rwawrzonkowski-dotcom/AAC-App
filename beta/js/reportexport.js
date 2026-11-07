@@ -96,7 +96,8 @@ export function sentenceRows(sessions, trials) {
 }
 
 export const EVENT_HEADERS = ["date", "time", "word", "how_reached", "mode"];
-const HOW_TEXT = { board: "board", page: "page", forms: "forms", dial: "dial", keyboard: "keyboard", numberpad: "number pad", scene: "scene strip", "photo scene": "scene photo", little: "little-word strip", "little dial": "little-word dial" };
+const HOW_TEXT = { board: "board", page: "page", forms: "forms", dial: "dial", keyboard: "keyboard", numberpad: "number pad", scene: "scene strip", "photo scene": "scene photo", little: "little-word strip", "little dial": "little-word dial",
+  tone: "message tone (tone wheel)", mood: "mood set (normal = cleared)" };
 export function eventRows(events) {
   return events.map((e) => [dateOf(e.time), clock(e.time), e.form || e.label, HOW_TEXT[e.how] || e.how, e.mode]);
 }

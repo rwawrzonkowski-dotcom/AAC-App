@@ -60,6 +60,7 @@
 // over an existing learner leaves that learner's things alone.
 // Version 18 (beta 3.12) can hold SENTENCE targets in the teaching data (kind "chain": links, method, phase, linkPos... see js/teaching.js)
 // and sentence trials (links, method, phase). An older app would turn them into broken word targets, so it refuses a version 18 file.
+// Beta 3.16 (still version 18) adds `toneWheel` ("off" | "on"); a backup without it gets "off".
 // Version 17 (beta 3.7) added `littleStrip` ("auto" | "always" | "never": the little-word strip). Older backups get Auto.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
@@ -130,6 +131,7 @@ export async function buildBackup(learners, { teaching = true, templates = false
       speakLetters: p.speakLetters,
       cameraButton: p.cameraButton,
       littleStrip: p.littleStrip,
+      toneWheel: p.toneWheel,
       matchStrictness: p.matchStrictness,
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
@@ -344,7 +346,8 @@ function cleanLearner(raw, index, version) {
   const matchStrictness = version >= 16 && MATCH_STRICTNESS_CHOICES.includes(raw.matchStrictness) ? raw.matchStrictness : "medium";
   const things = version >= 16 ? cleanThingsBackup(raw.things) : null;
   const littleStrip = version >= 17 && CAMERA_BUTTON_CHOICES.includes(raw.littleStrip) ? raw.littleStrip : "auto";
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, wordDial, notices, teaching, everyday, scenes, things, photos };
+  const toneWheel = raw.toneWheel === "on" ? "on" : "off";
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

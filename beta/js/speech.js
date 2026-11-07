@@ -14,6 +14,8 @@
 // EVERY spoken sound in the app goes through speak() or speakSequence() in this file, so every path
 // uses the learner's voice and pitch, and the right speed.
 
+import { toneText, toneSettings } from "./tones.js";
+
 const synth = "speechSynthesis" in window ? window.speechSynthesis : null;
 let voices = [];
 let settings = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
@@ -129,13 +131,16 @@ export function speak(text, kind = "auto", voice = settings) {
 // (see isMessagePlaying). Everything else about it is the same as speak(text, "sentence").
 let msgUtt = null;        // the message-bar utterance that is playing, or null
 let msgStart = 0;
-export function speakMessage(text) {
+// tone (Beta 3.16, js/tones.js): the message's tone or the learner's mood: pitch, speed and ending punctuation (silly may borrow a
+// novelty voice). null = the learner's own voice as set.
+export function speakMessage(text, tone = null) {
   if (!synth || !text) return;
   try {
     stopSequence();
     synth.cancel();
     refreshVoices();
-    const u = makeUtterance(text, sentenceRate());
+    const s = toneSettings(settings, tone, voices);
+    const u = makeUtterance(toneText(text, tone), s.sentenceRate ?? sentenceRate(), s);
     const done = () => { if (msgUtt === u) msgUtt = null; };
     u.onend = done;
     u.onerror = done;
@@ -184,7 +189,7 @@ export function stopSpeech() {
 // chunks = the texts to say, in order. gapMs = pause between them.
 //   onChunk(i)   called as chunk i begins (the message bar highlights that chip)
 //   onEnd(done)  called when it is over: done = true if it played to the end, false if it was stopped
-export function speakSequence(chunks, gapMs, { onChunk, onEnd } = {}) {
+export function speakSequence(chunks, gapMs, { onChunk, onEnd, tone = null } = {}) {
   const list = chunks.filter(Boolean);
   if (!synth || !list.length) return;
   try {
@@ -199,7 +204,9 @@ export function speakSequence(chunks, gapMs, { onChunk, onEnd } = {}) {
       if (i >= list.length) { seq = null; if (onEnd) onEnd(true); return; }
       const idx = i++;
       if (onChunk) onChunk(idx);
-      const u = makeUtterance(list[idx], sentenceRate());
+      // With a tone (Beta 3.16) every chip gets its pitch and speed; the last one gets its ending punctuation.
+      const ts = toneSettings(settings, tone, voices);
+      const u = tone ? makeUtterance(idx === list.length - 1 ? toneText(list[idx], tone) : list[idx], ts.sentenceRate, ts) : makeUtterance(list[idx], sentenceRate());
       let advanced = false;
       const advance = () => {
         if (advanced || seq !== me) return;

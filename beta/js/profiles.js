@@ -39,6 +39,8 @@
 //     keyboardButton: "auto",           // the top-bar ABC (keyboard) button: "auto" (from stage 3),
 //                                       // "always" or "never"  (adult menu > Vocabulary stage)
 //     littleStrip: "auto",              // the little-word strip under the message bar (Beta 3.7): "auto" (from stage 3), "always" or "never"
+//     toneWheel: "off",                 // press and hold the message bar for the tone wheel (Beta 3.16): "off" or "on" (works from stage 4)
+//     toneSuggested: false,             // the end of a session already suggested turning the tone wheel on
 //     cameraButton: "auto",             // the top-bar camera button (hold 1 s: quick scene): "auto" (from stage 3), "always" or "never"
 //     matchStrictness: "medium",        // Scenes > My things: "low" | "medium" | "high" (js/things.js)
 //     speakLetters: false,              // the keyboard says each letter's name as it is typed
@@ -104,7 +106,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
     wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
-    cameraButton: "auto", matchStrictness: "medium", littleStrip: "auto",
+    cameraButton: "auto", matchStrictness: "medium", littleStrip: "auto", toneWheel: "off", toneSuggested: false,
     wordDial: { ...DEFAULT_WORD_DIAL },
   };
 }
@@ -194,6 +196,8 @@ export async function initProfiles(board) {
     if (!CAMERA_BUTTON_CHOICES.includes(p.cameraButton)) p.cameraButton = "auto";
     if (!MATCH_STRICTNESS_CHOICES.includes(p.matchStrictness)) p.matchStrictness = "medium";
     if (!CAMERA_BUTTON_CHOICES.includes(p.littleStrip)) p.littleStrip = "auto";      // Beta 3.7: same three choices
+    if (p.toneWheel !== "on") p.toneWheel = "off";                                     // Beta 3.16
+    p.toneSuggested = p.toneSuggested === true;
   }
   // Learners saved before the word-forms dial: Auto (from stage 3), hold 0.5 s, markers on.
   for (const p of profiles) p.wordDial = cleanWordDial(p.wordDial);
@@ -342,6 +346,7 @@ export async function importLearner(data, replaceId = null) {
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
     p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
     if (data.littleStrip) p.littleStrip = data.littleStrip;
+    if (data.toneWheel) p.toneWheel = data.toneWheel;
     p.wordDial = cleanWordDial(data.wordDial);
     // Reward pictures belong to the teaching data: when the backup has none, the learner keeps theirs.
     if (!data.teaching) keepRewards = (await db.getPrefix("photos", p.id + "|reward:")).filter((r) => r.value && r.value.blob);

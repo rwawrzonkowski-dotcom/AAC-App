@@ -272,6 +272,24 @@ export async function runEndFlow(result, ctx) {
   const model = buildModel(ctx.board, cur.gridSize);
   const stageIds = model.main.filter((b) => b.stage === cur.stage).map((b) => b.id);
   if (T.stageReady(cur.stage, stageIds, data.getTargets())) await askStage(cur, ctx);
+  // The tone wheel (Beta 3.16): suggested once, at stage 4, when the learner has 3 or more mastered targets. The adult decides.
+  const mastered = data.getTargets().filter((t) => t.status === "mastered" || t.status === "maintenance").length;
+  if (cur.stage >= 4 && cur.toneWheel !== "on" && !cur.toneSuggested && mastered >= TONE_SUGGEST_MASTERED) await askToneWheel(cur, mastered);
+}
+
+const TONE_SUGGEST_MASTERED = 3;
+function askToneWheel(cur, mastered) {
+  return new Promise((resolve) => {
+    const finish = async (on) => { cur.toneSuggested = true; if (on) cur.toneWheel = "on"; await saveProfile(cur); o.close(); resolve(); };
+    const o = openOverlay([
+      h("h2", { id: "tone-suggest-title", text: "Turn on the tone wheel?" }),
+      h("p", { class: "confirm-text", text: `${cur.name} is at stage 4 with ${mastered} mastered targets. The tone wheel lets them press and hold the message bar ` +
+        "and say it happy, excited, silly, as a question, calm, sad, mad or scared, and set a mood that stays. You can change this any time in Voice settings." }),
+      h("div", { class: "btn-row" },
+        h("button", { type: "button", class: "btn", id: "tone-suggest-no", text: "Not now", onclick: () => finish(false) }),
+        h("button", { type: "button", class: "btn primary", id: "tone-suggest-yes", text: "Turn it on", onclick: () => finish(true) })),
+    ], { sheetClass: "small" });
+  });
 }
 
 function fmtDuration(ms) {

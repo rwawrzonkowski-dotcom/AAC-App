@@ -46,6 +46,9 @@ import * as everyday from "./everyday.js";
 import * as scenes from "./scenestrip.js";
 import * as little from "./littlewords.js";
 import { openModelSentence } from "./modelsentence.js";
+import { openToneWheel } from "./tonewheel.js";
+import { toneById } from "./tones.js";
+import { wordInfo } from "./scenewords.js";
 import { MODEL_STEP_MS as STEP_MS_BY_SPEED } from "./critters.js";
 import { initCameraButton } from "./camerabtn.js";
 
@@ -82,7 +85,8 @@ const state = {
   sentence: [],       // words in the message bar: {label, spoken, base} (base = the word tapped on the board)
   cells: new Map(),   // key -> description of each cell currently drawn
   forms: null,        // the open Forms popover, if any
-  dial: null,         // the open press-and-hold word-forms dial, if any (js/dial.js)
+  dial: null,         // the open press-and-hold word-forms dial, if any (js/dial.js); also the tone wheel (js/tonewheel.js)
+  mood: null,         // the learner's mood (a tone id from js/tones.js) or null; kept only while VOICE is open (Beta 3.16)
   draft: null,        // what is being typed on the keyboard / number pad: { text, kind } or null
 };
 let started = false;  // true once the first board has been drawn
@@ -132,7 +136,7 @@ function chipsChanged(added) {
   try { const p = getCurrent(); everyday.sentenceChanged(p.id, state.sentence, { gridSize: p.gridSize, stage: p.stage }, added); } catch (e) { /* never break a tap */ }
 }
 // The bar is spoken ("barSpeak"), cleared ("clear"), or left alone for 20 s ("idle", by the tracker itself).
-function utteranceEnds(source) { try { everyday.endUtterance(source); } catch (e) { /* ignore */ } }
+function utteranceEnds(source, extra) { try { everyday.endUtterance(source, extra); } catch (e) { /* ignore */ } }
 
 // ---------- Which page is showing ----------
 // The layout for the current learner's grid size (45 or 84).
@@ -185,6 +189,7 @@ function renderAll() {
   teach.onRender();                     // a running teaching trial re-draws its prompt on the new page
   scenes.onRender(!state.editing && !state.choosing);     // the scene strip shows on the child's board only
   updateLittle();                                           // the little-word strip (Beta 3.7), unless a scene has the strip
+  drawMoodBadge();                                          // the mood face in the message bar (Beta 3.16)
   if (hintsReady) setTimeout(coachCheck, 600);           // "This is the adult menu", once per learner (js/adulthint.js)
 }
 
@@ -262,14 +267,63 @@ function drawMessage() {
 function highlightChip(i) {
   document.querySelectorAll("#message-chips .chip:not(.draft)").forEach((c, n) => c.classList.toggle("speaking", n === i));
 }
-function playMessage() {
+// toneId (Beta 3.16): undefined = the learner's mood (if any); a tone id = that tone, once (from the tone wheel); null = Normal.
+function playMessage(toneId, from = "wheel") {
   const chunks = state.sentence.map((w) => w.spoken).filter(Boolean);
   if (!chunks.length) return;
-  if (isMessagePlaying()) { stopSpeech(); return; }
+  const fromWheel = toneId !== undefined;
+  if (isMessagePlaying() && !fromWheel) { stopSpeech(); return; }
+  const tone = toneById(fromWheel ? toneId : state.mood);
   const gap = pauseMs();
-  if (gap > 0) speakSequence(chunks, gap, { onChunk: highlightChip, onEnd: () => highlightChip(-1) });
-  else speakMessage(chunks.join(" "));
-  utteranceEnds("barSpeak");               // (after the speech has started)
+  if (gap > 0) speakSequence(chunks, gap, { onChunk: highlightChip, onEnd: () => highlightChip(-1), tone });
+  else speakMessage(chunks.join(" "), tone);
+  if (tone) recordTap({ id: tone.wordId, label: tone.label, spoken: tone.label, how: "tone" });   // (not counted as a word)
+  utteranceEnds("barSpeak", tone ? { tone: tone.id, toneFrom: fromWheel ? from : "mood" } : null);   // (after the speech has started)
+}
+
+// ---------- Tone wheel and mood (Beta 3.16, js/tones.js + js/tonewheel.js) ----------
+// Press and hold the message bar (learners at stage 4 with "Tone wheel" on): 8 feelings around the finger. A pick says the message
+// once in that tone; resting 1 second on a feeling first sets it as the learner's MOOD (every message in that tone until changed;
+// a small face shows in the message bar); the centre, "Normal", clears the mood. The mood lasts while VOICE is open.
+const toneWheelOn = (p) => p.toneWheel === "on" && p.stage >= 4;
+function toneDialMs(el) {
+  if (el.id !== "message-text" || !toneWheelOn(getCurrent()) || !state.sentence.length) return 0;
+  if (state.dial || state.editing || state.choosing || returning || previewing || teach.isActive() || (typing && typing.isOpen())) return 0;
+  return Math.round(getCurrent().wordDial.holdSec * 1000);
+}
+function openToneWheelAt(el, { pointer }) {
+  const r = el.getBoundingClientRect();
+  stopSpeech();
+  state.dial = openToneWheel({
+    x: pointer ? pointer.x : r.left + r.width / 2, y: pointer ? pointer.y : r.top + r.height / 2, pointer, mood: state.mood,
+    iconOf: (t) => (wordInfo(t.wordId) || {}).image || null,
+    onPick: (t, { lock }) => { if (lock) setMood(t.id); playMessage(t.id, lock ? "mood" : "wheel"); },
+    onNormal: () => { setMood(null); playMessage(null); },
+    onClose: () => { state.dial = null; },
+  });
+  return true;
+}
+function setMood(id) {
+  const before = state.mood;
+  state.mood = id || null;
+  drawMoodBadge();
+  if (before !== state.mood) {
+    const t = toneById(state.mood);
+    recordTap({ id: t ? t.wordId : null, label: t ? t.label : "normal", spoken: t ? t.label : "normal", how: "mood" });   // (not counted as a word)
+  }
+}
+function drawMoodBadge() {
+  const b = $("mood-badge"), t = toneById(state.mood);
+  if (t && !toneWheelOn(getCurrent())) { state.mood = null; }
+  const tone = toneById(state.mood);
+  b.hidden = !tone;
+  b.replaceChildren();
+  if (!tone) return;
+  const src = (wordInfo(tone.wordId) || {}).image;
+  if (src) { const img = document.createElement("img"); img.src = src; img.alt = ""; b.append(img); }
+  else b.textContent = tone.id === "question" ? "?" : tone.label[0];
+  b.title = "Mood: " + tone.label;
+  b.setAttribute("aria-label", "Mood: " + tone.label);
 }
 
 // ---------- Scenes: a tap on a strip button or on the scene photo ----------
@@ -908,6 +962,7 @@ function showAdultMenu(startAt) {
     startAt,
     onLearnerChanged: () => {
       // A different learner: start clean on the main board.
+      state.mood = null;                    // (a mood belongs to the learner who set it)
       utteranceEnds("clear");               // (the old learner's message, if any, is closed before the bar is emptied)
       closeSessionQuietly();
       everyday.prepare(getCurrent().id);
@@ -1050,7 +1105,8 @@ async function start() {
     }
     else if (el.id === "forms-btn") { if (!typing.isOpen()) openForms(); }
     else if (el.id === "abc-btn") toggleKeyboard();
-  }, "#message-text, .bar-btn:not(#camera-btn)");     // (the camera button has its own 1-second hold: js/camerabtn.js)
+  }, "#message-text, .bar-btn:not(#camera-btn)",      // (the camera button has its own 1-second hold: js/camerabtn.js)
+  { dialMs: toneDialMs, openDial: openToneWheelAt });  // press and hold the message: the tone wheel (Beta 3.16)
   initCameraButton({
     button: $("camera-btn"),
     blocked: () => (teach.isActive() ? "Finish the session first" : null),   // no camera during a teaching session

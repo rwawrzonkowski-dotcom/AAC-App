@@ -1,13 +1,14 @@
 # VOICE changelog and code map
 
-*Updated Nov 4, 2026, at VOICE Beta 3.15. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
+*Updated Nov 4, 2026, at VOICE Beta 3.16. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
 *Paths are inside `beta/` (the stable copy in the repo root has the same layout).*
 
 ## Part 1: Versions
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
-| **Beta 3.15** | Nov 5 | **Model a sentence:** in Model mode, "⌨ Type" lets the adult type what they said; VOICE models each visible word along its real path, says it and adds it to the message bar (word forms, 2-word labels, little-strip words handled; hidden words skipped; Slow/Medium/Fast). | `modelsentence.js` (new), `app.js`, `session.js` (`routeTo`), `critters.js`, `modelsettings.js`, `scenewords.js`, `index.html`, `styles.css` |
+| **Beta 3.16** | Nov 7 | **Tone wheel and mood (stage 4):** press and hold the message bar for 8 feelings (happy, excited, silly, question, calm, sad, mad, scared) + Normal; a pick says the message once in that tone; resting 1 s sets a mood that stays (face in the message bar). Tones = pitch, speed and ending punctuation (silly may use a novelty voice). Per-learner switch, suggested at 3+ mastered targets; tone/mood events recorded (not counted as words). | `tones.js` (new), `tonewheel.js` (new), `speech.js`, `app.js`, `everyday.js`, `adult.js`, `teachui.js`, `profiles.js`, `backup.js`, `reportexport.js`, `settingsnav.js`, `index.html`, `styles.css` |
+| Beta 3.15 | Nov 5 | **Model a sentence:** in Model mode, "⌨ Type" lets the adult type what they said; VOICE models each visible word along its real path, says it and adds it to the message bar (word forms, 2-word labels, little-strip words handled; hidden words skipped; Slow/Medium/Fast). | `modelsentence.js` (new), `app.js`, `session.js` (`routeTo`), `critters.js`, `modelsettings.js`, `scenewords.js`, `index.html`, `styles.css` |
 | Beta 3.14 | Nov 5 | **Edit / Add-targets buttons moved into the context strip:** Words, Undo and Done sit under the banner instead of in it, away from the top edge where iOS swallows taps. | `index.html` (`#edit-actions`, `#target-actions`), `styles.css`, `app.js` (`renderAll`) |
 | Beta 3.13 | Nov 5 | **Done always works:** banner Done/Undo (Add targets, Add a sentence, Edit) act on click with a finger-lift fallback; leaving the mode always completes; holding the gear also ends Add targets / Edit (a sentence of 2+ words is saved). | `app.js` (`onBannerTap`, `stopChoosing`, `openAdult`) |
 | Beta 3.12 | Nov 5 | **Sentence targets:** chains of 2–6 words taught by total task, forward or backward chaining; each word has its own prompt step and fades on its own; forward chaining has the app model the rest, backward fills in the first words; optional "say the sentence" step; next-word suggestion at session end; task-analysis table in Reports; Sentence words CSV. Backup v18. | `teaching.js`, `session.js`, `teachui.js`, `teachdata.js`, `ladderui.js`, `app.js`, `reportdata.js`, `reportdoc.js`, `reportexport.js`, `reports.js`, `backup.js`, `index.html`, `styles.css` |
@@ -48,6 +49,7 @@
 | Which word sits where (45/84 layouts, stages, pages, folders) | `boardmodel.js` |
 | Drawing the grid; tap, hold-to-select, ignore-repeats, hold-for-dial | `board.js` (`renderBoard`, `attachPressHandling`) |
 | Speech (word vs sentence speed, pauses between words) | `speech.js` |
+| Tone wheel and mood (tones, wheel, mood face, recording) | `tones.js`, `tonewheel.js`, `app.js` (`playMessage`, `openToneWheelAt`, `setMood`), `everyday.js` |
 | Voice picker (installed voices by accent, novelty voices) | `voicepicker.js` |
 | Word forms (Forms button) and the press-and-hold forms dial | `forms.js`, `dial.js`, `data/word-forms.json` |
 | Little-word strip and its dials | `littlewords.js` (+ `updateLittle`, `onLittleTap`, `openLittleDial` in `app.js`) |
