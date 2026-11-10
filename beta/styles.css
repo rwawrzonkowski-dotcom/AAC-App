@@ -168,6 +168,20 @@ button { font: inherit; touch-action: manipulation; }
   pointer-events: none;
 }
 
+/* Beta 3.17: running without saving (js/datawarning.js): a small red tag for adults, top right of the message bar (left of the BETA tag). */
+#not-saving-tag {
+  position: absolute; right: 7.5vmin; top: 0.3vmin; font-size: 1.3vmin; font-weight: 700; letter-spacing: 0.05em;
+  color: #fff; background: #b91c1c; border-radius: 0.6vmin; padding: 0.1vmin 0.7vmin; pointer-events: none; z-index: 2;
+}
+/* The "could not open saved data" screen reuses the setup screen's look. */
+.data-warning .dw-card { max-width: 760px; text-align: left; }
+.data-warning h1 { text-align: center; color: #991b1b; }
+.data-warning .dw-text, .data-warning .dw-steps { font-size: 2.3vmin; line-height: 1.45; }
+.data-warning .dw-buttons { justify-content: center; margin: 2vmin 0; }
+.data-warning .dw-retry { font-size: 2.6vmin; padding: 1.4vmin 5vmin; }
+.data-warning .dw-continue-note { font-size: 1.9vmin; margin: 2vmin 0 0.6vmin; }
+.data-warning .dw-continue { display: block; margin: 0 auto; font-size: 2vmin; }
+
 /* Version label ("Stable 1.0", "Beta 1.1"): small and quiet, for adults */
 .version-label { font-weight: 400; font-size: 0.55em; opacity: 0.75; margin-left: 12px; }
 .setup-version { text-align: center; margin: 0.4vmin 0 0; font-size: 1.6vmin; color: #64748b; }

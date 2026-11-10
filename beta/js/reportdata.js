@@ -97,9 +97,13 @@ export function chainModel(target, series, per) {
   let lastPhase = null;
   const rows = series.map((p) => {
     const list = (per.get(p.sessionId) || []).filter((t) => Array.isArray(t.links));
+    // Only words the learner reached count (Beta 3.17): a word after the point where a trial stopped was never presented.
+    const reached = new Map(list.map((t) => [t, T.reachedLinks(t.links)]));
     const cells = words.map((_, i) => {
-      const recs = list.map((t) => (i < target.links.length ? t.links.find((l) => l.index === i) : t.links.find((l) => l.wordId === T.SPEAK_ID)))
-        .filter((l) => l && l.taught);
+      const recs = list.map((t) => {
+        const l = i < target.links.length ? t.links.find((x) => x.index === i) : t.links.find((x) => x.wordId === T.SPEAK_ID);
+        return l && reached.get(t).has(l) ? l : null;
+      }).filter((l) => l && l.taught);
       return recs.length ? (recs.filter(T.linkIndependent).length / recs.length) * 100 : null;
     });
     const phase = list.length ? Math.max(...list.map((t) => t.phase || 0)) : null;

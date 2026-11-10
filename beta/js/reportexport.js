@@ -85,11 +85,13 @@ export function sentenceRows(sessions, trials) {
   const out = [];
   for (const t of trials.filter((x) => by.has(x.sessionId) && Array.isArray(x.links)).sort((a, b) => a.start - b.start)) {
     const s = by.get(t.sessionId);
+    const reached = T.reachedLinks(t.links);           // (Beta 3.17) a learner word after the point where the trial stopped: "not reached", not scored
     for (const l of t.links) {
-      const step = !l.taught ? "" : l.minIndex >= l.ladderLength ? T.INDEPENDENT_NAME : "step " + (l.minIndex + 1) + " of " + l.ladderLength;
+      const scored = l.taught && reached.has(l);
+      const step = !l.taught ? "" : !scored ? "not reached" : l.minIndex >= l.ladderLength ? T.INDEPENDENT_NAME : "step " + (l.minIndex + 1) + " of " + l.ladderLength;
       out.push([dateOf(t.start), clock(t.start), t.sessionId, s.who, s.where, t.label, T.CHAIN_METHOD_LABELS[t.method] || t.method, t.phase,
         l.wordId === T.SPEAK_ID ? "end" : l.index + 1, l.label, l.taught ? "learner" : t.method === "forward" ? "app modeled" : "filled in",
-        l.done, step, l.taught ? T.linkIndependent(l) : "", l.errors, t.result]);
+        l.done, step, scored ? T.linkIndependent(l) : "", l.errors, t.result]);
     }
   }
   return out;

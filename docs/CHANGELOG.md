@@ -1,12 +1,13 @@
 # VOICE changelog and code map
 
-*Updated Nov 4, 2026, at VOICE Beta 3.16. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
+*Updated Nov 10, 2026, at VOICE Beta 3.17. Part 1 lists what changed in each version; part 2 shows which code runs which feature.*
 *Paths are inside `beta/` (the stable copy in the repo root has the same layout).*
 
 ## Part 1: Versions
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
+| **Beta 3.17** | Nov 10 | **Two fixes from the Nov 10 review.** (1) **Saved data that cannot be opened** no longer looks like a new iPad: a full-screen warning (Try again / Continue without saving) comes before the setup screen, a failed save later shows a one-time adult notice (waits until no session or sheet is open), and a red "Not saving" tag shows in the message bar while nothing is being saved. (2) **Sentence trials score only the words the learner reached:** words after the one the trial stopped on are "not reached" (no hit, no miss, left out of the task-analysis percent; CSV "not reached"). Past trials are re-read with the new rule; nothing saved is changed. | `datawarning.js` (new), `db.js` (`storageProblem`, `onStorageProblem`), `app.js`, `styles.css`, `teaching.js` (`reachedLinks`, `applyTrialToChain`), `reportdata.js` (`chainModel`), `reportexport.js` (`sentenceRows`) |
 | **Beta 3.16** | Nov 7 | **Tone wheel and mood (stage 4):** press and hold the message bar for 8 feelings (happy, excited, silly, question, calm, sad, mad, scared) + Normal; a pick says the message once in that tone; resting 1 s sets a mood that stays (face in the message bar). Tones = pitch, speed and ending punctuation (silly may use a novelty voice). Per-learner switch, suggested at 3+ mastered targets; tone/mood events recorded (not counted as words). | `tones.js` (new), `tonewheel.js` (new), `speech.js`, `app.js`, `everyday.js`, `adult.js`, `teachui.js`, `profiles.js`, `backup.js`, `reportexport.js`, `settingsnav.js`, `index.html`, `styles.css` |
 | Beta 3.15 | Nov 5 | **Model a sentence:** in Model mode, "⌨ Type" lets the adult type what they said; VOICE models each visible word along its real path, says it and adds it to the message bar (word forms, 2-word labels, little-strip words handled; hidden words skipped; Slow/Medium/Fast). | `modelsentence.js` (new), `app.js`, `session.js` (`routeTo`), `critters.js`, `modelsettings.js`, `scenewords.js`, `index.html`, `styles.css` |
 | Beta 3.14 | Nov 5 | **Edit / Add-targets buttons moved into the context strip:** Words, Undo and Done sit under the banner instead of in it, away from the top edge where iOS swallows taps. | `index.html` (`#edit-actions`, `#target-actions`), `styles.css`, `app.js` (`renderAll`) |
@@ -37,6 +38,7 @@
 | Stable vs beta copy (storage prefix, version label) | `channel.js` |
 | Saved settings (localStorage, never throws) | `storage.js` |
 | Database (IndexedDB wrapper: prefix reads, ranges, batches) | `db.js` |
+| Warnings when saved data cannot be opened or saved (Beta 3.17) | `datawarning.js`, `db.js` (`storageProblem`) |
 | Offline cache and updates that download only changed files | `sw.js`, `tools/update-cache-list.py` |
 | Keeping data safe (persist request, Home Screen notice, Backup status line) | `keepdata.js` |
 | First-run setup (board choice, Parent/Clinician view, restore) | `setup.js` |

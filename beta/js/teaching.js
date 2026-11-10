@@ -340,7 +340,22 @@ export function advancePhase(t, reason = "next word added (confirmed by adult)",
   return true;
 }
 
-// After a sentence trial: each word the learner did fades or backs up on its own (most-to-least only), and the phase counter moves.
+// Which of a sentence trial's learner steps the learner actually REACHED (Beta 3.17). The learner's words are prompted one at a time in
+// order (then "say the sentence", if on), so the reached ones are every step that was done plus the one the trial stopped on (the first
+// step not done). Steps after it were never presented: they are "no opportunity" and are not scored at all (no hit, no miss, not in the
+// task-analysis percent). Returns a Set of the trial's link records.
+export function reachedLinks(links) {
+  const steps = (links || []).filter((l) => l.taught)
+    .sort((a, b) => (a.wordId === SPEAK_ID) - (b.wordId === SPEAK_ID) || a.index - b.index);
+  const out = new Set();
+  for (const l of steps) {
+    out.add(l);
+    if (!l.done) break;                      // the trial stopped here: later steps were never reached
+  }
+  return out;
+}
+
+// After a sentence trial: each word the learner REACHED fades or backs up on its own (most-to-least only), and the phase counter moves.
 // trial.links = [{ index, wordId, label, taught, done, startIndex, minIndex, errors }]   (minIndex = ladder length when no prompt showed)
 // Returns { changes: [{ time, from, to, reason, dir, linkIndex, label }], phaseReady }.
 export function applyTrialToChain(target, trial, now = Date.now()) {
@@ -348,8 +363,10 @@ export function applyTrialToChain(target, trial, now = Date.now()) {
   if (trial.result === "skipped" || target.status !== "teaching") return out;
   const n = ladderOf(target).length;
   let allIndependent = trial.result === "correct";
+  const reached = reachedLinks(trial.links);
   for (const l of trial.links || []) {
     if (!l.taught) continue;
+    if (!reached.has(l)) { allIndependent = false; continue; }      // never presented: no opportunity, nothing scored
     if (!(l.done && l.errors === 0 && l.minIndex >= n)) allIndependent = false;      // (the "say the sentence" step counts here too)
     if (l.index < 0 || l.index >= target.links.length || target.direction !== "mtl") continue;
     const i = l.index;

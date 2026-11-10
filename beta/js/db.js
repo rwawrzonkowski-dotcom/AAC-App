@@ -23,9 +23,27 @@ const memory = Object.fromEntries(STORES.map((s) => [s, new Map()]));
 let dbPromise = null;
 export let usingFallback = false;
 
+// PROBLEMS WITH SAVING (Beta 3.17). Two things can go wrong, and both used to be silent:
+//   "open"  the database could not be opened at all (or not within 4 seconds): everything this session is kept in memory only and is
+//           lost when VOICE closes. At start-up this looked like a brand-new app (the setup screen), so js/app.js now shows a warning
+//           screen instead (js/datawarning.js).
+//   "write" the database opened, but a save failed (for example the iPad is out of storage). js/app.js shows a one-time adult notice.
+// Listeners are told once per kind.
+const problems = { open: null, write: null };
+const listeners = new Set();
+export const storageProblem = () => ({ ...problems });
+export function onStorageProblem(fn) { listeners.add(fn); return () => listeners.delete(fn); }
+function report(kind, reason) {
+  if (problems[kind]) return;
+  problems[kind] = String((reason && (reason.name || reason.message)) || reason || "unknown");
+  for (const fn of listeners) { try { fn(kind, problems[kind]); } catch (e) { /* ignore */ } }
+}
+const writeFailed = (e) => { console.warn("IndexedDB write failed, kept in memory only:", e); report("write", e); };
+
 function fallback(reason) {
   usingFallback = true;
   console.warn("IndexedDB unavailable, using memory only:", reason);
+  report("open", reason);
 }
 
 // Open the database once; resolves to null if it cannot be opened.
@@ -72,7 +90,7 @@ async function withDb(storeName, mode, work, memWork) {
   const db = await open();
   if (db) {
     try { return await run(db, storeName, mode, work); }
-    catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    catch (e) { if (mode === "readwrite") writeFailed(e); else console.warn("IndexedDB operation failed, using memory:", e); }
   }
   return memWork(memory[storeName]);
 }
@@ -108,7 +126,7 @@ export async function delPrefix(store, prefix) {
   const db = await open();
   if (db) {
     try { return await run(db, store, "readwrite", (s) => s.delete(range)); }
-    catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    catch (e) { writeFailed(e); }
   }
   for (const k of [...memory[store].keys()]) if (k.startsWith(prefix)) memory[store].delete(k);
 }
@@ -135,7 +153,7 @@ export async function batch(ops) {
         tx.onabort = () => reject(tx.error);
       });
       return;
-    } catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    } catch (e) { writeFailed(e); }
   }
   for (const o of ops) { if (o.remove) memory[o.store].delete(o.key); else memory[o.store].set(o.key, o.value); }
 }
@@ -145,7 +163,7 @@ export async function delRange(store, lower, upperKey) {
   const db = await open();
   if (db) {
     try { return await run(db, store, "readwrite", (s) => s.delete(rangeOf(lower, upperKey))); }
-    catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    catch (e) { writeFailed(e); }
   }
   for (const k of [...memory[store].keys()]) if (k >= lower && k <= upperKey) memory[store].delete(k);
 }

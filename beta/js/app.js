@@ -51,6 +51,7 @@ import { toneById } from "./tones.js";
 import { wordInfo } from "./scenewords.js";
 import { MODEL_STEP_MS as STEP_MS_BY_SPEED } from "./critters.js";
 import { initCameraButton } from "./camerabtn.js";
+import { checkOpenProblem, showNotSavingTag, watchWriteProblems } from "./datawarning.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 // Model mode: how long to pause on each page while stepping back out (ring only: 600 ms;
@@ -1037,6 +1038,9 @@ async function start() {
   state.board = await loadBoardData();
   await loadForms();
   await initProfiles(state.board);
+  // Beta 3.17: the saved data could not be opened. Warn first (Try again / Continue without saving) instead of showing the setup
+  // screen as if the iPad were new (js/datawarning.js).
+  if (await checkOpenProblem()) showNotSavingTag($("message-text"));
   if (!hasProfiles()) {
     // Very first open on this device: quick setup (or restore a backup), then start.
     const c = await showSetup({ first: true });
@@ -1127,6 +1131,8 @@ async function start() {
 
   started = true;
   renderAll();
+  // Beta 3.17: a save that fails later (for example the iPad is out of storage) gets a one-time adult notice, never during a session.
+  watchWriteProblems({ busy: () => teach.isActive() || !!document.querySelector(".overlay"), tagHost: $("message-text") });
 
   // Block pinch/double-tap zoom and rubber-band scrolling on iOS
   // (but let the adult menus scroll).

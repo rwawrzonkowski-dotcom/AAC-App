@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v31";
+const CACHE_VERSION = "beta-aac-v32";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -1426,16 +1426,17 @@ const FILES = [
   "js/about.js?v=5bda0bb73f",
   "js/adult.js?v=d5bf001e7b",
   "js/adulthint.js?v=21b269cb20",
-  "js/app.js?v=5ef39862b2",
+  "js/app.js?v=c2704552d6",
   "js/backup.js?v=e7ea3b9fa2",
   "js/board.js?v=a03f965c1f",
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=6051d46365",
   "js/camerabtn.js?v=114b8ebc7a",
-  "js/channel.js?v=5542504e9f",
+  "js/channel.js?v=22a5b2ad92",
   "js/critters.js?v=0008315f67",
   "js/datapanel.js?v=9d732dde59",
-  "js/db.js?v=c7fd293ac1",
+  "js/datawarning.js?v=d0c538ff70",
+  "js/db.js?v=44c9f55183",
   "js/devicetips.js?v=a7802d0524",
   "js/dial.js?v=2737236a3d",
   "js/editor.js?v=8407e9e8c2",
@@ -1458,9 +1459,9 @@ const FILES = [
   "js/profiles.js?v=289bf766bc",
   "js/recognize.js?v=30c88551b8",
   "js/reportcharts.js?v=11b54cd11d",
-  "js/reportdata.js?v=60e89bad6c",
+  "js/reportdata.js?v=9a2163ec7d",
   "js/reportdoc.js?v=92a5a8a231",
-  "js/reportexport.js?v=f99ec92c47",
+  "js/reportexport.js?v=fc54029b49",
   "js/reports.js?v=c7a3c57172",
   "js/sceneadult.js?v=c3a9ac6259",
   "js/scenedata.js?v=7d379fd91a",
@@ -1472,7 +1473,7 @@ const FILES = [
   "js/speech.js?v=cd10c9a79b",
   "js/storage.js?v=2e81ec1d38",
   "js/teachdata.js?v=82721d5a37",
-  "js/teaching.js?v=99b5843bb1",
+  "js/teaching.js?v=6bf54f9f23",
   "js/teachui.js?v=73397a4218",
   "js/templates.js?v=2976601b82",
   "js/things.js?v=d3b2765c49",
@@ -1482,7 +1483,7 @@ const FILES = [
   "js/ui.js?v=6b27e92e5d",
   "js/voicepicker.js?v=e4127d1c9d",
   "manifest.webmanifest?v=2c85c0b4e9",
-  "styles.css?v=2eadb9a669",
+  "styles.css?v=a867b2b43c",
 ];
 // END FILE LIST
 
