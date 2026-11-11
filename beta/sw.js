@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v46";
+const CACHE_VERSION = "beta-aac-v47";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -1488,15 +1488,15 @@ const FILES = [
   "js/about.js?v=5bda0bb73f",
   "js/access.js?v=662f65d543",
   "js/accessui.js?v=348e5e7940",
-  "js/adult.js?v=88190cd17e",
+  "js/adult.js?v=23de75d58d",
   "js/adulthint.js?v=21b269cb20",
-  "js/app.js?v=d4974b4701",
-  "js/backup.js?v=bb42ce5c41",
+  "js/app.js?v=96f8debb92",
+  "js/backup.js?v=da516d51d3",
   "js/board.js?v=a91dfe0402",
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=a5ac8a084f",
   "js/camerabtn.js?v=114b8ebc7a",
-  "js/channel.js?v=a30b4493b5",
+  "js/channel.js?v=2f8ef92e4f",
   "js/critters.js?v=0008315f67",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=d0c538ff70",
@@ -1510,7 +1510,7 @@ const FILES = [
   "js/instrcard.js?v=f47cb8f9eb",
   "js/instrui.js?v=ee3af4f621",
   "js/keepdata.js?v=65e624a7c2",
-  "js/keyboard.js?v=e6442a7201",
+  "js/keyboard.js?v=e8a541921d",
   "js/ladderui.js?v=60d996c6e9",
   "js/littlewords.js?v=358cd2ae4c",
   "js/lock.js?v=1ad71b40d0",
@@ -1520,7 +1520,8 @@ const FILES = [
   "js/modelsettings.js?v=8b24020b2f",
   "js/numberwords.js?v=52f41a7a84",
   "js/photoboxes.js?v=0250b9f5f6",
-  "js/profiles.js?v=1ebc762ead",
+  "js/predict.js?v=400e6a9e74",
+  "js/profiles.js?v=76fe9bc83d",
   "js/recognize.js?v=50dbddeda9",
   "js/reportcharts.js?v=11b54cd11d",
   "js/reportdata.js?v=5fc0a03e25",
@@ -1549,7 +1550,7 @@ const FILES = [
   "js/ui.js?v=6b27e92e5d",
   "js/voicepicker.js?v=e4127d1c9d",
   "manifest.webmanifest?v=2c85c0b4e9",
-  "styles.css?v=2524e84a8f",
+  "styles.css?v=8f4336da3d",
 ];
 // END FILE LIST
 

@@ -44,7 +44,9 @@
 //     toneSuggested: false,             // the end of a session already suggested turning the tone wheel on
 //     cameraButton: "auto",             // the top-bar camera button (hold 1 s: quick scene): "auto" (from stage 3), "always" or "never"
 //     matchStrictness: "medium",        // Scenes > My things: "low" | "medium" | "high" (js/things.js)
-//     speakLetters: false,              // the keyboard says each letter's name as it is typed
+//     speakLetters: false,              // the keyboard says each letter as it is typed
+//     letterMode: "names",              // what it says (Beta 3.28): "names" ("bee") or "sounds" ("buh")
+//     wordPredict: false,               // three word guesses above the keyboard (Beta 3.28)
 //     stageRule: { mode: "percent"|"words", pct, words: { stage: [ids] }, days, weeks }   // next-stage rule (Beta 3.22, js/stagerule.js)
 //     scan: { mode: "off"|"one"|"two", speed, loops, screen, cues }   // Switch scanning (Beta 3.21, js/scan.js)
 //     access: { theme, font, labelSize, ... }  // Accessibility (Beta 3.18): the child screen's look and listener helps (js/access.js)
@@ -118,7 +120,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
     id: newId(), name, created: Date.now(), v: CURRENT_PROFILE_VERSION, stage, gridSize,
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
-    wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
+    wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false, letterMode: "names", wordPredict: false,
     cameraButton: "auto", matchStrictness: "medium", littleStrip: "auto", toneWheel: "off", toneSuggested: false,
     wordDial: { ...DEFAULT_WORD_DIAL }, access: cleanAccess(null), scan: cleanScan(null), stageRule: cleanStageRule(null),
   };
@@ -220,6 +222,8 @@ export async function initProfiles(board) {
   for (const p of profiles) {
     if (!KEYBOARD_BUTTON_CHOICES.includes(p.keyboardButton)) p.keyboardButton = "auto";
     p.speakLetters = p.speakLetters === true;
+    p.letterMode = p.letterMode === "sounds" ? "sounds" : "names";     // (Beta 3.28)
+    p.wordPredict = p.wordPredict === true;
     p.voice = cleanVoice(p.voice);
   }
   // Learners saved before the camera button and My things (Beta 3.1): camera button on Auto, match strictness Medium.
@@ -379,6 +383,7 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.letterMode = data.letterMode === "sounds" ? "sounds" : "names"; p.wordPredict = data.wordPredict === true;
     p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
     if (data.littleStrip) p.littleStrip = data.littleStrip;
     if (data.toneWheel) p.toneWheel = data.toneWheel;
@@ -398,6 +403,7 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.letterMode = data.letterMode === "sounds" ? "sounds" : "names"; p.wordPredict = data.wordPredict === true;
     p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
     if (data.littleStrip) p.littleStrip = data.littleStrip;      // (Beta 3.18: a NEW learner from a backup now keeps these too)
     if (data.toneWheel) p.toneWheel = data.toneWheel;

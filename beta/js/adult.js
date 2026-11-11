@@ -452,7 +452,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
   // "Reading and typing" (Beta 3.9).
   function readingSection() {
     const cur = getCurrent();
-    return h("section", { class: "panel", id: "sec-reading" }, wordsOnlySetting(cur), speakLettersSetting(cur));
+    return h("section", { class: "panel", id: "sec-reading" }, wordsOnlySetting(cur), speakLettersSetting(cur), wordPredictSetting(cur));
   }
 
   // The top-bar Words button (and the Forms button next to it): Auto shows them from stage 3.
@@ -569,6 +569,10 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
 
   // Say each letter's name as it is typed (default off).
   function speakLettersSetting(cur) {
+    const mode = (value, text) => h("button", {
+      type: "button", class: "seg" + ((cur.letterMode || "names") === value ? " on" : ""), id: `lettermode-${value}`, text,
+      onclick: async () => { cur.letterMode = value; await saveProfile(cur); refresh(); },
+    });
     const btn = (value, text) => h("button", {
       type: "button", class: "seg" + (cur.speakLetters === value ? " on" : ""), id: `speakletters-${value ? "on" : "off"}`, text,
       onclick: async () => { cur.speakLetters = value; await saveProfile(cur); refresh(); },
@@ -576,7 +580,23 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("div", { class: "field touch-setting", id: "setting-speak-letters" },
       h("label", { text: "Speak each letter while typing" }),
       h("div", { class: "seg-row touch-seg" }, btn(false, "Off"), btn(true, "On")),
-      h("p", { class: "muted", text: "On: every key says its letter name (\"bee\", \"oh\"...) as it is tapped." }));
+      cur.speakLetters ? h("div", { class: "seg-row touch-seg", id: "letter-mode" }, mode("names", "Letter names"), mode("sounds", "Letter sounds")) : null,
+      h("p", { class: "muted", text: "On: every key speaks as it is tapped. Letter names say \"bee\", \"oh\"; letter sounds say \"buh\", \"ahh\" " +
+        "(the sound the letter usually makes at the start of a word). The iPad voice decides exactly how a sound comes out, so listen to a few first." }));
+  }
+
+  // Word guesses above the keyboard (Beta 3.28, default off).
+  function wordPredictSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (!!cur.wordPredict === value ? " on" : ""), id: `wordpredict-${value ? "on" : "off"}`, text,
+      onclick: async () => { cur.wordPredict = value; await saveProfile(cur); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-word-predict" },
+      h("label", { text: "Word guesses on the keyboard" }),
+      h("div", { class: "seg-row touch-seg" }, btn(false, "Off"), btn(true, "On")),
+      h("p", { class: "muted", text: "On: three fixed boxes above the keys show words that start with the letters typed so far. Tap one to say it. " +
+        "Words this learner has used most in the last 4 weeks come first, then sight words and board words. The boxes never move. " +
+        "Leave it off while the goal is spelling the whole word." }));
   }
 
   // Reading stage: take away every picture so the learner reads the words.

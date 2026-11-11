@@ -674,6 +674,11 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .kb-switch { background: #ddd6fe; font-size: min(5.2vmin, 7dvh); }
 .kb-head .kb-key { flex: 0 0 auto; padding: 0 3.5vmin; font-size: min(3.8vmin, 5.4dvh); min-height: 0; }
 .kb-close { background: #e5e7eb; }
+/* Word guesses (Beta 3.28): three fixed boxes in the keyboard's top band, where the title is when they are off. The keys below never move. */
+.kb-predict { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2vmin; }
+.kb-head .kb-slot { padding: 0 1vmin; background: #fef9c3; border-color: #ca8a04; font-size: min(4.2vmin, 5.6dvh); font-weight: 800;
+  text-transform: none; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.kb-head .kb-slot.empty { background: #f8fafc; border-style: dashed; border-color: #cbd5e1; }
 .kb-pad .kb-done { font-size: min(6vmin, 8dvh); }
 
 /* ---------- Passcode: stay unlocked ---------- */

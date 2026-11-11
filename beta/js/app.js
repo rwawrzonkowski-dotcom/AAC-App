@@ -53,6 +53,7 @@ import { toneById } from "./tones.js";
 import { wordInfo } from "./scenewords.js";
 import { MODEL_STEP_MS as STEP_MS_BY_SPEED } from "./critters.js";
 import { initCameraButton } from "./camerabtn.js";
+import * as predictor from "./predict.js";
 import { checkOpenProblem, showNotSavingTag, watchWriteProblems } from "./datawarning.js";
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
@@ -1216,12 +1217,19 @@ async function start() {
   typing = createTyping({
     host: $("app"),
     speakLetters: () => getCurrent().speakLetters,
+    letterMode: () => getCurrent().letterMode,
+    predictOn: () => getCurrent().wordPredict === true,
+    predict: (draft) => predictor.predict(draft, 3),
     allowLetters: () => keyboardButtonShown(getCurrent()),
     onDraft: (text, kind) => { state.draft = text ? { text, kind } : null; drawMessage(); },
     onCommit: onTyped,
     onLetter: (name) => speak(name, "word"),
     onKeyPress: (el) => { if (state.modeling) ringBriefly(el, getCurrent().model); },
-    onOpenChange: (open) => { $("app").classList.toggle("typing", open); },
+    onOpenChange: (open) => {
+      $("app").classList.toggle("typing", open);
+      // Word guesses (Beta 3.28): read this learner's words when the keyboard opens, then fill the slots.
+      if (open && getCurrent().wordPredict === true) predictor.prepare(state.board, getCurrent()).then(() => typing.refreshSlots());
+    },
   });
 
   attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked, dialMs, openDial: openWordDial, touch: touchOpts, preview: previewTap });
