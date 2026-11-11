@@ -382,3 +382,55 @@ export function parentProgress(tm, name) {
   if (avg(late, "help") < avg(early, "help") - 0.05 || avg(late, "pct") > avg(early, "pct") + 10) return `${name} needs less help now.`;
   return "Still learning this one. That is okay, keep practicing together.";
 }
+
+// ---------------------------------------------------------------- board heat map (Beta 3.19)
+// Where on the MAIN board a learner's words were chosen, for Reports > Everyday use. Each main-board spot shows its own uses; a category
+// button (Food, Play...) also counts every use of a word on its pages and folders ("through Food"), because every one of those words
+// was reached through that button. Word forms count for their base word ("go+went" -> go). Typed words ("~...") are not on the board.
+//   model      js/boardmodel.js buildModel(board, size) for the learner's board size
+//   counts     { key: n } learner uses in the period (from everydayModel topAll), or modeled uses (modelCountsFrom)
+//   visible(w) true when that main-board word is revealed for this learner (stage, or the adult's show/hide)
+// Returns { cols, rows, cells: [{ id, label, row, col, category, visible, direct, via, total }], max, top: [cells], unused: [labels] }
+export function boardHeat({ model, counts, visible }) {
+  const mainIds = new Set(model.main.map((w) => w.id));
+  const ownerOf = new Map();                         // a page word's id -> the main-board button that leads to its page
+  const topOf = (pid) => {
+    let p = model.pages[pid];
+    for (let n = 0; p && p.parent && p.parent !== "core" && n < 6; n++) p = model.pages[p.parent];
+    return p && p.parent === "core" ? p.id : null;
+  };
+  const buttonFor = new Map(model.main.filter((w) => w.loadBoard).map((w) => [w.loadBoard, w.id]));
+  for (const p of Object.values(model.pages)) {
+    const btn = buttonFor.get(topOf(p.id));
+    if (!btn) continue;
+    for (const it of p.items) if (!ownerOf.has(it.id)) ownerOf.set(it.id, btn);
+  }
+  const direct = new Map(), via = new Map();
+  for (const [key, n] of Object.entries(counts || {})) {
+    if (!n || key.startsWith("~")) continue;
+    const id = key.split("+")[0];
+    if (mainIds.has(id)) direct.set(id, (direct.get(id) || 0) + n);
+    else if (ownerOf.has(id)) via.set(ownerOf.get(id), (via.get(ownerOf.get(id)) || 0) + n);
+  }
+  const cells = model.main.map((w) => {
+    const d = direct.get(w.id) || 0, v = via.get(w.id) || 0;
+    return { id: w.id, label: w.label, row: w.row, col: w.col, category: !!w.loadBoard, visible: !!visible(w), direct: d, via: v, total: d + v };
+  });
+  const max = cells.reduce((m, c) => Math.max(m, c.total), 0);
+  const top = cells.filter((c) => c.total > 0).sort((a, b) => b.total - a.total || (a.label < b.label ? -1 : 1)).slice(0, 5);
+  const unused = cells.filter((c) => c.visible && !c.category && c.total === 0).map((c) => c.label);
+  return { cols: model.cols, rows: model.rows, cells, max, top, unused };
+}
+
+/** { key: n } of MODELED uses (an adult in Model mode) from raw everyday events, keyed like the daily word counts. */
+export function modelCountsFrom(events) {
+  const out = {};
+  for (const e of events) {
+    if (e.mode !== "model" || !e.wordId || e.how === "tone" || e.how === "mood") continue;
+    out[e.wordId] = (out[e.wordId] || 0) + 1;            // (a word form's event carries its base word's id)
+  }
+  return out;
+}
+
+/** The learner counts of an everyday model as { key: n }. */
+export const learnerCounts = (em) => Object.fromEntries((em.topAll || []).map((r) => [r.key, r.count]));

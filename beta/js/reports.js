@@ -18,6 +18,7 @@ import { loadBoardData, getBoardData } from "./boarddata.js";
 import * as R from "./reportdata.js";
 import * as X from "./reportexport.js";
 import * as D from "./reportdoc.js";
+import { buildModel } from "./boardmodel.js";
 
 const TABS = [["teaching", "Teaching"], ["everyday", "Everyday use"], ["printable", "Printable summary"], ["parent", "Parent summary"], ["export", "Export"]];
 const PRINT_HELP = "On iPad: tap Print, then pinch out on the preview (or use Share, then Save to Files) to save a PDF.";
@@ -34,7 +35,7 @@ async function loadLearner(id) {
 
 export async function openReports({ learnerId = getCurrent().id } = {}) {
   const st = { id: learnerId, spec: { id: "4w", from: "", to: "" }, who: "", where: "", tab: "teaching", notes: "", instr: false,
-    data: null, range: null, tm: null, em: null, longestText: null, token: 0, raw: new Map(), msg: "" };
+    data: null, range: null, tm: null, em: null, longestText: null, token: 0, raw: new Map(), msg: "", heatMode: "learner", modelCounts: null };
   const body = h("div", { class: "rp-body", id: "rp-body" });
   const controls = h("div", { class: "rp-controls", id: "rp-controls" });
   const tabsEl = h("div", { class: "rp-tabs seg-row", id: "rp-tabs", role: "tablist" });
@@ -169,8 +170,37 @@ export async function openReports({ learnerId = getCurrent().id } = {}) {
     }
     out.push(D.everydayTiles(em));
     out.push(...D.everydayCards(em));
+    out.push(...heatSection());
     out.push(heading("Newest words"), D.newestWordsEl(em));
     out.push(h("p", { class: "muted", text: "Who and Where do not change these graphs: everyday use has no Who or Where." }));
+    return out;
+  }
+
+  // Board heat map (Beta 3.19): where on the main board the learner's words were chosen, or where adults modeled. Learner uses come from
+  // the daily summaries (kept forever); modeled uses are read from the saved taps when first asked for (kept as long as Everyday data
+  // keeps raw taps, 180 days by default).
+  function heatSection() {
+    const prof = listProfiles().find((p) => p.id === st.id);
+    if (!prof) return [];
+    const model = buildModel(getBoardData(), prof.gridSize);
+    const words = prof.words || {};
+    const visible = (w) => { const ov = words[w.id] || {}; return ov.show ?? (Number(w.stage || 1) <= prof.stage); };
+    const seg = (mode, label) => h("button", { type: "button", class: "seg" + (st.heatMode === mode ? " on" : ""), id: "ev-heat-" + mode, text: label,
+      onclick: () => { st.heatMode = mode; paint(); } });
+    const out = [heading("Where on the board"), h("div", { class: "seg-row", id: "ev-heat-mode" }, seg("learner", "Learner"), seg("model", "Modeled by adults"))];
+    if (st.heatMode === "model") {
+      const key = st.range.from + ":" + st.range.to + ":" + st.id;
+      if (!st.modelCounts || st.modelCounts.key !== key) {
+        rawRows("events", st.range.from, st.range.to).then((ev) => { st.modelCounts = { key, counts: R.modelCountsFrom(ev) }; if (st.tab === "everyday") paint(); });
+        out.push(h("p", { class: "muted", id: "ev-heat-loading", text: "Reading the saved taps..." }));
+        return out;
+      }
+    }
+    const counts = st.heatMode === "model" ? st.modelCounts.counts : R.learnerCounts(st.em);
+    const heat = R.boardHeat({ model, counts, visible });
+    out.push(D.heatmapEl(heat, { modeLabel: st.heatMode === "model" ? "modeled" : "uses" }));
+    out.push(h("p", { class: "muted", text: `${prof.gridSize}-button main board. A category button also counts the words used on its pages and folders. ` +
+      (st.heatMode === "model" ? "Modeled uses come from saved taps, which Everyday data keeps for a limited time." : "Word forms count for their word; typed words are not shown.") }));
     return out;
   }
 
@@ -196,7 +226,7 @@ export async function openReports({ learnerId = getCurrent().id } = {}) {
   }
 
   function paintParent() {
-    const host = h("div", { class: "rp-docwrap", id: "rp-docwrap" });
+    const host = h("div", { class: "rp-docwrap paper", id: "rp-docwrap" });
     host.append(D.parentDoc(docContext()));
     const status = h("span", { class: "muted", id: "rp-copy-status", role: "status" });
     const copy = h("button", { type: "button", class: "btn", id: "rp-copy", text: "Copy as text", onclick: async () => {

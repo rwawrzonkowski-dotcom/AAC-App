@@ -85,6 +85,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     h("div", { class: "set-split" }, nav, detail),
   ], { sheetClass: "menu" });
   const sheet = o.sheet;
+  sheet.closest(".overlay").classList.add("frosted");     // Beta 3.19: the board shows softly blurred behind the menu (styles.css)
 
   function close() {
     stopVoiceListener();

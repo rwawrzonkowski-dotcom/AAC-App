@@ -1377,3 +1377,65 @@ html[data-hidden="dots"][data-theme] #app .cell.hidden {
 /* Little-word strip in the dark themes (its own light colours otherwise stay) */
 html[data-theme="dim"] #app .lw-item { background: #3a3f4a; border-color: #8b80d6; }
 html[data-theme="dark"] #app .lw-item { --edge: #c4b5fd; }
+
+/* =====================================================================================================================================
+   Beta 3.19 designs: frosted adult menu, board heat map (Reports), paper-style parent summary
+   ===================================================================================================================================== */
+/* Frosted adult menu: the child's board shows softly blurred behind the menu, so it is clear this is the adult layer on top of THIS
+   learner's board. Only while the menu is open. Without blur support (or with Reduce Transparency on) it is a plain soft tint. */
+.overlay.frosted { background: rgba(226, 232, 240, 0.9); }
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .overlay.frosted { background: rgba(241, 245, 249, 0.42); -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25); }
+  html[data-theme="dark"] .overlay.frosted, html[data-theme="cvi"] .overlay.frosted, html[data-theme="dim"] .overlay.frosted { background: rgba(15, 23, 42, 0.45); }
+}
+@media (prefers-reduced-transparency: reduce) { .overlay.frosted { background: rgba(226, 232, 240, 0.95); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+.overlay.frosted .sheet.adult.menu { box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32); border: 1px solid rgba(255, 255, 255, 0.8); }
+
+/* Board heat map (Reports > Everyday use) */
+.heat-wrap { display: flex; flex-wrap: wrap; gap: 18px; margin: 10px 0 6px; }
+.heat-main { flex: 1 1 520px; min-width: 0; }
+.heat-grid { display: grid; gap: 4px; }
+.heat-cell { min-width: 0; aspect-ratio: 1.15 / 1; border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; overflow: hidden; padding: 2px; }
+.heat-cell .hw { font-size: clamp(11px, 1.55vmin, 15px); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.heat-cell .hn { font-size: clamp(11px, 1.45vmin, 15px); font-weight: 800; font-variant-numeric: tabular-nums; }
+.heat-cell.hidden { background: #e5e7eb; color: #9ca3af; }
+.heat-cell.empty { visibility: hidden; }
+.heat-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; font-size: 13px; color: #4b5563; }
+.heat-ramp { flex: 0 0 260px; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #1b0c41, #4a0c6b, #781c6d, #a52c60, #cf4446, #ed6925, #fb9b06, #f7d13d, #fcffa4); }
+.heat-key-hidden { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
+.heat-key-hidden i { width: 14px; height: 14px; border-radius: 4px; background: #e5e7eb; display: inline-block; }
+.heat-side { flex: 0 1 260px; display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
+.heat-box { padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; }
+.heat-box h4 { margin: 0 0 6px; font-size: 15px; }
+.heat-box p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; }
+.heat-top { margin: 0; padding: 0; list-style: none; }
+.heat-top li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f2f4; font-size: 14px; }
+.heat-top li:last-child { border-bottom: 0; }
+@media print { .heat-cell, .heat-ramp { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+/* Paper-style parent summary: warm paper on screen, serif headings (iPad's Iowan Old Style), the easy-to-read Atkinson Hyperlegible for
+   the text. Printed, it is plain white so it copies cleanly. */
+.rp-docwrap.paper {
+  background-color: #f7f2e7; border-color: #d6cbb3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+}
+.report-doc.parent { font-family: "Atkinson Hyperlegible", -apple-system, Arial, sans-serif; color: #292524; }
+.report-doc.parent h1, .report-doc.parent h2 { font-family: "Iowan Old Style", "Palatino", Georgia, serif; color: #292524; }
+.report-doc.parent .rep-brand { letter-spacing: 0.14em; color: #57534e; }
+.par-stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 18px; }
+.par-stat { flex: 1 1 150px; padding: 14px 16px; border-radius: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid #e4dccb; }
+.par-big { font-family: "Iowan Old Style", "Palatino", Georgia, serif; font-size: 36px; font-weight: 700; color: #3b2f9e; line-height: 1; }
+.par-lab { font-size: 14px; color: #57534e; margin-top: 6px; }
+.par-weeks h2 { margin-top: 4px; }
+.par-bars { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 6px; border-bottom: 1px solid #a8a29e; margin-bottom: 16px; }
+.par-bar { flex: 1 1 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; min-width: 0; }
+.par-b { width: 100%; max-width: 64px; border-radius: 4px 4px 0 0; background: #6d5bd0; }
+.par-bn { font-size: 12px; font-weight: 700; color: #3b2f9e; }
+.par-bl { font-size: 11px; color: #57534e; white-space: nowrap; margin-bottom: -18px; }
+.par-chips { margin: -4px 0 12px; }
+.par-chip { display: inline-block; padding: 4px 10px; margin: 0 6px 6px 0; border-radius: 999px; border: 1px solid #d6cbb3; background: rgba(255, 255, 255, 0.6); font-size: 14px; font-weight: 700; }
+@media print {
+  .rp-docwrap.paper { background: #fff !important; }
+  .par-stat, .par-chip { background: #fff; }
+  .par-b { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
