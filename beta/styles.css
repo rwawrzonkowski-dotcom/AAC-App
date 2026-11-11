@@ -1445,3 +1445,9 @@ html[data-theme="dark"] #app .lw-item { --edge: #c4b5fd; }
 .touch-hold.dwell .th-fg { stroke: #7c3aed; }
 #board .cell.previewed { outline: 0.6vmin dashed #1d4ed8; outline-offset: -0.7vmin; }
 html[data-theme="dark"] #board .cell.previewed, html[data-theme="cvi"] #board .cell.previewed, html[data-theme="dim"] #board .cell.previewed { outline-color: #ffffff; }
+
+/* Switch scanning (Beta 3.21, js/scan.js): outlines drawn over the buttons in their own places (nothing moves) */
+#app .scan-row { outline: 0.55vmin solid #f59e0b; outline-offset: -0.55vmin; }
+#app .scan-item { outline: 0.95vmin solid #1d4ed8; outline-offset: -0.95vmin; box-shadow: 0 0 0 0.5vmin rgba(29, 78, 216, 0.35); z-index: 3; }
+html[data-theme="dark"] #app .scan-item, html[data-theme="cvi"] #app .scan-item, html[data-theme="dim"] #app .scan-item { outline-color: #ffffff; }
+html[data-theme="cvi"] #app .scan-row { outline-color: #ff3b30; }

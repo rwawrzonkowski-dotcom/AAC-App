@@ -45,6 +45,7 @@ import * as everyday from "./everyday.js";
 import * as scenes from "./scenestrip.js";
 import * as little from "./littlewords.js";
 import { applyAccess, getAccess, showToListener } from "./access.js";
+import { createScanner } from "./scan.js";
 import { openModelSentence } from "./modelsentence.js";
 import { openToneWheel } from "./tonewheel.js";
 import { toneById } from "./tones.js";
@@ -177,6 +178,24 @@ function currentPageDef() {
   return page;
 }
 
+// The message bar's buttons (a tap, or a switch choosing them while scanning).
+function barTap(el) {
+    if (el.disabled) return;
+    if (el.id === "message-text") { playMessage(); teach.onSelect({ type: "speak" }); }   // (a sentence target's "say the sentence" step)
+    else if (el.id === "delete-btn") { stopSpeech(); state.sentence.pop(); drawMessage(); chipsChanged(false); }   // removes a whole chip
+    else if (el.id === "clear-btn") { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; typing.clearDraft(); drawMessage(); }
+    else if (el.id === "show-btn") showToListener(state.sentence.map((w) => w.label).join(" "));   // Accessibility: the message for a listener
+    else if (el.id === "words-btn") {
+      if (!returning && !previewing && !typing.isOpen()) {
+        // (Opening the Words menu is a choice the teaching trial must classify before the page changes.)
+        teach.onSelect(onWordsPage() ? { type: "back" } : { type: "category", id: "words-btn", label: "Words", opens: "words" });
+        toggleWords();
+      }
+    }
+    else if (el.id === "forms-btn") { if (!typing.isOpen()) openForms(); }
+    else if (el.id === "abc-btn") toggleKeyboard();
+}
+
 // ---------- Accessibility (Beta 3.18, js/access.js) ----------
 // The learner's look (theme, font, labels, spacing, hidden spots, motion) is set on <html> before the board is drawn; the Show button
 // and the "talking" glow follow their settings. Cheap enough to run on every redraw (nothing changes when nothing changed).
@@ -187,6 +206,40 @@ function syncAccess(profile) {
   if (a.glow && !stopGlow) stopGlow = onSpeakingChange((on) => $("message-text").classList.toggle("talking", on));
   else if (!a.glow && stopGlow) { stopGlow(); stopGlow = null; $("message-text").classList.remove("talking"); }
 }
+
+// ---------- Switch scanning (Beta 3.21, js/scan.js) ----------
+// Rows of the board on screen now (top to bottom, each left to right, only buttons that can be chosen), then the message-bar row.
+const shown = (el) => el && !el.hidden && el.offsetParent !== null;
+function scanGroups() {
+  const rows = new Map();
+  for (const el of document.querySelectorAll("#board .cell.tap")) {
+    const r = Number(el.style.gridRow), c = Number(el.style.gridColumn);
+    if (!rows.has(r)) rows.set(r, []);
+    rows.get(r).push([c, el]);
+  }
+  const out = [...rows.keys()].sort((a, b) => a - b).map((r) => rows.get(r).sort((a, b) => a[0] - b[0]).map((x) => x[1]));
+  out.push([$("message-text"), $("show-btn"), $("delete-btn"), $("clear-btn")].filter(shown));
+  return out;
+}
+function scanSettings() {
+  const s = getCurrent().scan;
+  if (!s || s.mode === "off") return null;
+  if (state.editing || state.choosing || state.modeling || previewing || state.dial || state.forms) return null;
+  if ((typing && typing.isOpen()) || document.querySelector(".overlay, .listener-view")) return null;
+  return s;
+}
+function scanChoose(el) {
+  if (el.closest("#board")) onCellTap(el);
+  else barTap(el);
+}
+const BAR_NAMES = { "message-text": "speak", "delete-btn": "delete", "clear-btn": "clear", "show-btn": "show" };
+function scanCue(el) {
+  const v = getCurrent().voice;
+  const d = el.dataset && el.dataset.key ? state.cells.get(el.dataset.key) : null;
+  const text = d ? (d.kind === "home" ? "back" : d.label) : BAR_NAMES[el.id] || "";
+  if (text) speak(text, "word", { ...v, pitch: Math.max(0.5, (v.pitch || 1) - 0.45) });
+}
+let scanner = null;
 
 // Redraw everything that depends on page / learner / mode.
 function renderAll() {
@@ -230,6 +283,7 @@ function renderAll() {
   updateLittle();                                           // the little-word strip (Beta 3.7), unless a scene has the strip
   drawMoodBadge();                                          // the mood face in the message bar (Beta 3.16)
   if (hintsReady) setTimeout(coachCheck, 600);           // "This is the adult menu", once per learner (js/adulthint.js)
+  if (scanner) scanner.sync();                              // switch scanning (Beta 3.21): repaint the highlight on the new buttons
 }
 
 // The adult-menu pointer shows once per learner, only on the child's plain board (no menu, session, edit, Model mode or keyboard open).
@@ -1148,22 +1202,8 @@ async function start() {
   attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked, dialMs, openDial: openWordDial, touch: touchOpts, preview: previewTap });
 
   // Message bar: tap text to speak the sentence; Delete / Clear
-  attachPressHandling($("message-bar"), (el) => {
-    if (el.disabled) return;
-    if (el.id === "message-text") { playMessage(); teach.onSelect({ type: "speak" }); }   // (a sentence target's "say the sentence" step)
-    else if (el.id === "delete-btn") { stopSpeech(); state.sentence.pop(); drawMessage(); chipsChanged(false); }   // removes a whole chip
-    else if (el.id === "clear-btn") { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; typing.clearDraft(); drawMessage(); }
-    else if (el.id === "show-btn") showToListener(state.sentence.map((w) => w.label).join(" "));   // Accessibility: the message for a listener
-    else if (el.id === "words-btn") {
-      if (!returning && !previewing && !typing.isOpen()) {
-        // (Opening the Words menu is a choice the teaching trial must classify before the page changes.)
-        teach.onSelect(onWordsPage() ? { type: "back" } : { type: "category", id: "words-btn", label: "Words", opens: "words" });
-        toggleWords();
-      }
-    }
-    else if (el.id === "forms-btn") { if (!typing.isOpen()) openForms(); }
-    else if (el.id === "abc-btn") toggleKeyboard();
-  }, "#message-text, .bar-btn:not(#camera-btn)",      // (the camera button has its own 1-second hold: js/camerabtn.js)
+  scanner = createScanner({ groups: scanGroups, choose: scanChoose, settings: scanSettings, cue: scanCue });
+  attachPressHandling($("message-bar"), barTap, "#message-text, .bar-btn:not(#camera-btn)",      // (the camera button has its own 1-second hold: js/camerabtn.js)
   { dialMs: toneDialMs, openDial: openToneWheelAt });  // press and hold the message: the tone wheel (Beta 3.16)
   initCameraButton({
     button: $("camera-btn"),

@@ -629,7 +629,40 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         min: 0.5, max: 3, step: 0.1, decimals: 1,
         help: "Resting a pointer on a button for this long chooses it (a purple ring fills). Not for fingers. On an iPad with Eye Tracking or AssistiveTouch, the iPad's own Dwell control already taps for the learner: leave this Off there.",
       }),
-      h("p", { class: "muted", text: "These do not affect the message bar, Delete, Clear or the adult screens. Only the board's buttons use the options under More ways to choose." }));
+      h("p", { class: "muted", text: "These do not affect the message bar, Delete, Clear or the adult screens. Only the board's buttons use the options under More ways to choose." }),
+      scanSection());
+  }
+  // Switch scanning (Beta 3.21, js/scan.js).
+  function scanSection() {
+    const cur = getCurrent();
+    const sc = cur.scan;
+    const save = async () => { await saveProfile(cur); onVocabChanged(); refresh(); };
+    const seg = (key, choices) => h("div", { class: "seg-row touch-seg" }, choices.map(([v, label]) =>
+      h("button", { type: "button", class: "seg" + (sc[key] === v ? " on" : ""), id: `scan-${key}-${v}`, text: label, onclick: async () => { sc[key] = v; await save(); } })));
+    const speedNum = h("span", { class: "slider-num", id: "scan-speed-val", text: sc.speed.toFixed(1) + " s" });
+    const speed = h("input", { type: "range", id: "scan-speed", min: 0.5, max: 5, step: 0.1, value: sc.speed, disabled: sc.mode !== "one",
+      oninput: () => { sc.speed = parseFloat(speed.value); speedNum.textContent = sc.speed.toFixed(1) + " s"; saveProfile(cur); } });
+    const on = sc.mode !== "off";
+    return h("div", { class: "scan-settings", id: "scan-settings" },
+      h("h3", { class: "access-h", text: "Switch scanning (Beta 3.21)" }),
+      h("div", { class: "field touch-setting" }, h("label", { text: "Switches" }),
+        seg("mode", [["off", "Off"], ["one", "One switch"], ["two", "Two switches"]]),
+        h("p", { class: "muted", text: "One switch: press to start; the highlight moves through the rows on its own, press to open a row, then press to choose a button. " +
+          "Two switches: switch 1 moves the highlight, switch 2 chooses. Rows come first, then the buttons in that row; the last row is the message bar (Speak, Delete, Clear). " +
+          "Switch keys: one switch = Space, Enter or 1; two switches = Space or 1 to move, Enter or 3 to choose." })),
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Scan speed (one switch)" }),
+        h("div", { class: "slider-row touch-slider" + (sc.mode === "one" ? "" : " off") }, h("label", { for: "scan-speed", text: "Time on each step" }), speed, speedNum),
+        h("p", { class: "muted", text: "Start slow (2 to 3 s) and speed up as the learner gets quicker." })) : null,
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Rounds before it waits (one switch)" }),
+        seg("loops", [[1, "1"], [2, "2"], [3, "3"], [5, "5"]]),
+        h("p", { class: "muted", text: "If nothing is chosen, it goes round this many times, then waits for the next press (inside a row it goes back to the rows)." })) : null,
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Touch the screen as a switch" }),
+        seg("screen", [[false, "Off"], [true, "On"]]),
+        h("p", { class: "muted", text: "A touch anywhere is the switch (with two switches: the left half moves, the right half chooses). The board's buttons then do not respond to touch. The adult circle still works." })) : null,
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Say each button as it lights up" }),
+        seg("cues", [[false, "Off"], [true, "On"]]),
+        h("p", { class: "muted", text: "Auditory scanning: VOICE quietly says each row's first word and each button, in a lower voice, for learners who choose by listening." })) : null,
+      on ? h("p", { class: "muted", id: "scan-note", text: "On iPad, do not also turn on the iPad's own Switch Control (Settings > Accessibility): it would take the switch presses. Scanning pauses in Edit mode, Model mode, the keyboard and the adult menu." }) : null);
   }
   // One plain Off / On setting (Beta 3.20 touch options).
   function onOff({ id, key, title, help }) {
