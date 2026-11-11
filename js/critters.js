@@ -37,9 +37,14 @@ export const SIZE_PCT = { small: 0.45, medium: 0.65, large: 0.85 };
 // the picture stays readable for the small and medium sizes. A large critter overlaps it a little.
 export const critterTop = (cellHeight, side) => Math.max(0, Math.round((cellHeight * 0.66 - side) / 2));
 
+// Model a sentence (Beta 3.15): how long each step of the model takes.
+export const MODEL_SPEEDS = ["slow", "medium", "fast"];
+export const MODEL_STEP_MS = { slow: 1400, medium: 950, fast: 600 };
+
 export const DEFAULT_MODEL = {
   style: "ring", ringOpacity: 100, critterOpacity: 100,
   animal: "puppy", color: COLORS[0].value, accessory: "none", size: "medium", arrival: "hop",
+  speed: "medium",            // Beta 3.15: how fast "Model a sentence" moves (slow / medium / fast)
 };
 
 // Where each accessory sits on each animal, in the animal's 100 x 100 drawing:
@@ -72,6 +77,7 @@ export function cleanModel(raw) {
     accessory: pick(m.accessory, ACCESSORIES, DEFAULT_MODEL.accessory),
     size: pick(m.size, SIZES, DEFAULT_MODEL.size),
     arrival: pick(m.arrival, ARRIVALS, DEFAULT_MODEL.arrival),
+    speed: pick(m.speed, MODEL_SPEEDS, "medium"),
   };
 }
 

@@ -1,0 +1,205 @@
+{
+ "_comment": [
+  "HOW OBJECT RECOGNITION NAMES BECOME VOICE WORDS (Scenes, beta 3.0).",
+  "The recognition model names things in its own vocabulary (80 'COCO' names such as 'sports ball' or 'dining table').",
+  "Each line below says what VOICE word that name should suggest.",
+  "  \"id\": the id of a word that is already on the VOICE board (its picture, spoken text and permanent spot are used).",
+  "  \"label\": a word that is NOT on the board; it is suggested as a new, text-only word.",
+  "  \"checked\": false means the suggestion starts unchecked (the adult must tick it).",
+  "If a name is not listed here, the model's own name is used as a new word. If an \"id\" is not on the board, its \"label\" is used.",
+  "You can edit this file with any text editor; save it as plain text (JSON) and keep the commas and quotes."
+ ],
+ "minConfidence": 0.4,
+ "classes": {
+  "sports ball": {
+   "id": "ball"
+  },
+  "cup": {
+   "id": "cup"
+  },
+  "dining table": {
+   "id": "table"
+  },
+  "tv": {
+   "id": "tv"
+  },
+  "cell phone": {
+   "id": "phone"
+  },
+  "teddy bear": {
+   "id": "stuffed-animal"
+  },
+  "potted plant": {
+   "label": "plant"
+  },
+  "couch": {
+   "id": "couch"
+  },
+  "bed": {
+   "id": "bed"
+  },
+  "dog": {
+   "id": "dog"
+  },
+  "cat": {
+   "id": "cat"
+  },
+  "book": {
+   "id": "book"
+  },
+  "bottle": {
+   "id": "bottle"
+  },
+  "car": {
+   "id": "car"
+  },
+  "bicycle": {
+   "id": "bike"
+  },
+  "motorcycle": {
+   "id": "motorcycle"
+  },
+  "banana": {
+   "id": "banana"
+  },
+  "apple": {
+   "id": "apple"
+  },
+  "orange": {
+   "id": "orange"
+  },
+  "pizza": {
+   "id": "pizza"
+  },
+  "cake": {
+   "id": "cake"
+  },
+  "donut": {
+   "id": "donut"
+  },
+  "sandwich": {
+   "id": "sandwich"
+  },
+  "hot dog": {
+   "id": "hot-dog"
+  },
+  "broccoli": {
+   "id": "broccoli"
+  },
+  "carrot": {
+   "id": "carrots"
+  },
+  "chair": {
+   "id": "chair"
+  },
+  "toilet": {
+   "id": "toilet"
+  },
+  "sink": {
+   "id": "sink"
+  },
+  "clock": {
+   "id": "clock"
+  },
+  "remote": {
+   "id": "remote"
+  },
+  "scissors": {
+   "id": "scissors"
+  },
+  "toothbrush": {
+   "id": "toothbrush"
+  },
+  "backpack": {
+   "id": "backpack"
+  },
+  "umbrella": {
+   "id": "umbrella"
+  },
+  "laptop": {
+   "id": "computer"
+  },
+  "mouse": {
+   "label": "computer mouse"
+  },
+  "keyboard": {
+   "label": "keyboard"
+  },
+  "bird": {
+   "id": "bird"
+  },
+  "horse": {
+   "id": "horse"
+  },
+  "sheep": {
+   "id": "sheep"
+  },
+  "cow": {
+   "id": "cow"
+  },
+  "bear": {
+   "id": "bear"
+  },
+  "elephant": {
+   "id": "elephant"
+  },
+  "giraffe": {
+   "id": "giraffe"
+  },
+  "zebra": {
+   "id": "zebra"
+  },
+  "bus": {
+   "id": "bus"
+  },
+  "truck": {
+   "id": "truck"
+  },
+  "boat": {
+   "id": "boat"
+  },
+  "airplane": {
+   "id": "airplane"
+  },
+  "train": {
+   "id": "train"
+  },
+  "wine glass": {
+   "label": "glass"
+  },
+  "bowl": {
+   "label": "bowl"
+  },
+  "spoon": {
+   "label": "spoon"
+  },
+  "fork": {
+   "label": "fork"
+  },
+  "knife": {
+   "label": "knife"
+  },
+  "refrigerator": {
+   "label": "refrigerator"
+  },
+  "oven": {
+   "label": "oven"
+  },
+  "microwave": {
+   "label": "microwave"
+  },
+  "vase": {
+   "label": "vase"
+  },
+  "bench": {
+   "label": "bench"
+  },
+  "kite": {
+   "label": "kite"
+  },
+  "person": {
+   "label": "person",
+   "checked": false
+  }
+ }
+}

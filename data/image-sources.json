@@ -8314,5 +8314,101 @@
   "source": "OpenMoji",
   "originalName": "1F373 cooking",
   "license": "CC BY-SA 4.0"
+ },
+ "bite": {
+  "file": "images/symbols/bite.svg",
+  "source": "Mulberry",
+  "originalName": "bite , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "blow": {
+  "file": "images/symbols/blow.svg",
+  "source": "Mulberry",
+  "originalName": "blow , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "close": {
+  "file": "images/symbols/close.svg",
+  "source": "Mulberry",
+  "originalName": "close , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "drive": {
+  "file": "images/symbols/drive.svg",
+  "source": "Mulberry",
+  "originalName": "drive , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "feed": {
+  "file": "images/symbols/feed.svg",
+  "source": "Mulberry",
+  "originalName": "feed someone , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "fix": {
+  "file": "images/symbols/fix.svg",
+  "source": "Mulberry",
+  "originalName": "mend",
+  "license": "CC BY-SA 4.0"
+ },
+ "hear": {
+  "file": "images/symbols/hear.svg",
+  "source": "Mulberry",
+  "originalName": "hear , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "hit": {
+  "file": "images/symbols/hit.svg",
+  "source": "Mulberry",
+  "originalName": "hit , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "kiss": {
+  "file": "images/symbols/kiss.svg",
+  "source": "Mulberry",
+  "originalName": "blow kiss , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "knock": {
+  "file": "images/symbols/knock.svg",
+  "source": "Mulberry",
+  "originalName": "knock , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "stand": {
+  "file": "images/symbols/stand.svg",
+  "source": "Mulberry",
+  "originalName": "stand , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "talk": {
+  "file": "images/symbols/talk.svg",
+  "source": "Mulberry",
+  "originalName": "talk 1 , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "touch": {
+  "file": "images/symbols/touch.svg",
+  "source": "Mulberry",
+  "originalName": "touch , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "wake": {
+  "file": "images/symbols/wake.svg",
+  "source": "Mulberry",
+  "originalName": "wake up , to",
+  "license": "CC BY-SA 4.0"
+ },
+ "cry": {
+  "file": "images/symbols/cry.svg",
+  "source": "OpenMoji",
+  "originalName": "1F622 crying face",
+  "license": "CC BY-SA 4.0"
+ },
+ "smell": {
+  "file": "images/symbols/smell.svg",
+  "source": "OpenMoji",
+  "originalName": "1F443 nose",
+  "license": "CC BY-SA 4.0"
  }
 }

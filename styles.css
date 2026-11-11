@@ -83,6 +83,10 @@ button { font: inherit; touch-action: manipulation; }
 }
 #delete-btn { background: #ffd9a0; }
 #clear-btn  { background: #ffb3b3; }
+/* Beta 3.3: Delete and Clear are narrow (icon over a small word) so the message text has more room for words. */
+.small-btn { flex: 0 0 7vw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2vmin; padding: 0; line-height: 1; }
+.small-btn .bb-icon { font-size: min(3.4vw, 5.2dvh); font-weight: 700; }
+.small-btn .bb-text { font-size: min(1.5vw, 2.4dvh); font-weight: 800; }
 .bar-btn.pressed { filter: brightness(0.8); }
 /* Words and Forms sit between the message text and Delete. They take their room from the message
    text (which shrinks); the grid below is not affected. The word "Close" replaces "Words" while a
@@ -93,6 +97,34 @@ button { font: inherit; touch-action: manipulation; }
 #abc-btn { flex: 0 0 11vw; background: #ffe08a; }
 #app.typing #abc-btn { background: #f5b82e; box-shadow: inset 0 0 0 0.5vmin #7a4b00; }   /* ABC is "on" while typing; tap it to close */
 #app.typing #words-btn, #app.typing #forms-btn { opacity: 0.38; }                            /* not usable behind the keyboard */
+/* Camera button (Beta 3.1; moved to the right end of the context strip in Beta 3.3 so the message text keeps its room).
+   Hold 1 second (the ring fills, the button turns green and reads "Tap"), let go, then tap. Nothing on the board moves. */
+#camera-btn { position: absolute; top: 0.5vmin; bottom: 0.5vmin; right: 0.6vmin; width: 9vw; border: 0.3vmin solid #6b7480; border-radius: var(--radius);
+  background: #cfe3f7; display: flex; align-items: center; justify-content: center; padding: 0; touch-action: none; color: #1e3a5f; cursor: pointer; z-index: 2; }
+#camera-btn.pressed { filter: brightness(0.8); }
+#app.in-session #camera-btn { display: none; }                   /* a teaching session owns the strip */
+/* with the camera showing, the scene buttons stop short of it */
+#app.cam-on.scene-on #scene-bar { right: calc(9vw + 1.2vmin); }
+#camera-btn[hidden] { display: none; }
+#camera-btn .cam-icon { width: 4.8vmin; height: 4.8vmin; }
+#camera-btn .cam-ring { position: absolute; inset: 8%; width: 84%; height: 84%; pointer-events: none; }
+#camera-btn .hold-ring .ring-bg { stroke: rgba(30, 58, 95, 0.14); }
+#camera-btn .hold-ring .ring-fg { stroke: #1e3a5f; stroke-width: 3.4; }
+#camera-btn.ready { background: #8fd8a8; }                      /* the ring is full: now TAP to open the camera */
+/* Beta 3.6: armed = solid green with a big white TAP (the icon and ring step aside), gently pulsing so it is easy to see. */
+#camera-btn .cam-tap { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-weight: 900; font-size: min(4.2vmin, 3.6vw); letter-spacing: 0.08em; color: #fff; pointer-events: none; }
+#camera-btn.armed { background: #15803d; border-color: #0b4d24; animation: cam-armed-pulse 0.8s ease-in-out infinite alternate; }
+#camera-btn.armed .cam-icon, #camera-btn.armed .cam-ring { visibility: hidden; }
+@keyframes cam-armed-pulse { from { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.55); } to { box-shadow: 0 0 0 0.9vmin rgba(21, 128, 61, 0.25); } }
+#camera-btn { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+#camera-btn.armed .cam-tap { display: flex; }
+/* While armed, the real photo control lies exactly over the camera button so the adult's tap lands on it (iPad Safari requires this). */
+.cam-input.cam-armed { position: fixed; opacity: 0.01; pointer-events: auto; z-index: 70; cursor: pointer; }
+#camera-btn.ready .ring-fg { stroke-dashoffset: 0; opacity: 1; }
+#camera-btn.off { opacity: 0.38; }                              /* a teaching session is running */
+#app.typing #camera-btn { opacity: 0.38; }
+.cam-toast { position: fixed; left: 50%; bottom: 8vmin; transform: translateX(-50%); z-index: 60; background: #1f2937; color: #fff; font-weight: 800; font-size: 3vmin;
+  padding: 1.4vmin 3vmin; border-radius: 2vmin; box-shadow: 0 0.6vmin 2vmin rgba(0,0,0,.35); pointer-events: none; }
 .bar-btn[hidden] { display: none; }
 .bar-btn:disabled { opacity: 0.38; cursor: default; }
 .bar-btn:disabled.pressed { filter: none; }
@@ -106,12 +138,15 @@ button { font: inherit; touch-action: manipulation; }
 .on-category #context-strip { background: #e8923a; border: 0.2vmin solid #b86a14; }
 #page-title { font-size: min(5vmin, 6.5dvh); font-weight: 800; color: #4a2500; letter-spacing: 0.02em; }
 
-/* Hidden adult target: small, unlabeled, low contrast. Press and hold 3 sec. */
+/* Adult target: small, low contrast, with a muted gear (Beta 3.5) so adults know what it is. Press and hold 3 sec. */
 #adult-hold {
   position: absolute; left: 0.4vmin; top: 0.4vmin; width: 6.5vmin; height: 6.5vmin;
   padding: 0; border: 0; border-radius: 50%; background: rgba(0,0,0,0.04);
-  touch-action: none; cursor: default;
+  touch-action: none; cursor: default; display: flex; align-items: center; justify-content: center; color: #8a96a3;
 }
+#adult-hold .hold-ring { position: absolute; inset: 0; }
+#adult-hold .adult-gear { width: 52%; height: 52%; pointer-events: none; }
+.on-category #adult-hold { color: #7a4310; }
 .hold-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
 .hold-ring circle { fill: none; stroke-width: 3; }
 .hold-ring .ring-bg { stroke: rgba(0,0,0,0.10); }
@@ -133,6 +168,20 @@ button { font: inherit; touch-action: manipulation; }
   pointer-events: none;
 }
 
+/* Beta 3.17: running without saving (js/datawarning.js): a small red tag for adults, top right of the message bar (left of the BETA tag). */
+#not-saving-tag {
+  position: absolute; right: 7.5vmin; top: 0.3vmin; font-size: 1.3vmin; font-weight: 700; letter-spacing: 0.05em;
+  color: #fff; background: #b91c1c; border-radius: 0.6vmin; padding: 0.1vmin 0.7vmin; pointer-events: none; z-index: 2;
+}
+/* The "could not open saved data" screen reuses the setup screen's look. */
+.data-warning .dw-card { max-width: 760px; text-align: left; }
+.data-warning h1 { text-align: center; color: #991b1b; }
+.data-warning .dw-text, .data-warning .dw-steps { font-size: 2.3vmin; line-height: 1.45; }
+.data-warning .dw-buttons { justify-content: center; margin: 2vmin 0; }
+.data-warning .dw-retry { font-size: 2.6vmin; padding: 1.4vmin 5vmin; }
+.data-warning .dw-continue-note { font-size: 1.9vmin; margin: 2vmin 0 0.6vmin; }
+.data-warning .dw-continue { display: block; margin: 0 auto; font-size: 2vmin; }
+
 /* Version label ("Stable 1.0", "Beta 1.1"): small and quiet, for adults */
 .version-label { font-weight: 400; font-size: 0.55em; opacity: 0.75; margin-left: 12px; }
 .setup-version { text-align: center; margin: 0.4vmin 0 0; font-size: 1.6vmin; color: #64748b; }
@@ -143,7 +192,7 @@ button { font: inherit; touch-action: manipulation; }
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  gap: var(--gap);
+  gap: var(--cell-gap, var(--gap));            /* Accessibility > Button spacing (Beta 3.18) */
   min-height: 0; min-width: 0;
 }
 .cell {
@@ -192,7 +241,7 @@ button { font: inherit; touch-action: manipulation; }
 .cell-image img.photo { width: 100%; height: 100%; object-fit: cover; }
 .cell-label {
   flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 1.7vw; font-weight: 800; letter-spacing: -0.01em;
+  font-size: calc(1.7vw * var(--lbl-k, 1)); font-weight: 800; letter-spacing: -0.01em;
   overflow: hidden; pointer-events: none;
 }
 /* The label text. js/board.js (fitLabels) wraps a long label onto two lines or
@@ -208,14 +257,14 @@ button { font: inherit; touch-action: manipulation; }
    laid over the WHOLE button so the word can be big. js/board.js fitLabels() still shrinks a long
    word to fit. */
 .cell.text-only .cell-label {
-  position: absolute; inset: 0; font-size: 3vw; letter-spacing: -0.02em; padding: 0 0.3vw; z-index: 1;
+  position: absolute; inset: 0; font-size: calc(3vw * var(--lbl-k, 1)); letter-spacing: -0.02em; padding: 0 0.3vw; z-index: 1;
 }
-#board[data-size="84"] .cell.text-only .cell-label { font-size: 2.3vw; padding: 0 0.2vw; }
+#board[data-size="84"] .cell.text-only .cell-label { font-size: calc(2.3vw * var(--lbl-k, 1)); padding: 0 0.2vw; }
 
 /* 84-location board: more, smaller buttons, so smaller letters (and emoji fallback) */
 #board[data-size="84"] { --radius: 0.9vmin; }
 #board[data-size="84"] .cell { border-radius: 0.9vmin; border-width: 0.2vmin; }
-#board[data-size="84"] .cell-label { font-size: 1.3vw; letter-spacing: -0.02em; padding: 0 0.15vw; }
+#board[data-size="84"] .cell-label { font-size: calc(1.3vw * var(--lbl-k, 1)); letter-spacing: -0.02em; padding: 0 0.15vw; }
 #board[data-size="84"] .cell-image .placeholder { font-size: min(3.6vw, 5.4dvh); }
 #board[data-size="84"] .cell.empty-slot .plus { font-size: 3.4vmin; }
 
@@ -268,19 +317,28 @@ button { font: inherit; touch-action: manipulation; }
 }
 
 /* ---------- Model mode ---------- */
+/* A thin label only; touches pass through it to the message bar (Beta 3.11). */
 #model-banner {
-  position: fixed; top: 0; left: 0; right: 0; height: calc(3.6dvh + var(--safe-t)); z-index: 30;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: var(--safe-t) calc(2vmin + var(--safe-x)) 0;
-  background: rgba(109, 40, 217, 0.92); color: #fff; font-weight: 800;
-  font-size: 2.4dvh; letter-spacing: 0.08em;
+  position: fixed; top: 0; left: 0; right: 0; height: calc(3.6dvh + var(--safe-t)); z-index: 45; pointer-events: none;
+  display: flex; align-items: center; padding: var(--safe-t) calc(2vmin + var(--safe-x)) 0;
+  background: rgba(109, 40, 217, 0.92); color: #fff; font-weight: 800; font-size: 2.4dvh; letter-spacing: 0.08em;
 }
 #model-banner[hidden] { display: none; }
+/* End modeling: above the scene photo (36) and Forms (40), below adult sheets (50). Placed by js/app.js over the right end of the message bar. */
 #model-end {
-  position: relative; overflow: hidden; height: 80%; border: 0.2vmin solid #fff; border-radius: 1vmin;
-  background: transparent; color: #fff; font-size: 2.2dvh; font-weight: 700; padding: 0 2vmin; cursor: pointer;
-  touch-action: none;
+  position: fixed; z-index: 46; min-height: 44px; padding: 0 2.2vmin; border-radius: 1.4vmin; cursor: pointer;
+  background: #6d28d9; color: #fff; border: 0.35vmin solid #fff; box-shadow: 0 0.4vmin 1.6vmin rgba(0,0,0,0.3);
+  font-weight: 800; font-size: min(2.6vmin, 3.8dvh); white-space: nowrap;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
 }
+#model-end[hidden], #model-type[hidden] { display: none; }
+#model-type {
+  position: fixed; z-index: 46; min-height: 44px; padding: 0 2vmin; border-radius: 1.4vmin; cursor: pointer;
+  background: #fff; color: #5b21b6; border: 0.35vmin solid #6d28d9; box-shadow: 0 0.4vmin 1.6vmin rgba(0,0,0,0.2);
+  font-weight: 800; font-size: min(2.4vmin, 3.6dvh); white-space: nowrap; touch-action: manipulation;
+}
+#model-type:disabled { opacity: 0.5; }
+#model-end.confirm { background: #dc2626; }
 .hold-bar::after {            /* progress bar that fills while holding */
   content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255,255,255,0.45);
 }
@@ -332,7 +390,61 @@ button { font: inherit; touch-action: manipulation; }
 .sheet.adult h1 { margin: 0; font-size: 1.5em; }
 .sheet.adult h2 { margin: 0 0 12px; font-size: 1.2em; }
 .menu-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #1f2937; color: #fff; }
-.menu-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+/* ---------- Adult menu layout (Beta 3.9, js/adult.js + js/settingsnav.js): iPad = list left, page right; phone = one at a time ---------- */
+.sheet.adult.menu { width: min(1180px, calc(97vw - 2 * var(--safe-x))); }
+.menu-head { gap: 16px; }
+.menu-head h1 { flex: 0 0 auto; }
+.view-row { flex: 0 1 320px; margin-left: auto; }
+.view-row .seg { min-height: 40px; padding: 6px 10px; background: transparent; color: #e2e8f0; border-color: #64748b; }
+.view-row .seg.on { background: #fff; color: #1f2937; border-color: #fff; }
+.set-split { flex: 1; min-height: 0; display: flex; }
+.set-nav { flex: 0 0 clamp(300px, 34%, 380px); display: flex; flex-direction: column; min-height: 0; border-right: 1px solid #d5dde6; background: #eef2f6; }
+.set-search-wrap { padding: 12px 14px 6px; }
+.set-search { width: 100%; box-sizing: border-box; font-size: 1em; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; }
+.set-nav-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 14px 20px; }
+.set-card { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid #d5dde6; background: #fff;
+  text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.set-card.on, .set-row.on { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.set-card.on small, .set-row.on .set-row-value, .set-row.on .set-row-sub, .set-row.on .set-chev, .set-card.on .set-chev { color: #dbeafe; }
+.set-avatar { flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; background: #6366f1; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.3em; }
+.set-card-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.set-card-name { font-weight: 800; font-size: 1.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-card small { color: #64748b; }
+.set-badge { flex: 0 0 auto; min-width: 24px; height: 24px; border-radius: 12px; background: #dc2626; color: #fff; font-weight: 800; font-size: 0.8em; display: flex; align-items: center; justify-content: center; padding: 0 6px; }
+.set-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.set-actions .btn { flex: 1 1 30%; min-height: 46px; padding: 8px 10px; font-size: 0.9em; }
+.set-busy { font-size: 0.85em; }
+.set-group-title { margin: 16px 6px 6px; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
+.set-group { background: #fff; border-radius: 12px; border: 1px solid #d5dde6; overflow: hidden; }
+.set-row { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 12px; border: 0; border-bottom: 1px solid #e5e9ef;
+  background: #fff; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.set-group .set-row:last-child { border-bottom: 0; }
+.set-icon { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 8px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; }
+.set-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.set-row-title { font-weight: 700; }
+.set-row-sub { color: #64748b; font-size: 0.8em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-row-value { flex: 0 1 auto; color: #64748b; font-size: 0.9em; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-row-value.warn { color: #b45309; font-weight: 700; }
+.set-chev { flex: 0 0 auto; color: #94a3b8; font-size: 1.4em; line-height: 1; }
+.set-none { margin: 14px 6px; }
+.set-hidden { display: block; margin: 8px 2px; }
+.set-scope-note { font-size: 0.8em; margin: 14px 6px 0; }
+.set-detail { flex: 1; min-width: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.set-detail-head { display: flex; align-items: center; gap: 8px; }
+.set-detail-title { margin: 0; font-size: 1.5em; }
+.set-back { padding: 8px 4px; text-decoration: none; font-weight: 700; }
+/* Phone: one column at a time */
+.sheet.adult.menu.narrow .set-nav { flex: 1; border-right: 0; }
+.sheet.adult.menu.narrow .set-detail { display: none; }
+.sheet.adult.menu.narrow.show-page .set-nav { display: none; }
+.sheet.adult.menu.narrow.show-page .set-detail { display: flex; }
+.sheet.adult.menu.narrow .view-row .seg { font-size: 0.85em; }
+/* Setup screen: who the adult menu is for (first setup only) */
+.setup-view { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; margin: 0 0 2vmin; font-size: 2.1vmin; }
+.setup-view-label { font-weight: 700; }
+.setup-view-row { flex: 0 1 480px; }
+.setup-view-row .seg { min-height: 44px; padding: 6px 10px; }
+.setup-view small { flex-basis: 100%; text-align: center; margin: 0; }
 .panel { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #d5dde6; }
 .muted { color: #64748b; margin: 4px 0 12px; }
 .panel.notice { background: #fffbeb; border-color: #f59e0b; }
@@ -351,7 +463,6 @@ button { font: inherit; touch-action: manipulation; }
 .btn.big { flex: 1; min-height: 76px; font-size: 1.2em; background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
 .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
 .btn-row.left { justify-content: flex-start; margin-top: 12px; }
-.action-row { display: flex; gap: 16px; }
 .link-btn { background: none; border: 0; color: #1d4ed8; text-decoration: underline; font-size: 0.95em; padding: 12px; cursor: pointer; }
 
 .learner-list { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -641,10 +752,14 @@ button { font: inherit; touch-action: manipulation; }
 }
 #target-banner[hidden] { display: none; }
 #target-count { margin-left: auto; font-size: 0.7em; font-weight: 600; opacity: 0.9; }
-#target-words, #target-done {
+#target-words, #target-done, #target-undo {
   border: 0; border-radius: 1.2vmin; height: 80%; cursor: pointer; font-size: min(3.4vmin, 5dvh); font-weight: 800; padding: 0 4vmin;
 }
 #target-words { background: #b9e6d6; color: #052e16; }
+#target-undo { background: #fde68a; color: #422006; }
+#target-undo[hidden] { display: none; }
+#target-banner-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cell.in-sentence { outline: 0.6vmin solid #f59e0b; outline-offset: -0.6vmin; }
 #target-words[hidden] { display: none; }
 #target-done { background: #22c55e; color: #052e16; padding: 0 5vmin; }
 /* A target word: an amber frame and a star in the corner (drawn inside the button, so nothing moves). */
@@ -694,7 +809,7 @@ button { font: inherit; touch-action: manipulation; }
 }
 /* Path highlight (a step of a custom ladder) and the ring part of a Model or Ring step: the same ring as Model mode,
    kept on until the child answers. --ring-a is the strength (0 to 1). */
-.cell.teach-ring, .bar-btn.teach-ring {
+.cell.teach-ring, .bar-btn.teach-ring, #message-text.teach-ring {
   z-index: 5;
   animation: model-pulse 0.5s ease-in-out infinite alternate;
   box-shadow: 0 0 0 0.7vmin rgba(255, 255, 255, var(--ring-a, 1)), 0 0 0 1.6vmin rgba(124, 58, 237, var(--ring-a, 1));
@@ -875,3 +990,479 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
   .rep-break { break-before: page; }
   .rep-svg svg, .rchart { break-inside: avoid; }
 }
+
+/* ======================================================================================================
+   Scenes (Phase 3, beta 3.0). The strip buttons live inside the (otherwise empty) context strip, the glow is a soft shadow
+   around a board button, and the scene photo is its own full-screen layer. None of it changes the size or position of a board cell.
+   ====================================================================================================== */
+#scene-bar { display: none; }
+#app.scene-on #scene-bar {
+  display: flex; align-items: stretch; gap: 5px; position: absolute; inset: 0.5vmin 0.6vmin 0.5vmin 8vmin;
+}
+#app.scene-on #page-title { display: none; }
+#app.in-session #scene-bar { display: none; }          /* a teaching session owns the strip; the scene comes back afterwards */
+/* the scene name at the left (hold 1 second to change scene) */
+.sc-switch { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; background: #fff; border-color: #0f766e; }
+.sc-name {
+  font-size: min(1.6vmin, 2.4dvh); line-height: 1.1; text-align: left; white-space: normal; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-width: 0;
+}
+.sc-items { flex: 1 1 0; min-width: 0; display: flex; gap: 5px; overflow: hidden; }
+/* a strip button reuses the board button look (.cell); fixed size, set from JS */
+.sc-item { flex: 0 0 auto; border: 0.35vmin solid #0f766e; background: #eefaf7; }
+.sc-item.sc-related { border-color: #d97706; background: #fff4dc; }
+.sc-item .cell-image { flex: 0 0 62%; }
+/* a photo button: the square crop fills the whole button and the label sits on a pale bar along the bottom */
+.sc-object .cell-image { position: absolute; inset: 0; flex: none; }
+.sc-object .cell-image img.photo { width: 100%; height: 100%; object-fit: cover; }
+.sc-object .cell-label { position: absolute; left: 0; right: 0; bottom: 0; height: 32%; flex: none; background: rgba(255, 255, 255, 0.9); z-index: 1; }
+.sc-object.text-only .cell-label { height: 100%; background: transparent; }
+.sc-item .cell-image img.symbol { padding: 2% 4%; }
+.sc-item .cell-label { font-size: min(1.55vmin, 2.3dvh); letter-spacing: -0.01em; padding: 0 0.2vmin; }
+.sc-item.text-only .cell-label { font-size: min(2.1vmin, 3dvh); letter-spacing: -0.02em; padding: 0 0.2vmin; }
+.sc-more {
+  flex: 0 0 auto; border: 0.3vmin solid #0f766e; background: #fff; border-radius: var(--radius); color: #0f766e;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 0; font-weight: 800;
+}
+.sc-arrow { font-size: 4.4vmin; line-height: 0.9; }
+.sc-more small { font-size: 1.3vmin; color: #475569; }
+.sc-photo { flex: 0 0 auto; flex-direction: column; gap: 0; background: #fff; border-color: #0f766e; color: #0f766e; }
+.sc-photo .sb-ring { position: absolute; top: 0.2vmin; right: 0.2vmin; width: 1.8vmin; height: 1.8vmin; }
+.sc-photo-icon svg { width: 4vmin; height: 4vmin; display: block; }
+/* the word's permanent spot glows gently for a moment (a soft teal shadow; nothing is resized) */
+.cell.scene-glow, .bar-btn.scene-glow { z-index: 4; animation: scene-glow 0.9s ease-in-out 3 alternate; }
+@keyframes scene-glow {
+  from { box-shadow: 0 0 0 0.3vmin rgba(13, 148, 136, 0.35), 0 0 1.4vmin 0.2vmin rgba(13, 148, 136, 0.25); }
+  to   { box-shadow: 0 0 0 0.6vmin rgba(13, 148, 136, 0.75), 0 0 2.8vmin 0.8vmin rgba(13, 148, 136, 0.5); }
+}
+
+/* the tappable scene photo: full screen over the board (the board underneath is not touched) */
+.photo-scene {
+  position: fixed; inset: 0; z-index: 36; background: #0b1220; display: flex; flex-direction: column;
+  padding: var(--safe-t) var(--safe-x) var(--safe-b);
+}
+.ps-top { flex: 0 0 auto; height: 11vmin; display: flex; align-items: center; gap: 2vmin; padding: 0 2vmin; color: #fff; }
+.ps-title { font-size: 3vmin; font-weight: 800; opacity: 0.85; }
+.ps-said { flex: 1; text-align: center; font-size: 4.2vmin; font-weight: 800; color: #fde68a; min-height: 1em; }
+.ps-close { min-width: 22vmin; height: 8.5vmin; font-size: 3.6vmin; font-weight: 800; background: #fff; color: #111; border: 0; border-radius: 1.5vmin; cursor: pointer; }
+.ps-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 1vmin 1.2vmin; }
+.ps-wrap { position: relative; }
+.ps-img { width: 100%; height: 100%; display: block; -webkit-user-drag: none; user-select: none; pointer-events: none; }
+.ps-spot { position: absolute; border-radius: 1vmin; cursor: pointer; touch-action: none; }
+.ps-spot.pressed { outline: 0.6vmin solid rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.18); }
+.ps-spot.ps-flash { animation: ps-flash 1.2s ease-out; }
+@keyframes ps-flash { from { outline: 0.7vmin solid rgba(253, 224, 71, 0.95); } to { outline: 0.7vmin solid rgba(253, 224, 71, 0); } }
+
+/* adult screens for scenes */
+.sheet.adult.scene { width: min(1100px, calc(96vw - 2 * var(--safe-x))); }
+.se-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.se-left { position: sticky; top: 0; }
+.se-photo { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; user-select: none; margin-bottom: 10px; }
+.se-photo img { width: 100%; height: 100%; display: block; object-fit: fill; pointer-events: none; }
+.se-boxes { position: absolute; inset: 0; }
+.se-box { position: absolute; border: 3px dashed #cbd5e1; background: rgba(148, 163, 184, 0.12); border-radius: 4px; cursor: pointer; }
+.se-box.on { border: 3px solid #14b8a6; background: rgba(20, 184, 166, 0.14); }
+.se-photo.drawing { touch-action: none; cursor: crosshair; outline: 3px solid #1d4ed8; }
+.se-photo.drawing .se-box { pointer-events: none; }
+.se-photo canvas { width: 100%; height: 100%; display: block; pointer-events: none; }
+.se-ghost { position: absolute; border: 3px solid #1d4ed8; background: rgba(29, 78, 216, 0.2); pointer-events: none; }
+.se-num { position: absolute; left: 2px; top: 2px; background: #0f766e; color: #fff; font-size: 13px; font-weight: 800; border-radius: 10px; min-width: 20px; text-align: center; padding: 0 4px; }
+.se-row .se-num, .se-row .se-pos { position: static; }
+.se-row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-bottom: 1px solid #e5eaf0; }
+.se-row.off { opacity: 0.8; }
+.se-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; flex: 0 0 auto; background: #f1f5f9; }
+.se-thumb.sym { object-fit: contain; }
+.se-thumb.txt { display: flex; align-items: center; justify-content: center; font-weight: 800; color: #475569; }
+.se-check { width: 26px; height: 26px; flex: 0 0 auto; }
+.se-label { flex: 1; min-width: 0; padding: 8px 10px; }
+/* Beta 3.6: where the word lives. Green: on the board now; amber: has a spot but is hidden at this stage; gray: scene strip only. */
+.se-labelcol .se-tag { align-self: flex-start; margin-top: 0.3em; }
+.se-tag { flex: 0 0 auto; font-size: 0.72em; font-weight: 800; padding: 0.3em 0.7em; border-radius: 999px; white-space: nowrap; max-width: 16em; overflow: hidden; text-overflow: ellipsis; }
+.se-tag.on { background: #dcfce7; color: #14532d; border: 1px solid #86c79d; }
+.se-tag.hidden { background: #fff4dc; color: #7a4b00; border: 1px solid #e0a83a; }
+.se-tag.only { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+.se-rel-label { flex: 1; font-weight: 700; }
+.se-mv { min-height: 40px; padding: 4px 12px; }
+.se-pos { width: 22px; font-weight: 800; color: #475569; }
+.se-actions { position: sticky; bottom: -24px; background: #fff; padding: 10px 0 24px; margin: 10px 0 -24px; }
+.field-label { font-weight: 700; display: block; margin: 0 0 4px; }
+.scene-row { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #d5dde6; border-radius: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.scene-row.is-active { border-color: #0f766e; background: #ecfdf5; }
+.sl-thumb { width: 96px; height: 72px; object-fit: cover; border-radius: 8px; background: #e2e8f0; }
+.sl-main { flex: 1; min-width: 140px; }
+.sl-name { font-weight: 800; }
+.sl-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.sl-btns .btn { min-height: 44px; padding: 8px 14px; }
+.wp-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin: 12px 0; max-height: 46dvh; overflow-y: auto; }
+.wp-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; border: 2px solid #94a3b8; border-radius: 10px; background: #fff; font-weight: 700; font-size: 0.9em; cursor: pointer; color: #1f2937; }
+.wp-item img { width: 56px; height: 56px; object-fit: contain; }
+.wp-none { width: 56px; height: 56px; }
+.sheet.adult progress { width: 100%; height: 18px; }
+.scene-offline { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+
+/* ---------- Beta 3.1: remembered things, place words and the quick scene sheet ---------- */
+.se-labelcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.se-labelcol .se-label { flex: none; }
+.se-remembered { color: #7c2d12; background: #ffedd5; border-radius: 6px; padding: 1px 8px; font-weight: 800; align-self: flex-start; }
+.se-row.remembered { background: #fff7ed; }
+.se-remlabel { display: flex; align-items: center; gap: 6px; font-size: 0.8em; font-weight: 700; color: #334155; flex: 0 0 auto; max-width: 9.5em; line-height: 1.15; }
+.se-remember { width: 24px; height: 24px; flex: 0 0 auto; }
+.se-row.place { cursor: pointer; }
+#scene-place-box h3 { margin-bottom: 2px; }
+.sheet.adult.scene.quick { width: min(980px, calc(94vw - 2 * var(--safe-x))); }
+.se-grid.quick .qhide { display: none; }
+.se-grid.quick { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.btn.big { min-height: 64px; font-size: 1.25em; padding: 12px 36px; }
+.my-things { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+.thing-row .sl-thumb { width: 72px; height: 72px; }
+.sheet.adult .btn[hidden], .sheet.adult [hidden] { display: none !important; }
+
+/* ---------- Keeping this device's data (Beta 3.4, js/keepdata.js) ---------- */
+.keep-line { padding: 1vmin 1.4vmin; border-radius: 1vmin; background: #f1f5f9; border: 0.2vmin solid #cbd5e1; font-weight: 700; }
+.keep-line.ok { background: #e7f6ec; border-color: #86c79d; color: #14532d; }
+.keep-line.warn { background: #fff4dc; border-color: #e0a83a; color: #7a4b00; }
+.keep-steps { margin: 0.6em 0 0.8em 1.2em; padding: 0; line-height: 1.45; }
+.keep-steps li { margin: 0.3em 0; }
+.keep-notice h2 { margin-top: 0; }
+
+/* ---------- "This is the adult menu" pointer (Beta 3.5, js/adulthint.js) ---------- */
+.coach-layer { position: fixed; inset: 0; z-index: 80; background: rgba(15, 23, 42, 0.35); }
+.coach-ring { position: absolute; border-radius: 50%; border: 0.6vmin solid #fbbf24; box-shadow: 0 0 0 0.4vmin rgba(255,255,255,0.8); animation: coach-pulse 1.1s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes coach-pulse { from { transform: scale(0.94); opacity: 0.75; } to { transform: scale(1.08); opacity: 1; } }
+.coach-bubble { position: absolute; max-width: min(46vw, 520px); background: #fff; border-radius: 1.6vmin; padding: 2vmin 2.4vmin; box-shadow: 0 0.8vmin 3vmin rgba(0,0,0,0.3);
+  font-size: min(2.4vmin, 3.4dvh); color: #1f2937; line-height: 1.4; }
+.coach-bubble::before { content: ""; position: absolute; left: -1.6vmin; top: 2.4vmin; border: 1.6vmin solid transparent; border-left: 0; border-right-color: #fff; }
+.coach-bubble h3 { margin: 0 0 0.6vmin; font-size: 1.25em; }
+.coach-bubble p { margin: 0.4vmin 0; }
+.coach-bubble .muted { color: #475569; font-size: 0.9em; }
+.coach-bubble .btn-row { margin-top: 1.4vmin; }
+
+/* ---------- Little-word strip (Beta 3.7, js/littlewords.js) ----------
+   Eight buttons in permanent slots, left-aligned after the adult circle, the same on every page. A scene takes the strip over
+   (#app.scene-on), and a teaching session, Edit mode and Add targets hide it (js/app.js updateLittle). */
+#little-bar { display: none; }
+#app.little-on #little-bar { display: flex; align-items: stretch; gap: 5px; position: absolute; inset: 0.5vmin 0.6vmin 0.5vmin 8vmin; right: 0.6vmin; }
+#app.little-on.cam-on #little-bar { right: calc(9vw + 1.2vmin); }
+.lw-item { flex: 0 0 auto; position: relative; background: #f8f5ff; border: 0.35vmin solid #6d5bd0; }
+.lw-item.text-only .cell-label { font-size: min(2.6vmin, 3.6dvh); font-weight: 800; }
+.lw-item .cell-label { font-size: min(1.7vmin, 2.4dvh); }
+/* four small dots in the middle of each edge: "hold me for more" */
+.lw-dots { position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) 50% 0.5vmin / 1.2vmin 1.2vmin no-repeat,
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) calc(100% - 0.5vmin) 50% / 1.2vmin 1.2vmin no-repeat,
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) 50% calc(100% - 0.5vmin) / 1.2vmin 1.2vmin no-repeat,
+    radial-gradient(circle, #6d5bd0 0 0.45vmin, transparent 0.5vmin) 0.5vmin 50% / 1.2vmin 1.2vmin no-repeat;
+  opacity: 0.55; }
+#app.typing #little-bar { opacity: 0.38; pointer-events: none; }   /* finish typing first */
+/* On a category page the page name moves to a small label at the right of the strip, so the little words keep their spots. */
+#app.little-on #page-title { position: absolute; right: 1.2vmin; top: 50%; transform: translateY(-50%); font-size: min(2.6vmin, 3.6dvh);
+  max-width: 18vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#app.little-on.cam-on #page-title { right: calc(9vw + 1.8vmin); }
+
+/* ---------- Sentence targets (Beta 3.12) ---------- */
+.chain-words { display: flex; flex-direction: column; gap: 6px; }
+.chain-word { display: grid; grid-template-columns: 2em minmax(5em, 1fr) auto minmax(9em, 14em); align-items: center; gap: 8px; }
+.chain-word.off .chain-label { color: #64748b; }
+.chain-num { width: 1.6em; height: 1.6em; border-radius: 50%; background: #1d4ed8; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 0.85em; }
+.chain-word.off .chain-num { background: #94a3b8; }
+.chain-label { font-weight: 800; }
+.chain-role { margin: 0; }
+.tgt-steps { font-size: 0.85em; }
+.rep-ta { margin-top: 10px; }
+.rep-ta h4 { margin: 4px 0 6px; }
+.ta-table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+.ta-table th, .ta-table td { border: 1px solid #e2e8f0; padding: 4px 8px; text-align: center; }
+.ta-table th:nth-child(-n+3), .ta-table td:nth-child(-n+3) { text-align: left; white-space: nowrap; }
+.ta-off { color: #94a3b8; font-style: italic; font-size: 0.85em; }
+.ta-phase td:first-child { color: #b45309; font-weight: 800; }
+.ta-note { font-size: 0.8em; }
+
+/* ---------- Edit / Add-targets buttons in the context strip (Beta 3.14) ----------
+   Away from the screen's top edge (the system's swipe-down gesture can swallow taps there). The strip is empty in these modes. */
+.strip-actions { position: absolute; top: 0.5vmin; bottom: 0.5vmin; right: 0.6vmin; display: flex; align-items: stretch; gap: 1vmin; z-index: 3; }
+.strip-actions[hidden] { display: none; }
+#edit-actions button, #target-actions button { height: auto; min-height: 0; margin: 0; padding: 0 3.6vmin; border: 0; border-radius: 1.2vmin; font-weight: 800;
+  font-size: min(3.2vmin, 4.6dvh); cursor: pointer; touch-action: manipulation; }
+#edit-actions #edit-done, #target-actions #target-done { background: #22c55e; color: #052e16; padding: 0 5vmin; }
+#app.editing #page-title, #app.choosing #page-title { position: absolute; left: 9vmin; right: 45%; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Model a sentence (Beta 3.15, js/modelsentence.js) ---------- */
+.ms-input { width: 100%; box-sizing: border-box; font-size: 1.15em; }
+.ms-review { display: flex; flex-wrap: wrap; gap: 6px; min-height: 2.4em; margin: 10px 0; align-items: center; }
+.ms-word { padding: 4px 10px; border-radius: 999px; font-weight: 700; border: 1px solid; }
+.ms-model { background: #dcfce7; color: #14532d; border-color: #86c79d; }
+.ms-hidden, .ms-none { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; text-decoration: line-through; }
+
+/* ---------- Tone wheel and mood (Beta 3.16, js/tonewheel.js) ---------- */
+#tone-layer { position: fixed; inset: 0; z-index: 41; background: rgba(15, 23, 42, 0.28); touch-action: none; -webkit-user-select: none; user-select: none; }
+.tone-ring { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.55); box-shadow: 0 0.6vmin 3vmin rgba(0,0,0,0.25); pointer-events: none; }
+.tone-chip, .tone-hub { position: absolute; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #fff; border: 0.4vmin solid #94a3b8; box-shadow: 0 0.3vmin 1vmin rgba(0,0,0,0.2); cursor: pointer; overflow: hidden; }
+.tone-chip img { width: 58%; height: 58%; object-fit: contain; pointer-events: none; }
+.tone-glyph { font-size: 2.2em; font-weight: 900; line-height: 1; color: #475569; }
+.tone-label { font-weight: 800; font-size: min(2vmin, 2.8dvh); line-height: 1.1; color: #1f2937; }
+.tone-chip.hot { border-color: #2563eb; transform: scale(1.08); }
+.tone-chip.chosen { background: #dbeafe; }
+.tone-chip.is-mood { border-color: #7c3aed; }
+/* resting on a feeling: a ring fills in over 1 second; when full, the lock shows (lifting sets the mood) */
+.tone-chip::after { content: ""; position: absolute; inset: -0.4vmin; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(#7c3aed var(--p, 0%), transparent 0); -webkit-mask: radial-gradient(circle, transparent 62%, #000 63%); mask: radial-gradient(circle, transparent 62%, #000 63%); opacity: 0; }
+.tone-chip.locking::after { opacity: 1; animation: tone-lock-fill 1s linear forwards; }
+@property --p { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+@keyframes tone-lock-fill { from { --p: 0%; } to { --p: 100%; } }
+.tone-lock { position: absolute; top: 4%; right: 10%; font-size: 1.1em; display: none; }
+.tone-chip.locked .tone-lock, .tone-chip.is-mood .tone-lock { display: block; }
+.tone-hub { background: #f1f5f9; font-weight: 800; font-size: min(2.2vmin, 3dvh); color: #334155; border-style: dashed; }
+.tone-hub.hot { background: #e2e8f0; border-color: #2563eb; }
+#mood-badge { position: absolute; left: 0.6vmin; top: 50%; transform: translateY(-50%); width: 5.6vmin; height: 5.6vmin; border-radius: 50%;
+  background: #fff; border: 0.35vmin solid #7c3aed; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2;
+  font-weight: 900; color: #5b21b6; }
+#mood-badge[hidden] { display: none; }
+#mood-badge img { width: 78%; height: 78%; object-fit: contain; }
+#mood-badge:not([hidden]) ~ #message-chips { padding-left: 7vmin; }
+.tone-samples { flex-wrap: wrap; align-items: center; }
+.tone-sample { min-height: 38px; padding: 4px 12px; }
+
+
+/* =====================================================================================================================================
+   ACCESSIBILITY (Beta 3.18, js/access.js). Set per learner as data- attributes on <html>. Only the CHILD'S screen changes (the adult
+   menu and sheets keep their own look). Nothing here moves a word: colours, fonts, label size and case, the gaps, hidden-spot drawing.
+   ===================================================================================================================================== */
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Lexend"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/lexend-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Lexend"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/lexend-latin-700-normal.woff2") format("woff2"); }
+html[data-font="atkinson"] #app, html[data-font="atkinson"] .listener-view, html[data-font="atkinson"] #dial-layer { font-family: "Atkinson Hyperlegible", -apple-system, Arial, sans-serif; }
+html[data-font="lexend"] #app, html[data-font="lexend"] .listener-view, html[data-font="lexend"] #dial-layer { font-family: "Lexend", -apple-system, Arial, sans-serif; }
+
+/* Label size: the letters scale (and, for L and XL, the label row gets a little more of the button; the picture box shrinks to match).
+   js/board.js fitLabels still shrinks a label that would not fit. */
+html[data-label-size="s"]  { --lbl-k: 0.85; }
+html[data-label-size="l"]  { --lbl-k: 1.25; }
+html[data-label-size="xl"] { --lbl-k: 1.55; }
+html[data-label-size="l"]  #app .cell-image { flex-basis: 60%; }
+html[data-label-size="xl"] #app .cell-image { flex-basis: 54%; }
+/* Label above the picture */
+html[data-label-pos="top"] #app .cell { flex-direction: column-reverse; }
+
+/* Button spacing: wider gaps only (every word keeps its row and column) */
+html[data-spacing="wide"]  #board { --cell-gap: 1.5vmin; }
+html[data-spacing="wider"] #board { --cell-gap: 2.6vmin; }
+
+/* Hidden spots */
+html[data-hidden="dots"] #app .cell.hidden {
+  background-color: transparent; border: 0.25vmin dashed var(--hid-edge, #c3cad4);
+  background-image: radial-gradient(circle, var(--hid-dot, #b8c0cc) 0.18vmin, transparent 0.22vmin); background-size: 1.6vmin 1.6vmin;
+}
+html[data-hidden="invisible"] #app .cell.hidden { background: transparent; border-color: transparent; }
+
+/* VOICE is talking (Glow while speaking) */
+#message-text.talking { box-shadow: 0 0 0 0.6vmin #f59e0b, 0 0 2.6vmin 0.8vmin rgba(245, 158, 11, 0.55); }
+
+/* Reduce motion: animations and transitions end at once. The fill-up rings that show how long to HOLD keep their timing (they are
+   information, not decoration). "auto" follows the iPad's own setting (Settings > Accessibility > Motion > Reduce Motion). */
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion="auto"] *, html[data-motion="auto"] *::before, html[data-motion="auto"] *::after {
+    animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+  }
+}
+html[data-motion] .holding .ring-fg, html[data-motion] .touch-hold .th-fg { animation-duration: var(--hold-ms) !important; }
+
+/* ---------- Show to listener ---------- */
+.listener-view { position: fixed; inset: 0; z-index: 200; background: #fff; color: #000; display: flex; flex-direction: column; }
+.listener-view .lv-inner { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 4vmin 5vmin; }
+.listener-view .lv-inner.flipped { transform: rotate(180deg); }
+.listener-view .lv-text { font-weight: 800; text-align: center; line-height: 1.1; overflow-wrap: anywhere; max-width: 100%; }
+.listener-view .lv-bar { flex: 0 0 auto; display: flex; justify-content: center; gap: 3vmin; padding: 0 0 calc(3vmin + var(--safe-b)); }
+.listener-view .lv-btn { font-size: 3vmin; font-weight: 800; padding: 1.6vmin 5vmin; border-radius: 1.6vmin; border: 0.4vmin solid currentColor; background: transparent; color: inherit; cursor: pointer; }
+.listener-view .lv-done { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+#show-btn { background: #c7dcf7; }
+html[data-theme="dark"] .listener-view, html[data-theme="dim"] .listener-view { background: #000; color: #fff; }
+html[data-theme="cvi"] .listener-view { background: #000; color: #ffd600; }
+
+/* ---------- Theme: High contrast (dark). Category colour moves to a thick border; symbols sit on white plates. ---------- */
+html[data-theme="dark"], html[data-theme="dark"] body, html[data-theme="dark"] #app { background: #000; }
+html[data-theme="dark"] #app.on-category { background: #1f1405; }
+html[data-theme="dark"] #message-text { background: #000; border-color: #fff; }
+html[data-theme="dark"] .chip { background: #1f2937; border-color: #fff; color: #fff; }
+html[data-theme="dark"] .chip.speaking { background: #facc15; border-color: #facc15; color: #000; }
+html[data-theme="dark"] #learner-name { color: #9ca3af; }
+html[data-theme="dark"] .bar-btn { background: #111 !important; color: #fff; border-color: #fff; }
+html[data-theme="dark"] #words-btn { border-color: #5eead4; } html[data-theme="dark"] #forms-btn { border-color: #c4b5fd; }
+html[data-theme="dark"] #abc-btn { border-color: #fde047; } html[data-theme="dark"] #delete-btn { border-color: #fdba74; }
+html[data-theme="dark"] #clear-btn { border-color: #fca5a5; } html[data-theme="dark"] #show-btn { border-color: #93c5fd; }
+html[data-theme="dark"] #camera-btn { background: #111; color: #fff; border-color: #93c5fd; }
+html[data-theme="dark"] #context-strip { background: #111; border-color: #444; }
+html[data-theme="dark"] .on-category #context-strip { background: #3b2208; border-color: #f59e0b; }
+html[data-theme="dark"] #page-title { color: #fbbf24; }
+html[data-theme="dark"] #adult-hold { color: #6b7280; background: rgba(255,255,255,0.06); }
+html[data-theme="dark"] #app .cell { background: #121212; border: 0.55vmin solid var(--edge, #fff); color: #fff; }
+html[data-theme="dark"] #app .type-people { --edge: #ffe14d; } html[data-theme="dark"] #app .type-action { --edge: #5ee36b; }
+html[data-theme="dark"] #app .type-describing, html[data-theme="dark"] #app .type-place { --edge: #58a6ff; }
+html[data-theme="dark"] #app .type-question { --edge: #c49bff; } html[data-theme="dark"] #app .type-social { --edge: #ff7ab6; }
+html[data-theme="dark"] #app .type-category { --edge: #ffa23a; } html[data-theme="dark"] #app .type-noun { --edge: #ffb38a; }
+html[data-theme="dark"] #app .type-little { --edge: #e7dcc8; } html[data-theme="dark"] #app .type-home { --edge: #f59e0b; background: #2a1a05; }
+html[data-theme="dark"] #app .cell-image img.symbol { background: #fff; border-radius: 0.8vmin; }
+html[data-theme="dark"] #app .cell.hidden { background: #1a1a1a; border-color: transparent; --hid-dot: #4b5563; --hid-edge: #374151; }
+html[data-theme="dark"] #app .cell.pressed { filter: none; background: #374151; }
+
+/* ---------- Theme: CVI. Black field, ONE salient colour (yellow), no category colours. ---------- */
+html[data-theme="cvi"], html[data-theme="cvi"] body, html[data-theme="cvi"] #app, html[data-theme="cvi"] #app.on-category { background: #000; }
+html[data-theme="cvi"] #message-text { background: #000; border-color: #ffd600; }
+html[data-theme="cvi"] .chip { background: #000; border-color: #ffd600; color: #ffd600; }
+html[data-theme="cvi"] .chip.speaking { background: #ffd600; color: #000; }
+html[data-theme="cvi"] #learner-name { color: #6b7280; }
+html[data-theme="cvi"] .bar-btn, html[data-theme="cvi"] #camera-btn { background: #000 !important; color: #ffd600; border-color: #ffd600; }
+html[data-theme="cvi"] #context-strip, html[data-theme="cvi"] .on-category #context-strip { background: #000; border: 0.2vmin solid #ffd600; }
+html[data-theme="cvi"] #page-title { color: #ffd600; }
+html[data-theme="cvi"] #adult-hold { color: #4b5563; background: rgba(255,255,255,0.05); }
+html[data-theme="cvi"] #app .cell { background: #000; border: 0.5vmin solid #ffd600; color: #ffd600; }
+html[data-theme="cvi"] #app .cell-image img.symbol { background: #fff; border-radius: 0.8vmin; }
+html[data-theme="cvi"] #app .cell.hidden { background: #000; border-color: transparent; --hid-dot: #3f3f00; --hid-edge: #3f3f00; }
+html[data-theme="cvi"] #app .cell.pressed { filter: none; background: #4d4100; }
+
+/* ---------- Theme: Colour-blind safe. White buttons with a dark edge; the category shows as a light plate behind the picture
+   (the plates differ in lightness as well as hue). ---------- */
+html[data-theme="cbsafe"], html[data-theme="cbsafe"] body, html[data-theme="cbsafe"] #app { background: #f8fafc; }
+html[data-theme="cbsafe"] #app.on-category { background: #ffe8c7; }
+html[data-theme="cbsafe"] #message-text { border-color: #1f2937; }
+html[data-theme="cbsafe"] #app .cell { background: #fff; border: 0.4vmin solid #1f2937; color: #111; }
+html[data-theme="cbsafe"] #app .cell-image { margin: 0.5vmin 0.5vmin 0; border-radius: 0.8vmin; }
+html[data-theme="cbsafe"] #app .type-people .cell-image { background: #fde68a; } html[data-theme="cbsafe"] #app .type-action .cell-image { background: #a7f3d0; }
+html[data-theme="cbsafe"] #app .type-describing .cell-image, html[data-theme="cbsafe"] #app .type-place .cell-image { background: #bfdbfe; }
+html[data-theme="cbsafe"] #app .type-question .cell-image { background: #e9d5ff; } html[data-theme="cbsafe"] #app .type-social .cell-image { background: #fecdd3; }
+html[data-theme="cbsafe"] #app .type-category .cell-image { background: #fed7aa; } html[data-theme="cbsafe"] #app .type-noun .cell-image { background: #f5e1d3; }
+html[data-theme="cbsafe"] #app .type-home { background: #fed7aa; border-color: #7c2d12; }
+html[data-theme="cbsafe"] #app .cell.hidden { background: #e5e7eb; border-color: transparent; }
+
+/* ---------- Theme: Dim (soft dark, low glare: bedtime, light sensitivity) ---------- */
+html[data-theme="dim"], html[data-theme="dim"] body, html[data-theme="dim"] #app { background: #1e2128; }
+html[data-theme="dim"] #app.on-category { background: #2b241b; }
+html[data-theme="dim"] #message-text { background: #2a2e37; border-color: #4b5262; }
+html[data-theme="dim"] .chip { background: #3a3f4a; border-color: #5b6272; color: #e5e7eb; }
+html[data-theme="dim"] .chip.speaking { background: #8a6d1f; color: #fff; }
+html[data-theme="dim"] .bar-btn, html[data-theme="dim"] #camera-btn { background: #343945 !important; color: #e5e7eb; border-color: #5b6272; }
+html[data-theme="dim"] #context-strip { background: #262a33; border-color: #3a3f4a; }
+html[data-theme="dim"] .on-category #context-strip { background: #5a3d1c; border-color: #7a5428; }
+html[data-theme="dim"] #page-title { color: #f3d3a8; }
+html[data-theme="dim"] #app .cell { border-color: rgba(255,255,255,0.12); color: #e5e7eb; }
+html[data-theme="dim"] #app .type-people { background: #5c5636; } html[data-theme="dim"] #app .type-action { background: #3f5a3d; }
+html[data-theme="dim"] #app .type-describing, html[data-theme="dim"] #app .type-place { background: #3d4f63; }
+html[data-theme="dim"] #app .type-question { background: #4f4563; } html[data-theme="dim"] #app .type-social { background: #63414f; }
+html[data-theme="dim"] #app .type-category { background: #66513a; } html[data-theme="dim"] #app .type-noun { background: #5e4b40; }
+html[data-theme="dim"] #app .type-little { background: #4d4840; } html[data-theme="dim"] #app .type-home { background: #6b4a26; border-color: #8a5f2e; }
+html[data-theme="dim"] #app .cell-image img.symbol { background: #d4d4d4; border-radius: 0.8vmin; filter: brightness(0.92); }
+html[data-theme="dim"] #app .cell.hidden { background: #262a33; --hid-dot: #4b5262; --hid-edge: #3a3f4a; }
+/* The hidden-spot choice wins over each theme's own hidden colour (higher specificity on purpose). */
+html[data-hidden="invisible"][data-theme] #app .cell.hidden { background: transparent; border-color: transparent; }
+html[data-hidden="dots"][data-theme] #app .cell.hidden {
+  background-color: transparent; border: 0.25vmin dashed var(--hid-edge, #c3cad4);
+  background-image: radial-gradient(circle, var(--hid-dot, #b8c0cc) 0.18vmin, transparent 0.22vmin); background-size: 1.6vmin 1.6vmin;
+}
+
+/* Adult menu > Accessibility page (js/accessui.js) */
+.access-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin: 6px 0 4px; }
+.access-preset { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid #d1d5db; background: #fff; cursor: pointer; }
+.access-preset:active { background: #eef2ff; }
+.access-preset .ap-title { font-weight: 800; font-size: 16px; color: #1e3a8a; }
+.access-preset .ap-text { font-size: 13px; color: #4b5563; line-height: 1.35; }
+.access-h { margin: 18px 0 4px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; color: #6b7280; }
+.access-status { min-height: 1.2em; color: #166534; font-weight: 600; }
+.access-seg { flex-wrap: wrap; }
+/* Little-word strip in the dark themes (its own light colours otherwise stay) */
+html[data-theme="dim"] #app .lw-item { background: #3a3f4a; border-color: #8b80d6; }
+html[data-theme="dark"] #app .lw-item { --edge: #c4b5fd; }
+
+/* =====================================================================================================================================
+   Beta 3.19 designs: frosted adult menu, board heat map (Reports), paper-style parent summary
+   ===================================================================================================================================== */
+/* Frosted adult menu: the child's board shows softly blurred behind the menu, so it is clear this is the adult layer on top of THIS
+   learner's board. Only while the menu is open. Without blur support (or with Reduce Transparency on) it is a plain soft tint. */
+.overlay.frosted { background: rgba(226, 232, 240, 0.9); }
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .overlay.frosted { background: rgba(241, 245, 249, 0.42); -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25); }
+  html[data-theme="dark"] .overlay.frosted, html[data-theme="cvi"] .overlay.frosted, html[data-theme="dim"] .overlay.frosted { background: rgba(15, 23, 42, 0.45); }
+}
+@media (prefers-reduced-transparency: reduce) { .overlay.frosted { background: rgba(226, 232, 240, 0.95); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+.overlay.frosted .sheet.adult.menu { box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32); border: 1px solid rgba(255, 255, 255, 0.8); }
+
+/* Board heat map (Reports > Everyday use) */
+.heat-wrap { display: flex; flex-wrap: wrap; gap: 18px; margin: 10px 0 6px; }
+.heat-main { flex: 1 1 520px; min-width: 0; }
+.heat-grid { display: grid; gap: 4px; }
+.heat-cell { min-width: 0; aspect-ratio: 1.15 / 1; border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; overflow: hidden; padding: 2px; }
+.heat-cell .hw { font-size: clamp(11px, 1.55vmin, 15px); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.heat-cell .hn { font-size: clamp(11px, 1.45vmin, 15px); font-weight: 800; font-variant-numeric: tabular-nums; }
+.heat-cell.hidden { background: #e5e7eb; color: #9ca3af; }
+.heat-cell.empty { visibility: hidden; }
+.heat-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; font-size: 13px; color: #4b5563; }
+.heat-ramp { flex: 0 0 260px; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #1b0c41, #4a0c6b, #781c6d, #a52c60, #cf4446, #ed6925, #fb9b06, #f7d13d, #fcffa4); }
+.heat-key-hidden { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
+.heat-key-hidden i { width: 14px; height: 14px; border-radius: 4px; background: #e5e7eb; display: inline-block; }
+.heat-side { flex: 0 1 260px; display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
+.heat-box { padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; }
+.heat-box h4 { margin: 0 0 6px; font-size: 15px; }
+.heat-box p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; }
+.heat-top { margin: 0; padding: 0; list-style: none; }
+.heat-top li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f2f4; font-size: 14px; }
+.heat-top li:last-child { border-bottom: 0; }
+@media print { .heat-cell, .heat-ramp { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+/* Paper-style parent summary: warm paper on screen, serif headings (iPad's Iowan Old Style), the easy-to-read Atkinson Hyperlegible for
+   the text. Printed, it is plain white so it copies cleanly. */
+.rp-docwrap.paper {
+  background-color: #f7f2e7; border-color: #d6cbb3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+}
+.report-doc.parent { font-family: "Atkinson Hyperlegible", -apple-system, Arial, sans-serif; color: #292524; }
+.report-doc.parent h1, .report-doc.parent h2 { font-family: "Iowan Old Style", "Palatino", Georgia, serif; color: #292524; }
+.report-doc.parent .rep-brand { letter-spacing: 0.14em; color: #57534e; }
+.par-stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 18px; }
+.par-stat { flex: 1 1 150px; padding: 14px 16px; border-radius: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid #e4dccb; }
+.par-big { font-family: "Iowan Old Style", "Palatino", Georgia, serif; font-size: 36px; font-weight: 700; color: #3b2f9e; line-height: 1; }
+.par-lab { font-size: 14px; color: #57534e; margin-top: 6px; }
+.par-weeks h2 { margin-top: 4px; }
+.par-bars { display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 0 6px; border-bottom: 1px solid #a8a29e; margin-bottom: 16px; }
+.par-bar { flex: 1 1 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; min-width: 0; }
+.par-b { width: 100%; max-width: 64px; border-radius: 4px 4px 0 0; background: #6d5bd0; }
+.par-bn { font-size: 12px; font-weight: 700; color: #3b2f9e; }
+.par-bl { font-size: 11px; color: #57534e; white-space: nowrap; margin-bottom: -18px; }
+.par-chips { margin: -4px 0 12px; }
+.par-chip { display: inline-block; padding: 4px 10px; margin: 0 6px 6px 0; border-radius: 999px; border: 1px solid #d6cbb3; background: rgba(255, 255, 255, 0.6); font-size: 14px; font-weight: 700; }
+@media print {
+  .rp-docwrap.paper { background: #fff !important; }
+  .par-stat, .par-chip { background: #fff; }
+  .par-b { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* Beta 3.20 touch options: dwell ring (a different colour from Hold to select) and the "previewed" button of Speak on touch */
+.touch-hold.dwell { background: rgba(255, 255, 255, 0.22); }
+.touch-hold.dwell .th-fg { stroke: #7c3aed; }
+#board .cell.previewed { outline: 0.6vmin dashed #1d4ed8; outline-offset: -0.7vmin; }
+html[data-theme="dark"] #board .cell.previewed, html[data-theme="cvi"] #board .cell.previewed, html[data-theme="dim"] #board .cell.previewed { outline-color: #ffffff; }
+
+/* Switch scanning (Beta 3.21, js/scan.js): outlines drawn over the buttons in their own places (nothing moves) */
+#app .scan-row { outline: 0.55vmin solid #f59e0b; outline-offset: -0.55vmin; }
+#app .scan-item { outline: 0.95vmin solid #1d4ed8; outline-offset: -0.95vmin; box-shadow: 0 0 0 0.5vmin rgba(29, 78, 216, 0.35); z-index: 3; }
+html[data-theme="dark"] #app .scan-item, html[data-theme="cvi"] #app .scan-item, html[data-theme="dim"] #app .scan-item { outline-color: #ffffff; }
+html[data-theme="cvi"] #app .scan-row { outline-color: #ff3b30; }
+
+/* Beta 3.22: next-stage progress and rule (Adult menu > Vocabulary stage) */
+.stage-progress { margin-top: 16px; padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; }
+.sp-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.sp-bar { height: 12px; border-radius: 999px; background: #e5e7eb; overflow: hidden; margin: 10px 0 6px; }
+.sp-fill { height: 100%; background: #4f46e5; border-radius: 999px; }
+.sp-fill.done { background: #16a34a; }
+.sp-list { display: flex; flex-direction: column; border-top: 1px solid #f1f2f4; margin-top: 6px; }
+.sp-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 2px; border-bottom: 1px solid #f1f2f4; font-size: 15px; }
+.sp-chip { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 9px; }
+.sp-chip.m { background: #dcfce7; color: #166534; } .sp-chip.e { background: #dbeafe; color: #1e40af; } .sp-chip.n { background: #f3f4f6; color: #4b5563; }
+.stage-rule { margin-top: 14px; }
+.sr-words { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; margin: 8px 0; }
+.sr-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 4px; }
+.sr-select { width: auto; padding: 4px 8px; }

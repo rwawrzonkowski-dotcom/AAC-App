@@ -71,13 +71,35 @@ export const TARGET_HEADERS = ["word", "word_id", "status", "direction", "ladder
   "back_up_after_misses", "mastery_percent", "mastery_sessions", "mastery_min_trials", "mastery_different_people_or_settings", "instruction_template", "date_added", "removed"];
 export function targetRows(targets) {
   return targets.slice().sort((a, b) => a.added - b.added).map((t) => [t.label, t.wordId, T.STATUS_LABELS[t.status], T.DIRECTION_LABELS[t.direction], T.ladderSummary(t),
-    T.isCustom(t) ? "custom" : T.STEP_SIZES[t.stepSize] + "%", t.direction === "ltm" ? "Least-to-most" : T.isProbe(t) ? "No prompts" : T.posName(t),
+    T.isCustom(t) ? "custom" : T.STEP_SIZES[t.stepSize] + "%", t.direction === "ltm" ? "Least-to-most" : T.isProbe(t) ? "No prompts" : T.isChain(t) ? T.chainStepsText(t) : T.posName(t),
     t.delaySec, t.fadeAfter, t.backUpAfter, t.mastery.pct, t.mastery.sessions, t.mastery.minTrials, t.mastery.differentTags,
     t.instructions ? tpl.templateNameOf(t) : "", t.added ? dateOf(t.added) : "", t.removed ? dateOf(t.removed) : ""]);
 }
 
+// Sentence targets (Beta 3.12): one row per word per sentence trial. done_by: "learner" (the learner's part), "app modeled" (forward
+// chaining) or "filled in" (backward chaining). prompt_step = the most help shown for that word.
+export const SENTENCE_HEADERS = ["date", "time", "session_id", "who", "where", "sentence", "method", "words_done_by_learner", "word_number", "word",
+  "done_by", "done", "prompt_step", "independent", "errors", "trial_result"];
+export function sentenceRows(sessions, trials) {
+  const by = new Map(sessions.map((s) => [s.id, s]));
+  const out = [];
+  for (const t of trials.filter((x) => by.has(x.sessionId) && Array.isArray(x.links)).sort((a, b) => a.start - b.start)) {
+    const s = by.get(t.sessionId);
+    const reached = T.reachedLinks(t.links);           // (Beta 3.17) a learner word after the point where the trial stopped: "not reached", not scored
+    for (const l of t.links) {
+      const scored = l.taught && reached.has(l);
+      const step = !l.taught ? "" : !scored ? "not reached" : l.minIndex >= l.ladderLength ? T.INDEPENDENT_NAME : "step " + (l.minIndex + 1) + " of " + l.ladderLength;
+      out.push([dateOf(t.start), clock(t.start), t.sessionId, s.who, s.where, t.label, T.CHAIN_METHOD_LABELS[t.method] || t.method, t.phase,
+        l.wordId === T.SPEAK_ID ? "end" : l.index + 1, l.label, l.taught ? "learner" : t.method === "forward" ? "app modeled" : "filled in",
+        l.done, step, scored ? T.linkIndependent(l) : "", l.errors, t.result]);
+    }
+  }
+  return out;
+}
+
 export const EVENT_HEADERS = ["date", "time", "word", "how_reached", "mode"];
-const HOW_TEXT = { board: "board", page: "page", forms: "forms", dial: "dial", keyboard: "keyboard", numberpad: "number pad" };
+const HOW_TEXT = { board: "board", page: "page", forms: "forms", dial: "dial", keyboard: "keyboard", numberpad: "number pad", scene: "scene strip", "photo scene": "scene photo", little: "little-word strip", "little dial": "little-word dial",
+  tone: "message tone (tone wheel)", mood: "mood set (normal = cleared)" };
 export function eventRows(events) {
   return events.map((e) => [dateOf(e.time), clock(e.time), e.form || e.label, HOW_TEXT[e.how] || e.how, e.mode]);
 }

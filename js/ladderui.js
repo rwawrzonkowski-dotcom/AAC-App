@@ -28,13 +28,17 @@ export function changeLadder(t, next) {
   if (next.custom) t.customLadder = next.custom.map((s) => ({ type: s.type, opacity: s.opacity }));
   t.pos = T.remapPos(oldLadder, oldPos, T.ladderOf(t));
   t.streakHits = 0; t.streakMisses = 0;
+  if (T.isChain(t)) {          // a sentence target: every word keeps its own place by strength (Beta 3.12)
+    t.linkPos = t.linkPos.map((p) => T.remapPos(oldLadder, p, T.ladderOf(t)));
+    t.linkHits = t.linkHits.map(() => 0); t.linkMisses = t.linkMisses.map(() => 0);
+  }
   const newName = T.posName(t);
   if (newName !== oldName) t.history.push({ time: Date.now(), from: oldName, to: newName, reason: "ladder changed by adult", dir: "" });
 }
 
 // ---------- In a target's settings ----------
 // save(): saves the target (teachui.js has it). Every change of the ladder or the starting step is written into the target's history.
-export function ladderSection(t, { save }) {
+export function ladderSection(t, { save, hideStart = false }) {
   const box = h("div", { class: "field", id: "ts-ladder" });
   function paint() {
     const custom = T.isCustom(t);
@@ -67,7 +71,7 @@ export function ladderSection(t, { save }) {
             onclick: () => { if (t.stepSize !== id) { changeLadder(t, { stepSize: id }); save(); paint(); } } })))),
       h("div", { class: "lad-sumrow" }, summary,
         custom ? h("button", { type: "button", class: "btn", id: "ts-ladder-edit", text: "Edit ladder", onclick: () => openLadderEditor(t, { save, onSaved: paint }) }) : null),
-      h("div", { class: "field lad-sub" }, h("label", { for: "ts-start", text: "Starting step (most-to-least; the app moves it by itself)" }), startSel),
+      hideStart ? null : h("div", { class: "field lad-sub" }, h("label", { for: "ts-start", text: "Starting step (most-to-least; the app moves it by itself)" }), startSel),
       h("p", { class: "muted", text: "Changing the ladder keeps this target at the nearest step by strength; it does not jump back to the top." }));
   }
   paint();

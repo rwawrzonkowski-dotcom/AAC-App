@@ -28,14 +28,16 @@ BEFORE="$(mktemp -d)"
 trap 'rm -rf "$BEFORE"' EXIT
 for f in index.html styles.css sw.js manifest.webmanifest; do cp "$f" "$BEFORE/"; done
 cp -R js data images icons "$BEFORE/"
+[ -d fonts ] && cp -R fonts "$BEFORE/"
 
 OLD_N="$(sed -n 's/^const CACHE_VERSION = "aac-v\([0-9]*\)";.*/\1/p' sw.js)"
 [ -n "$OLD_N" ] || { echo "Could not read stable CACHE_VERSION from sw.js" >&2; exit 1; }
 
 # 1. Copy beta's app files over stable's (whole folders, so removed files disappear too).
 cp beta/index.html beta/styles.css beta/sw.js .
-rm -rf js data images
+rm -rf js data images fonts
 cp -R beta/js beta/data beta/images .
+[ -d beta/fonts ] && cp -R beta/fonts .            # Accessibility fonts (Beta 3.18)
 # Object recognition for Scenes (beta 3.0): the library (vendor/) and model (models/) are NOT in the install cache; the service worker
 # keeps them in a separate "models" cache the first time they are used. They still have to be copied along with the app files.
 rm -rf vendor models

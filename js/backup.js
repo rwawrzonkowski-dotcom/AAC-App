@@ -49,6 +49,20 @@
 // and `startHelp` next to the old `promptLevel` / `startLevel`. A target without `ladderVersion: 1` (every backup of version 11 to 13) is
 // converted on the way in by cleanTarget (js/teaching.js: old level 7 -> Model 100%, 6 -> 75%, 5 -> 50%, 4 and 3 and 2 -> 25%, 1 and 0 ->
 // Independent, the change logged in its history as "ladder update"); an old trial keeps its data and gets a computed `help`.
+// Version 15 (beta 3.0, camera scenes) added `scenes` to a learner: { active: sceneId | null, list: [ { id, name, order, created, showPhoto,
+// photoW, photoH, photo: "data:image/jpeg;base64,...", items: [ { id, kind, label, spoken, wordId, box?, crop?: dataUrl } ] } ] } (see
+// js/scenedata.js). The adult chooses in the backup section whether to include it ("Include scenes and photos", on by default); without
+// it the field is missing. A backup older than 15 has no `scenes` field and restores as before; restoring one over an existing learner
+// leaves that learner's scenes alone.
+// Version 16 (beta 3.1) added `cameraButton` ("auto" | "always" | "never") and `matchStrictness` ("low" | "medium" | "high") to a learner, and
+// `things` ({ list: [ { id, label, spoken, wordId, created, photos, picture: dataUrl, views: [base64 of 1280 float32 numbers] } ] }: "My things",
+// see js/things.js), written with the scenes under "Include scenes and photos". Older backups get Auto / Medium and no things; restoring one
+// over an existing learner leaves that learner's things alone.
+// Version 18 (beta 3.12) can hold SENTENCE targets in the teaching data (kind "chain": links, method, phase, linkPos... see js/teaching.js)
+// and sentence trials (links, method, phase). An older app would turn them into broken word targets, so it refuses a version 18 file.
+// Beta 3.18 (still version 18) adds `access` (Accessibility: theme, font, labels, spacing...; js/access.js); a backup without it gets the defaults.
+// Beta 3.16 (still version 18) adds `toneWheel` ("off" | "on"); a backup without it gets "off".
+// Version 17 (beta 3.7) added `littleStrip` ("auto" | "always" | "never": the little-word strip). Older backups get Auto.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
 // pages were reorganized into row groups, Phase 1.6) are still readable: they are upgraded on
@@ -60,20 +74,25 @@
 // until you move it yourself.
 import { h, openOverlay, askConfirm } from "./ui.js";
 import {
-  listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES,
+  listProfiles, getPhotoBlobs, importLearner, DEFAULT_TOUCH, cleanVoice, KEYBOARD_BUTTON_CHOICES, CAMERA_BUTTON_CHOICES, MATCH_STRICTNESS_CHOICES,
 } from "./profiles.js";
 import { exportTeaching } from "./teachdata.js";
 import { exportEveryday, cleanEverydayBackup } from "./everyday.js";
+import { exportScenes, cleanScenesBackup } from "./scenedata.js";
+import { exportThings, cleanThingsBackup } from "./things.js";
 import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
-import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE } from "./migrate.js";
+import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE, LAYOUT8_NOTE } from "./migrate.js";
 import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
+import { cleanAccess } from "./access.js";
+import { cleanScan } from "./scan.js";
+import { cleanStageRule } from "./stagerule.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 14;
+export const BACKUP_VERSION = 19;   // 19 = Beta 3.23 (Actions folder layout)
 
 // ---------------------------------------------------------------- saving
 
@@ -89,8 +108,9 @@ function blobToDataUrl(blob) {
 // Build the backup object for these learners (profile objects from profiles.js).
 // options.teaching (default true): include the learners' targets, sessions, trials and reward pictures.
 // options.everyday (default true): include the learners' everyday use data (word events, utterances, daily summaries, settings).
+// options.scenes (default true): include the learners' scenes with their photos (Beta 3.0).
 // options.templates (default false; the "all learners" button): include this device's edited teaching templates, if there are any.
-export async function buildBackup(learners, { teaching = true, templates = false, everyday = true } = {}) {
+export async function buildBackup(learners, { teaching = true, templates = false, everyday = true, scenes = true } = {}) {
   const out = [];
   for (const p of learners) {
     const photos = [];
@@ -113,9 +133,17 @@ export async function buildBackup(learners, { teaching = true, templates = false
       wordsOnly: p.wordsOnly,
       keyboardButton: p.keyboardButton,
       speakLetters: p.speakLetters,
+      cameraButton: p.cameraButton,
+      littleStrip: p.littleStrip,
+      toneWheel: p.toneWheel,
+      access: p.access,
+      scan: p.scan,
+      stageRule: p.stageRule,
+      matchStrictness: p.matchStrictness,
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
       ...(everyday ? { everyday: await exportEveryday(p.id) } : {}),
+      ...(scenes ? { scenes: await exportScenes(p.id, p.activeScene), things: await exportThings(p.id) } : {}),
       photos,
     });
   }
@@ -268,6 +296,9 @@ function cleanLearner(raw, index, version) {
     holdSec: clamp(num(t.holdSec, DEFAULT_TOUCH.holdSec), 0.1, 2),
     ignoreOn: t.ignoreOn === true,
     ignoreSec: clamp(num(t.ignoreSec, DEFAULT_TOUCH.ignoreSec), 0.25, 3),
+    // Beta 3.20 (still file version 18): a backup without these gets them Off
+    liftOff: t.liftOff === true, zones: t.zones === true, keyguard: t.keyguard === true, preview: t.preview === true,
+    dwellOn: t.dwellOn === true, dwellSec: clamp(num(t.dwellSec, DEFAULT_TOUCH.dwellSec), 0.5, 3),
   };
 
   // Backups older than version 3 have no Model prompt settings: use the defaults.
@@ -289,12 +320,14 @@ function cleanLearner(raw, index, version) {
   // tidy moves nothing.)
   let notices = [];
   let moved = {};
-  if (version < 9) {
+  if (version < 19) {
+    // (Beta 3.23 file version 19: the Actions folder layout. Older backups also get their adult words moved off the new Back cells.)
     const r = relocateAdultWords(board, cells, pages);
-    cells = r.cells; pages = r.pages; pins = {};
+    cells = r.cells; pages = r.pages; if (version < 9) pins = {};
     moved = moveMap(r.moves);
     notices = describeMoves(r.moves);
     if (version < 8) notices.push(RANCH_NOTE);   // (Phase 1.8A: ranch moved into More food; version 8 backups already know)
+    notices.push(LAYOUT8_NOTE);
   }
 
   const photos = [];
@@ -318,7 +351,18 @@ function cleanLearner(raw, index, version) {
   }
   // Everyday use data exists only in version 13+ backups made with "Include everyday use data".
   const everyday = version >= 13 ? cleanEverydayBackup(raw.everyday) : null;
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial, notices, teaching, everyday, photos };
+  // Scenes exist only in version 15+ backups made with "Include scenes and photos".
+  const scenes = version >= 15 ? cleanScenesBackup(raw.scenes) : null;
+  // Camera button, match strictness and My things exist only in version 16+ backups.
+  const cameraButton = version >= 16 && CAMERA_BUTTON_CHOICES.includes(raw.cameraButton) ? raw.cameraButton : "auto";
+  const matchStrictness = version >= 16 && MATCH_STRICTNESS_CHOICES.includes(raw.matchStrictness) ? raw.matchStrictness : "medium";
+  const things = version >= 16 ? cleanThingsBackup(raw.things) : null;
+  const littleStrip = version >= 17 && CAMERA_BUTTON_CHOICES.includes(raw.littleStrip) ? raw.littleStrip : "auto";
+  const toneWheel = raw.toneWheel === "on" ? "on" : "off";
+  const stageRule = cleanStageRule(raw.stageRule);          // Beta 3.22 (still version 18): a backup without it gets 50% of the stage
+  const scan = cleanScan(raw.scan);                        // Beta 3.21 (still version 18): a backup without it has scanning Off
+  const access = cleanAccess(raw.access);                  // Beta 3.18 (still version 18): a backup without it gets the standard look
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, access, scan, stageRule, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
@@ -393,7 +437,9 @@ export async function restoreFromFile(file) {
       if (repBtn) repBtn.addEventListener("click", () => { choice[i] = match.id; paint(); });
       const photoText = l.photos.length === 1 ? "1 photo" : `${l.photos.length} photos`;
       const tc = (l.teaching ? `, teaching data (${l.teaching.targets.length} targets, ${l.teaching.sessions.length} sessions)` : "") +
-        (l.everyday ? `, everyday use data (${l.everyday.events.length} words, ${l.everyday.utterances.length} messages)` : "");
+        (l.everyday ? `, everyday use data (${l.everyday.events.length} words, ${l.everyday.utterances.length} messages)` : "") +
+        (l.scenes ? `, ${l.scenes.list.length === 1 ? "1 scene" : l.scenes.list.length + " scenes"} with photos` : "") +
+        (l.things && l.things.list.length ? `, ${l.things.list.length === 1 ? "1 remembered thing" : l.things.list.length + " remembered things"}` : "");
       return h("div", { class: "restore-row" },
         h("div", { class: "restore-name", text: l.name }),
         h("div", { class: "muted", text: `Stage ${l.stage}, ${photoText}${tc}` }),

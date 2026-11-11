@@ -38,7 +38,6 @@ export function loadTemplates() {
 
 export const fieldList = () => (data ? data.fields : FALLBACK_DATA.fields);
 export const templateList = () => (data ? data.templates : FALLBACK_DATA.templates);
-export const hasTemplate = (id) => byId.has(id);
 export const getTemplate = (id) => byId.get(id) || byId.get(FALLBACK_TEMPLATE) || FALLBACK_DATA.templates[0];
 const originalRaw = (id, voice, field) => { const t = getTemplate(id); return (t[voice] && typeof t[voice][field] === "string") ? t[voice][field] : ""; };
 

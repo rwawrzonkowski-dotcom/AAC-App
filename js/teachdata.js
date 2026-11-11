@@ -10,7 +10,7 @@
 // Every trial is written the moment it ends, so nothing is lost if the iPad is closed in the middle of a session.
 // Rounds B (everyday recording) and C (reports) read these same rows.
 import * as db from "./db.js";
-import { newTarget, cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
+import { newTarget, newChainTarget, cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { load, save } from "./storage.js";
 import { loadBoardData, getBoardData } from "./boarddata.js";
 import { buildModel, pathToCore } from "./boardmodel.js";
@@ -41,7 +41,6 @@ export async function loadTeaching(learnerId) {
     if (ensureInstructions(getBoardData(), t) || migrated.has(t.wordId)) await db.put("targets", learnerId + "|" + t.wordId, t);
   }
 }
-export const loadedFor = () => cacheFor;
 
 // Targets currently in use (not removed), oldest first.
 export const getTargets = () => [...cache.values()].filter((t) => !t.removed).sort((a, b) => a.added - b.added);
@@ -65,6 +64,14 @@ export async function addTarget(learnerId, info) {
   }
   const t = newTarget(learnerId, info);
   ensureInstructions(getBoardData(), t);          // the starting template for this word (js/templates.js)
+  await saveTarget(t);
+  return t;
+}
+// Add a sentence target (Beta 3.12): links = the words in order, [{ wordId, label, pageId, path }].
+export async function addChainTarget(learnerId, links) {
+  await Promise.all([loadTemplates(), loadBoardData()]);
+  const t = newChainTarget(learnerId, links);
+  ensureInstructions(getBoardData(), t);
   await saveTarget(t);
   return t;
 }
@@ -124,6 +131,13 @@ export async function copyTargetToLearner(source, profile) {
   if (old) {
     t = old; how = "updated";
     t.removed = null;
+  } else if (source.kind === "chain") {
+    // A sentence target (Beta 3.12): the same words, method and settings, starting fresh (every word at the top of the ladder).
+    const n = source.links.length;
+    t = cleanTarget({ ...JSON.parse(JSON.stringify(source)), status: "teaching", history: [], statusHistory: [], removed: null, reward: false,
+      phase: source.method === "total" ? n : 1, linkPos: Array(n).fill(0), linkHits: Array(n).fill(0), linkMisses: Array(n).fill(0), phaseRun: 0,
+      streakHits: 0, streakMisses: 0, added: Date.now() }, profile.id);
+    how = "added";
   } else {
     // The route to the word depends on the learner's board size (for example Animals is a Play folder on the 45 board).
     const model = buildModel(getBoardData(), profile.gridSize);

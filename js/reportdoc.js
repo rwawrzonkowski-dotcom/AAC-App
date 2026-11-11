@@ -55,10 +55,33 @@ export function targetBlock(tm, shapes, { plotH = 170, helpH = 92, withTable = t
     svgBox(C.teachingChart(tm, { plotH, shapes }), "teach-graph"),
     svgBox(C.helpChart(tm, { plotH: helpH }), "help-graph"),
     svgBox(C.teachingKey(shapes, wheres), "key-graph")));
+  if (tm.chain) card.append(chainTable(tm));
   card.append(h("details", { class: "tbl-view no-print" }, h("summary", { text: "Show as table" }),
     tableEl(["Session", "Date", "Who", "Where", "Trials", "Independent", "% independent", "Average help", "Status"],
       tm.series.map((p) => [p.n, p.date, p.who, p.where, p.trials, p.independent, n0(p.pct) + "%", n0(p.help * 100) + "%", T.STATUS_LABELS[p.status]]))));
   return card;
+}
+
+/** A sentence target's task-analysis table (Beta 3.12): one row per session, one column per word, % independent in each cell (shaded:
+ *  darker green = more independent; "modeled" = the app modeled or filled in that word). A ▲ marks a session where a word was added. */
+export function chainTable(tm) {
+  const { words, rows } = tm.chain;
+  const nWords = tm.target.links.length;
+  const cell = (v, i) => {
+    const td = h("td", { class: "ta-cell" + (v === null ? " ta-off" : ""), text: v === null ? (i < nWords ? "modeled" : "–") : Math.round(v) + "%" });
+    if (v !== null) td.style.background = `rgba(22, 163, 74, ${0.08 + 0.5 * (v / 100)})`;
+    return td;
+  };
+  const methodShort = { total: "Total task", forward: "Forward", backward: "Backward" };
+  return h("div", { class: "rep-ta" },
+    h("h4", { text: "Each word (task analysis)" }),
+    h("table", { class: "rep-table ta-table", "data-word": tm.wordId },
+      h("thead", {}, h("tr", {}, h("th", { text: "Session" }), h("th", { text: "Date" }), h("th", { text: "Words done" }), ...words.map((w) => h("th", { text: w })))),
+      h("tbody", {}, rows.map((r) => h("tr", { class: r.phaseChanged ? "ta-phase" : "" },
+        h("td", { text: (r.phaseChanged ? "▲ " : "") + r.n }), h("td", { text: r.date }),
+        h("td", { text: r.phase === null ? "-" : `${methodShort[r.method] || ""} ${r.phase} of ${tm.target.links.length}` }),
+        ...r.cells.map((v, i) => cell(v, i)))))),
+    h("p", { class: "muted ta-note", text: "% independent for each word, over the trials in which the learner did that word. “modeled”: the app modeled the word or put it in the message bar. ▲ a word was added or taken away from the learner's part before this session." }));
 }
 
 /** The shapes for everybody in the report (the same person always has the same shape on every graph). */
@@ -208,10 +231,29 @@ export function parentDoc(ctx) {
   if (!em.hasData) {
     doc.append(p("par-none", `We have not saved any of ${name}'s words in this time yet.`));
   } else {
+    // At a glance (Beta 3.19): three numbers and the words used each week. Plain counts only, no percentages.
+    const stat = (id, n, label) => h("div", { class: "par-stat", id }, h("div", { class: "par-big", text: String(n) }), h("div", { class: "par-lab", text: label }));
+    doc.append(h("div", { class: "par-stats" },
+      stat("par-stat-words", t.distinct, t.distinct === 1 ? "different word used" : "different words used"),
+      stat("par-stat-new", t.newWords, t.newWords === 1 ? "new word" : "new words"),
+      t.longest >= 2 ? stat("par-stat-longest", t.longest, "words in the longest message")
+        : stat("par-stat-days", t.activeDays, t.activeDays === 1 ? "day VOICE was used" : "days VOICE was used")));
+    const wk = weeklyWords(em);
+    if (wk.length >= 2) {
+      const top = Math.max(1, ...wk.map((w) => w.n));
+      doc.append(h("div", { class: "par-weeks", id: "par-weeks" },
+        h("h2", { text: "Different words each week" }),
+        h("div", { class: "par-bars", role: "img", "aria-label": wk.map((w) => `Week of ${shortDate(w.key)}: ${w.n}`).join(", ") },
+          wk.map((w) => h("div", { class: "par-bar" },
+            h("span", { class: "par-bn", text: String(w.n) }),
+            h("div", { class: "par-b", style: `height: ${Math.max(4, Math.round((w.n / top) * 100))}%` }),
+            h("span", { class: "par-bl", text: shortDate(w.key) }))))));
+    }
     doc.append(p("par-unique", `${ctx.range.phrase}, ${name} used ${plural(t.distinct, "different word")}.`));
     if (t.newWords) {
       const names = em.newestWords.slice().reverse().map((f) => f.label);
       doc.append(p("par-new", `${name} started using ${plural(t.newWords, "new word")}: ${list(names.slice(0, 12))}${names.length > 12 ? ", and more" : ""}.`));
+      doc.append(h("div", { class: "par-chips", id: "par-new-chips" }, names.slice(0, 24).map((n) => h("span", { class: "par-chip", text: n }))));
     }
     const fav = em.topAll.slice(0, 5).map((r) => r.label);
     if (fav.length) doc.append(p("par-fav", `${name}'s favorite words were ${list(fav)}.`));
@@ -229,4 +271,64 @@ export function parentDoc(ctx) {
     h("li", { "data-word": x.wordId }, h("strong", { text: x.label }), h("div", { text: tpl.instructionText(x.target, "parent", "cue", name) })))));
   doc.append(p("par-thanks", `Thank you for practicing with ${name}. Every word counts!`), h("footer", { class: "rep-foot", text: FOOT }));
   return doc;
+}
+
+// ---------------------------------------------------------------- board heat map (Beta 3.19)
+// Colours run from deep purple (few uses) to pale yellow (most), with the square root of the count so a few busy words do not wash out
+// the rest. The scale stays readable in grey and for colour-blind readers, and every spot also shows its number. Spots not revealed yet
+// are plain grey with a dash.
+const HEAT = ["#1b0c41", "#4a0c6b", "#781c6d", "#a52c60", "#cf4446", "#ed6925", "#fb9b06", "#f7d13d", "#fcffa4"];
+export function heatColor(n, max) {
+  if (!n || !max) return { bg: HEAT[0], fg: "#ffffff", k: 0 };
+  const k = Math.min(8, Math.max(1, Math.round(Math.sqrt(n / max) * 8)));
+  return { bg: HEAT[k], fg: k >= 6 ? "#111827" : "#ffffff", k };
+}
+/** heat = R.boardHeat(...). modeLabel = "learner uses" | "modeled uses". */
+export function heatmapEl(heat, { modeLabel = "uses", id = "ev-heat" } = {}) {
+  const grid = h("div", { class: "heat-grid", id: id + "-grid", role: "table", "aria-label": "Uses of each spot on the main board" });
+  grid.style.gridTemplateColumns = `repeat(${heat.cols}, minmax(0, 1fr))`;
+  const byPos = new Map(heat.cells.map((c) => [c.row + "," + c.col, c]));
+  for (let r = 0; r < heat.rows; r++) for (let c = 0; c < heat.cols; c++) {
+    const cell = byPos.get(r + "," + c);
+    if (!cell) { grid.append(h("div", { class: "heat-cell empty", "aria-hidden": "true" })); continue; }
+    if (!cell.visible && !cell.total) {
+      grid.append(h("div", { class: "heat-cell hidden", role: "cell", "data-word": cell.id, "aria-label": `${cell.label}: not revealed yet` },
+        h("span", { class: "hw", text: cell.label }), h("span", { class: "hn", text: "–" })));
+      continue;
+    }
+    const col = heatColor(cell.total, heat.max);
+    const el = h("div", { class: "heat-cell", role: "cell", "data-word": cell.id, "data-n": String(cell.total),
+      "aria-label": `${cell.label}: ${cell.total} ${modeLabel}${cell.via ? ` (${cell.via} through its pages)` : ""}`,
+      title: cell.via ? `${cell.direct} on the button, ${cell.via} through its pages` : "" },
+      h("span", { class: "hw", text: cell.label }), h("span", { class: "hn", text: cell.total.toLocaleString() }));
+    el.style.background = col.bg; el.style.color = col.fg;
+    grid.append(el);
+  }
+  const legend = h("div", { class: "heat-legend" }, h("span", { text: "0" }), h("span", { class: "heat-ramp", "aria-hidden": "true" }),
+    h("span", { text: `${heat.max.toLocaleString()} ${modeLabel}` }),
+    h("span", { class: "heat-key-hidden" }, h("i", { "aria-hidden": "true" }), "Not revealed yet"));
+  const side = h("div", { class: "heat-side" },
+    h("div", { class: "heat-box" }, h("h4", { text: "Most used spots" }),
+      heat.top.length ? h("ol", { class: "heat-top", id: id + "-top" }, heat.top.map((c) => h("li", {}, h("span", { text: c.label }), h("b", { text: c.total.toLocaleString() }))))
+        : h("p", { class: "muted", text: "None in this period." })),
+    h("div", { class: "heat-box" }, h("h4", { text: "Revealed but not used yet" }),
+      h("p", { id: id + "-unused", text: heat.unused.length ? heat.unused.join(", ") : "Every revealed word was used." }),
+      heat.unused.length ? h("p", { class: "muted", text: "Good words to model." }) : null));
+  return h("div", { class: "heat-wrap", id }, h("div", { class: "heat-main" }, grid, legend), side);
+}
+
+// ---------------------------------------------------------------- parent summary extras (Beta 3.19 paper design)
+/** Distinct words per calendar week (Monday start), for the parent page's simple bar chart. */
+export function weeklyWords(em) {
+  const weeks = new Map();
+  for (const d of em.days) {
+    const [y, m, dd] = d.date.split("-").map(Number);
+    const dt = new Date(y, m - 1, dd);
+    const mon = new Date(y, m - 1, dd - ((dt.getDay() + 6) % 7));
+    const key = mon.getFullYear() + "-" + String(mon.getMonth() + 1).padStart(2, "0") + "-" + String(mon.getDate()).padStart(2, "0");
+    let w = weeks.get(key);
+    if (!w) weeks.set(key, (w = { key, set: new Set() }));
+    d.uniqueKeys.forEach((k) => w.set.add(k));
+  }
+  return [...weeks.values()].map((w) => ({ key: w.key, n: w.set.size }));
 }

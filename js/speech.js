@@ -14,6 +14,8 @@
 // EVERY spoken sound in the app goes through speak() or speakSequence() in this file, so every path
 // uses the learner's voice and pitch, and the right speed.
 
+import { toneText, toneSettings } from "./tones.js";
+
 const synth = "speechSynthesis" in window ? window.speechSynthesis : null;
 let voices = [];
 let settings = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
@@ -33,13 +35,6 @@ export const isPhrase = (text) => String(text).trim().split(/\s+/).length > 1;
 // Voices load asynchronously on iOS/Chrome, so refresh when they arrive.
 function refreshVoices() {
   if (synth) voices = synth.getVoices();
-}
-
-// English voices only; if the device has none, offer every voice.
-export function listVoices() {
-  refreshVoices();
-  const english = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith("en"));
-  return english.length ? english : voices.slice();
 }
 
 // Every voice the device offers, in every language (the voice picker sorts and groups them).
@@ -96,10 +91,33 @@ export function initSpeech() {
   window.addEventListener("pointerdown", unlock, true);
 }
 
+// ---------- "VOICE is talking" (Beta 3.18, Accessibility > Glow while speaking) ----------
+// onSpeakingChange(fn): fn(true) when speech starts, fn(false) when it has stopped. Every utterance is made by makeUtterance below,
+// which reports its start and end here (addEventListener, so the onend handlers used elsewhere are untouched). A small poll is the
+// safety net for voices that never report the end, and it runs only while something is being said and someone is listening.
+const speakingFns = new Set();
+let speakingNow = false, speakingPoll = null;
+export function onSpeakingChange(fn) { speakingFns.add(fn); return () => speakingFns.delete(fn); }
+function setSpeaking(on) {
+  if (on === speakingNow) return;
+  speakingNow = on;
+  clearInterval(speakingPoll); speakingPoll = null;
+  if (on) speakingPoll = setInterval(() => { if (synth && !synth.speaking && !synth.pending) setSpeaking(false); }, 300);
+  for (const fn of speakingFns) { try { fn(on); } catch (e) { /* ignore */ } }
+}
+function track(u) {
+  if (!speakingFns.size) return u;
+  u.addEventListener("start", () => setSpeaking(true));
+  const ended = () => setTimeout(() => { if (synth && !synth.speaking && !synth.pending) setSpeaking(false); }, 120);
+  u.addEventListener("end", ended);
+  u.addEventListener("error", ended);
+  return u;
+}
+
 // ---------- Speaking ----------
 // Build one utterance with the learner's voice and pitch at the given speed.
 function makeUtterance(text, rate, s = settings) {
-  const u = new SpeechSynthesisUtterance(text);
+  const u = track(new SpeechSynthesisUtterance(text));
   const voice = pickVoice(s);
   if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = "en-US"; }
   u.pitch = s.pitch;
@@ -136,13 +154,24 @@ export function speak(text, kind = "auto", voice = settings) {
 // (see isMessagePlaying). Everything else about it is the same as speak(text, "sentence").
 let msgUtt = null;        // the message-bar utterance that is playing, or null
 let msgStart = 0;
-export function speakMessage(text) {
+// tone (Beta 3.16, js/tones.js): the message's tone or the learner's mood: pitch, speed and ending punctuation (silly may borrow a
+// novelty voice). null = the learner's own voice as set.
+// onWord(charIndex) (Beta 3.18, Accessibility > Highlight each word): called as each word starts, with its position in `text`, and with
+// -1 at the end. Only voices that report word timing ("boundary" events) can do this; with others nothing is highlighted.
+export function speakMessage(text, tone = null, { onWord } = {}) {
   if (!synth || !text) return;
   try {
     stopSequence();
     synth.cancel();
     refreshVoices();
-    const u = makeUtterance(text, sentenceRate());
+    const s = toneSettings(settings, tone, voices);
+    const u = makeUtterance(toneText(text, tone), s.sentenceRate ?? sentenceRate(), s);
+    if (onWord) {
+      u.addEventListener("boundary", (e) => { if (msgUtt === u && (!e.name || e.name === "word")) onWord(e.charIndex); });
+      const off = () => onWord(-1);
+      u.addEventListener("end", off);
+      u.addEventListener("error", off);
+    }
     const done = () => { if (msgUtt === u) msgUtt = null; };
     u.onend = done;
     u.onerror = done;
@@ -161,7 +190,6 @@ export function speakMessage(text) {
 let seq = null;   // the playback in progress: { id, polls }
 let seqId = 0;
 
-export const isSequencePlaying = () => !!seq;
 
 // True while the message bar is being played, with pauses ON (a chip-by-chip sequence) or OFF (one
 // utterance). The single utterance is trusted for as long as the speech engine also says it is busy;
@@ -192,7 +220,7 @@ export function stopSpeech() {
 // chunks = the texts to say, in order. gapMs = pause between them.
 //   onChunk(i)   called as chunk i begins (the message bar highlights that chip)
 //   onEnd(done)  called when it is over: done = true if it played to the end, false if it was stopped
-export function speakSequence(chunks, gapMs, { onChunk, onEnd } = {}) {
+export function speakSequence(chunks, gapMs, { onChunk, onEnd, tone = null } = {}) {
   const list = chunks.filter(Boolean);
   if (!synth || !list.length) return;
   try {
@@ -207,7 +235,9 @@ export function speakSequence(chunks, gapMs, { onChunk, onEnd } = {}) {
       if (i >= list.length) { seq = null; if (onEnd) onEnd(true); return; }
       const idx = i++;
       if (onChunk) onChunk(idx);
-      const u = makeUtterance(list[idx], sentenceRate());
+      // With a tone (Beta 3.16) every chip gets its pitch and speed; the last one gets its ending punctuation.
+      const ts = toneSettings(settings, tone, voices);
+      const u = tone ? makeUtterance(idx === list.length - 1 ? toneText(list[idx], tone) : list[idx], ts.sentenceRate, ts) : makeUtterance(list[idx], sentenceRate());
       let advanced = false;
       const advance = () => {
         if (advanced || seq !== me) return;

@@ -11,9 +11,9 @@
 import * as T from "./teaching.js";
 import { localDate, dayStart } from "./everyday.js";
 
-const DAY = 86400000;
 export const HOW_NAMES = { board: "Main board", page: "Category and Words pages", forms: "Forms button", dial: "Press-and-hold dial",
-  keyboard: "Keyboard (ABC)", numberpad: "Number pad" };
+  keyboard: "Keyboard (ABC)", numberpad: "Number pad", scene: "Scene strip", "photo scene": "Scene photo",
+  little: "Little-word strip", "little dial": "Little-word dial" };
 export const HOW_IDS = Object.keys(HOW_NAMES);
 
 // ---------------------------------------------------------------- dates
@@ -21,7 +21,6 @@ export function addDays(date, n) {
   const [y, m, d] = date.split("-").map(Number);
   return localDate(new Date(y, m - 1, d + n).getTime());
 }
-export const daysBetween = (a, b) => Math.round((dayStart(b) - dayStart(a)) / DAY);
 /** The Monday (local) of the week a "YYYY-MM-DD" day is in. */
 export function weekStart(date) {
   const [y, m, d] = date.split("-").map(Number);
@@ -85,7 +84,36 @@ export function ladderLabel(id) {
   return m ? `${m[1]}% steps` : "custom ladder";
 }
 /** What the target's prompt is now, in a few words. */
-export const stepNow = (t) => (T.isProbe(t) ? "No prompts" : t.direction === "ltm" ? "Least-to-most" : T.posName(t));
+export const stepNow = (t) => (T.isProbe(t) ? "No prompts" : t.direction === "ltm" ? "Least-to-most" : T.isChain(t) ? T.chainStepsText(t) : T.posName(t));
+
+// The task-analysis view of a sentence target (Beta 3.12): for each session, each word's percent independent over the trials in which
+// the learner did that word (null = the learner did not do it that session: the app modeled it or filled it in), and how many words the
+// learner did (a change from the session before is a phase change: a word was added or taken away).
+// Returns { words: [labels (+ "say the sentence" when used)], rows: [{ n, date, who, where, method, phase, phaseChanged, trials, cells: [pct|null] }] }.
+export function chainModel(target, series, per) {
+  const words = target.links.map((l) => l.label);
+  const withSpeak = [...per.values()].some((list) => list.some((t) => (t.links || []).some((l) => l.wordId === T.SPEAK_ID)));
+  if (withSpeak) words.push("say the sentence");
+  let lastPhase = null;
+  const rows = series.map((p) => {
+    const list = (per.get(p.sessionId) || []).filter((t) => Array.isArray(t.links));
+    // Only words the learner reached count (Beta 3.17): a word after the point where a trial stopped was never presented.
+    const reached = new Map(list.map((t) => [t, T.reachedLinks(t.links)]));
+    const cells = words.map((_, i) => {
+      const recs = list.map((t) => {
+        const l = i < target.links.length ? t.links.find((x) => x.index === i) : t.links.find((x) => x.wordId === T.SPEAK_ID);
+        return l && reached.get(t).has(l) ? l : null;
+      }).filter((l) => l && l.taught);
+      return recs.length ? (recs.filter(T.linkIndependent).length / recs.length) * 100 : null;
+    });
+    const phase = list.length ? Math.max(...list.map((t) => t.phase || 0)) : null;
+    const method = list.length ? list[list.length - 1].method : null;
+    const row = { n: p.n, date: p.date, who: p.who, where: p.where, method, phase, phaseChanged: lastPhase !== null && phase !== null && phase !== lastPhase, trials: list.length, cells };
+    if (phase !== null) lastPhase = phase;
+    return row;
+  });
+  return { words, rows };
+}
 
 /**
  * Teaching numbers for the chosen range and filters.
@@ -161,6 +189,7 @@ function targetModel(target, inScope, per, allSessions, allTrials, range) {
     stepText: stepNow(target), masteryPct: target.mastery.pct,
     mastery: masteryProgress(target, allSessions.filter((s) => s.start < range.to), allTrials),
     trailing: lines.some((l) => l.x > series.length + 0.25),
+    chain: T.isChain(target) ? chainModel(target, series, per) : null,
   };
 }
 
@@ -353,3 +382,55 @@ export function parentProgress(tm, name) {
   if (avg(late, "help") < avg(early, "help") - 0.05 || avg(late, "pct") > avg(early, "pct") + 10) return `${name} needs less help now.`;
   return "Still learning this one. That is okay, keep practicing together.";
 }
+
+// ---------------------------------------------------------------- board heat map (Beta 3.19)
+// Where on the MAIN board a learner's words were chosen, for Reports > Everyday use. Each main-board spot shows its own uses; a category
+// button (Food, Play...) also counts every use of a word on its pages and folders ("through Food"), because every one of those words
+// was reached through that button. Word forms count for their base word ("go+went" -> go). Typed words ("~...") are not on the board.
+//   model      js/boardmodel.js buildModel(board, size) for the learner's board size
+//   counts     { key: n } learner uses in the period (from everydayModel topAll), or modeled uses (modelCountsFrom)
+//   visible(w) true when that main-board word is revealed for this learner (stage, or the adult's show/hide)
+// Returns { cols, rows, cells: [{ id, label, row, col, category, visible, direct, via, total }], max, top: [cells], unused: [labels] }
+export function boardHeat({ model, counts, visible }) {
+  const mainIds = new Set(model.main.map((w) => w.id));
+  const ownerOf = new Map();                         // a page word's id -> the main-board button that leads to its page
+  const topOf = (pid) => {
+    let p = model.pages[pid];
+    for (let n = 0; p && p.parent && p.parent !== "core" && n < 6; n++) p = model.pages[p.parent];
+    return p && p.parent === "core" ? p.id : null;
+  };
+  const buttonFor = new Map(model.main.filter((w) => w.loadBoard).map((w) => [w.loadBoard, w.id]));
+  for (const p of Object.values(model.pages)) {
+    const btn = buttonFor.get(topOf(p.id));
+    if (!btn) continue;
+    for (const it of p.items) if (!ownerOf.has(it.id)) ownerOf.set(it.id, btn);
+  }
+  const direct = new Map(), via = new Map();
+  for (const [key, n] of Object.entries(counts || {})) {
+    if (!n || key.startsWith("~")) continue;
+    const id = key.split("+")[0];
+    if (mainIds.has(id)) direct.set(id, (direct.get(id) || 0) + n);
+    else if (ownerOf.has(id)) via.set(ownerOf.get(id), (via.get(ownerOf.get(id)) || 0) + n);
+  }
+  const cells = model.main.map((w) => {
+    const d = direct.get(w.id) || 0, v = via.get(w.id) || 0;
+    return { id: w.id, label: w.label, row: w.row, col: w.col, category: !!w.loadBoard, visible: !!visible(w), direct: d, via: v, total: d + v };
+  });
+  const max = cells.reduce((m, c) => Math.max(m, c.total), 0);
+  const top = cells.filter((c) => c.total > 0).sort((a, b) => b.total - a.total || (a.label < b.label ? -1 : 1)).slice(0, 5);
+  const unused = cells.filter((c) => c.visible && !c.category && c.total === 0).map((c) => c.label);
+  return { cols: model.cols, rows: model.rows, cells, max, top, unused };
+}
+
+/** { key: n } of MODELED uses (an adult in Model mode) from raw everyday events, keyed like the daily word counts. */
+export function modelCountsFrom(events) {
+  const out = {};
+  for (const e of events) {
+    if (e.mode !== "model" || !e.wordId || e.how === "tone" || e.how === "mood") continue;
+    out[e.wordId] = (out[e.wordId] || 0) + 1;            // (a word form's event carries its base word's id)
+  }
+  return out;
+}
+
+/** The learner counts of an everyday model as { key: n }. */
+export const learnerCounts = (em) => Object.fromEntries((em.topAll || []).map((r) => [r.key, r.count]));

@@ -1,14 +1,23 @@
 // The adult menu: a large overlay for learners, board size, vocabulary stage, edit mode,
 // model prompt (ring / critter), voice settings, touch supports, backup and model mode. Adult-styled so it looks different from the
 // child's board.
+//
+// LAYOUT (Beta 3.9, iPad-Settings style; the structure, views and search are in js/settingsnav.js):
+//   iPad   a list on the left (learner card, quick actions, search, grouped rows showing their current value) and the chosen
+//          page on the right.
+//   phone  the list fills the screen; a page opens over it with "‹ Settings" to go back.
+// The setting sections below (sizeSection, voiceSection...) are unchanged; each page shows one or more of them.
 import { h, openOverlay, askText, askConfirm } from "./ui.js";
 import {
   listProfiles, getCurrent, switchTo, addProfile, renameProfile, deleteProfile,
   saveProfile, CHILD_VOICE, ADULT_VOICE, DIAL_HOLD_MIN, DIAL_HOLD_MAX,
 } from "./profiles.js";
-import { setVoiceSettings, speak, speakSequence, stopSpeech, pauseMs, PAUSE_MS } from "./speech.js";
+import { setVoiceSettings, speak, speakSequence, speakMessage, stopSpeech, pauseMs, PAUSE_MS } from "./speech.js";
 import { createVoicePicker, newPickerState } from "./voicepicker.js";
 import { saveBackup, restoreFromFile } from "./backup.js";
+import { dataSafetyLine, needsHomeScreen, homeScreenSteps } from "./keepdata.js";
+import { showCoach } from "./adulthint.js";
+import { TONES } from "./tones.js";
 import { showSetup } from "./setup.js";
 import { buildModel } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
@@ -18,6 +27,14 @@ import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesHelp } from
 import { teachingSection } from "./teachui.js";
 import { dataSection } from "./datapanel.js";
 import { openReports } from "./reports.js";
+import { scenesSection } from "./sceneadult.js";
+import { openStartSession } from "./teachui.js";
+import { getTargets } from "./teachdata.js";
+import { isRecording } from "./everyday.js";
+import { getScenes } from "./scenestrip.js";
+import { getView, setView, groupedPages, pageById, pageForOldId, visibleIn, searchPages } from "./settingsnav.js";
+import { accessSection, accessSummary } from "./accessui.js";
+import { progressFor, cleanStageRule, MAX_STAGE } from "./stagerule.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -33,35 +50,173 @@ const PREVIEW_WORD = "bubbles";                      // "Preview a word"
 //   startAt             id of a section to scroll to when the menu opens (optional)
 //   teach               the Teaching section (Phase 2): { sessionActive(), onChooseTargets(), onStartSession(opts) }
 export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel,
-  onPreviewPrompt, teach }) {
-  const body = h("div", { class: "menu-body" });
+  onPreviewPrompt, teach, isModeling = () => false, onStopModel = () => {} }) {
   let stopVoiceListener = () => {};
   const pickerState = newPickerState();   // which voice groups are open; kept when the menu is rebuilt
   let backupMessage = "";   // result of the last save / restore, shown in the Backup section
 
+  let view = getView();                                   // "parent" | "clinician" (this iPad)
+  let pageId = pageForOldId(startAt) || "learner";        // the page on the right (iPad) or open (phone)
+  if (!visibleIn(pageById(pageId), view)) pageId = "learner";
+  let query = "";
+  const isNarrow = () => looksLikePhone() || window.innerWidth < 760;
+  let narrow = isNarrow();
+  let showingPage = !narrow || !!startAt;                 // phone: start on the list unless asked for a page
+
+  // The top bar: title, Parent / Clinician view, Close.
+  const viewBtn = (v, text) => h("button", { type: "button", class: "seg view-seg" + (view === v ? " on" : ""), id: "view-" + v, text,
+    onclick: () => { if (view === v) return; view = v; setView(v); if (!visibleIn(pageById(pageId), view)) pageId = "learner"; paintHead(); refresh(); } });
+  const viewRow = h("div", { class: "seg-row view-row", role: "group", "aria-label": "Adult menu view" });
+  const paintHead = () => viewRow.replaceChildren(viewBtn("parent", "Parent"), viewBtn("clinician", "Clinician"));
+  paintHead();
+
+  // Left: the search field (kept across redraws so typing is never interrupted), then the list.
+  const searchIn = h("input", { type: "search", class: "set-search", id: "set-search", placeholder: "Search settings", "aria-label": "Search settings",
+    autocomplete: "off", oninput: () => { query = searchIn.value; paintNav(); },
+    onkeydown: (e) => { if (e.key === "Enter") { const first = navBody.querySelector(".set-row"); if (first) first.click(); } } });
+  const navBody = h("div", { class: "set-nav-body" });
+  const nav = h("nav", { class: "set-nav", id: "set-nav", "aria-label": "Settings" }, h("div", { class: "set-search-wrap" }, searchIn), navBody);
+  const detail = h("div", { class: "set-detail", id: "set-detail" });
+
   const o = openOverlay([
     h("div", { class: "menu-head" },
       h("h1", {}, "VOICE", h("small", { class: "version-label", id: "version-label", text: VERSION_LABEL })),
+      viewRow,
       h("button", { type: "button", class: "btn primary", id: "menu-close-top", text: "Close", onclick: close })),
-    body,
+    h("div", { class: "set-split" }, nav, detail),
   ], { sheetClass: "menu" });
+  const sheet = o.sheet;
+  sheet.closest(".overlay").classList.add("frosted");     // Beta 3.19: the board shows softly blurred behind the menu (styles.css)
 
   function close() {
     stopVoiceListener();
     stopSpeech();
+    window.removeEventListener("resize", onResize);
     o.close();
   }
+  function onResize() { const n = isNarrow(); if (n !== narrow) { narrow = n; if (!narrow) showingPage = true; refresh(); } }
+  window.addEventListener("resize", onResize);
 
-  // Rebuild the whole menu, keeping the scroll position.
+  function openPage(id) {
+    pageId = id;
+    showingPage = true;
+    detail.scrollTop = 0;
+    refresh();
+  }
+
+  // ---------- The list ----------
+  // What a row says on its right: the current value, so the adult can check a setting without opening it.
+  function valueOf(id, cur) {
+    try {
+      switch (id) {
+        case "size": return cur.gridSize + " buttons";
+        case "stage": return "Stage " + cur.stage;
+        case "reading": return cur.wordsOnly ? "Words only" : "";
+        case "access": return accessSummary(cur.access);
+        case "voice": {
+          const v = (window.speechSynthesis && speechSynthesis.getVoices().find((x) => x.voiceURI === cur.voice.voiceURI)) || null;
+          return v ? v.name.replace(/\s*\(.*\)$/, "") : "Default";
+        }
+        case "touch": { const t = cur.touch; return ["holdOn", "ignoreOn", "liftOff", "zones", "keyguard", "preview", "dwellOn"].some((k) => t[k]) ? "On" : "Off"; }
+        case "teaching": { const n = getTargets().length; return n + (n === 1 ? " target" : " targets"); }
+        case "data": return isRecording(cur.id) ? "On" : "Off";
+        case "scenes": { const n = getScenes().length; return n + " saved"; }
+        case "backup": { const d = dataSafetyLine(); return d.ok === true ? "Protected" : d.ok === false ? "Not protected" : ""; }
+        default: return "";
+      }
+    } catch (e) { return ""; }
+  }
+  const icon = (p) => { const t = h("span", { class: "set-icon", "aria-hidden": "true", text: p.icon }); t.style.background = p.color; return t; };
+  function row(p, cur, sub) {
+    const val = valueOf(p.id, cur);
+    return h("button", { type: "button", class: "set-row" + (p.id === pageId && !narrow ? " on" : ""), id: "row-" + p.id, "data-page": p.id,
+      onclick: () => openPage(p.id) },
+      icon(p),
+      h("span", { class: "set-row-text" }, h("span", { class: "set-row-title", text: p.title }), sub ? h("small", { class: "set-row-sub", text: sub }) : null),
+      val ? h("span", { class: "set-row-value" + (p.id === "backup" && val === "Not protected" ? " warn" : ""), text: val }) : null,
+      h("span", { class: "set-chev", "aria-hidden": "true", text: "›" }));
+  }
+  function paintNav() {
+    const cur = getCurrent();
+    const top = navBody.scrollTop;
+    if (query.trim()) {
+      const { results, hiddenCount } = searchPages(query, view);
+      navBody.replaceChildren(...[
+        h("div", { class: "set-group" }, results.map((r) => row(r.page, cur, r.match ? "“" + r.match + "”" : null))),
+        !results.length ? h("p", { class: "muted set-none", id: "set-none", text: "No settings match “" + query.trim() + "”." }) : null,
+        hiddenCount ? h("button", { type: "button", class: "link-btn set-hidden", id: "set-hidden",
+          text: hiddenCount + (hiddenCount === 1 ? " more result" : " more results") + " in Clinician view",
+          onclick: () => { view = "clinician"; setView(view); paintHead(); refresh(); } }) : null].filter(Boolean));
+      return;
+    }
+    const busy = teach.sessionActive();
+    const notes = (cur.notices || []).length;
+    const card = h("button", { type: "button", class: "set-card" + (pageId === "learner" && !narrow ? " on" : ""), id: "set-card", onclick: () => openPage("learner") },
+      h("span", { class: "set-avatar", "aria-hidden": "true", text: (cur.name.trim()[0] || "?").toUpperCase() }),
+      h("span", { class: "set-card-text" }, h("span", { class: "set-card-name", text: cur.name }),
+        h("small", { text: "Stage " + cur.stage + " · " + cur.gridSize + " buttons" })),
+      notes ? h("span", { class: "set-badge", id: "set-badge", title: "Notes about the board", text: String(notes) }) : null,
+      h("span", { class: "set-chev", "aria-hidden": "true", text: "›" }));
+    const actions = h("div", { class: "set-actions" },
+      h("button", { type: "button", class: "btn", id: "menu-edit", text: "Edit board", disabled: busy, onclick: () => { close(); onEdit(); } }),
+      isModeling()
+        ? h("button", { type: "button", class: "btn primary", id: "menu-model-stop", text: "Stop modeling", onclick: () => { close(); onStopModel(); } })
+        : h("button", { type: "button", class: "btn", id: "menu-model", text: "Start modeling", disabled: busy, onclick: () => { close(); onModel(); } }),
+      view === "clinician" ? h("button", { type: "button", class: "btn", id: "menu-session", text: "Start a session", disabled: busy,
+        onclick: () => openStartSession({ refresh, closeMenu: close, ...teach }) }) : null);
+    navBody.replaceChildren(...[card, actions,
+      busy ? h("p", { class: "muted set-busy", text: "Editing, modeling and new sessions are off while a teaching session is running." }) : null,
+      ...groupedPages(view).map((g) => h("div", { class: "set-group-wrap" },
+        h("h3", { class: "set-group-title", text: g.title }),
+        h("div", { class: "set-group" }, g.pages.map((p) => row(p, cur))))),
+      h("p", { class: "muted set-scope-note", text: "Everything above “This iPad” belongs to " + cur.name + " and is saved in their backup." })].filter(Boolean));
+    navBody.scrollTop = top;
+  }
+
+  // ---------- The page ----------
+  function pageContent(id) {
+    switch (id) {
+      case "learner": return [noticeSection(), learnerSection()];
+      case "size": return [sizeSection()];
+      case "stage": return [stageSection()];
+      case "buttons": return [buttonsSection()];
+      case "reading": return [readingSection()];
+      case "access": return [accessSection({ onChanged: onVocabChanged, refresh })];
+      case "voice": return [voiceSection()];
+      case "touch": return [touchSection()];
+      case "teaching": return [teachingSection({ refresh, closeMenu: close, ...teach })];
+      case "model": return [modelSection({ refresh, closeMenu: close, onPreviewPrompt })];
+      case "reports": return [reportsSection()];
+      case "data": return [dataSection({ refresh, sessionActive: teach.sessionActive })];
+      case "scenes": return [scenesSection({ refresh, closeMenu: close })];
+      case "backup": return [backupSection()];
+      case "about": return [aboutSection()];
+      default: return [];
+    }
+  }
+  function paintDetail() {
+    const top = detail.scrollTop;
+    const page = pageById(pageId);
+    const content = pageContent(pageId).filter(Boolean);
+    // The page title replaces each section's own heading (e.g. "Voice (for this learner)"); the notes panel keeps its heading.
+    for (const el of content) { if (el.id === "sec-notice") continue; const h2 = el.querySelector(":scope > h2"); if (h2) h2.remove(); }
+    detail.replaceChildren(
+      h("div", { class: "set-detail-head" },
+        narrow ? h("button", { type: "button", class: "link-btn set-back", id: "set-back", text: "‹ Settings",
+          onclick: () => { showingPage = false; refresh(); } }) : null,
+        h("h2", { class: "set-detail-title", id: "set-detail-title", text: page ? page.title : "" })),
+      ...content);
+    detail.scrollTop = top;
+  }
+
+  // Redraw the list and the page (every setting calls this after a change), keeping both scroll positions.
   function refresh() {
-    const top = body.scrollTop;
     stopVoiceListener();
-    body.replaceChildren(...[noticeSection(), learnerSection(), sizeSection(), stageSection(), actionSection(),
-      modelSection({ refresh, closeMenu: close, onPreviewPrompt }),
-      teachingSection({ refresh, closeMenu: close, ...teach }), dataSection({ refresh, sessionActive: teach.sessionActive }), reportsSection(), voiceSection(),
-      touchSection(), backupSection(), aboutSection(),
-      h("button", { type: "button", class: "btn wide", id: "menu-close", text: "Close", onclick: close })].filter(Boolean));
-    body.scrollTop = top;
+    stopVoiceListener = () => {};
+    sheet.classList.toggle("narrow", narrow);
+    sheet.classList.toggle("show-page", narrow && showingPage);
+    paintNav();
+    if (!narrow || showingPage) paintDetail(); else detail.replaceChildren();
   }
 
   // ---------- Reports (Beta 2.5) ----------
@@ -107,7 +262,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
           onclick: async () => {
             if (p.id === cur.id) return;
             await switchTo(p.id);
-            onLearnerChanged();
+            await onLearnerChanged();
             refresh();
           },
         }))),
@@ -117,14 +272,14 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
           if (!choice) return;
           const p = await addProfile(choice.name, choice);
           await switchTo(p.id);
-          onLearnerChanged();
+          await onLearnerChanged();
           refresh();
         } }),
         h("button", { type: "button", class: "btn", id: "learner-rename", text: "Rename", onclick: async () => {
           const name = await askText("Rename learner", cur.name, "Save");
           if (!name) return;
           await renameProfile(cur.id, name);
-          onLearnerChanged();
+          await onLearnerChanged();
           refresh();
         } }),
         h("button", { type: "button", class: "btn danger", id: "learner-delete", text: "Delete",
@@ -133,7 +288,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
               `Delete ${cur.name}? Their settings, changes and photos will be erased from this iPad. This cannot be undone.`,
               "Delete");
             if (!sure) return;
-            if (await deleteProfile(cur.id)) { onLearnerChanged(); refresh(); }
+            if (await deleteProfile(cur.id)) { await onLearnerChanged(); refresh(); }
           } })),
       list.length <= 1 ? h("p", { class: "muted", text: "The last learner cannot be deleted." }) : null);
   }
@@ -192,11 +347,73 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("span", { class: "stage-title", text: "Stage " + n }),
         h("span", { class: "stage-note", text: note[n] + ":" }),
         h("span", { class: "stage-words", text: wordsFor(n) })))),
-      wordsButtonSetting(cur),
-      wordDialSetting(cur),
-      keyboardButtonSetting(cur),
-      speakLettersSetting(cur),
-      wordsOnlySetting(cur));
+      stageProgressBlock(cur, model),
+      view === "clinician" ? stageRuleBlock(cur, model) : null);
+  }
+
+  // Ready for the next stage? (Beta 3.22, js/stagerule.js). Filled in once the everyday summaries are read.
+  function stageProgressBlock(cur, model) {
+    const box = h("div", { class: "stage-progress", id: "stage-progress" }, h("p", { class: "muted", text: "Checking progress..." }));
+    if (cur.stage >= MAX_STAGE) { box.replaceChildren(h("p", { class: "muted", text: `Stage ${MAX_STAGE} is the last stage for now.` })); return box; }
+    progressFor(cur, model, getTargets()).then((pr) => {
+      const r = cleanStageRule(cur.stageRule);
+      const pct = pr.need ? Math.min(100, Math.round((pr.have / pr.need) * 100)) : 0;
+      box.replaceChildren(
+        h("div", { class: "sp-head" }, h("strong", { text: `Ready for stage ${cur.stage + 1}?` }),
+          h("span", { class: "muted", text: pr.mode === "words" ? "Rule: the chosen words" : `Rule: ${pr.pct}% of stage ${cur.stage} words` })),
+        h("div", { class: "sp-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(pr.need), "aria-valuenow": String(Math.min(pr.have, pr.need)) },
+          h("div", { class: "sp-fill" + (pr.ready ? " done" : ""), style: `width: ${pct}%` })),
+        h("p", { id: "stage-progress-text", text: pr.note || `${pr.have} of ${pr.mode === "words" ? pr.need : pr.items.length} words proficient · needs ${pr.need}` + (pr.ready ? " · Ready: VOICE will suggest it at the end of the next session." : "") }),
+        h("div", { class: "sp-list" }, pr.items.filter((i) => pr.mode === "percent" || i.chosen).map((i) =>
+          h("div", { class: "sp-row", "data-word": i.id }, h("span", { text: i.label }),
+            h("span", { class: "sp-chip " + (i.why === "Mastered target" ? "m" : i.proficient ? "e" : "n"), text: i.why })))),
+        h("p", { class: "muted", text: `Proficient = a mastered target, or used on their own (not modeled, not in a session) on ${r.days}+ days in the last ${r.weeks} weeks.` }));
+    }).catch(() => box.replaceChildren(h("p", { class: "muted", text: "Progress could not be read." })));
+    return box;
+  }
+
+  // The clinician's rule for suggesting the next stage (Clinician view only).
+  function stageRuleBlock(cur, model) {
+    const r = cleanStageRule(cur.stageRule);
+    const save = async (patch) => { cur.stageRule = cleanStageRule({ ...r, ...patch }); await saveProfile(cur); refresh(); };
+    const modeBtn = (v, text) => h("button", { type: "button", class: "seg" + (r.mode === v ? " on" : ""), id: "stagerule-" + v, text, onclick: () => save({ mode: v }) });
+    const pctVal = h("span", { class: "slider-num", id: "stagerule-pct-val", text: r.pct + "%" });
+    const slider = h("input", { type: "range", id: "stagerule-pct", min: 10, max: 100, step: 10, value: r.pct,
+      oninput: () => { pctVal.textContent = slider.value + "%"; }, onchange: () => save({ pct: Number(slider.value) }) });
+    const stageWords = model.main.filter((b) => b.stage === cur.stage);
+    const chosen = new Set(r.words[String(cur.stage)] || []);
+    const toggle = (id) => { const list = new Set(chosen); list.has(id) ? list.delete(id) : list.add(id); save({ words: { ...r.words, [String(cur.stage)]: [...list] } }); };
+    const num = (key, min, max, label) => {
+      const sel = h("select", { class: "text-input sr-select", id: "stagerule-" + key, "aria-label": label, onchange: () => save({ [key]: Number(sel.value) }) },
+        Array.from({ length: max - min + 1 }, (_, i) => h("option", { value: String(min + i), text: String(min + i) })));
+      sel.value = String(r[key]);
+      return sel;
+    };
+    return h("div", { class: "field stage-rule", id: "stage-rule" },
+      h("h3", { class: "access-h", text: "When to suggest the next stage (clinician)" }),
+      h("div", { class: "seg-row" }, modeBtn("percent", "A share of the stage's words"), modeBtn("words", "Words I choose")),
+      r.mode === "percent"
+        ? h("div", { class: "slider-row" }, h("label", { for: "stagerule-pct", text: "Words proficient" }), slider, pctVal)
+        : h("div", { class: "sr-words", id: "stagerule-words" }, stageWords.map((b) =>
+            h("label", { class: "check-line" }, h("input", { type: "checkbox", id: "stagerule-w-" + b.id, checked: chosen.has(b.id), onchange: () => toggle(b.id) }),
+              h("span", { text: b.label })))),
+      r.mode === "words" ? h("p", { class: "muted", text: `Tick the stage ${cur.stage} words that must be proficient. Each stage keeps its own list.` }) : null,
+      h("div", { class: "sr-line" }, h("span", { text: "Everyday use counts after" }), num("days", 1, 14, "Days"), h("span", { text: "days of use in the last" }),
+        num("weeks", 1, 12, "Weeks"), h("span", { text: "weeks." })),
+      h("p", { class: "muted", text: "VOICE only suggests the next stage at the end of a teaching session; you decide. The progress above is shown in both views." }));
+  }
+
+  // "Buttons on the board" (Beta 3.9): the five Auto / Always / Never choices for the buttons around the board, on one page.
+  function buttonsSection() {
+    const cur = getCurrent();
+    return h("section", { class: "panel", id: "sec-buttons" },
+      h("p", { class: "muted", text: "Auto shows a button from stage 3, when most learners are ready for it. Nothing on the board moves when a button appears." }),
+      wordsButtonSetting(cur), littleStripSetting(cur), keyboardButtonSetting(cur), cameraButtonSetting(cur), wordDialSetting(cur));
+  }
+  // "Reading and typing" (Beta 3.9).
+  function readingSection() {
+    const cur = getCurrent();
+    return h("section", { class: "panel", id: "sec-reading" }, wordsOnlySetting(cur), speakLettersSetting(cur));
   }
 
   // The top-bar Words button (and the Forms button next to it): Auto shows them from stage 3.
@@ -262,6 +479,55 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "The keyboard uses ordinary taps: Hold to select and Ignore repeated taps do not apply to it." }));
   }
 
+  // The top-bar camera button (Beta 3.1): hold 1 second to make a quick scene from a photo. Auto shows it from stage 3, like ABC.
+  function cameraButtonSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (cur.cameraButton === value ? " on" : ""), id: `cambtn-${value}`, text,
+      onclick: async () => { cur.cameraButton = value; await saveProfile(cur); onVocabChanged(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-camera-button" },
+      h("label", { text: "Show camera button" }),
+      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("p", { class: "muted", text: "The camera button at the right end of the strip under the message bar makes a scene from a photo in one step: hold it for 1 second until it turns green and reads “Tap”, " +
+        "then tap it once. A quick tap on its own does nothing. The camera opens, everything VOICE finds in the photo (and anything it remembers from My things) is ticked, " +
+        "and “Use now” puts the scene on the strip. It needs no passcode and is switched off while a teaching session runs. " +
+        "Scenes made this way are named with the date and time and can be renamed in Scenes." }));
+  }
+
+  // The tone wheel (Beta 3.16, js/tones.js + js/tonewheel.js): press and hold the message bar to say it happy, sad, as a question...
+  function toneWheelSetting(cur) {
+    const set = (v) => async () => { cur.toneWheel = v; await saveProfile(cur); onVocabChanged(); refresh(); };
+    const sample = (t) => h("button", { type: "button", class: "btn tone-sample", "data-tone": t.id, text: t.label, onclick: () => speakMessage(SAMPLE_TONE_TEXT, t) });
+    return h("div", { class: "field touch-setting", id: "setting-tone-wheel" },
+      h("label", { text: "Tone wheel and mood" }),
+      h("div", { class: "seg-row" },
+        h("button", { type: "button", class: "seg" + (cur.toneWheel === "on" ? "" : " on"), id: "tone-wheel-off", text: "Off", onclick: set("off") }),
+        h("button", { type: "button", class: "seg" + (cur.toneWheel === "on" ? " on" : ""), id: "tone-wheel-on", text: "On", onclick: set("on") })),
+      h("p", { class: "muted", text: "For learners at stage 4. Press and hold the message bar: 8 feelings appear around the finger (happy, excited, silly, " +
+        "question, calm, sad, mad, scared), always in the same spots. Pick one to say the message once in that tone. Rest on one for 1 second (a lock fills in) " +
+        "to set it as the learner's mood: every message is said in it until it is changed or VOICE is reopened, and a small face shows in the message bar. " +
+        "The centre, Normal, clears the mood. Tones change pitch, speed and the ending of the sentence; Enhanced or Premium voices sound best." +
+        (cur.stage < 4 ? " This learner is at stage " + cur.stage + ", so the wheel will start working at stage 4." : "") }),
+      h("div", { class: "btn-row left tone-samples" }, h("span", { class: "muted", text: "Hear the tones:" }), TONES.map(sample)));
+  }
+  const SAMPLE_TONE_TEXT = "I want to go outside";
+
+  // The little-word strip (Beta 3.7, js/littlewords.js): eight little words in the strip, each holding a dial of four more.
+  function littleStripSetting(cur) {
+    const btn = (value, text) => h("button", {
+      type: "button", class: "seg" + (cur.littleStrip === value ? " on" : ""), id: `littlestrip-${value}`, text,
+      onclick: async () => { cur.littleStrip = value; await saveProfile(cur); onVocabChanged(); refresh(); },
+    });
+    return h("div", { class: "field touch-setting", id: "setting-little-strip" },
+      h("label", { text: "Show little-word strip" }),
+      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("p", { class: "muted", text: "Eight little words (a, is, and, to, will, has, him, there) in the strip under the message bar, always in the same spots. " +
+        "Tap one to say it. Press and hold one to open a dial of four more, each always in the same direction: a → an, the, any, every; " +
+        "is → was, are, am, were; and → but, or, so, because; to → of, for, with, from; will → would, could, may, must; " +
+        "has → had, does, did, been; him → her, us, them, their; there → here, these, those, which. " +
+        "When a scene is showing, the scene uses the strip instead. The strip is hidden during teaching sessions. The words also stay on the Little words pages." }));
+  }
+
   // Say each letter's name as it is typed (default off).
   function speakLettersSetting(cur) {
     const btn = (value, text) => h("button", {
@@ -284,19 +550,6 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("label", { text: "Show words only (no pictures)" }),
       h("div", { class: "seg-row touch-seg" }, btn(false, "Off"), btn(true, "On")),
       h("p", { class: "muted", text: "Reading stage: hides pictures so the learner reads the words." }));
-  }
-
-  // ---------- Edit / Model ----------
-  // (Edit and Model mode are off while a teaching session is running: model mode and sessions are separate.)
-  function actionSection() {
-    const busy = teach.sessionActive();
-    return h("section", { class: "panel", id: "sec-actions" },
-      h("div", { class: "action-row" },
-        h("button", { type: "button", class: "btn big", id: "menu-edit", text: "Edit board", disabled: busy,
-          onclick: () => { close(); onEdit(); } }),
-        h("button", { type: "button", class: "btn big", id: "menu-model", text: "Start modeling", disabled: busy,
-          onclick: () => { close(); onModel(); } })),
-      busy ? h("p", { class: "muted", text: "Editing and modeling are off while a teaching session is running." }) : null);
   }
 
   // ---------- Voice ----------
@@ -338,6 +591,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "so Sentence speed is its own, slower setting (0.9 to start)." }),
       slider("sentence-rate", "Sentence speed", 0.5, 1.5, 0.05, "sentenceRate", 2),
       pauseSetting(v, persist),
+      toneWheelSetting(cur),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "voice-preview", text: "Preview a word",
           onclick: () => speak(PREVIEW_WORD) }),
@@ -416,7 +670,65 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         help: "After a word is spoken, taps on any board button are ignored for this long (nothing is shown or said). " +
           "Helps when a child taps the same button again and again. Opening a category does not start the wait.",
       }),
-      h("p", { class: "muted", text: "These do not affect the message bar, Delete, Clear or the adult screens." }));
+      h("h3", { class: "access-h", text: "More ways to choose (Beta 3.20)" }),
+      onOff({ id: "touch-lift", key: "liftOff", title: "Choose when the finger lifts",
+        help: "The button under the finger when it LIFTS is chosen, so a child can touch, slide to the right word and let go. The pressed button follows the finger. With Hold to select on, holding still on the new button chooses it." }),
+      onOff({ id: "touch-zones", key: "zones", title: "Touches between buttons go to the nearest one",
+        help: "A touch that lands in a gap counts for the nearest button (only when it is very close). Not used with Keyguard mode." }),
+      onOff({ id: "touch-keyguard", key: "keyguard", title: "Keyguard mode",
+        help: "For a plastic keyguard over the iPad: only the middle of each button responds, so touching the keyguard's edges does nothing, and other fingers resting on the keyguard are ignored. Set Button spacing (Accessibility) to match the keyguard's holes." }),
+      onOff({ id: "touch-preview", key: "preview", title: "Speak on touch (hear before choosing)",
+        help: "The first touch on a button only says its word, in a lower voice, and outlines it; touching it again within 5 seconds chooses it. For learners who scan by listening (low vision) or who need to check before choosing. Off while modeling." }),
+      setting({
+        id: "touch-dwell", title: "Dwell to select (mouse, trackpad or head pointer)", onKey: "dwellOn", secKey: "dwellSec",
+        min: 0.5, max: 3, step: 0.1, decimals: 1,
+        help: "Resting a pointer on a button for this long chooses it (a purple ring fills). Not for fingers. On an iPad with Eye Tracking or AssistiveTouch, the iPad's own Dwell control already taps for the learner: leave this Off there.",
+      }),
+      h("p", { class: "muted", text: "These do not affect the message bar, Delete, Clear or the adult screens. Only the board's buttons use the options under More ways to choose." }),
+      scanSection());
+  }
+  // Switch scanning (Beta 3.21, js/scan.js).
+  function scanSection() {
+    const cur = getCurrent();
+    const sc = cur.scan;
+    const save = async () => { await saveProfile(cur); onVocabChanged(); refresh(); };
+    const seg = (key, choices) => h("div", { class: "seg-row touch-seg" }, choices.map(([v, label]) =>
+      h("button", { type: "button", class: "seg" + (sc[key] === v ? " on" : ""), id: `scan-${key}-${v}`, text: label, onclick: async () => { sc[key] = v; await save(); } })));
+    const speedNum = h("span", { class: "slider-num", id: "scan-speed-val", text: sc.speed.toFixed(1) + " s" });
+    const speed = h("input", { type: "range", id: "scan-speed", min: 0.5, max: 5, step: 0.1, value: sc.speed, disabled: sc.mode !== "one",
+      oninput: () => { sc.speed = parseFloat(speed.value); speedNum.textContent = sc.speed.toFixed(1) + " s"; saveProfile(cur); } });
+    const on = sc.mode !== "off";
+    return h("div", { class: "scan-settings", id: "scan-settings" },
+      h("h3", { class: "access-h", text: "Switch scanning (Beta 3.21)" }),
+      h("div", { class: "field touch-setting" }, h("label", { text: "Switches" }),
+        seg("mode", [["off", "Off"], ["one", "One switch"], ["two", "Two switches"]]),
+        h("p", { class: "muted", text: "One switch: press to start; the highlight moves through the rows on its own, press to open a row, then press to choose a button. " +
+          "Two switches: switch 1 moves the highlight, switch 2 chooses. Rows come first, then the buttons in that row; the last row is the message bar (Speak, Delete, Clear). " +
+          "Switch keys: one switch = Space, Enter or 1; two switches = Space or 1 to move, Enter or 3 to choose." })),
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Scan speed (one switch)" }),
+        h("div", { class: "slider-row touch-slider" + (sc.mode === "one" ? "" : " off") }, h("label", { for: "scan-speed", text: "Time on each step" }), speed, speedNum),
+        h("p", { class: "muted", text: "Start slow (2 to 3 s) and speed up as the learner gets quicker." })) : null,
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Rounds before it waits (one switch)" }),
+        seg("loops", [[1, "1"], [2, "2"], [3, "3"], [5, "5"]]),
+        h("p", { class: "muted", text: "If nothing is chosen, it goes round this many times, then waits for the next press (inside a row it goes back to the rows)." })) : null,
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Touch the screen as a switch" }),
+        seg("screen", [[false, "Off"], [true, "On"]]),
+        h("p", { class: "muted", text: "A touch anywhere is the switch (with two switches: the left half moves, the right half chooses). The board's buttons then do not respond to touch. The adult circle still works." })) : null,
+      on ? h("div", { class: "field touch-setting" }, h("label", { text: "Say each button as it lights up" }),
+        seg("cues", [[false, "Off"], [true, "On"]]),
+        h("p", { class: "muted", text: "Auditory scanning: VOICE quietly says each row's first word and each button, in a lower voice, for learners who choose by listening." })) : null,
+      on ? h("p", { class: "muted", id: "scan-note", text: "On iPad, do not also turn on the iPad's own Switch Control (Settings > Accessibility): it would take the switch presses. Scanning pauses in Edit mode, Model mode, the keyboard and the adult menu." }) : null);
+  }
+  // One plain Off / On setting (Beta 3.20 touch options).
+  function onOff({ id, key, title, help }) {
+    const cur = getCurrent(), t = cur.touch;
+    const set = (v) => async () => { t[key] = v; await saveProfile(cur); refresh(); };
+    return h("div", { class: "field touch-setting", id },
+      h("label", { text: title }),
+      h("div", { class: "seg-row touch-seg" },
+        h("button", { type: "button", class: "seg" + (t[key] ? "" : " on"), id: id + "-off", text: "Off", onclick: set(false) }),
+        h("button", { type: "button", class: "seg" + (t[key] ? " on" : ""), id: id + "-on", text: "On", onclick: set(true) })),
+      h("p", { class: "muted", text: help }));
   }
 
   // ---------- Backup and restore ----------
@@ -434,7 +746,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         fileIn.value = "";                     // so choosing the same file again still works
         if (!f) return;
         const msg = await restoreFromFile(f);
-        if (msg) { backupMessage = msg; onLearnerChanged(); refresh(); }
+        if (msg) { backupMessage = msg; await onLearnerChanged(); refresh(); }
       } });
     // Teaching data (targets, sessions and trials) is on by default; untick it to leave it out of the file.
     const teachBox = h("input", { type: "checkbox", id: "backup-teaching" });
@@ -442,9 +754,15 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     // Everyday use data (which words were used and when) is on by default too.
     const everydayBox = h("input", { type: "checkbox", id: "backup-everyday" });
     everydayBox.checked = true;
-    const opts = () => ({ teaching: teachBox.checked, everyday: everydayBox.checked });
+    // Scenes with their photos (Beta 3.0) are on by default too; the photos can make the file large, so it can be left out.
+    const scenesBox = h("input", { type: "checkbox", id: "backup-scenes" });
+    scenesBox.checked = true;
+    const opts = () => ({ teaching: teachBox.checked, everyday: everydayBox.checked, scenes: scenesBox.checked });
     return h("section", { class: "panel", id: "sec-backup" },
       h("h2", { text: "Backup" }),
+      // Beta 3.4: how safe this device's data is (js/keepdata.js), with the Home Screen steps when VOICE is in a Safari tab.
+      (() => { const d = dataSafetyLine(); return h("p", { class: "keep-line " + (d.ok === true ? "ok" : d.ok === false ? "warn" : ""), text: d.text }); })(),
+      needsHomeScreen() ? homeScreenSteps() : null,
       h("p", { class: "muted", text:
         "A backup is one file with a learner's board size, stage, button changes, pages you made, voice and speech pacing, keyboard settings, touch settings, Model prompt settings and photos. " +
         "On the iPad, a save sheet opens: choose Save to Files. The passcode is not included. A backup of all learners also keeps the teaching templates you edited." }),
@@ -452,6 +770,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("span", { text: "Include teaching data (targets, sessions and trials)" })),
       h("label", { class: "check-line", for: "backup-everyday" }, everydayBox,
         h("span", { text: "Include everyday use data (words used and when, for progress reports)" })),
+      h("label", { class: "check-line", for: "backup-scenes" }, scenesBox,
+        h("span", { text: "Include scenes and photos (the photos you took for Scenes; they stay in the file only)" })),
       h("div", { class: "btn-row left" },
         h("button", { type: "button", class: "btn primary", id: "backup-one", text: "Save backup of this learner",
           onclick: () => run(async () => "Saved " + await saveBackup([cur], cur.name, opts()) + ". Keep it somewhere safe.") }),
@@ -467,12 +787,11 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("section", { class: "panel", id: "sec-about" },
       h("h2", { text: "About" }),
       h("div", { class: "btn-row left" },
-        h("button", { type: "button", class: "btn", id: "about-open", text: "About VOICE", onclick: () => openAbout() })));
+        h("button", { type: "button", class: "btn", id: "about-open", text: "About VOICE", onclick: () => openAbout() }),
+        // Beta 3.5: for new staff or parents, point at the adult-menu circle again (js/adulthint.js)
+        h("button", { type: "button", class: "btn", id: "show-adult-hint", text: "Show where the adult menu is",
+          onclick: () => { close(); setTimeout(() => showCoach(), 250); } })));
   }
 
   refresh();
-  if (startAt) {
-    const sec = body.querySelector("#" + startAt);
-    if (sec) body.scrollTop = sec.offsetTop - body.offsetTop - 8;
-  }
 }

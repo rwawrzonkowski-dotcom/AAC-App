@@ -40,7 +40,6 @@ export function formsFor(text) {
   return fam && fam.length > 1 ? fam : null;
 }
 
-export const familyCount = () => families.length;
 
 // Show the popover. Returns { close, button(word) }.
 //   forms        the family (array of words)

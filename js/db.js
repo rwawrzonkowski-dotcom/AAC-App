@@ -5,25 +5,45 @@
 // back to plain in-memory storage so the app still works for the current
 // session (but nothing is remembered after a reload).
 //
-// Nine "stores" (like tables): "profiles" and "photos", plus (Phase 2, teaching) "targets", "sessions" and "trials", plus
-// (Phase 2, everyday recording) "events", "utterances", "daily" and "firstseen" (see js/everyday.js).
+// Ten "stores" (like tables): "profiles" and "photos", plus (Phase 2, teaching) "targets", "sessions" and "trials", plus
+// (Phase 2, everyday recording) "events", "utterances", "daily" and "firstseen" (see js/everyday.js), plus (Phase 3, beta 3.0)
+// "scenes" (photo scenes, see js/scenedata.js), plus (Beta 3.1) "things" (My things: the objects a learner's adults taught VOICE, see js/things.js).
 // Keys are strings. Teaching and everyday rows are keyed "<learnerId>|<id>" so one learner's rows are found (and deleted) by prefix.
 // Everyday event and utterance ids start with the time (zero-padded), so a time range of rows is also a key range.
 
 import { STORAGE_PREFIX } from "./channel.js";
 // Stable: "aac-board" (as always). Beta: "beta-aac-board" (its own database).
 const DB_NAME = STORAGE_PREFIX + "aac-board";
-// Version 2 added the three teaching stores, version 3 the four everyday stores. Opening an older database just creates the missing stores.
-const DB_VERSION = 3;
-export const STORES = ["profiles", "photos", "targets", "sessions", "trials", "events", "utterances", "daily", "firstseen"];
+// Version 2 added the three teaching stores, version 3 the four everyday stores, version 4 the "scenes" store, version 5 the "things" store. Opening an older database
+// just creates the missing stores and keeps every row that is already there (nothing is ever deleted or rewritten by an upgrade).
+const DB_VERSION = 5;
+export const STORES = ["profiles", "photos", "targets", "sessions", "trials", "events", "utterances", "daily", "firstseen", "scenes", "things"];
 
 const memory = Object.fromEntries(STORES.map((s) => [s, new Map()]));
 let dbPromise = null;
 export let usingFallback = false;
 
+// PROBLEMS WITH SAVING (Beta 3.17). Two things can go wrong, and both used to be silent:
+//   "open"  the database could not be opened at all (or not within 4 seconds): everything this session is kept in memory only and is
+//           lost when VOICE closes. At start-up this looked like a brand-new app (the setup screen), so js/app.js now shows a warning
+//           screen instead (js/datawarning.js).
+//   "write" the database opened, but a save failed (for example the iPad is out of storage). js/app.js shows a one-time adult notice.
+// Listeners are told once per kind.
+const problems = { open: null, write: null };
+const listeners = new Set();
+export const storageProblem = () => ({ ...problems });
+export function onStorageProblem(fn) { listeners.add(fn); return () => listeners.delete(fn); }
+function report(kind, reason) {
+  if (problems[kind]) return;
+  problems[kind] = String((reason && (reason.name || reason.message)) || reason || "unknown");
+  for (const fn of listeners) { try { fn(kind, problems[kind]); } catch (e) { /* ignore */ } }
+}
+const writeFailed = (e) => { console.warn("IndexedDB write failed, kept in memory only:", e); report("write", e); };
+
 function fallback(reason) {
   usingFallback = true;
   console.warn("IndexedDB unavailable, using memory only:", reason);
+  report("open", reason);
 }
 
 // Open the database once; resolves to null if it cannot be opened.
@@ -40,9 +60,15 @@ function open() {
       req.onupgradeneeded = () => {
         for (const s of STORES) if (!req.result.objectStoreNames.contains(s)) req.result.createObjectStore(s);
       };
-      req.onsuccess = () => finish(req.result);
+      req.onsuccess = () => {
+        // If a later version of the app needs to upgrade this database, let go of it so that upgrade is not held up.
+        req.result.onversionchange = () => req.result.close();
+        finish(req.result);
+      };
       req.onerror = () => { fallback(req.error); finish(null); };
-      req.onblocked = () => { fallback("blocked"); finish(null); };
+      // "Blocked" means another open copy of the app (an old tab) still holds the older database. The open continues by itself as
+      // soon as that copy closes, so just wait: the 4-second timer above gives up and uses memory only if that never happens.
+      req.onblocked = () => console.warn("IndexedDB upgrade is waiting for another open copy of the app to close");
     } catch (e) { fallback(e); finish(null); }
   });
   return dbPromise;
@@ -64,7 +90,7 @@ async function withDb(storeName, mode, work, memWork) {
   const db = await open();
   if (db) {
     try { return await run(db, storeName, mode, work); }
-    catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    catch (e) { if (mode === "readwrite") writeFailed(e); else console.warn("IndexedDB operation failed, using memory:", e); }
   }
   return memWork(memory[storeName]);
 }
@@ -100,7 +126,7 @@ export async function delPrefix(store, prefix) {
   const db = await open();
   if (db) {
     try { return await run(db, store, "readwrite", (s) => s.delete(range)); }
-    catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    catch (e) { writeFailed(e); }
   }
   for (const k of [...memory[store].keys()]) if (k.startsWith(prefix)) memory[store].delete(k);
 }
@@ -127,7 +153,7 @@ export async function batch(ops) {
         tx.onabort = () => reject(tx.error);
       });
       return;
-    } catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    } catch (e) { writeFailed(e); }
   }
   for (const o of ops) { if (o.remove) memory[o.store].delete(o.key); else memory[o.store].set(o.key, o.value); }
 }
@@ -137,7 +163,7 @@ export async function delRange(store, lower, upperKey) {
   const db = await open();
   if (db) {
     try { return await run(db, store, "readwrite", (s) => s.delete(rangeOf(lower, upperKey))); }
-    catch (e) { console.warn("IndexedDB operation failed, using memory:", e); }
+    catch (e) { writeFailed(e); }
   }
   for (const k of [...memory[store].keys()]) if (k >= lower && k <= upperKey) memory[store].delete(k);
 }

@@ -40,6 +40,24 @@ The five animals (puppy, kitten, bunny, frog, owl) and the three accessories
 original shapes. They are not based on any existing character, mascot or
 brand. Shared under CC BY-SA 4.0.
 
+## Fonts (Accessibility)
+
+Two optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. Both are licensed under
+the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`):
+
+- **Atkinson Hyperlegible** (c) 2020 Braille Institute of America, Inc. https://www.brailleinstitute.org/freefont
+- **Lexend** (c) 2019 The Lexend Project Authors. https://github.com/googlefonts/lexend
+
+## Object recognition (Scenes)
+
+The Scenes feature finds everyday objects in a photo on the device itself (nothing is sent anywhere).
+It uses open-source software and a model, all licensed under the Apache License 2.0
+(`vendor/LICENSE-Apache-2.0.txt`):
+
+- **TensorFlow.js** 4.22.0 (c) Google LLC / TensorFlow authors - `vendor/tf.min.js`. https://github.com/tensorflow/tfjs
+- **COCO-SSD** 2.2.3 (c) Google LLC / TensorFlow authors - `vendor/coco-ssd.min.js` and the model files in `models/coco-ssd/`
+  (SSD with MobileNet v2, trained on the COCO dataset, whose labels are CC BY 4.0, (c) COCO Consortium). https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
+
 **License summary (CC BY-SA 4.0).** You may copy, share and adapt these
 pictures, including commercially, if you (1) give credit to the creators, as
 in this file, (2) say if you changed them, and (3) share anything you make from
@@ -48,7 +66,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 ## Where each picture comes from
 
-### Mulberry (840 pictures)
+### Mulberry (854 pictures)
 
 | Word | File | Original name | License |
 |---|---|---|---|
@@ -105,9 +123,11 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | bike | `images/symbols/bike.svg` | bicycle | CC BY-SA 4.0 |
 | bird | `images/symbols/bird.svg` | bird | CC BY-SA 4.0 |
 | birthday party | `images/symbols/birthday-party.svg` | birthday_cake | CC BY-SA 4.0 |
+| bite | `images/symbols/bite.svg` | bite , to | CC BY-SA 4.0 |
 | black | `images/symbols/black.svg` | black | CC BY-SA 4.0 |
 | blanket | `images/symbols/blanket.svg` | blanket | CC BY-SA 4.0 |
 | blocks | `images/symbols/blocks.svg` | bricks | CC BY-SA 4.0 |
+| blow | `images/symbols/blow.svg` | blow , to | CC BY-SA 4.0 |
 | blue | `images/symbols/blue.svg` | blue | CC BY-SA 4.0 |
 | boat | `images/symbols/boat.svg` | boat | CC BY-SA 4.0 |
 | boots | `images/symbols/boots.svg` | boots | CC BY-SA 4.0 |
@@ -187,6 +207,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | clean up | `images/symbols/clean-up.svg` | tidy_up_,_to | CC BY-SA 4.0 |
 | climb | `images/symbols/climb.svg` | climb_up_,_to | CC BY-SA 4.0 |
 | Clock words | `images/symbols/ti-clock.svg` | clock | CC BY-SA 4.0 |
+| close | `images/symbols/close.svg` | close , to | CC BY-SA 4.0 |
 | closet | `images/symbols/closet.svg` | wardrobe | CC BY-SA 4.0 |
 | Clothes | `images/symbols/w-clothes.svg` | shirt | CC BY-SA 4.0 |
 | cloudy | `images/symbols/cloudy.svg` | cloudy | CC BY-SA 4.0 |
@@ -255,6 +276,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | drink | `images/symbols/drink.svg` | drink_,_to | CC BY-SA 4.0 |
 | Drink things | `images/symbols/dr-things.svg` | cup_non_spill | CC BY-SA 4.0 |
 | Drinks | `images/symbols/drinks.svg` | drink | CC BY-SA 4.0 |
+| drive | `images/symbols/drive.svg` | drive , to | CC BY-SA 4.0 |
 | drum | `images/symbols/drum.svg` | drum | CC BY-SA 4.0 |
 | dry | `images/symbols/dry.svg` | dry | CC BY-SA 4.0 |
 | duck | `images/symbols/duck.svg` | duck | CC BY-SA 4.0 |
@@ -285,6 +307,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | farmer | `images/symbols/farmer.svg` | farmer_1a | CC BY-SA 4.0 |
 | fast | `images/symbols/fast.svg` | fast_2 | CC BY-SA 4.0 |
 | Favorites | `images/symbols/favorites.svg` | star | CC BY-SA 4.0 |
+| feed | `images/symbols/feed.svg` | feed someone , to | CC BY-SA 4.0 |
 | feel | `images/symbols/feel.svg` | touch_,_to | CC BY-SA 4.0 |
 | feet | `images/symbols/feet.svg` | feet | CC BY-SA 4.0 |
 | fidget | `images/symbols/fidget.svg` | koosh_ball | CC BY-SA 4.0 |
@@ -299,6 +322,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | fish | `images/symbols/fish.svg` | fish | CC BY-SA 4.0 |
 | fish sticks | `images/symbols/fish-sticks.svg` | frozen_fish_fingers | CC BY-SA 4.0 |
 | five | `images/symbols/five.svg` | five | CC BY-SA 4.0 |
+| fix | `images/symbols/fix.svg` | mend | CC BY-SA 4.0 |
 | flamingo | `images/symbols/flamingo.svg` | flamingo | CC BY-SA 4.0 |
 | floor | `images/symbols/floor.svg` | floor | CC BY-SA 4.0 |
 | flower | `images/symbols/flower.svg` | flower | CC BY-SA 4.0 |
@@ -373,6 +397,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | head | `images/symbols/head.svg` | head | CC BY-SA 4.0 |
 | headache | `images/symbols/headache.svg` | headache | CC BY-SA 4.0 |
 | headphones | `images/symbols/headphones.svg` | headphones | CC BY-SA 4.0 |
+| hear | `images/symbols/hear.svg` | hear , to | CC BY-SA 4.0 |
 | heart | `images/symbols/heart.svg` | heart_shape | CC BY-SA 4.0 |
 | heavy | `images/symbols/heavy.svg` | heavy | CC BY-SA 4.0 |
 | helicopter | `images/symbols/helicopter.svg` | helicopter | CC BY-SA 4.0 |
@@ -382,6 +407,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | herbal tea | `images/symbols/herbal-tea.svg` | tea_time | CC BY-SA 4.0 |
 | hi | `images/symbols/hi.svg` | hello | CC BY-SA 4.0 |
 | hippo | `images/symbols/hippo.svg` | hippopotamus | CC BY-SA 4.0 |
+| hit | `images/symbols/hit.svg` | hit , to | CC BY-SA 4.0 |
 | hold | `images/symbols/hold.svg` | hold_,_to | CC BY-SA 4.0 |
 | home | `images/symbols/home.svg` | house | CC BY-SA 4.0 |
 | honey | `images/symbols/honey.svg` | honey | CC BY-SA 4.0 |
@@ -404,7 +430,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | hungry | `images/symbols/hungry.svg` | hungry | CC BY-SA 4.0 |
 | I | `images/symbols/i.svg` | I | CC BY-SA 4.0 |
 | I need a break | `images/symbols/need-break.svg` | take_a_work_break_,_to | CC BY-SA 4.0 |
-| I talk with this | `images/symbols/about-talk.svg` | communication_aid_chat_2 | CC BY-SA 4.0 |
+| I use this device to talk | `images/symbols/about-talk.svg` | communication_aid_chat_2 | CC BY-SA 4.0 |
 | I want that | `images/symbols/i-want-that.svg` | want_,_to | CC BY-SA 4.0 |
 | ice cream | `images/symbols/ice-cream.svg` | ice_cream | CC BY-SA 4.0 |
 | ice cream shop | `images/symbols/ice-cream-shop.svg` | ice_cream | CC BY-SA 4.0 |
@@ -427,9 +453,11 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | kick | `images/symbols/kick.svg` | kick_ball_,_to | CC BY-SA 4.0 |
 | kids meal | `images/symbols/kids-meal.svg` | takeaway_burger_and_chips | CC BY-SA 4.0 |
 | kinetic sand | `images/symbols/kinetic-sand.svg` | sand_pit | CC BY-SA 4.0 |
+| kiss | `images/symbols/kiss.svg` | blow kiss , to | CC BY-SA 4.0 |
 | kitchen | `images/symbols/kitchen.svg` | cooker | CC BY-SA 4.0 |
 | kiwi | `images/symbols/kiwi.svg` | kiwi | CC BY-SA 4.0 |
 | knee | `images/symbols/knee.svg` | knee | CC BY-SA 4.0 |
+| knock | `images/symbols/knock.svg` | knock , to | CC BY-SA 4.0 |
 | knock it down | `images/symbols/knock-it-down.svg` | knock_down_,_to | CC BY-SA 4.0 |
 | lamp | `images/symbols/lamp.svg` | lamp | CC BY-SA 4.0 |
 | lasagna | `images/symbols/lasagna.svg` | lasagne | CC BY-SA 4.0 |
@@ -724,6 +752,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | squishy | `images/symbols/squishy.svg` | sponge | CC BY-SA 4.0 |
 | stacking cups | `images/symbols/stacking-cups.svg` | measuring_cups | CC BY-SA 4.0 |
 | stairs | `images/symbols/stairs.svg` | stairs | CC BY-SA 4.0 |
+| stand | `images/symbols/stand.svg` | stand , to | CC BY-SA 4.0 |
 | star | `images/symbols/star.svg` | star | CC BY-SA 4.0 |
 | starfish | `images/symbols/starfish.svg` | starfish | CC BY-SA 4.0 |
 | start | `images/symbols/start.svg` | begin_start | CC BY-SA 4.0 |
@@ -759,6 +788,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | take | `images/symbols/take.svg` | take_,_to | CC BY-SA 4.0 |
 | take a bath | `images/symbols/take-a-bath.svg` | bathe_,_to | CC BY-SA 4.0 |
 | take off | `images/symbols/take-off.svg` | take_off_cap_,_to | CC BY-SA 4.0 |
+| talk | `images/symbols/talk.svg` | talk 1 , to | CC BY-SA 4.0 |
 | tall | `images/symbols/tall.svg` | tall | CC BY-SA 4.0 |
 | taste | `images/symbols/taste.svg` | taste_,_to | CC BY-SA 4.0 |
 | Taste and smell | `images/symbols/ds-taste.svg` | tongue | CC BY-SA 4.0 |
@@ -805,6 +835,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | toothbrush | `images/symbols/toothbrush.svg` | toothbrush | CC BY-SA 4.0 |
 | toothpaste | `images/symbols/toothpaste.svg` | toothpaste | CC BY-SA 4.0 |
 | top | `images/symbols/top.svg` | top | CC BY-SA 4.0 |
+| touch | `images/symbols/touch.svg` | touch , to | CC BY-SA 4.0 |
 | towel | `images/symbols/towel.svg` | towel | CC BY-SA 4.0 |
 | tower | `images/symbols/tower.svg` | star_stacker | CC BY-SA 4.0 |
 | toy airplane | `images/symbols/toy-airplane.svg` | aeroplane | CC BY-SA 4.0 |
@@ -844,6 +875,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | vine | `images/symbols/vine.svg` | vine | CC BY-SA 4.0 |
 | wagon | `images/symbols/wagon.svg` | cart | CC BY-SA 4.0 |
 | wait my turn | `images/symbols/wait-my-turn.svg` | turn_,_to | CC BY-SA 4.0 |
+| wake | `images/symbols/wake.svg` | wake up , to | CC BY-SA 4.0 |
 | wake up | `images/symbols/wake-up.svg` | wake_up_,_to | CC BY-SA 4.0 |
 | walk | `images/symbols/walk.svg` | walk_,_to | CC BY-SA 4.0 |
 | wallet | `images/symbols/wallet.svg` | wallet | CC BY-SA 4.0 |
@@ -893,7 +925,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | zip | `images/symbols/zip.svg` | zip | CC BY-SA 4.0 |
 | Zoo | `images/symbols/a-zoo.svg` | giraffe | CC BY-SA 4.0 |
 
-### OpenMoji (395 pictures)
+### OpenMoji (397 pictures)
 
 | Word | File | Original name | License |
 |---|---|---|---|
@@ -980,6 +1012,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | crow | `images/symbols/crow.svg` | 1F426-200D-2B1B black bird | CC BY-SA 4.0 |
 | crowded | `images/symbols/crowded.svg` | 1F465 busts in silhouette | CC BY-SA 4.0 |
 | cruise | `images/symbols/cruise.svg` | 1F6F3 passenger ship | CC BY-SA 4.0 |
+| cry | `images/symbols/cry.svg` | 1F622 crying face | CC BY-SA 4.0 |
 | Daily routine | `images/symbols/ac-routine.svg` | 1F305 sunrise | CC BY-SA 4.0 |
 | Dairy | `images/symbols/mf-dairy.svg` | 1F9C0 cheese wedge | CC BY-SA 4.0 |
 | deep breath | `images/symbols/deep-breath.svg` | 1F62E-200D-1F4A8 face exhaling | CC BY-SA 4.0 |
@@ -992,9 +1025,6 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | dollar store | `images/symbols/dollar-store.svg` | 1F4B5 dollar banknote | CC BY-SA 4.0 |
 | dollhouse | `images/symbols/dollhouse.svg` | 1F3E1 house with garden | CC BY-SA 4.0 |
 | dominoes | `images/symbols/dominoes.svg` | 1F3B2 game die | CC BY-SA 4.0 |
-| don't know | `images/symbols/i-dont-know.svg` | 1F937 person shrugging | CC BY-SA 4.0 |
-| don't like it | `images/symbols/i-dont-like-it.svg` | 1F44E thumbs down | CC BY-SA 4.0 |
-| don't understand | `images/symbols/i-dont-understand.svg` | 1F615 confused face | CC BY-SA 4.0 |
 | dragon | `images/symbols/dragon.svg` | 1F409 dragon | CC BY-SA 4.0 |
 | eagle | `images/symbols/eagle.svg` | 1F985 eagle | CC BY-SA 4.0 |
 | earache | `images/symbols/earache.svg` | E31E earache | CC BY-SA 4.0 |
@@ -1060,6 +1090,9 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | hotel | `images/symbols/hotel.svg` | 1F3E8 hotel | CC BY-SA 4.0 |
 | Household | `images/symbols/th-household.svg` | 1F9F9 broom | CC BY-SA 4.0 |
 | hurt | `images/symbols/hurt.svg` | 1F915 face with head-bandage | CC BY-SA 4.0 |
+| I don't know | `images/symbols/i-dont-know.svg` | 1F937 person shrugging | CC BY-SA 4.0 |
+| I don't like it | `images/symbols/i-dont-like-it.svg` | 1F44E thumbs down | CC BY-SA 4.0 |
+| I don't understand | `images/symbols/i-dont-understand.svg` | 1F615 confused face | CC BY-SA 4.0 |
 | I like it | `images/symbols/i-like-it.svg` | 1F44D thumbs up | CC BY-SA 4.0 |
 | I love you | `images/symbols/i-love-you.svg` | 2764 red heart | CC BY-SA 4.0 |
 | I need it | `images/symbols/i-need-it.svg` | 1F97A pleading face | CC BY-SA 4.0 |
@@ -1159,6 +1192,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | playdate | `images/symbols/playdate.svg` | 1F9D1-200D-1F91D-200D-1F9D1 people holding hands | CC BY-SA 4.0 |
 | playground | `images/symbols/playground.svg` | 1F3A0 carousel horse | CC BY-SA 4.0 |
 | please | `images/symbols/please.svg` | 1F97A pleading face | CC BY-SA 4.0 |
+| Please give me time to answer | `images/symbols/about-wait.svg` | 23F3 hourglass not done | CC BY-SA 4.0 |
 | plus | `images/symbols/plus.svg` | 2795 plus | CC BY-SA 4.0 |
 | police officer | `images/symbols/police-officer.svg` | 1F46E police officer | CC BY-SA 4.0 |
 | pomegranate | `images/symbols/pomegranate.svg` | E0C4 pomegranate | CC BY-SA 4.0 |
@@ -1204,6 +1238,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | slide | `images/symbols/slide.svg` | 1F6DD playground slide | CC BY-SA 4.0 |
 | slow down | `images/symbols/slow-down.svg` | 1F422 turtle | CC BY-SA 4.0 |
 | slower | `images/symbols/slower.svg` | 1F40C snail | CC BY-SA 4.0 |
+| smell | `images/symbols/smell.svg` | 1F443 nose | CC BY-SA 4.0 |
 | smelly | `images/symbols/smelly.svg` | 1F922 nauseated face | CC BY-SA 4.0 |
 | snowy | `images/symbols/snowy.svg` | 1F328 cloud with snow | CC BY-SA 4.0 |
 | soda | `images/symbols/soda.svg` | 1F964 cup with straw | CC BY-SA 4.0 |
@@ -1254,7 +1289,6 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | volcano | `images/symbols/volcano.svg` | 1F30B volcano | CC BY-SA 4.0 |
 | waffle | `images/symbols/waffle.svg` | 1F9C7 waffle | CC BY-SA 4.0 |
 | wait | `images/symbols/wait.svg` | 23F3 hourglass not done | CC BY-SA 4.0 |
-| wait | `images/symbols/about-wait.svg` | 23F3 hourglass not done | CC BY-SA 4.0 |
 | warm | `images/symbols/warm.svg` | 1F31E sun with face | CC BY-SA 4.0 |
 | warm milk | `images/symbols/warm-milk.svg` | 1F95B glass of milk | CC BY-SA 4.0 |
 | watch this | `images/symbols/watch-this.svg` | 1F440 eyes | CC BY-SA 4.0 |
@@ -1271,6 +1305,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | whale | `images/symbols/whale.svg` | 1F40B whale | CC BY-SA 4.0 |
 | what happened? | `images/symbols/what-happened.svg` | 2049 exclamation question mark | CC BY-SA 4.0 |
 | what's that? | `images/symbols/whats-that.svg` | 1F449 backhand index pointing right | CC BY-SA 4.0 |
+| what's your name? | `images/symbols/whats-your-name.svg` | 1F4DB name badge | CC BY-SA 4.0 |
 | wind | `images/symbols/wind.svg` | 1F32C wind face | CC BY-SA 4.0 |
 | windy | `images/symbols/windy.svg` | 1F32C wind face | CC BY-SA 4.0 |
 | wings | `images/symbols/wings.svg` | 1F357 poultry leg | CC BY-SA 4.0 |
@@ -1288,7 +1323,6 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | you're it | `images/symbols/youre-it.svg` | 1FAF5 index pointing at the viewer | CC BY-SA 4.0 |
 | you're my friend | `images/symbols/youre-my-friend.svg` | 1F91D handshake | CC BY-SA 4.0 |
 | you're nice | `images/symbols/youre-nice.svg` | 1F60A smiling face with smiling eyes | CC BY-SA 4.0 |
-| your name? | `images/symbols/whats-your-name.svg` | 1F4DB name badge | CC BY-SA 4.0 |
 | your turn | `images/symbols/your-turn.svg` | 1FAF5 index pointing at the viewer | CC BY-SA 4.0 |
 | yuck | `images/symbols/yuck.svg` | 1F922 nauseated face | CC BY-SA 4.0 |
 | zoo | `images/symbols/zoo.svg` | 1F992 giraffe | CC BY-SA 4.0 |

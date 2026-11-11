@@ -11,6 +11,7 @@ import { restoreFromFile } from "./backup.js";
 import { listProfiles, CHILD_VOICE } from "./profiles.js";
 import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesLine } from "./devicetips.js";
 import { VERSION_LABEL } from "./channel.js";
+import { getView, setView } from "./settingsnav.js";
 
 export const SETUP_CHOICES = [
   { id: "full84", title: "Full board — 84 buttons", gridSize: 84, stage: 4,
@@ -54,11 +55,22 @@ export function showSetup({ first = false } = {}) {
         screen.hidden = false;                      // cancelled or failed: back to the choices
       } }) : null;
 
+    // First setup only (Beta 3.9): who will mostly use the adult menu on this iPad. It decides which settings the menu shows
+    // (js/settingsnav.js); it can be switched any time in the menu's top bar. Saved as soon as it is tapped.
+    const viewRow = first ? h("div", { class: "seg-row setup-view-row" }) : null;
+    const paintView = () => viewRow.replaceChildren(...[["parent", "Parent or caregiver"], ["clinician", "Clinician or teacher"]].map(([v, text]) =>
+      h("button", { type: "button", class: "seg" + (getView() === v ? " on" : ""), id: "setup-view-" + v, text,
+        onclick: () => { setView(v); paintView(); } })));
+    if (first) paintView();
+
     const screen = h("div", { class: "setup-screen", id: "setup-screen", role: "dialog", "aria-label": "Set up VOICE" },
       h("div", { class: "setup-card" },
         h("h1", { text: "Set up VOICE" }),
         h("div", { class: "setup-name-row" },
           h("label", { for: "setup-name", text: first ? "Learner name (optional)" : "Learner name" }), nameIn),
+        first ? h("div", { class: "setup-view", id: "setup-view" },
+          h("span", { class: "setup-view-label", text: "Adult menu for:" }), viewRow,
+          h("small", { class: "muted", text: "Parent shows the everyday settings; Clinician adds teaching sessions and data. You can switch any time." })) : null,
         phone ? h("p", { class: "setup-phone-tip", id: "setup-phone-tip", text: PHONE_BOARD_TIP }) : null,
         h("div", { class: "setup-choices" }, choices),
         // Volume check with the default child voice (no learner exists yet on a new device)

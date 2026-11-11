@@ -28,6 +28,7 @@
 //     touch: {                          // touch supports (adult menu > Touch)
 //       holdOn: false, holdSec: 0.5,    // hold to select
 //       ignoreOn: false, ignoreSec: 1,  // ignore repeated taps
+//       liftOff, zones, keyguard, preview, dwellOn, dwellSec   // Beta 3.20 (see DEFAULT_TOUCH)
 //     },
 //     model: {                          // what Model mode shows (adult menu > Model prompt)
 //       style: "ring", ringOpacity: 100, critterOpacity: 100,   // see js/critters.js
@@ -38,7 +39,15 @@
 //     wordsOnly: false,                 // reading stage: no pictures at all, only large words
 //     keyboardButton: "auto",           // the top-bar ABC (keyboard) button: "auto" (from stage 3),
 //                                       // "always" or "never"  (adult menu > Vocabulary stage)
+//     littleStrip: "auto",              // the little-word strip under the message bar (Beta 3.7): "auto" (from stage 3), "always" or "never"
+//     toneWheel: "off",                 // press and hold the message bar for the tone wheel (Beta 3.16): "off" or "on" (works from stage 4)
+//     toneSuggested: false,             // the end of a session already suggested turning the tone wheel on
+//     cameraButton: "auto",             // the top-bar camera button (hold 1 s: quick scene): "auto" (from stage 3), "always" or "never"
+//     matchStrictness: "medium",        // Scenes > My things: "low" | "medium" | "high" (js/things.js)
 //     speakLetters: false,              // the keyboard says each letter's name as it is typed
+//     stageRule: { mode: "percent"|"words", pct, words: { stage: [ids] }, days, weeks }   // next-stage rule (Beta 3.22, js/stagerule.js)
+//     scan: { mode: "off"|"one"|"two", speed, loops, screen, cues }   // Switch scanning (Beta 3.21, js/scan.js)
+//     access: { theme, font, labelSize, ... }  // Accessibility (Beta 3.18): the child screen's look and listener helps (js/access.js)
 //     wordDial: {                       // press-and-hold word-forms dial (beta; adult menu > Vocabulary stage)
 //       mode: "auto",                   //   "auto" (from stage 3), "always" or "never"
 //       holdSec: 0.5,                   //   how long to hold a word before the dial opens (0.3 to 1.0)
@@ -56,11 +65,16 @@
 // Only tiny things (which learner is current) go in localStorage.
 import * as db from "./db.js";
 import { load, save, remove } from "./storage.js";
-import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION, RANCH_NOTE } from "./migrate.js";
+import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION, RANCH_NOTE, LAYOUT8_NOTE } from "./migrate.js";
 import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 import { PAUSE_CHOICES } from "./speech.js";
 import { deleteTeaching, importTeaching } from "./teachdata.js";
 import { deleteEveryday, importEveryday } from "./everyday.js";
+import { deleteScenes, importScenes } from "./scenedata.js";
+import { deleteThings, importThings } from "./things.js";
+import { cleanAccess } from "./access.js";
+import { cleanScan } from "./scan.js";
+import { cleanStageRule } from "./stagerule.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
@@ -73,6 +87,8 @@ function newId() { return "p" + Date.now().toString(36) + Math.random().toString
 
 export const WORDS_BUTTON_CHOICES = ["auto", "always", "never"];
 export const KEYBOARD_BUTTON_CHOICES = ["auto", "always", "never"];   // same three choices for the ABC button
+export const CAMERA_BUTTON_CHOICES = ["auto", "always", "never"];     // and for the top-bar camera button (Beta 3.1)
+export const MATCH_STRICTNESS_CHOICES = ["low", "medium", "high"];    // how sure VOICE must be to suggest one of "My things" (Beta 3.1)
 
 export const WORD_DIAL_CHOICES = ["auto", "always", "never"];
 export const DEFAULT_WORD_DIAL = { mode: "auto", holdSec: 0.5, markers: true };
@@ -89,7 +105,12 @@ export function cleanWordDial(v) {
   };
 }
 
-export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1 };
+// Beta 3.20 adds: liftOff (choose the button under the finger when it LIFTS, so a child can slide to correct), zones (a touch between
+// buttons goes to the nearest one), keyguard (only the middle of each button responds; extra fingers are ignored), preview (speak on
+// touch: the first touch says the word in a lower voice, a second touch on it chooses it), dwellOn/dwellSec (a mouse, trackpad or head
+// pointer resting on a button chooses it).
+export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1,
+  liftOff: false, zones: false, keyguard: false, preview: false, dwellOn: false, dwellSec: 1 };
 
 function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
   return {
@@ -97,7 +118,8 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
     words: {}, cells: {}, pages: {}, pins: {}, notices: [],
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
     wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
-    wordDial: { ...DEFAULT_WORD_DIAL },
+    cameraButton: "auto", matchStrictness: "medium", littleStrip: "auto", toneWheel: "off", toneSuggested: false,
+    wordDial: { ...DEFAULT_WORD_DIAL }, access: cleanAccess(null), scan: cleanScan(null), stageRule: cleanStageRule(null),
   };
 }
 
@@ -154,6 +176,24 @@ async function upgradeProfile(p, board) {
     p.notices = [...(p.notices || []), ...describeMoves(r.moves)];
     if (p.v < 6 && !p.notices.includes(RANCH_NOTE)) p.notices.push(RANCH_NOTE);   // (learners already at 6 got it in 1.8A)
     p.v = CURRENT_PROFILE_VERSION;
+    p.notices.push(LAYOUT8_NOTE);
+    await saveProfile(p);
+  }
+  if (p.v < 8) {
+    // Version 7 -> 8 (Beta 3.23): the Actions folder on the main board moved Favorites (and on the 84 board About me). Words the adult
+    // added where a button or a Back cell now sits are moved (same rule as above), and the adult gets a note.
+    const r = relocateAdultWords(board, p.cells, p.pages);
+    p.cells = r.cells; p.pages = r.pages;
+    const map = moveMap(r.moves);
+    if (Object.keys(map).length) {
+      const prefix = p.id + "|";
+      for (const row of await db.getPrefix("photos", prefix)) {
+        const to = map[row.key.slice(prefix.length)];
+        if (to) { await db.put("photos", prefix + to, row.value); await db.del("photos", row.key); }
+      }
+    }
+    p.notices = [...(Array.isArray(p.notices) ? p.notices : []), ...describeMoves(r.moves), LAYOUT8_NOTE];
+    p.v = CURRENT_PROFILE_VERSION;
     await saveProfile(p);
   }
   p.words = p.words || {}; p.cells = p.cells || {}; p.pages = p.pages || {}; p.pins = p.pins || {};
@@ -180,6 +220,17 @@ export async function initProfiles(board) {
     if (!KEYBOARD_BUTTON_CHOICES.includes(p.keyboardButton)) p.keyboardButton = "auto";
     p.speakLetters = p.speakLetters === true;
     p.voice = cleanVoice(p.voice);
+  }
+  // Learners saved before the camera button and My things (Beta 3.1): camera button on Auto, match strictness Medium.
+  for (const p of profiles) {
+    if (!CAMERA_BUTTON_CHOICES.includes(p.cameraButton)) p.cameraButton = "auto";
+    if (!MATCH_STRICTNESS_CHOICES.includes(p.matchStrictness)) p.matchStrictness = "medium";
+    if (!CAMERA_BUTTON_CHOICES.includes(p.littleStrip)) p.littleStrip = "auto";      // Beta 3.7: same three choices
+    if (p.toneWheel !== "on") p.toneWheel = "off";                                     // Beta 3.16
+    p.access = cleanAccess(p.access);                                                  // Beta 3.18
+    p.scan = cleanScan(p.scan);                                                        // Beta 3.21
+    p.stageRule = cleanStageRule(p.stageRule);                                         // Beta 3.22
+    p.toneSuggested = p.toneSuggested === true;
   }
   // Learners saved before the word-forms dial: Auto (from stage 3), hold 0.5 s, markers on.
   for (const p of profiles) p.wordDial = cleanWordDial(p.wordDial);
@@ -240,6 +291,8 @@ export async function deleteProfile(id) {
   await db.delPrefix("photos", id + "|");
   for (const store of ["targets", "sessions", "trials"]) await db.delPrefix(store, id + "|");   // teaching data goes too
   await deleteEveryday(id);                                                                         // and the everyday use data
+  await deleteScenes(id);                                                                           // and the scenes with their photos (Beta 3.0)
+  await deleteThings(id);                                                                           // and "My things" (Beta 3.1)
   if (currentId === id) await switchTo(profiles[0].id);
   return true;
 }
@@ -305,6 +358,7 @@ export async function getPhotoBlobs(profileId) {
 // Add the clean learner `data` (from js/backup.js) to this device.
 //   replaceId = id of an existing learner to overwrite, or null to add a new one.
 // `data` = { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, wordDial,
+//            cameraButton, matchStrictness, things: null | { list },
 //            notices, teaching: null | { targets, sessions, trials }, everyday: null | { settings, events, utterances, daily, firstSeen },
 //            photos: [{ key, blob }] }
 // Returns the saved profile.
@@ -323,6 +377,12 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
+    if (data.littleStrip) p.littleStrip = data.littleStrip;
+    if (data.toneWheel) p.toneWheel = data.toneWheel;
+    p.access = cleanAccess(data.access);
+    p.scan = cleanScan(data.scan);
+    p.stageRule = cleanStageRule(data.stageRule);
     p.wordDial = cleanWordDial(data.wordDial);
     // Reward pictures belong to the teaching data: when the backup has none, the learner keeps theirs.
     if (!data.teaching) keepRewards = (await db.getPrefix("photos", p.id + "|reward:")).filter((r) => r.value && r.value.blob);
@@ -336,6 +396,12 @@ export async function importLearner(data, replaceId = null) {
     p.model = data.model;
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
+    p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
+    if (data.littleStrip) p.littleStrip = data.littleStrip;      // (Beta 3.18: a NEW learner from a backup now keeps these too)
+    if (data.toneWheel) p.toneWheel = data.toneWheel;
+    p.access = cleanAccess(data.access);
+    p.scan = cleanScan(data.scan);
+    p.stageRule = cleanStageRule(data.stageRule);
     p.wordDial = cleanWordDial(data.wordDial);
     profiles.push(p);
   }
@@ -347,6 +413,11 @@ export async function importLearner(data, replaceId = null) {
     await importTeaching(p.id, data.teaching);
   }
   if (data.everyday) await importEveryday(p.id, data.everyday);   // everyday use data (Beta 2.2) replaces this learner's; summaries are rebuilt
+  if (data.scenes) {                         // scenes (Beta 3.0) from the backup replace this learner's; a backup without them leaves them alone
+    p.activeScene = (await importScenes(p.id, data.scenes)) || null;
+    await saveProfile(p);
+  }
+  if (data.things) await importThings(p.id, data.things);        // My things (Beta 3.1) from the backup replace this learner's
   if (p.id === currentId) await loadPhotos();   // the learner on screen changed: reload their photos
   return p;
 }

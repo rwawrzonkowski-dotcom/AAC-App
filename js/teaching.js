@@ -50,7 +50,6 @@ export function cleanLadder(raw) {
 export const isCustom = (t) => t.ladderMode === "custom" && !!cleanLadder(t.customLadder);
 // The ladder a target uses now (a copy, most help first).
 export const ladderOf = (t) => (isCustom(t) ? cloneLadder(cleanLadder(t.customLadder)) : defaultLadder(t.stepSize));
-export const posIndependent = (t) => ladderOf(t).length;      // the pos that means "Independent"
 
 // "Model 50%"; in a custom ladder "Custom: Glow 25%".
 export const stepName = (step, custom) => (custom ? "Custom: " : "") + STEP_TYPE_NAMES[step.type] + " " + step.opacity + "%";
@@ -221,6 +220,10 @@ function migrateLegacyLadder(raw, now) {
 
 // Turn anything (from the database or from a backup file) into a complete, valid target, or null.
 export function cleanTarget(raw, learnerId) {
+  const t = cleanTargetInner(raw, learnerId);
+  return t && t.kind === "broken" ? null : t;           // a sentence target whose words could not be read
+}
+function cleanTargetInner(raw, learnerId) {
   if (!isObj(raw) || typeof raw.wordId !== "string" || !ID.test(raw.wordId)) return null;
   const s = DEFAULT_SETTINGS, m = isObj(raw.mastery) ? raw.mastery : {};
   const history = cleanChanges(raw.history);
@@ -253,8 +256,146 @@ export function cleanTarget(raw, learnerId) {
     history, statusHistory: cleanChanges(raw.statusHistory),
     removed: typeof raw.removed === "number" ? clampInt(raw.removed, 0, 4e12, 0) : null,
     instructions: cleanInstructions(raw.instructions),
+    ...(raw.kind === "chain" ? cleanChainFields(raw, (ladderMode === "custom" ? customLadder.length : defaultLadder(stepSize).length)) || { kind: "broken" } : {}),
   };
 }
+
+// ---------- Sentence targets (Beta 3.12) ----------
+// A SENTENCE TARGET is a chain of 2 to 6 board words taught in order ("I" > "want" > "more"). It is stored like a word target (so
+// lists, sessions, summaries, mastery, reports and backups keep working) with these extra fields:
+//   kind: "chain", wordId: "chain-<id>" (its own id, not a board word), label: "I want more" (the words joined),
+//   links: [{ wordId, label, pageId, path }]   the words in order, each with its own route on the board,
+//   method: "total" | "forward" | "backward"   total task, forward chaining or backward chaining,
+//   phase: how many words the learner does now (total task: all of them; forward: the FIRST `phase` words; backward: the LAST),
+//   linkPos: [pos per word]                    each word's own place in the ladder (each word fades on its own),
+//   linkHits, linkMisses: [n per word]         each word's streaks for fading and backing up,
+//   phaseRun: trials in a row in which every word the learner did was independent (when it reaches fadeAfter, the next word is
+//             SUGGESTED to the adult at the end of the session; the adult confirms),
+//   errorless: true                            (Beta 3.22) while the current word's prompt is at 50% or more, a wrong button does nothing
+//                                               (no speech, not added; still logged as an error and the prompt gets stronger)
+//   speakStep: false                           true = tapping the message bar to say the whole sentence is the last step.
+// In forward chaining the words after the learner's part are MODELED by the app (prompt on each button, the word added and spoken).
+// In backward chaining the words before the learner's part are put in the message bar when the trial starts.
+export const CHAIN_METHODS = ["total", "forward", "backward"];
+export const CHAIN_METHOD_LABELS = { total: "Total task", forward: "Forward chaining", backward: "Backward chaining" };
+export const MIN_CHAIN = 2, MAX_CHAIN = 6;
+export const SPEAK_ID = "__speak__";            // the "say the sentence" step, when it is on
+export const isChain = (t) => !!t && t.kind === "chain";
+
+function cleanLink(l) {
+  if (!isObj(l) || typeof l.wordId !== "string" || !ID.test(l.wordId)) return null;
+  return { wordId: l.wordId, label: str(l.label, 60) || l.wordId, pageId: ID.test(l.pageId || "") ? l.pageId : "core",
+    path: (Array.isArray(l.path) ? l.path : []).filter((p) => typeof p === "string" && ID.test(p)).slice(0, 8) };
+}
+const intList = (v, n, lo, hi, d) => Array.from({ length: n }, (_, i) => clampInt(Array.isArray(v) ? v[i] : d, lo, hi, d));
+function cleanChainFields(raw, ladderLen) {
+  const links = (Array.isArray(raw.links) ? raw.links : []).map(cleanLink).filter(Boolean).slice(0, MAX_CHAIN);
+  if (links.length < MIN_CHAIN) return null;
+  const n = links.length, method = CHAIN_METHODS.includes(raw.method) ? raw.method : "total";
+  return {
+    kind: "chain", links, method,
+    phase: method === "total" ? n : clampInt(raw.phase, 1, n, 1),
+    linkPos: intList(raw.linkPos, n, 0, ladderLen, 0),
+    linkHits: intList(raw.linkHits, n, 0, 1000, 0), linkMisses: intList(raw.linkMisses, n, 0, 1000, 0),
+    phaseRun: clampInt(raw.phaseRun, 0, 1000, 0), speakStep: raw.speakStep === true,
+    errorless: raw.errorless !== false,        // Beta 3.22: on unless turned off (sentences saved earlier get it on)
+  };
+}
+
+// A new sentence target from the words the adult tapped in order: [{ wordId, label, pageId, path }].
+export function newChainTarget(learnerId, links, now = Date.now()) {
+  const clean = links.map(cleanLink).filter(Boolean).slice(0, MAX_CHAIN);
+  const id = "chain-" + now.toString(36) + Math.random().toString(36).slice(2, 6);
+  const t = newTarget(learnerId, { wordId: id, label: clean.map((l) => l.label).join(" "), pageId: "core", path: [] }, now);
+  return Object.assign(t, { kind: "chain", links: clean, method: "total", phase: clean.length, linkPos: clean.map(() => 0),
+    linkHits: clean.map(() => 0), linkMisses: clean.map(() => 0), phaseRun: 0, speakStep: false, errorless: true });
+}
+
+// Which words (by index) the learner does in the current phase.
+export function taughtLinks(t) {
+  const n = t.links.length, k = t.method === "total" ? n : Math.min(n, Math.max(1, t.phase));
+  if (t.method === "backward") return Array.from({ length: k }, (_, i) => n - k + i);
+  return Array.from({ length: k }, (_, i) => i);
+}
+// "Forward chaining: 2 of 3 words" / "Total task: all 3 words".
+export function chainPhaseText(t) {
+  const n = t.links.length;
+  if (t.method === "total") return `${CHAIN_METHOD_LABELS.total}: all ${n} words`;
+  const k = taughtLinks(t).length;
+  return `${CHAIN_METHOD_LABELS[t.method]}: ${k} of ${n} words` + (k < n ? ` (${t.method === "forward" ? "the app models the rest" : "the first words are filled in"})` : "");
+}
+// Change the method. Forward and backward start again with one word; total task teaches all of them. Written into the history.
+export function setChainMethod(t, method, now = Date.now()) {
+  if (!CHAIN_METHODS.includes(method) || method === t.method) return;
+  t.history.push({ time: now, from: chainPhaseText(t), to: "", reason: "chaining method changed by adult", dir: "" });
+  t.method = method; t.phase = method === "total" ? t.links.length : 1; t.phaseRun = 0;
+  t.history[t.history.length - 1].to = chainPhaseText(t);
+}
+// Add the next word to the learner's part (forward: the next word; backward: the word before). The new word starts at the top of
+// the ladder (most help), its streaks at zero.
+export function advancePhase(t, reason = "next word added (confirmed by adult)", now = Date.now()) {
+  if (t.method === "total" || t.phase >= t.links.length) return false;
+  const from = chainPhaseText(t);
+  t.phase++; t.phaseRun = 0;
+  const added = t.method === "forward" ? t.phase - 1 : t.links.length - t.phase;
+  t.linkPos[added] = 0; t.linkHits[added] = 0; t.linkMisses[added] = 0;
+  t.history.push({ time: now, from, to: chainPhaseText(t), reason, dir: "" });
+  return true;
+}
+
+// Which of a sentence trial's learner steps the learner actually REACHED (Beta 3.17). The learner's words are prompted one at a time in
+// order (then "say the sentence", if on), so the reached ones are every step that was done plus the one the trial stopped on (the first
+// step not done). Steps after it were never presented: they are "no opportunity" and are not scored at all (no hit, no miss, not in the
+// task-analysis percent). Returns a Set of the trial's link records.
+export function reachedLinks(links) {
+  const steps = (links || []).filter((l) => l.taught)
+    .sort((a, b) => (a.wordId === SPEAK_ID) - (b.wordId === SPEAK_ID) || a.index - b.index);
+  const out = new Set();
+  for (const l of steps) {
+    out.add(l);
+    if (!l.done) break;                      // the trial stopped here: later steps were never reached
+  }
+  return out;
+}
+
+// After a sentence trial: each word the learner REACHED fades or backs up on its own (most-to-least only), and the phase counter moves.
+// trial.links = [{ index, wordId, label, taught, done, startIndex, minIndex, errors }]   (minIndex = ladder length when no prompt showed)
+// Returns { changes: [{ time, from, to, reason, dir, linkIndex, label }], phaseReady }.
+export function applyTrialToChain(target, trial, now = Date.now()) {
+  const out = { changes: [], phaseReady: false };
+  if (trial.result === "skipped" || target.status !== "teaching") return out;
+  const n = ladderOf(target).length;
+  let allIndependent = trial.result === "correct";
+  const reached = reachedLinks(trial.links);
+  for (const l of trial.links || []) {
+    if (!l.taught) continue;
+    if (!reached.has(l)) { allIndependent = false; continue; }      // never presented: no opportunity, nothing scored
+    if (!(l.done && l.errors === 0 && l.minIndex >= n)) allIndependent = false;      // (the "say the sentence" step counts here too)
+    if (l.index < 0 || l.index >= target.links.length || target.direction !== "mtl") continue;
+    const i = l.index;
+    const hit = l.done && l.errors === 0 && l.minIndex >= l.startIndex;
+    let to = null, reason = "", dir = "";
+    if (hit) {
+      target.linkHits[i]++; target.linkMisses[i] = 0;
+      if (target.linkHits[i] >= target.fadeAfter && target.linkPos[i] < n) { to = target.linkPos[i] + 1; reason = `faded after ${target.fadeAfter} correct in a row`; dir = "less"; }
+    } else {
+      target.linkMisses[i]++; target.linkHits[i] = 0;
+      if (target.linkMisses[i] >= target.backUpAfter && target.linkPos[i] > 0) { to = target.linkPos[i] - 1; reason = `backed up after ${target.backUpAfter} misses in a row`; dir = "more"; }
+    }
+    if (to !== null) {
+      const label = target.links[i].label;
+      const c = { time: now, from: `${label}: ${posName(target, target.linkPos[i])}`, to: `${label}: ${posName(target, to)}`, reason, dir };
+      target.linkPos[i] = to; target.linkHits[i] = 0; target.linkMisses[i] = 0;
+      target.history.push({ ...c });
+      out.changes.push({ ...c, linkIndex: i, label });
+    }
+  }
+  target.phaseRun = allIndependent ? target.phaseRun + 1 : 0;
+  out.phaseReady = target.method !== "total" && target.phase < target.links.length && target.phaseRun >= target.fadeAfter;
+  return out;
+}
+// Each word's step, in one line: "I: Independent · want: Model 50% · more: Model 100%".
+export const chainStepsText = (t) => t.links.map((l, i) => `${l.label}: ${posName(t, t.linkPos[i])}`).join(" · ");
 
 // ---------- Sessions and trials ----------
 // session: { id, learnerId, start, end, who, where, targets: [wordId], notes: "", levelChanges: [{ wordId, label, time, from, to, reason, dir }] }
@@ -278,7 +419,7 @@ export function cleanSession(raw, learnerId) {
 
 export const RESULTS = ["correct", "error", "noResponse", "skipped"];
 // trial: { id, sessionId, learnerId, wordId, label, type: "planned"|"NET", start, end, latencyMs,
-//          result, direction, errors: [{wordId,label,time}],
+//          result, direction, errors: [{wordId,label,time, blocked?}],   (blocked: an errorless sentence trial stopped that wrong button, Beta 3.22)
 //          promptStep: { index, type, opacity, ladderLength, ladderId }   the MOST help shown (type "independent" and index = ladderLength
 //                                                                         when no prompt was shown), startStep: the same for where the trial started,
 //          help (0 to 1: opacity of promptStep, 0 = independent), startHelp,
@@ -299,7 +440,7 @@ export function cleanTrial(raw, learnerId) {
   if (!isObj(raw) || typeof raw.id !== "string" || !ID.test(raw.id) || typeof raw.sessionId !== "string" || typeof raw.wordId !== "string") return null;
   const errors = [];
   for (const e of Array.isArray(raw.errors) ? raw.errors.slice(0, 200) : []) {
-    if (isObj(e)) errors.push({ wordId: str(e.wordId, 80), label: str(e.label, 60), time: clampInt(e.time, 0, 4e12, 0) });
+    if (isObj(e)) errors.push({ wordId: str(e.wordId, 80), label: str(e.label, 60), time: clampInt(e.time, 0, 4e12, 0), ...(e.blocked === true ? { blocked: true } : {}) });
   }
   const steps = [];
   for (const c of Array.isArray(raw.chainStepsPrompted) ? raw.chainStepsPrompted.slice(0, 20) : []) {
@@ -328,8 +469,24 @@ export function cleanTrial(raw, learnerId) {
     startHelp: unit(raw.startHelp, startStep ? startStep.opacity / 100 : legacyHelp(startLevel)),
     direction: DIRECTIONS.includes(raw.direction) ? raw.direction : "mtl",
     errors, chainStepsPrompted: steps, chain: (Array.isArray(raw.chain) ? raw.chain : []).map((x) => str(x, 60)).slice(0, 10), promptTimeline: timeline,
+    ...(Array.isArray(raw.links) ? cleanTrialLinks(raw) : {}),
   };
 }
+// Sentence trials (Beta 3.12) also keep: method, phase, and one record per word:
+//   links: [{ index, wordId, label, taught, done, startIndex, minIndex, ladderLength, errors }]   (the "say the sentence" step has wordId SPEAK_ID)
+function cleanTrialLinks(raw) {
+  const links = [];
+  for (const l of raw.links.slice(0, MAX_CHAIN + 1)) {
+    if (!isObj(l)) continue;
+    links.push({ index: clampInt(l.index, -1, MAX_CHAIN, 0), wordId: str(l.wordId, 80), label: str(l.label, 60), taught: l.taught === true,
+      done: l.done === true, startIndex: clampInt(l.startIndex, 0, MAX_STEPS, 0), minIndex: clampInt(l.minIndex, 0, MAX_STEPS, 0),
+      ladderLength: clampInt(l.ladderLength, 0, MAX_STEPS, 0), errors: clampInt(l.errors, 0, 200, 0) });
+  }
+  return { links, method: CHAIN_METHODS.includes(raw.method) ? raw.method : "total", phase: clampInt(raw.phase, 1, MAX_CHAIN, 1),
+    ...(typeof raw.errorless === "boolean" ? { errorless: raw.errorless } : {}) };       // Beta 3.22
+}
+// Was this word independent in this sentence trial? (done, no errors on it, no prompt shown for it)
+export const linkIndependent = (l) => l.done && l.errors === 0 && l.minIndex >= l.ladderLength;
 
 // ---------- Scoring ----------
 // A trial is INDEPENDENT when the child selected the target having been shown no prompt step (only the wait for the time delay)
@@ -412,20 +569,24 @@ export function summarizeSession(session, trials, targets) {
 // Returns { met, reason, sessions: [{ id, start, who, where, trials, pct }] }.
 export function masteryCheck(target, sessions, trials) {
   const rule = target.mastery;
-  const mine = trials.filter((t) => t.wordId === target.wordId && t.result !== "skipped");
+  // A sentence target only counts trials in which the learner did every word (in forward or backward chaining, the last phase).
+  const mine = trials.filter((t) => t.wordId === target.wordId && t.result !== "skipped" &&
+    !(isChain(target) && Array.isArray(t.links) && t.links.some((l) => l.wordId !== SPEAK_ID && !l.taught)));
   const bySession = new Map();
   for (const t of mine) {
     if (!bySession.has(t.sessionId)) bySession.set(t.sessionId, []);
     bySession.get(t.sessionId).push(t);
   }
-  const used = sessions.filter((s) => bySession.has(s.id)).sort((a, b) => b.start - a.start).slice(0, rule.sessions);
+  // (Beta 3.22) A session with fewer than the minimum trials of this word (a single Opportunity, say) is SKIPPED: it neither counts
+  // nor blocks mastery, for the percent or for the people/settings rule. Mastery looks at the last sessions that qualify.
+  const used = sessions.filter((s) => bySession.has(s.id) && bySession.get(s.id).length >= rule.minTrials)
+    .sort((a, b) => b.start - a.start).slice(0, rule.sessions);
   const info = used.map((s) => {
     const list = bySession.get(s.id);
     return { id: s.id, start: s.start, who: s.who, where: s.where, trials: list.length,
       pct: Math.round((list.filter(isIndependent).length / list.length) * 100) };
   });
   if (info.length < rule.sessions) return { met: false, reason: `only ${info.length} of ${rule.sessions} sessions so far`, sessions: info };
-  if (info.some((s) => s.trials < rule.minTrials)) return { met: false, reason: `a session had fewer than ${rule.minTrials} trials`, sessions: info };
   if (info.some((s) => s.pct < rule.pct)) return { met: false, reason: `a session was under ${rule.pct}% independent`, sessions: info };
   const whos = new Set(info.map((s) => s.who).filter(Boolean)), wheres = new Set(info.map((s) => s.where).filter(Boolean));
   if (whos.size < rule.differentTags && wheres.size < rule.differentTags) {

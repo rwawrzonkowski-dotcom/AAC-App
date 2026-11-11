@@ -4,6 +4,7 @@
 import { h, openOverlay, askConfirm } from "./ui.js";
 import { getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto } from "./profiles.js";
 import { buildModel } from "./boardmodel.js";
+import { progressFor, MAX_STAGE } from "./stagerule.js";
 import { downscaleImage } from "./editor.js";
 import * as T from "./teaching.js";
 import * as data from "./teachdata.js";
@@ -38,7 +39,7 @@ function segRow(idPrefix, values, current, label, onPick) {
 }
 
 // ---------- The Teaching section of the adult menu ----------
-// ctx: { refresh, closeMenu, sessionActive(), onChooseTargets(), onStartSession(opts), onResume() }
+// ctx: { refresh, closeMenu, sessionActive(), onChooseTargets(), onChooseSentence(), onStartSession(opts), onResume() }
 export function teachingSection(ctx) {
   const cur = getCurrent();
   const n = data.getTargets().length;
@@ -64,6 +65,10 @@ export function teachingSection(ctx) {
 function statusPill(t) { return h("span", { class: "pill st-" + t.status, text: T.STATUS_LABELS[t.status] }); }
 
 function targetDetail(t) {
+  if (T.isChain(t)) {
+    return `Sentence of ${t.links.length} words  |  ${T.chainPhaseText(t)}` + (t.speakStep ? "  |  then say the sentence" : "") +
+      `  |  ${T.DIRECTION_LABELS[t.direction]}`;
+  }
   const start = startText(t);
   const last = t.history.length ? t.history[t.history.length - 1] : null;
   const ladder = T.isCustom(t) ? `Custom ladder (${T.ladderOf(t).length} steps)` : `Default ladder (${T.STEP_SIZES[t.stepSize]}% steps)`;
@@ -74,11 +79,14 @@ export function openTargetsList(ctx) {
   const list = h("div", { class: "tgt-list", id: "tgt-list" });
   const o = openOverlay([
     h("h2", { text: "Targets" }),
-    h("p", { class: "muted", text: "Targets are the words you are teaching. Each target has a prompt ladder: by default the Model prompt at 100, 75, 50 and 25 percent, then Independent; a custom ladder can also use critter, ring, glow and path highlight steps." }),
+    h("p", { class: "muted", text: "Targets are the words and sentences you are teaching. Each target has a prompt ladder: by default the Model prompt at 100, 75, 50 and 25 percent, then Independent; a custom ladder can also use critter, ring, glow and path highlight steps. " +
+      "A sentence target is a chain of 2 to 6 words taught in order, by total task, forward or backward chaining; each word fades on its own." }),
     list,
     h("div", { class: "btn-row" },
       h("button", { type: "button", class: "btn primary", id: "tgt-add", text: "Add targets",
         onclick: () => { o.close(); ctx.closeMenu(); ctx.onChooseTargets(); } }),
+      h("button", { type: "button", class: "btn primary", id: "tgt-add-sentence", text: "Add a sentence",
+        onclick: () => { o.close(); ctx.closeMenu(); ctx.onChooseSentence(); } }),
       h("button", { type: "button", class: "btn", id: "tgt-close", text: "Close", onclick: () => { o.close(); ctx.refresh(); } })),
   ], { sheetClass: "editor tall" });
 
@@ -89,7 +97,8 @@ export function openTargetsList(ctx) {
         h("div", { class: "tgt-main" },
           h("div", { class: "tgt-name" }, h("span", { class: "tgt-label", text: t.label }), statusPill(t)),
           h("div", { class: "muted tgt-detail", text: targetDetail(t) }),
-          t.path.length ? h("div", { class: "muted tgt-detail", text: "Path: " + t.path.join(" > ") + " > " + t.label }) : null),
+          T.isChain(t) ? h("div", { class: "muted tgt-detail tgt-steps", text: T.chainStepsText(t) }) : null,
+          !T.isChain(t) && t.path.length ? h("div", { class: "muted tgt-detail", text: "Path: " + t.path.join(" > ") + " > " + t.label }) : null),
         h("div", { class: "tgt-btns" },
           h("button", { type: "button", class: "btn tgt-settings", text: "Settings", onclick: () => openTargetSettings(t, paint) }),
           h("button", { type: "button", class: "btn danger tgt-remove", text: "Remove", onclick: async () => {
@@ -135,7 +144,8 @@ export function openTargetSettings(t, onDone) {
     h("div", { class: "field" }, h("label", { text: "Prompt direction" }),
       segRow("ts-dir", T.DIRECTIONS, t.direction, (v) => T.DIRECTION_LABELS[v], (v) => { t.direction = v; save(); }),
       h("p", { class: "muted", text: "Most-to-least starts each trial at the target's step in the ladder and fades it automatically. Least-to-most starts with no prompt and adds help one step at a time, from the faintest step up." })),
-    ladderSection(t, { save }),
+    T.isChain(t) ? chainSection(t, { save }) : null,
+    ladderSection(t, { save, hideStart: T.isChain(t) }),
     stepper("ts-delay", "Time delay", { min: 1, max: 15, value: t.delaySec, fmt: (v) => v + " s", onChange: (v) => { t.delaySec = v; save(); } }),
     stepper("ts-fade", "Fade after correct in a row", { min: 1, max: 10, value: t.fadeAfter, onChange: (v) => { t.fadeAfter = v; save(); } }),
     stepper("ts-back", "Back up after misses in a row", { min: 1, max: 10, value: t.backUpAfter, onChange: (v) => { t.backUpAfter = v; save(); } }),
@@ -155,6 +165,59 @@ export function openTargetSettings(t, onDone) {
     h("div", { class: "btn-row" }, h("button", { type: "button", class: "btn primary", id: "ts-done", text: "Done", onclick: () => { o.close(); onDone(); } })),
   ], { sheetClass: "editor tall" });
   paintReward();
+}
+
+// ---------- A sentence target's own settings (Beta 3.12) ----------
+// The chaining method, the "say the sentence" step, and each word's starting step (each word fades on its own).
+function chainSection(t, { save }) {
+  const box = h("div", { class: "field", id: "ts-chain" });
+  function paint() {
+    const n = T.ladderOf(t).length, taught = new Set(T.taughtLinks(t));
+    const wordRows = t.links.map((l, i) => {
+      const sel = h("select", { class: "text-input ts-link-start", "data-link": String(i), "aria-label": "Starting step for " + l.label, onchange: () => {
+        const to = Number(sel.value);
+        if (to === t.linkPos[i]) return;
+        t.history.push({ time: Date.now(), from: `${l.label}: ${T.posName(t, t.linkPos[i])}`, to: `${l.label}: ${T.posName(t, to)}`, reason: "changed by adult", dir: to > t.linkPos[i] ? "less" : "more" });
+        t.linkPos[i] = to; t.linkHits[i] = 0; t.linkMisses[i] = 0; save();
+      } });
+      T.ladderOf(t).forEach((s, k) => sel.append(h("option", { value: k, text: `${k + 1}. ${T.stepName(s, T.isCustom(t))}` })));
+      sel.append(h("option", { value: n, text: T.INDEPENDENT_NAME }));
+      sel.value = String(t.linkPos[i]);
+      const role = taught.has(i) ? "learner" : t.method === "forward" ? "modeled by the app" : "filled in";
+      return h("div", { class: "chain-word" + (taught.has(i) ? "" : " off") },
+        h("span", { class: "chain-num", text: String(i + 1) }), h("span", { class: "chain-label", text: l.label }),
+        h("small", { class: "muted chain-role", text: role }), sel);
+    });
+    box.replaceChildren(
+      h("label", { text: "Sentence: " + t.label }),
+      h("div", { class: "seg-row seg-wrap", id: "ts-method" }, T.CHAIN_METHODS.map((m) =>
+        h("button", { type: "button", class: "seg" + (t.method === m ? " on" : ""), id: "ts-method-" + m, text: T.CHAIN_METHOD_LABELS[m],
+          onclick: () => { if (t.method !== m) { T.setChainMethod(t, m); save(); paint(); } } }))),
+      h("p", { class: "muted", id: "ts-phase", text: T.chainPhaseText(t) + "." }),
+      h("p", { class: "muted", text: "Total task: the learner does every word on every trial. Forward: the learner does the first words and the app models the rest " +
+        "(prompt on each button, the word is added and said). Backward: the first words are already in the message bar and the learner finishes the sentence. " +
+        "When every word the learner does has been independent for the “Fade after” number of trials in a row, the end of the session asks whether to add the next word." }),
+      t.method !== "total" ? h("div", { class: "btn-row left" },
+        h("button", { type: "button", class: "btn", id: "ts-phase-back", text: "One word fewer", disabled: t.phase <= 1, onclick: () => {
+          t.history.push({ time: Date.now(), from: T.chainPhaseText(t), to: "", reason: "changed by adult", dir: "" });
+          t.phase--; t.phaseRun = 0; t.history[t.history.length - 1].to = T.chainPhaseText(t); save(); paint(); } }),
+        h("button", { type: "button", class: "btn", id: "ts-phase-next", text: "Add the next word now", disabled: t.phase >= t.links.length, onclick: () => {
+          T.advancePhase(t, "changed by adult"); save(); paint(); } })) : null,
+      h("div", { class: "field lad-sub" }, h("label", { text: "Each word's starting step (most-to-least; each word fades on its own)" }),
+        h("div", { class: "chain-words", id: "ts-chain-words" }, wordRows)),
+      h("div", { class: "field lad-sub" }, h("label", { text: "Say the sentence at the end" }),
+        h("div", { class: "seg-row touch-seg" },
+          h("button", { type: "button", class: "seg" + (t.speakStep ? "" : " on"), id: "ts-speak-off", text: "Off", onclick: () => { t.speakStep = false; save(); paint(); } }),
+          h("button", { type: "button", class: "seg" + (t.speakStep ? " on" : ""), id: "ts-speak-on", text: "On", onclick: () => { t.speakStep = true; save(); paint(); } })),
+        h("p", { class: "muted", text: "On: after the last word, tapping the message bar to say the whole sentence is one more step (prompted like a word)." })),
+      h("div", { class: "field lad-sub", id: "ts-errorless" }, h("label", { text: "Errorless" }),
+        h("div", { class: "seg-row touch-seg" },
+          h("button", { type: "button", class: "seg" + (t.errorless === false ? " on" : ""), id: "ts-errorless-off", text: "Off", onclick: () => { t.errorless = false; save(); paint(); } }),
+          h("button", { type: "button", class: "seg" + (t.errorless === false ? "" : " on"), id: "ts-errorless-on", text: "On", onclick: () => { t.errorless = true; save(); paint(); } })),
+        h("p", { class: "muted", text: "On: while a word's prompt is at 50% or more, a wrong button does nothing (no speech, not added, no page opens). It is still recorded as an error and the prompt gets stronger. Once the prompt fades below 50%, wrong words are said and added, so the learner hears the natural result." })));
+  }
+  paint();
+  return box;
 }
 
 // ---------- Start a session ----------
@@ -201,15 +264,41 @@ export async function runEndFlow(result, ctx) {
   await showSummary(result);
   const cur = getCurrent();
   const [sessions, trials] = await Promise.all([data.listSessions(cur.id), data.listTrials(cur.id)]);
+  // Sentence targets ready for the next word (Beta 3.12): suggested here, the adult confirms.
+  for (const id of result.phaseReady || []) {
+    const live = data.getTarget(id);
+    if (live && T.isChain(live) && live.status === "teaching") await askPhase(live);
+  }
   for (const t of result.targets) {
     const live = data.getTarget(t.wordId);
     if (!live || (live.status !== "teaching" && live.status !== "baseline")) continue;
     const check = T.masteryCheck(live, sessions, trials);
     if (check.met) await askMastery(live, check);
   }
-  const model = buildModel(ctx.board, cur.gridSize);
-  const stageIds = model.main.filter((b) => b.stage === cur.stage).map((b) => b.id);
-  if (T.stageReady(cur.stage, stageIds, data.getTargets())) await askStage(cur, ctx);
+  // Next stage (Beta 3.22): enough of this stage's main-board words are proficient (mastered target or used on their own on enough days),
+  // by the clinician's rule (Adult menu > Vocabulary stage). Only suggested; the adult decides.
+  if (cur.stage < MAX_STAGE) {
+    const prog = await progressFor(cur, buildModel(ctx.board, cur.gridSize), data.getTargets());
+    if (prog.ready) await askStage(cur, ctx, prog);
+  }
+  // The tone wheel (Beta 3.16): suggested once, at stage 4, when the learner has 3 or more mastered targets. The adult decides.
+  const mastered = data.getTargets().filter((t) => t.status === "mastered" || t.status === "maintenance").length;
+  if (cur.stage >= 4 && cur.toneWheel !== "on" && !cur.toneSuggested && mastered >= TONE_SUGGEST_MASTERED) await askToneWheel(cur, mastered);
+}
+
+const TONE_SUGGEST_MASTERED = 3;
+function askToneWheel(cur, mastered) {
+  return new Promise((resolve) => {
+    const finish = async (on) => { cur.toneSuggested = true; if (on) cur.toneWheel = "on"; await saveProfile(cur); o.close(); resolve(); };
+    const o = openOverlay([
+      h("h2", { id: "tone-suggest-title", text: "Turn on the tone wheel?" }),
+      h("p", { class: "confirm-text", text: `${cur.name} is at stage 4 with ${mastered} mastered targets. The tone wheel lets them press and hold the message bar ` +
+        "and say it happy, excited, silly, as a question, calm, sad, mad or scared, and set a mood that stays. You can change this any time in Voice settings." }),
+      h("div", { class: "btn-row" },
+        h("button", { type: "button", class: "btn", id: "tone-suggest-no", text: "Not now", onclick: () => finish(false) }),
+        h("button", { type: "button", class: "btn primary", id: "tone-suggest-yes", text: "Turn it on", onclick: () => finish(true) })),
+    ], { sheetClass: "small" });
+  });
 }
 
 function fmtDuration(ms) {
@@ -227,7 +316,8 @@ function showSummary({ session, trials, targets }) {
       h("tbody", {}, rows.map((r) => {
         const t = targets.find((x) => x.wordId === r.wordId);
         const level = r.changes.length ? r.changes.map((c) => T.changeText(c)).join(", ")
-          : t && T.isProbe(t) ? "No prompts used" : t && t.direction === "ltm" ? "Least-to-most" : "Stayed at " + (t ? T.posName(t) : T.INDEPENDENT_NAME);
+          : t && T.isProbe(t) ? "No prompts used" : t && t.direction === "ltm" ? "Least-to-most"
+          : t && T.isChain(t) ? "Each word stayed: " + T.chainStepsText(t) : "Stayed at " + (t ? T.posName(t) : T.INDEPENDENT_NAME);
         return h("tr", { "data-word": r.wordId },
           h("td", { class: "sum-name", text: r.label }),
           h("td", { class: "sum-trials", text: r.trials ? `${r.trials} (${r.planned} planned, ${r.net} NET)` : "0" + (r.skipped ? `, ${r.skipped} skipped` : "") }),
@@ -265,14 +355,34 @@ function askMastery(t, check) {
   });
 }
 
-function askStage(cur, ctx) {
+function askPhase(t) {
+  return new Promise((resolve) => {
+    const finish = () => { o.close(); resolve(); };
+    const n = t.links.length, k = T.taughtLinks(t).length;
+    const nextWord = t.method === "forward" ? t.links[k].label : t.links[n - k - 1].label;
+    const o = openOverlay([
+      h("h2", { id: "phase-title", text: `Add “${nextWord}” to “${t.label}”?` }),
+      h("p", { class: "confirm-text", id: "phase-detail", text: `Every word the learner does was independent ${t.fadeAfter} trials in a row. ` +
+        `${T.CHAIN_METHOD_LABELS[t.method]}: next, the learner also does “${nextWord}” (${k + 1} of ${n} words). It starts with the most help.` }),
+      h("div", { class: "btn-row" },
+        h("button", { type: "button", class: "btn", id: "phase-no", text: "Not yet", onclick: async () => { t.phaseRun = 0; await data.saveTarget(t); finish(); } }),
+        h("button", { type: "button", class: "btn primary", id: "phase-yes", text: `Add “${nextWord}”`, onclick: async () => {
+          T.advancePhase(t); await data.saveTarget(t); finish();
+        } })),
+    ], { sheetClass: "small" });
+  });
+}
+
+function askStage(cur, ctx, prog) {
   return new Promise((resolve) => {
     const next = cur.stage + 1;
     const finish = () => { o.close(); resolve(); };
     const o = openOverlay([
       h("h2", { id: "stage-title", text: `Move ${cur.name} to stage ${next}?` }),
-      h("p", { class: "confirm-text", id: "stage-detail", text: `Every stage ${cur.stage} word you are teaching is mastered. ` +
-        `Stage ${next} reveals more words in their permanent spots; nothing moves.` }),
+      h("p", { class: "confirm-text", id: "stage-detail", text: (prog.mode === "words"
+        ? `All ${prog.need} of the stage ${cur.stage} words you chose are proficient: ${prog.items.filter((i) => i.chosen).map((i) => i.label).join(", ")}.`
+        : `${prog.have} of ${prog.items.length} stage ${cur.stage} words are proficient (the rule is ${prog.pct}%): ${prog.items.filter((i) => i.proficient).map((i) => i.label).join(", ")}.`) +
+        ` Stage ${next} reveals more words in their permanent spots; nothing moves.` }),
       h("div", { class: "btn-row" },
         h("button", { type: "button", class: "btn", id: "stage-no", text: "Not yet", onclick: finish }),
         h("button", { type: "button", class: "btn primary", id: "stage-yes", text: `Move to stage ${next}`, onclick: async () => {
