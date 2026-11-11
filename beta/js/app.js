@@ -46,6 +46,7 @@ import * as scenes from "./scenestrip.js";
 import * as little from "./littlewords.js";
 import { applyAccess, getAccess, showToListener } from "./access.js";
 import { createScanner } from "./scan.js";
+import { looksLikePhone } from "./devicetips.js";
 import { openModelSentence } from "./modelsentence.js";
 import { openToneWheel } from "./tonewheel.js";
 import { toneById } from "./tones.js";
@@ -1235,6 +1236,9 @@ async function start() {
   attachPressHandling(little.init($("context-strip")), onLittleTap, ".lw-item",
     { holdMs, blocked: tapsBlocked, dialMs: littleDialMs, openDial: openLittleDial });
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
+  attachHold($("adult-hold-portrait"), HOLD_TO_OPEN_MS, openAdult);    // the turn-sideways screen has its own adult circle (Beta 3.24)
+  initAdultHint($("adult-hold-portrait"));
+  $("rotate-text").textContent = looksLikePhone() ? "Turn the phone sideways" : "Turn the iPad sideways";
   initAdultHint($("adult-hold"));          // a quick tap shows "Adults: hold 3 seconds to open the menu"
   initModelEnd();                          // End modeling: two taps on a button inside the message bar (Beta 3.11)
   onBannerTap($("edit-done"), stopEditing);
