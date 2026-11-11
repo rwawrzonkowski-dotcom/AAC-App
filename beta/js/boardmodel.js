@@ -99,17 +99,22 @@ export function buildModel(board, size) {
       ? p.groups.flatMap((g) => [...g.words.map(asEntry).filter(onSize), ...(size === 84 ? (g.adds || []).map(asEntry) : [])]).map((e) => e.id)
       : (p.items || []).map(asEntry).filter(onSize).map((e) => e.id);
     defs[pid] = { id: pid, name: p.name, groups: p.groups || null, starter: p.starter || [], items: p.items || [], itemIds: ids,
-                  fromBar: !!p.fromBar, newWords: new Set(p.newWords || []), wordStages: p.wordStages || {} };
+                  fromBar: !!p.fromBar, newWords: new Set(p.newWords || []), wordStages: p.wordStages || {}, home: p.home || null };
   }
 
   // Where is each page opened from? (the main grid, the top bar, or an item on another page)
   const openerOf = {};   // pageId -> { parent, openerId }   (openerId null = the top-bar Words button)
   for (const b of main) if (b.loadBoard && defs[b.loadBoard]) openerOf[b.loadBoard] = { parent: "core", openerId: b.id };
   for (const d of Object.values(defs)) if (d.fromBar) openerOf[d.id] = { parent: "core", openerId: null };
+  // A folder with a "home" page (Beta 3.27: the stage-5 folders also open from Play, Describing, Time and Places > School) always
+  // belongs to its home page: its Back spot, depth and Model-mode path come from there, wherever else a second button opens it.
   for (const d of Object.values(defs)) {
     for (const id of d.itemIds) {
       const w = board.words[id];
-      if (w.loadBoard && defs[w.loadBoard]) openerOf[w.loadBoard] = { parent: d.id, openerId: id };
+      if (!w.loadBoard || !defs[w.loadBoard]) continue;
+      const home = defs[w.loadBoard].home;
+      if (home && home !== d.id && defs[home]) continue;
+      openerOf[w.loadBoard] = { parent: d.id, openerId: id };
     }
   }
 
@@ -144,7 +149,11 @@ export function buildModel(board, size) {
       const NEW_STAGE = board.pageNewWordStage || 3;
       // pageStage: from which stage the word shows on this page (original items: always)
       // "wordStages" (Beta 3.26) names the stage of particular words on the page, e.g. the stage-5 folders on the Words menu.
-      const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: d.wordStages[e.id] ?? (starter.has(e.id) ? 1 : NEW_STAGE) });
+      // "late": a button added to an existing page after release (the "wordStages" ones). If an adult had already put a word of their
+      // own in that cell, the adult's word stays and the late button does not show there (see resolvePage), so nothing the learner
+      // already uses moves.
+      const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: d.wordStages[e.id] ?? (starter.has(e.id) ? 1 : NEW_STAGE),
+                                                ...(e.id in d.wordStages ? { late: true } : {}) });
       for (const g of d.groups) {
         const skip = back45 && back45.row === g.row ? back45.col : -1;
         let col = 0;
@@ -239,8 +248,9 @@ export function resolvePage(page, profile, model) {
     for (let col = 0; col < cols; col++) {
       const key = posKey(size, page.id, row, col);
       const d = { key, row, col, base: null, ov: {}, page: page.id };
-      const base = byPos.get(row + "," + col) || null;
+      let base = byPos.get(row + "," + col) || null;
       const custom = profile.cells[key];
+      if (base && base.late && custom && custom.custom && custom.label) base = null;   // the adult's own word keeps its cell
 
       if (page.at && page.at.row === row && page.at.col === col) {
         d.kind = "home";                              // Back button: not editable
