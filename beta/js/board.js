@@ -146,6 +146,11 @@ export function fitLabelsOnResize(boardEl) {
     clearTimeout(fitTimer);
     fitTimer = setTimeout(() => fitLabels(boardEl), 120);
   });
+  // ...and when a font finishes loading (Accessibility > Letters: a chosen font arrives a moment after the board is drawn, and the labels
+  // were measured in the fallback font; OpenDyslexic is much wider).
+  try {
+    if (document.fonts) document.fonts.addEventListener("loadingdone", () => { clearTimeout(fitTimer); fitTimer = setTimeout(() => fitLabels(boardEl), 30); });
+  } catch (e) { /* older browsers: the resize refit still works */ }
 }
 
 // Put a built-in symbol in an image area. If the file cannot be loaded, show the

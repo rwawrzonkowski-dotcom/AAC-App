@@ -3,7 +3,7 @@
 // between buttons, or how a hidden spot is drawn. Each word keeps its row and column (motor planning).
 //
 //   theme        standard | dark (high contrast) | cvi (black and yellow) | cbsafe (colour-blind safe) | dim (soft dark, low glare)
-//   font         system | atkinson (Atkinson Hyperlegible) | lexend           (fonts/ : both SIL Open Font License, bundled, offline)
+//   font         system | atkinson (Atkinson Hyperlegible) | lexend | opendyslexic (OpenDyslexic, Nov 11)   (fonts/ : all SIL Open Font License, bundled, offline)
 //   labelSize    s | m | l | xl                 (labels still shrink to fit their button: js/board.js fitLabels)
 //   labelPos     bottom | top
 //   labelCase    asis | lower | upper           ("lower" keeps "I" and "I'm" capital)
@@ -19,7 +19,7 @@ import { h } from "./ui.js";
 
 export const ACCESS_CHOICES = {
   theme: ["standard", "dark", "cvi", "cbsafe", "dim"],
-  font: ["system", "atkinson", "lexend"],
+  font: ["system", "atkinson", "lexend", "opendyslexic"],
   labelSize: ["s", "m", "l", "xl"],
   labelPos: ["bottom", "top"],
   labelCase: ["asis", "lower", "upper"],

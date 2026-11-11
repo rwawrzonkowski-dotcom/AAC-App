@@ -1275,6 +1275,14 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 @font-face { font-family: "Lexend"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/lexend-latin-700-normal.woff2") format("woff2"); }
 html[data-font="atkinson"] #app, html[data-font="atkinson"] .listener-view, html[data-font="atkinson"] #dial-layer { font-family: "Atkinson Hyperlegible", -apple-system, Arial, sans-serif; }
 html[data-font="lexend"] #app, html[data-font="lexend"] .listener-view, html[data-font="lexend"] #dial-layer { font-family: "Lexend", -apple-system, Arial, sans-serif; }
+/* OpenDyslexic (Nov 11): weighted letter bottoms for readers with dyslexia. Its letters are wide, so labels get normal letter spacing
+   (fitLabels still shrinks a long label to fit its button). */
+@font-face { font-family: "OpenDyslexic"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/opendyslexic-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "OpenDyslexic"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/opendyslexic-latin-700-normal.woff2") format("woff2"); }
+html[data-font="opendyslexic"] #app, html[data-font="opendyslexic"] .listener-view, html[data-font="opendyslexic"] #dial-layer { font-family: "OpenDyslexic", -apple-system, Arial, sans-serif; }
+html[data-font="opendyslexic"] #board .cell-label { letter-spacing: 0; }
+/* The little-word strip is not re-fitted: its short words get slightly smaller letters in this wide font, so "there" and "where" fit. */
+html[data-font="opendyslexic"] .lw-item.text-only .cell-label { font-size: min(2.1vmin, 2.9dvh); letter-spacing: 0; }
 
 /* Label size: the letters scale (and, for L and XL, the label row gets a little more of the button; the picture box shrinks to match).
    js/board.js fitLabels still shrinks a label that would not fit. */

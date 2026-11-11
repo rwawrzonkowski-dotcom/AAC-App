@@ -1,6 +1,6 @@
 # VOICE — Project Status and Reference
 
-*Last updated: Nov 10, 2026 (VOICE 3.1.2 stable, Nov 11 security fixes; beta = Beta 3.25, the 24 board). Read this first in any new session instead of re-reading old chats.*
+*Last updated: Nov 10, 2026 (VOICE 3.1.2 stable, Nov 11 security fixes; beta = Beta 3.25.1: the 24 board, OpenDyslexic). Read this first in any new session instead of re-reading old chats.*
 
 **VOICE** = Variable Output for Individualized Communication and Expression. A free, iPad-first AAC (speech) app for nonvocal children new to AAC, built by **Richard Wawrzonkowski, M.S., LBA, BCBA**. Pilot with his clients now; public release later.
 

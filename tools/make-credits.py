@@ -61,11 +61,12 @@ brand. Shared under CC BY-SA 4.0.
 
 ## Fonts (Accessibility)
 
-Two optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. Both are licensed under
-the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`):
+Three optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. All are licensed under
+the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`, `fonts/OFL-opendyslexic.txt`):
 
 - **Atkinson Hyperlegible** (c) 2020 Braille Institute of America, Inc. https://www.brailleinstitute.org/freefont
 - **Lexend** (c) 2019 The Lexend Project Authors. https://github.com/googlefonts/lexend
+- **OpenDyslexic** (c) 2012-2019 Abbie Gonzalez, with Reserved Font Name OpenDyslexic (used unmodified). https://opendyslexic.org
 
 ## Object recognition (Scenes)
 

@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v41";
+const CACHE_VERSION = "beta-aac-v42";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -26,10 +26,13 @@ const FILES = [
   "data/word-forms.json?v=97d3b113c2",
   "fonts/OFL-atkinson-hyperlegible.txt?v=be10884967",
   "fonts/OFL-lexend.txt?v=2c363333f9",
+  "fonts/OFL-opendyslexic.txt?v=1ff1e4ec1e",
   "fonts/atkinson-hyperlegible-latin-400-normal.woff2?v=307749986f",
   "fonts/atkinson-hyperlegible-latin-700-normal.woff2?v=7fb4e9c838",
   "fonts/lexend-latin-400-normal.woff2?v=afbf53683c",
   "fonts/lexend-latin-700-normal.woff2?v=69aae2c5c4",
+  "fonts/opendyslexic-latin-400-normal.woff2?v=cd87d324c8",
+  "fonts/opendyslexic-latin-700-normal.woff2?v=0cd88b3ba3",
   "icons/apple-touch-icon.png?v=ef01a9abb4",
   "icons/icon-180.png?v=ef01a9abb4",
   "icons/icon-192.png?v=3080986afa",
@@ -1447,17 +1450,17 @@ const FILES = [
   "images/symbols/zip.svg?v=7b690677e7",
   "images/symbols/zoo.svg?v=156859c56f",
   "js/about.js?v=5bda0bb73f",
-  "js/access.js?v=d2e916839d",
-  "js/accessui.js?v=7e50db4eb1",
+  "js/access.js?v=662f65d543",
+  "js/accessui.js?v=348e5e7940",
   "js/adult.js?v=ca5757b48e",
   "js/adulthint.js?v=21b269cb20",
   "js/app.js?v=d4974b4701",
   "js/backup.js?v=4365500670",
-  "js/board.js?v=f108ac9be0",
+  "js/board.js?v=a91dfe0402",
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=3f97f40d3f",
   "js/camerabtn.js?v=114b8ebc7a",
-  "js/channel.js?v=6d375d9dd9",
+  "js/channel.js?v=a645154ef1",
   "js/critters.js?v=0008315f67",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=d0c538ff70",
@@ -1510,7 +1513,7 @@ const FILES = [
   "js/ui.js?v=6b27e92e5d",
   "js/voicepicker.js?v=e4127d1c9d",
   "manifest.webmanifest?v=2c85c0b4e9",
-  "styles.css?v=6254afe842",
+  "styles.css?v=7d0df4900d",
 ];
 // END FILE LIST
 
