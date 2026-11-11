@@ -59,7 +59,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
   let pageId = pageForOldId(startAt) || "learner";        // the page on the right (iPad) or open (phone)
   if (!visibleIn(pageById(pageId), view)) pageId = "learner";
   let query = "";
-  const isNarrow = () => looksLikePhone() || window.innerWidth < 760;
+  // (Beta 3.24) also one column when the device is upright and not very wide (an iPad in portrait)
+  const isNarrow = () => looksLikePhone() || window.innerWidth < 760 || (window.innerHeight > window.innerWidth && window.innerWidth < 900);
   let narrow = isNarrow();
   let showingPage = !narrow || !!startAt;                 // phone: start on the list unless asked for a page
 
