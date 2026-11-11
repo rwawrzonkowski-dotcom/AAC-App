@@ -1,6 +1,6 @@
 # VOICE — Project Status and Reference
 
-*Last updated: Nov 10, 2026 (VOICE 3.1 stable, promoted Nov 10; beta = the same, 24 grid next). Read this first in any new session instead of re-reading old chats.*
+*Last updated: Nov 10, 2026 (VOICE 3.1.1 stable, Nov 10; beta = the same, 24 grid next). Read this first in any new session instead of re-reading old chats.*
 
 **VOICE** = Variable Output for Individualized Communication and Expression. A free, iPad-first AAC (speech) app for nonvocal children new to AAC, built by **Richard Wawrzonkowski, M.S., LBA, BCBA**. Pilot with his clients now; public release later.
 
@@ -8,7 +8,7 @@
 
 | What | Where |
 |---|---|
-| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 3.1" (promoted Nov 10: everything through Beta 3.24) |
+| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 3.1.1" (promoted Nov 10: everything through Beta 3.24.1) |
 | Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 3.23": VOICE 2.0 plus **camera scenes** (Phase 3), **scene-name vocabulary**, **My things** and the **camera button** (see below) |
 | Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE), `stable-1.1` (VOICE 1.1), `stable-2.0` (VOICE 2.0), `stable-3.0` (VOICE 3.0) and `stable-3.1` (VOICE 3.1) |
 | Planning doc (source of truth for decisions) | https://claude.ai/code/artifact/133274d9-e0f2-4009-8086-6f527aebe3af |

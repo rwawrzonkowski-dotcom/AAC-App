@@ -7,6 +7,7 @@
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
+| **VOICE 3.1.1** | Nov 10 | Stable gets the Beta 3.24.1 upright fixes (two-line adult menu top bar on phones; pointer waits while upright). | styles.css, js/app.js |
 | **Beta 3.24.1** | Nov 10 | Upright fixes: on a phone the adult menu's top bar now uses two lines (title and Close, then Parent / Clinician), so nothing is cut off; the "This is the adult menu" pointer waits while the device is upright, so it can no longer cover the turn screen's adult circle. | styles.css, js/app.js |
 | **VOICE 3.1** | Nov 10 | **Promoted to stable**: Beta 3.24 (portrait: adult screens upright, animated turn picture, adult circle on the turn screen). | (see Beta 3.24) |
 | **Beta 3.24** | Nov 10 | **Portrait.** The adult menu, passcode, reports and every adult sheet now work with the iPad or phone upright (they used to disappear); the menu uses its one-column layout when upright and not wide; turning the device keeps the menu open. The child's board still waits for landscape, and the turn screen now shows an **animated picture**: a device with a little VOICE board turns from upright to sideways, then a green check (4 s loop; a still sideways picture with Reduce Motion). The text says "Turn the iPad sideways" or "Turn the phone sideways". The turn screen has its own adult circle (same 3-second hold and passcode). | `index.html` (#rotate-message, #adult-hold-portrait), `styles.css` (Portrait section), `app.js`, `adult.js` (`isNarrow`) |

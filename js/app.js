@@ -292,7 +292,8 @@ function renderAll() {
 let hintsReady = false;      // set after the start-up Home Screen notice (if any) is closed, so the two never stack
 function coachCheck() {
   maybeShowCoach(getCurrent().id, () => !state.editing && !state.choosing && !state.modeling && !teach.isActive()
-    && !(typing && typing.isOpen()) && !document.querySelector(".overlay"));
+    && !(typing && typing.isOpen()) && !document.querySelector(".overlay")
+    && !(window.matchMedia && window.matchMedia("(orientation: portrait)").matches));   // upright: the board (and its circle) is hidden
 }
 
 // The Words, Forms and ABC buttons in the top bar. They only change themselves (and the message text's width):
