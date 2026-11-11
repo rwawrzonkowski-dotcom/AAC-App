@@ -84,7 +84,7 @@ import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
 import { SIZES, MAX_DEPTH } from "./boardmodel.js";
-import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE } from "./migrate.js";
+import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE, LAYOUT8_NOTE } from "./migrate.js";
 import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 import { cleanAccess } from "./access.js";
@@ -92,7 +92,7 @@ import { cleanScan } from "./scan.js";
 import { cleanStageRule } from "./stagerule.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 18;
+export const BACKUP_VERSION = 19;   // 19 = Beta 3.23 (Actions folder layout)
 
 // ---------------------------------------------------------------- saving
 
@@ -320,12 +320,14 @@ function cleanLearner(raw, index, version) {
   // tidy moves nothing.)
   let notices = [];
   let moved = {};
-  if (version < 9) {
+  if (version < 19) {
+    // (Beta 3.23 file version 19: the Actions folder layout. Older backups also get their adult words moved off the new Back cells.)
     const r = relocateAdultWords(board, cells, pages);
-    cells = r.cells; pages = r.pages; pins = {};
+    cells = r.cells; pages = r.pages; if (version < 9) pins = {};
     moved = moveMap(r.moves);
     notices = describeMoves(r.moves);
     if (version < 8) notices.push(RANCH_NOTE);   // (Phase 1.8A: ranch moved into More food; version 8 backups already know)
+    notices.push(LAYOUT8_NOTE);
   }
 
   const photos = [];

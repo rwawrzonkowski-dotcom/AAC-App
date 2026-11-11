@@ -65,7 +65,7 @@
 // Only tiny things (which learner is current) go in localStorage.
 import * as db from "./db.js";
 import { load, save, remove } from "./storage.js";
-import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION, RANCH_NOTE } from "./migrate.js";
+import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, CURRENT_PROFILE_VERSION, RANCH_NOTE, LAYOUT8_NOTE } from "./migrate.js";
 import { DEFAULT_MODEL, cleanModel } from "./critters.js";
 import { PAUSE_CHOICES } from "./speech.js";
 import { deleteTeaching, importTeaching } from "./teachdata.js";
@@ -175,6 +175,24 @@ async function upgradeProfile(p, board) {
     }
     p.notices = [...(p.notices || []), ...describeMoves(r.moves)];
     if (p.v < 6 && !p.notices.includes(RANCH_NOTE)) p.notices.push(RANCH_NOTE);   // (learners already at 6 got it in 1.8A)
+    p.v = CURRENT_PROFILE_VERSION;
+    p.notices.push(LAYOUT8_NOTE);
+    await saveProfile(p);
+  }
+  if (p.v < 8) {
+    // Version 7 -> 8 (Beta 3.23): the Actions folder on the main board moved Favorites (and on the 84 board About me). Words the adult
+    // added where a button or a Back cell now sits are moved (same rule as above), and the adult gets a note.
+    const r = relocateAdultWords(board, p.cells, p.pages);
+    p.cells = r.cells; p.pages = r.pages;
+    const map = moveMap(r.moves);
+    if (Object.keys(map).length) {
+      const prefix = p.id + "|";
+      for (const row of await db.getPrefix("photos", prefix)) {
+        const to = map[row.key.slice(prefix.length)];
+        if (to) { await db.put("photos", prefix + to, row.value); await db.del("photos", row.key); }
+      }
+    }
+    p.notices = [...(Array.isArray(p.notices) ? p.notices : []), ...describeMoves(r.moves), LAYOUT8_NOTE];
     p.v = CURRENT_PROFILE_VERSION;
     await saveProfile(p);
   }

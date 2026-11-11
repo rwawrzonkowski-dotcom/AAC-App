@@ -1467,7 +1467,24 @@
   "ac-school": {"label": "School actions", "spokenText": "School actions", "wordType": "category", "loadBoard": "ac-school", "image": "images/symbols/ac-school.svg"},
   "ac-play": {"label": "Play actions", "spokenText": "Play actions", "wordType": "category", "loadBoard": "ac-play", "image": "images/symbols/ac-play.svg"},
   "ac-body": {"label": "Body moves", "spokenText": "Body moves", "wordType": "category", "loadBoard": "ac-body", "image": "images/symbols/ac-body.svg"},
-  "ac-kitchen": {"label": "Kitchen", "spokenText": "Kitchen", "wordType": "category", "loadBoard": "ac-kitchen", "image": "images/symbols/ac-kitchen.svg"}
+  "ac-kitchen": {"label": "Kitchen", "spokenText": "Kitchen", "wordType": "category", "loadBoard": "ac-kitchen", "image": "images/symbols/ac-kitchen.svg"},
+  "actions": {"label": "Actions", "spokenText": "Actions", "wordType": "category", "stage": 2, "loadBoard": "actions", "image": "images/symbols/w-actions.svg"},
+  "bite": {"label": "bite", "spokenText": "bite", "wordType": "action", "image": "images/symbols/bite.svg"},
+  "blow": {"label": "blow", "spokenText": "blow", "wordType": "action", "image": "images/symbols/blow.svg"},
+  "close": {"label": "close", "spokenText": "close", "wordType": "action", "image": "images/symbols/close.svg"},
+  "cry": {"label": "cry", "spokenText": "cry", "wordType": "action", "image": "images/symbols/cry.svg"},
+  "drive": {"label": "drive", "spokenText": "drive", "wordType": "action", "image": "images/symbols/drive.svg"},
+  "feed": {"label": "feed", "spokenText": "feed", "wordType": "action", "image": "images/symbols/feed.svg"},
+  "fix": {"label": "fix", "spokenText": "fix", "wordType": "action", "image": "images/symbols/fix.svg"},
+  "hear": {"label": "hear", "spokenText": "hear", "wordType": "action", "image": "images/symbols/hear.svg"},
+  "hit": {"label": "hit", "spokenText": "hit", "wordType": "action", "image": "images/symbols/hit.svg"},
+  "kiss": {"label": "kiss", "spokenText": "kiss", "wordType": "action", "image": "images/symbols/kiss.svg"},
+  "knock": {"label": "knock", "spokenText": "knock", "wordType": "action", "image": "images/symbols/knock.svg"},
+  "smell": {"label": "smell", "spokenText": "smell", "wordType": "action", "image": "images/symbols/smell.svg"},
+  "stand": {"label": "stand", "spokenText": "stand", "wordType": "action", "image": "images/symbols/stand.svg"},
+  "talk": {"label": "talk", "spokenText": "talk", "wordType": "action", "image": "images/symbols/talk.svg"},
+  "touch": {"label": "touch", "spokenText": "touch", "wordType": "action", "image": "images/symbols/touch.svg"},
+  "wake": {"label": "wake", "spokenText": "wake", "wordType": "action", "image": "images/symbols/wake.svg"}
  },
  "layouts": {
   "45": {"columns": 9, "rows": 5, "main": [
@@ -1475,7 +1492,7 @@
    ["want", "like", "get", "go", "stop", "help", "more", "all", "some"],
    ["do", "make", "put", "turn", "look", "open", "eat", "drink", "bathroom"],
    ["can", "not", "finished", "good", "different", "same", "up", "in", "on"],
-   ["yes", "no", "chat", "play", "people", "favorites", "food", "drinks", "places"]
+   ["yes", "no", "chat", "play", "people", "actions", "food", "drinks", "places"]
   ]},
   "84": {"columns": 12, "rows": 7, "main": [
    ["i", "you", "it", "that", "what", "where", "who", "when", "why", "how", "he", "she"],
@@ -1484,7 +1501,7 @@
    ["can", "not", "finished", "good", "different", "same", "up", "in", "on", "off", "out", "down"],
    ["me", "my", "we", "they", "this", "big", "little", "hot", "cold", "fast", "slow", "again"],
    ["hi", "bye", "please", "thank-you", "sorry", "wait", "hurt", "feel", "see", "read", "love", "break"],
-   ["yes", "no", "chat", "play", "people", "favorites", "food", "drinks", "places", "aboutme", "feelings", "animals"]
+   ["yes", "no", "chat", "play", "people", "actions", "food", "drinks", "places", "favorites", "feelings", "animals"]
   ]}
  },
  "pages": {
@@ -1521,12 +1538,13 @@
     {"row": 3, "name": "About me", "words": [{"id": "aboutme", "sizes": [45]}]},
     {"row": 4, "name": "People folders", "words": ["pe-family", "pe-school", "pe-helpers", "pe-pretend", "pe-friends"]}
   ]},
-  "chat": {"name": "Chat", "starter": ["hi", "bye", "my-turn", "your-turn", "sorry", "how-are-you", "need-break", "look-at-me", "please", "thank-you", "good-morning", "good-job"], "groups": [
+  "chat": {"name": "Chat", "starter": ["hi", "bye", "my-turn", "your-turn", "sorry", "how-are-you", "need-break", "look-at-me", "please", "thank-you", "good-morning"], "groups": [
     {"row": 0, "name": "Greetings", "words": ["hi", "bye", "good-morning", "good-night", "see-you-later", "how-are-you", "im-good", "nice-to-meet-you", "whats-your-name"], "adds": ["hello", "welcome", "happy-birthday"]},
     {"row": 1, "name": "Turns and play", "words": ["my-turn", "your-turn", "look-at-me", "come-here", "lets-play", "again", "wait", "im-done", "help-me"], "adds": ["watch-this", "follow-me", "ready-set-go"]},
     {"row": 2, "name": "Comments", "words": ["i-like-it", "i-dont-like-it", "thats-funny", "wow", "uh-oh", "oops", "cool", "yuck", "yay"], "adds": ["awesome", "gross", "oh-no"]},
     {"row": 3, "name": "Manners and protest", "words": ["please", "thank-you", "sorry", "excuse-me", "yes-please", "no-thank-you", "stop-it", "leave-me-alone", "need-break"], "adds": ["not-now", "my-body", "too-much"]},
-    {"row": 4, "name": "Help", "words": ["i-dont-know", "i-dont-understand", "good-job", {"id": "feelings", "sizes": [45]}, "ch-questions", "ch-requests", "ch-play", "ch-compliments"], "adds": ["say-it-again", "slow-down", "im-trying"]}
+    {"row": 4, "name": "Help", "words": ["i-dont-know", "i-dont-understand", {"id": "favorites", "sizes": [45]}, {"id": "feelings", "sizes": [45]}, "ch-questions", "ch-requests", "ch-play", "ch-compliments"], "adds": ["say-it-again", "slow-down", "im-trying"]},
+    {"row": 5, "name": "About me", "words": [{"id": "aboutme", "sizes": [84]}]}
   ]},
   "feelings": {"name": "Feelings", "starter": ["happy", "sad", "mad", "scared", "tired", "sick", "silly", "calm"], "groups": [
     {"row": 0, "name": "Feelings", "words": ["happy", "sad", "mad", "scared", "tired", "sick", "silly", "calm", "excited"], "adds": ["frustrated", "worried", "proud"]},
@@ -1849,6 +1867,14 @@
   ]},
   "ac-kitchen": {"name": "Kitchen", "groups": [
     {"row": 0, "name": "Kitchen", "words": ["cook", "stir", "pour", "mix", "bake", "wash-dishes", "set-the-table", "scoop", "spread"], "adds": ["peel", "chop", "taste"]}
+  ]},
+  "actions": {"name": "Actions", "starter": ["run", "walk", "jump", "sit", "climb", "ride", "swim", "dance", "fall", "give", "take", "push", "pull", "throw", "catch", "hold", "pour", "wash", "play-word", "read", "sing", "draw", "color", "hug", "tickle", "sleep", "wait"], "groups": [
+    {"row": 0, "name": "Move", "words": ["run", "walk", "jump", "sit", "climb", "ride", "swim", "dance", "fall"], "adds": ["kick", "slide", "swing"]},
+    {"row": 1, "name": "Hands", "words": ["give", "take", "push", "pull", "throw", "catch", "hold", "pour", "wash"], "adds": ["bring", "shake", "splash"]},
+    {"row": 2, "name": "Action folders", "words": ["ac-routine", "ac-school", "ac-play", "ac-body", "ac-kitchen", "bite", "blow", "kiss", "cry"], "adds": ["paint", "write", "laugh"]},
+    {"row": 3, "name": "Play and talk", "words": ["play-word", "read", "sing", "draw", "color", "hug", "tickle", "sleep", "wait"], "adds": ["hear", "smell", "feed"]},
+    {"row": 4, "name": "More actions", "words": ["see", "listen", "come", "find", "hide", "touch", "talk", "clean"], "adds": ["wipe", "taste", "watch"]},
+    {"row": 5, "name": "Even more actions", "words": [{"id": "build", "sizes": [84]}, {"id": "cook", "sizes": [84]}, {"id": "cut", "sizes": [84]}, {"id": "close", "sizes": [84]}, {"id": "drive", "sizes": [84]}, {"id": "fix", "sizes": [84]}, {"id": "hit", "sizes": [84]}, {"id": "knock", "sizes": [84]}, {"id": "stand", "sizes": [84]}], "adds": ["wake", "break", "work"]}
   ]},
   "favorites": {"name": "Favorites", "items": []}
  }

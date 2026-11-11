@@ -81,9 +81,18 @@ export function migrateCells(board, oldCells) {
 // word goes to the first free cell on the Favorites page. Everything about built-in words
 // (renamed label, photo, show/hide) is stored by word id, so it follows its word by itself.
 // ---------------------------------------------------------------------------------
-export const CURRENT_PROFILE_VERSION = 7;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders;
+export const CURRENT_PROFILE_VERSION = 8;   // 3 = row-group category pages; 4 = Number pad on the Numbers page; 5 = toy and animal folders;
                                             // 6 = folders on Places, People, Chat, Feelings, Drinks and the More food folder on Food;
                                             // 7 = folders on the Words pages (Describing, Time, Numbers, Clothes, Outside, Things) and the five Actions folders on the Words menu
+                                            // 8 = (Beta 3.23) the Actions folder on the main board: 45 board: Actions takes Favorites' spot and Favorites
+                                            //     moves into Chat (where "good job" was; good job is still in Chat > Compliments); 84 board: Actions takes
+                                            //     Favorites' spot, Favorites takes About me's spot and About me moves into Chat (row 6, first button)
+
+// Beta 3.23 (Richard, Nov 10): the one deliberate exception to "a word never moves", made before the public release. Every learner saved
+// before profile version 8 gets this note once (and anything an adult added where a button now sits is moved, as for earlier versions).
+export const LAYOUT8_NOTE = "New Actions folder on the main board (verbs; shows from stage 2). To make room, two folders moved: " +
+  "45 board: Favorites moved into Chat (bottom row, where \"good job\" was; good job is still in Chat > Compliments). " +
+  "84 board: Favorites moved to the spot where About me was, and About me moved into Chat (row 6, first button). Show the learner the new spots.";
 
 // Phase 1.8A: the "ranch" button (Food page, row 5, column 9) became the "More food" folder button. The word itself
 // (same id, so a renamed label, photo or show/hide choice follows it) now lives in More food > Sauces and spreads.

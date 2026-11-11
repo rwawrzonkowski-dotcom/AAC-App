@@ -115,6 +115,7 @@ const state = {
   forms: null,        // the open Forms popover, if any
   dial: null,         // the open press-and-hold word-forms dial, if any (js/dial.js); also the tone wheel (js/tonewheel.js)
   mood: null,         // the learner's mood (a tone id from js/tones.js) or null; kept only while VOICE is open (Beta 3.16)
+  cameFrom: {},       // page id -> the page it was opened from (for Back)
   draft: null,        // what is being typed on the keyboard / number pad: { text, kind } or null
 };
 let started = false;  // true once the first board has been drawn
@@ -318,6 +319,19 @@ function updateBar() {
 // Words button: open the Words menu; while a Words page is open the same button ("Close") goes back to the main board.
 function toggleWords() {
   goTo(onWordsPage() ? "core" : "words");
+}
+
+// Back goes to the page the learner came from when that page really opens this one (Beta 3.23: the action folders open from the Actions
+// folder and from the Words menu); otherwise to the page's own parent. The Back button's spot is the same either way.
+function backTarget() {
+  const page = currentPageDef();
+  const from = state.cameFrom[state.page];
+  if (from && from !== state.page) {
+    const model = modelNow(), opener = from === "core" ? null : getPage(model, getCurrent(), from);
+    const opens = from === "core" ? model.main.some((b) => b.loadBoard === state.page) : opener && opener.items.some((it) => it.loadBoard === state.page);
+    if (opens) return from;
+  }
+  return page.parent || "core";
 }
 
 function goTo(pageId) {
@@ -709,7 +723,7 @@ function onCellTap(cellEl) {
 
   // Back button: up ONE level (a page opened from another page goes back to that
   // page; a page opened from the main board goes back to the main board). Never speaks.
-  if (d.kind === "home") { teach.onSelect({ type: "back" }); goTo(currentPageDef().parent || "core"); return; }
+  if (d.kind === "home") { teach.onSelect({ type: "back" }); goTo(backTarget()); return; }
 
   if (state.editing) { editCell(d); return; }
 
@@ -721,6 +735,7 @@ function onCellTap(cellEl) {
     const ev = { type: "category", id: d.wordId || d.key, label: d.label, opens: d.loadBoard };
     if (teach.errorlessBlocks(ev)) { teach.onSelect({ ...ev, blocked: true }); return; }   // errorless sentence trial (Beta 3.22): wrong page stays shut
     teach.onSelect(ev);
+    state.cameFrom[d.loadBoard] = state.page;      // Back returns here (a folder can be opened from two places, Beta 3.23)
     goTo(d.loadBoard);
     return;
   }
