@@ -4,6 +4,7 @@
 import { h, openOverlay, askConfirm } from "./ui.js";
 import { getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto } from "./profiles.js";
 import { buildModel } from "./boardmodel.js";
+import { progressFor, MAX_STAGE } from "./stagerule.js";
 import { downscaleImage } from "./editor.js";
 import * as T from "./teaching.js";
 import * as data from "./teachdata.js";
@@ -208,7 +209,12 @@ function chainSection(t, { save }) {
         h("div", { class: "seg-row touch-seg" },
           h("button", { type: "button", class: "seg" + (t.speakStep ? "" : " on"), id: "ts-speak-off", text: "Off", onclick: () => { t.speakStep = false; save(); paint(); } }),
           h("button", { type: "button", class: "seg" + (t.speakStep ? " on" : ""), id: "ts-speak-on", text: "On", onclick: () => { t.speakStep = true; save(); paint(); } })),
-        h("p", { class: "muted", text: "On: after the last word, tapping the message bar to say the whole sentence is one more step (prompted like a word)." })));
+        h("p", { class: "muted", text: "On: after the last word, tapping the message bar to say the whole sentence is one more step (prompted like a word)." })),
+      h("div", { class: "field lad-sub", id: "ts-errorless" }, h("label", { text: "Errorless" }),
+        h("div", { class: "seg-row touch-seg" },
+          h("button", { type: "button", class: "seg" + (t.errorless === false ? " on" : ""), id: "ts-errorless-off", text: "Off", onclick: () => { t.errorless = false; save(); paint(); } }),
+          h("button", { type: "button", class: "seg" + (t.errorless === false ? "" : " on"), id: "ts-errorless-on", text: "On", onclick: () => { t.errorless = true; save(); paint(); } })),
+        h("p", { class: "muted", text: "On: while a word's prompt is at 50% or more, a wrong button does nothing (no speech, not added, no page opens). It is still recorded as an error and the prompt gets stronger. Once the prompt fades below 50%, wrong words are said and added, so the learner hears the natural result." })));
   }
   paint();
   return box;
@@ -269,9 +275,12 @@ export async function runEndFlow(result, ctx) {
     const check = T.masteryCheck(live, sessions, trials);
     if (check.met) await askMastery(live, check);
   }
-  const model = buildModel(ctx.board, cur.gridSize);
-  const stageIds = model.main.filter((b) => b.stage === cur.stage).map((b) => b.id);
-  if (T.stageReady(cur.stage, stageIds, data.getTargets())) await askStage(cur, ctx);
+  // Next stage (Beta 3.22): enough of this stage's main-board words are proficient (mastered target or used on their own on enough days),
+  // by the clinician's rule (Adult menu > Vocabulary stage). Only suggested; the adult decides.
+  if (cur.stage < MAX_STAGE) {
+    const prog = await progressFor(cur, buildModel(ctx.board, cur.gridSize), data.getTargets());
+    if (prog.ready) await askStage(cur, ctx, prog);
+  }
   // The tone wheel (Beta 3.16): suggested once, at stage 4, when the learner has 3 or more mastered targets. The adult decides.
   const mastered = data.getTargets().filter((t) => t.status === "mastered" || t.status === "maintenance").length;
   if (cur.stage >= 4 && cur.toneWheel !== "on" && !cur.toneSuggested && mastered >= TONE_SUGGEST_MASTERED) await askToneWheel(cur, mastered);
@@ -364,14 +373,16 @@ function askPhase(t) {
   });
 }
 
-function askStage(cur, ctx) {
+function askStage(cur, ctx, prog) {
   return new Promise((resolve) => {
     const next = cur.stage + 1;
     const finish = () => { o.close(); resolve(); };
     const o = openOverlay([
       h("h2", { id: "stage-title", text: `Move ${cur.name} to stage ${next}?` }),
-      h("p", { class: "confirm-text", id: "stage-detail", text: `Every stage ${cur.stage} word you are teaching is mastered. ` +
-        `Stage ${next} reveals more words in their permanent spots; nothing moves.` }),
+      h("p", { class: "confirm-text", id: "stage-detail", text: (prog.mode === "words"
+        ? `All ${prog.need} of the stage ${cur.stage} words you chose are proficient: ${prog.items.filter((i) => i.chosen).map((i) => i.label).join(", ")}.`
+        : `${prog.have} of ${prog.items.length} stage ${cur.stage} words are proficient (the rule is ${prog.pct}%): ${prog.items.filter((i) => i.proficient).map((i) => i.label).join(", ")}.`) +
+        ` Stage ${next} reveals more words in their permanent spots; nothing moves.` }),
       h("div", { class: "btn-row" },
         h("button", { type: "button", class: "btn", id: "stage-no", text: "Not yet", onclick: finish }),
         h("button", { type: "button", class: "btn primary", id: "stage-yes", text: `Move to stage ${next}`, onclick: async () => {

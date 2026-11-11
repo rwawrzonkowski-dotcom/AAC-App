@@ -34,6 +34,7 @@ import { isRecording } from "./everyday.js";
 import { getScenes } from "./scenestrip.js";
 import { getView, setView, groupedPages, pageById, pageForOldId, visibleIn, searchPages } from "./settingsnav.js";
 import { accessSection, accessSummary } from "./accessui.js";
+import { progressFor, cleanStageRule, MAX_STAGE } from "./stagerule.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -345,7 +346,61 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         },
         h("span", { class: "stage-title", text: "Stage " + n }),
         h("span", { class: "stage-note", text: note[n] + ":" }),
-        h("span", { class: "stage-words", text: wordsFor(n) })))));
+        h("span", { class: "stage-words", text: wordsFor(n) })))),
+      stageProgressBlock(cur, model),
+      view === "clinician" ? stageRuleBlock(cur, model) : null);
+  }
+
+  // Ready for the next stage? (Beta 3.22, js/stagerule.js). Filled in once the everyday summaries are read.
+  function stageProgressBlock(cur, model) {
+    const box = h("div", { class: "stage-progress", id: "stage-progress" }, h("p", { class: "muted", text: "Checking progress..." }));
+    if (cur.stage >= MAX_STAGE) { box.replaceChildren(h("p", { class: "muted", text: `Stage ${MAX_STAGE} is the last stage for now.` })); return box; }
+    progressFor(cur, model, getTargets()).then((pr) => {
+      const r = cleanStageRule(cur.stageRule);
+      const pct = pr.need ? Math.min(100, Math.round((pr.have / pr.need) * 100)) : 0;
+      box.replaceChildren(
+        h("div", { class: "sp-head" }, h("strong", { text: `Ready for stage ${cur.stage + 1}?` }),
+          h("span", { class: "muted", text: pr.mode === "words" ? "Rule: the chosen words" : `Rule: ${pr.pct}% of stage ${cur.stage} words` })),
+        h("div", { class: "sp-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(pr.need), "aria-valuenow": String(Math.min(pr.have, pr.need)) },
+          h("div", { class: "sp-fill" + (pr.ready ? " done" : ""), style: `width: ${pct}%` })),
+        h("p", { id: "stage-progress-text", text: pr.note || `${pr.have} of ${pr.mode === "words" ? pr.need : pr.items.length} words proficient · needs ${pr.need}` + (pr.ready ? " · Ready: VOICE will suggest it at the end of the next session." : "") }),
+        h("div", { class: "sp-list" }, pr.items.filter((i) => pr.mode === "percent" || i.chosen).map((i) =>
+          h("div", { class: "sp-row", "data-word": i.id }, h("span", { text: i.label }),
+            h("span", { class: "sp-chip " + (i.why === "Mastered target" ? "m" : i.proficient ? "e" : "n"), text: i.why })))),
+        h("p", { class: "muted", text: `Proficient = a mastered target, or used on their own (not modeled, not in a session) on ${r.days}+ days in the last ${r.weeks} weeks.` }));
+    }).catch(() => box.replaceChildren(h("p", { class: "muted", text: "Progress could not be read." })));
+    return box;
+  }
+
+  // The clinician's rule for suggesting the next stage (Clinician view only).
+  function stageRuleBlock(cur, model) {
+    const r = cleanStageRule(cur.stageRule);
+    const save = async (patch) => { cur.stageRule = cleanStageRule({ ...r, ...patch }); await saveProfile(cur); refresh(); };
+    const modeBtn = (v, text) => h("button", { type: "button", class: "seg" + (r.mode === v ? " on" : ""), id: "stagerule-" + v, text, onclick: () => save({ mode: v }) });
+    const pctVal = h("span", { class: "slider-num", id: "stagerule-pct-val", text: r.pct + "%" });
+    const slider = h("input", { type: "range", id: "stagerule-pct", min: 10, max: 100, step: 10, value: r.pct,
+      oninput: () => { pctVal.textContent = slider.value + "%"; }, onchange: () => save({ pct: Number(slider.value) }) });
+    const stageWords = model.main.filter((b) => b.stage === cur.stage);
+    const chosen = new Set(r.words[String(cur.stage)] || []);
+    const toggle = (id) => { const list = new Set(chosen); list.has(id) ? list.delete(id) : list.add(id); save({ words: { ...r.words, [String(cur.stage)]: [...list] } }); };
+    const num = (key, min, max, label) => {
+      const sel = h("select", { class: "text-input sr-select", id: "stagerule-" + key, "aria-label": label, onchange: () => save({ [key]: Number(sel.value) }) },
+        Array.from({ length: max - min + 1 }, (_, i) => h("option", { value: String(min + i), text: String(min + i) })));
+      sel.value = String(r[key]);
+      return sel;
+    };
+    return h("div", { class: "field stage-rule", id: "stage-rule" },
+      h("h3", { class: "access-h", text: "When to suggest the next stage (clinician)" }),
+      h("div", { class: "seg-row" }, modeBtn("percent", "A share of the stage's words"), modeBtn("words", "Words I choose")),
+      r.mode === "percent"
+        ? h("div", { class: "slider-row" }, h("label", { for: "stagerule-pct", text: "Words proficient" }), slider, pctVal)
+        : h("div", { class: "sr-words", id: "stagerule-words" }, stageWords.map((b) =>
+            h("label", { class: "check-line" }, h("input", { type: "checkbox", id: "stagerule-w-" + b.id, checked: chosen.has(b.id), onchange: () => toggle(b.id) }),
+              h("span", { text: b.label })))),
+      r.mode === "words" ? h("p", { class: "muted", text: `Tick the stage ${cur.stage} words that must be proficient. Each stage keeps its own list.` }) : null,
+      h("div", { class: "sr-line" }, h("span", { text: "Everyday use counts after" }), num("days", 1, 14, "Days"), h("span", { text: "days of use in the last" }),
+        num("weeks", 1, 12, "Weeks"), h("span", { text: "weeks." })),
+      h("p", { class: "muted", text: "VOICE only suggests the next stage at the end of a teaching session; you decide. The progress above is shown in both views." }));
   }
 
   // "Buttons on the board" (Beta 3.9): the five Auto / Always / Never choices for the buttons around the board, on one page.

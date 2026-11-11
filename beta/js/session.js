@@ -408,6 +408,23 @@ export function onRender() {
 
 // app.js calls this for each choice the child makes on the board (before the board changes page):
 //   { type: "word" | "category" | "back" | "other", id, label, opens }
+// ERRORLESS sentence trials (Beta 3.22, Richard): while the learner's current word is prompted at 50% strength or more, a WRONG button
+// is blocked before it does anything (js/app.js asks here first): no speech, nothing added to the message bar, no page opened. It is
+// still logged as an error (marked "blocked") and the prompt gets stronger, as before. Once the prompt is below 50% (25% and
+// Independent on the default ladder) wrong buttons talk and are added as usual. Per sentence target (on by default).
+export function errorlessBlocks(ev) {
+  const tr = S && S.trial;
+  if (!tr || !tr.cx || tr.busy || tr.ended || tr.target.errorless === false) return false;
+  if (ev.type === "back" || ev.type === "other" || ev.type === "speak") return false;
+  if (ev.type === "word" && ev.id === curWordId(tr)) return false;
+  if (ev.type === "category") {
+    const i = tr.chain.pages.indexOf(hooks.getPageId());
+    if (i >= 0 && i < tr.chain.pages.length - 1 && tr.chain.pages[i + 1] === ev.opens) return false;    // the right button
+  }
+  const help = tr.cur < tr.n ? T.helpOfStep(tr.ladder[tr.cur]) : 0;
+  return help >= 0.5;
+}
+
 export function onSelect(ev) {
   const tr = S && S.trial;
   if (!tr || tr.busy || ev.type === "back" || ev.type === "other") return;
@@ -422,7 +439,7 @@ export function onSelect(ev) {
     const i = tr.chain.pages.indexOf(hooks.getPageId());
     if (i >= 0 && i < tr.chain.pages.length - 1 && tr.chain.pages[i + 1] === ev.opens) return;    // the right button: progress
   }
-  tr.errors.push({ wordId: ev.id, label: ev.label, time: now });
+  tr.errors.push(ev.blocked ? { wordId: ev.id, label: ev.label, time: now, blocked: true } : { wordId: ev.id, label: ev.label, time: now });
   if (tr.cx) curRec(tr).errors++;
   if (!tr.probe) escalate(tr);
 }
@@ -444,6 +461,7 @@ function endTrial(result) {
     promptLevel: T.legacyLevelOfStep(stepRecord(tr, tr.minIdx)), startLevel: T.legacyLevelOfStep(stepRecord(tr, tr.base)),    // (old numbers, for older readers)
     errors: tr.errors, chainStepsPrompted: [...tr.steps.values()].sort((a, b) => a.step - b.step),
     chain: tr.chain.steps.map((s) => s.label), promptTimeline: tr.timeline,
+    ...(tr.cx ? { errorless: tr.target.errorless !== false } : {}),
   };
   if (tr.cx) {
     // A sentence: one record per word (and the "say the sentence" step); the trial's start step is its first learner word's.

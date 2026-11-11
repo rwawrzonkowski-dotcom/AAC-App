@@ -718,13 +718,18 @@ function onCellTap(cellEl) {
 
   // Category / page button: open its page. No speech, nothing added.
   if (d.loadBoard) {
-    teach.onSelect({ type: "category", id: d.wordId || d.key, label: d.label, opens: d.loadBoard });
+    const ev = { type: "category", id: d.wordId || d.key, label: d.label, opens: d.loadBoard };
+    if (teach.errorlessBlocks(ev)) { teach.onSelect({ ...ev, blocked: true }); return; }   // errorless sentence trial (Beta 3.22): wrong page stays shut
+    teach.onSelect(ev);
     goTo(d.loadBoard);
     return;
   }
 
   // The Number pad button: opens the number pad. No speech, nothing added until a number is finalized.
   if (d.action === "numberpad") { teach.onSelect({ type: "other" }); openNumberPad(d); return; }
+
+  // Errorless sentence trial (Beta 3.22): a wrong word while the prompt is strong does nothing (logged as an error, prompt gets stronger).
+  if (teach.errorlessBlocks({ type: "word", id: d.wordId || d.key })) { teach.onSelect({ type: "word", id: d.wordId || d.key, label: d.label, blocked: true }); return; }
 
   // A normal word: speak immediately, add to the message bar.
   lastSelectAt = performance.now();      // starts the "ignore repeated taps" wait, if it is on

@@ -89,6 +89,7 @@ import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 import { cleanAccess } from "./access.js";
 import { cleanScan } from "./scan.js";
+import { cleanStageRule } from "./stagerule.js";
 
 export const BACKUP_APP = "AAC-App";
 export const BACKUP_VERSION = 18;
@@ -137,6 +138,7 @@ export async function buildBackup(learners, { teaching = true, templates = false
       toneWheel: p.toneWheel,
       access: p.access,
       scan: p.scan,
+      stageRule: p.stageRule,
       matchStrictness: p.matchStrictness,
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
@@ -355,9 +357,10 @@ function cleanLearner(raw, index, version) {
   const things = version >= 16 ? cleanThingsBackup(raw.things) : null;
   const littleStrip = version >= 17 && CAMERA_BUTTON_CHOICES.includes(raw.littleStrip) ? raw.littleStrip : "auto";
   const toneWheel = raw.toneWheel === "on" ? "on" : "off";
+  const stageRule = cleanStageRule(raw.stageRule);          // Beta 3.22 (still version 18): a backup without it gets 50% of the stage
   const scan = cleanScan(raw.scan);                        // Beta 3.21 (still version 18): a backup without it has scanning Off
   const access = cleanAccess(raw.access);                  // Beta 3.18 (still version 18): a backup without it gets the standard look
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, access, scan, wordDial, notices, teaching, everyday, scenes, things, photos };
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, access, scan, stageRule, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

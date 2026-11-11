@@ -271,6 +271,8 @@ function cleanTargetInner(raw, learnerId) {
 //   linkHits, linkMisses: [n per word]         each word's streaks for fading and backing up,
 //   phaseRun: trials in a row in which every word the learner did was independent (when it reaches fadeAfter, the next word is
 //             SUGGESTED to the adult at the end of the session; the adult confirms),
+//   errorless: true                            (Beta 3.22) while the current word's prompt is at 50% or more, a wrong button does nothing
+//                                               (no speech, not added; still logged as an error and the prompt gets stronger)
 //   speakStep: false                           true = tapping the message bar to say the whole sentence is the last step.
 // In forward chaining the words after the learner's part are MODELED by the app (prompt on each button, the word added and spoken).
 // In backward chaining the words before the learner's part are put in the message bar when the trial starts.
@@ -296,6 +298,7 @@ function cleanChainFields(raw, ladderLen) {
     linkPos: intList(raw.linkPos, n, 0, ladderLen, 0),
     linkHits: intList(raw.linkHits, n, 0, 1000, 0), linkMisses: intList(raw.linkMisses, n, 0, 1000, 0),
     phaseRun: clampInt(raw.phaseRun, 0, 1000, 0), speakStep: raw.speakStep === true,
+    errorless: raw.errorless !== false,        // Beta 3.22: on unless turned off (sentences saved earlier get it on)
   };
 }
 
@@ -305,7 +308,7 @@ export function newChainTarget(learnerId, links, now = Date.now()) {
   const id = "chain-" + now.toString(36) + Math.random().toString(36).slice(2, 6);
   const t = newTarget(learnerId, { wordId: id, label: clean.map((l) => l.label).join(" "), pageId: "core", path: [] }, now);
   return Object.assign(t, { kind: "chain", links: clean, method: "total", phase: clean.length, linkPos: clean.map(() => 0),
-    linkHits: clean.map(() => 0), linkMisses: clean.map(() => 0), phaseRun: 0, speakStep: false });
+    linkHits: clean.map(() => 0), linkMisses: clean.map(() => 0), phaseRun: 0, speakStep: false, errorless: true });
 }
 
 // Which words (by index) the learner does in the current phase.
@@ -416,7 +419,7 @@ export function cleanSession(raw, learnerId) {
 
 export const RESULTS = ["correct", "error", "noResponse", "skipped"];
 // trial: { id, sessionId, learnerId, wordId, label, type: "planned"|"NET", start, end, latencyMs,
-//          result, direction, errors: [{wordId,label,time}],
+//          result, direction, errors: [{wordId,label,time, blocked?}],   (blocked: an errorless sentence trial stopped that wrong button, Beta 3.22)
 //          promptStep: { index, type, opacity, ladderLength, ladderId }   the MOST help shown (type "independent" and index = ladderLength
 //                                                                         when no prompt was shown), startStep: the same for where the trial started,
 //          help (0 to 1: opacity of promptStep, 0 = independent), startHelp,
@@ -437,7 +440,7 @@ export function cleanTrial(raw, learnerId) {
   if (!isObj(raw) || typeof raw.id !== "string" || !ID.test(raw.id) || typeof raw.sessionId !== "string" || typeof raw.wordId !== "string") return null;
   const errors = [];
   for (const e of Array.isArray(raw.errors) ? raw.errors.slice(0, 200) : []) {
-    if (isObj(e)) errors.push({ wordId: str(e.wordId, 80), label: str(e.label, 60), time: clampInt(e.time, 0, 4e12, 0) });
+    if (isObj(e)) errors.push({ wordId: str(e.wordId, 80), label: str(e.label, 60), time: clampInt(e.time, 0, 4e12, 0), ...(e.blocked === true ? { blocked: true } : {}) });
   }
   const steps = [];
   for (const c of Array.isArray(raw.chainStepsPrompted) ? raw.chainStepsPrompted.slice(0, 20) : []) {
@@ -479,7 +482,8 @@ function cleanTrialLinks(raw) {
       done: l.done === true, startIndex: clampInt(l.startIndex, 0, MAX_STEPS, 0), minIndex: clampInt(l.minIndex, 0, MAX_STEPS, 0),
       ladderLength: clampInt(l.ladderLength, 0, MAX_STEPS, 0), errors: clampInt(l.errors, 0, 200, 0) });
   }
-  return { links, method: CHAIN_METHODS.includes(raw.method) ? raw.method : "total", phase: clampInt(raw.phase, 1, MAX_CHAIN, 1) };
+  return { links, method: CHAIN_METHODS.includes(raw.method) ? raw.method : "total", phase: clampInt(raw.phase, 1, MAX_CHAIN, 1),
+    ...(typeof raw.errorless === "boolean" ? { errorless: raw.errorless } : {}) };       // Beta 3.22
 }
 // Was this word independent in this sentence trial? (done, no errors on it, no prompt shown for it)
 export const linkIndependent = (l) => l.done && l.errors === 0 && l.minIndex >= l.ladderLength;
@@ -573,14 +577,16 @@ export function masteryCheck(target, sessions, trials) {
     if (!bySession.has(t.sessionId)) bySession.set(t.sessionId, []);
     bySession.get(t.sessionId).push(t);
   }
-  const used = sessions.filter((s) => bySession.has(s.id)).sort((a, b) => b.start - a.start).slice(0, rule.sessions);
+  // (Beta 3.22) A session with fewer than the minimum trials of this word (a single Opportunity, say) is SKIPPED: it neither counts
+  // nor blocks mastery, for the percent or for the people/settings rule. Mastery looks at the last sessions that qualify.
+  const used = sessions.filter((s) => bySession.has(s.id) && bySession.get(s.id).length >= rule.minTrials)
+    .sort((a, b) => b.start - a.start).slice(0, rule.sessions);
   const info = used.map((s) => {
     const list = bySession.get(s.id);
     return { id: s.id, start: s.start, who: s.who, where: s.where, trials: list.length,
       pct: Math.round((list.filter(isIndependent).length / list.length) * 100) };
   });
   if (info.length < rule.sessions) return { met: false, reason: `only ${info.length} of ${rule.sessions} sessions so far`, sessions: info };
-  if (info.some((s) => s.trials < rule.minTrials)) return { met: false, reason: `a session had fewer than ${rule.minTrials} trials`, sessions: info };
   if (info.some((s) => s.pct < rule.pct)) return { met: false, reason: `a session was under ${rule.pct}% independent`, sessions: info };
   const whos = new Set(info.map((s) => s.who).filter(Boolean)), wheres = new Set(info.map((s) => s.where).filter(Boolean));
   if (whos.size < rule.differentTags && wheres.size < rule.differentTags) {

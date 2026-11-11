@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v36";
+const CACHE_VERSION = "beta-aac-v37";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -1432,15 +1432,15 @@ const FILES = [
   "js/about.js?v=5bda0bb73f",
   "js/access.js?v=d2e916839d",
   "js/accessui.js?v=7e50db4eb1",
-  "js/adult.js?v=517bb48c29",
+  "js/adult.js?v=c97aa70eb5",
   "js/adulthint.js?v=21b269cb20",
-  "js/app.js?v=2666020daa",
-  "js/backup.js?v=0984fc56df",
+  "js/app.js?v=7984594ed9",
+  "js/backup.js?v=1400e68ee2",
   "js/board.js?v=f108ac9be0",
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=6051d46365",
   "js/camerabtn.js?v=114b8ebc7a",
-  "js/channel.js?v=e510b7842d",
+  "js/channel.js?v=a249823ef2",
   "js/critters.js?v=0008315f67",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=d0c538ff70",
@@ -1464,7 +1464,7 @@ const FILES = [
   "js/modelsettings.js?v=8b24020b2f",
   "js/numberwords.js?v=52f41a7a84",
   "js/photoboxes.js?v=0250b9f5f6",
-  "js/profiles.js?v=0212d4721f",
+  "js/profiles.js?v=7a248beaec",
   "js/recognize.js?v=30c88551b8",
   "js/reportcharts.js?v=11b54cd11d",
   "js/reportdata.js?v=5fc0a03e25",
@@ -1476,14 +1476,15 @@ const FILES = [
   "js/scenedata.js?v=7d379fd91a",
   "js/scenestrip.js?v=232b895209",
   "js/scenewords.js?v=c2f51e5349",
-  "js/session.js?v=3379718f07",
+  "js/session.js?v=f96d5abee1",
   "js/settingsnav.js?v=f36c1f349d",
   "js/setup.js?v=d53f414276",
   "js/speech.js?v=3ac88eccc4",
+  "js/stagerule.js?v=a67bae6ffe",
   "js/storage.js?v=2e81ec1d38",
   "js/teachdata.js?v=82721d5a37",
-  "js/teaching.js?v=6bf54f9f23",
-  "js/teachui.js?v=73397a4218",
+  "js/teaching.js?v=6ac69c0401",
+  "js/teachui.js?v=42917934eb",
   "js/templates.js?v=2976601b82",
   "js/things.js?v=d3b2765c49",
   "js/thingsui.js?v=223e0d38b1",
@@ -1492,7 +1493,7 @@ const FILES = [
   "js/ui.js?v=6b27e92e5d",
   "js/voicepicker.js?v=e4127d1c9d",
   "manifest.webmanifest?v=2c85c0b4e9",
-  "styles.css?v=4fe6fb3f74",
+  "styles.css?v=a287098776",
 ];
 // END FILE LIST
 
