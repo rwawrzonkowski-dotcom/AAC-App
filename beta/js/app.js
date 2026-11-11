@@ -69,6 +69,32 @@ function holdMs() {
   const t = getCurrent().touch;
   return touchActive() && t.holdOn ? Math.round(t.holdSec * 1000) : 0;
 }
+// Beta 3.20 touch options for the board's press handling (js/board.js): lift-off, larger touch zones, keyguard, dwell. Off in Edit mode
+// and Add targets, so adults always get plain taps there.
+function touchOpts() {
+  if (!touchActive()) return null;
+  const t = getCurrent().touch;
+  return { liftOff: t.liftOff, zones: t.zones, keyguard: t.keyguard, dwellOn: t.dwellOn, dwellSec: t.dwellSec };
+}
+// Speak on touch (Beta 3.20): the first touch on a button only SAYS it (in a lower voice, nothing added, nothing recorded, nothing opens)
+// and outlines it; touching the same button again within 5 seconds chooses it. Off while modeling, so the adult's model is one tap.
+let armed = null;                     // { key, at, el } of the button that was just previewed
+const PREVIEW_WINDOW_MS = 5000;
+function clearArmed() { if (armed && armed.el) armed.el.classList.remove("previewed"); armed = null; }
+function previewTap(el) {
+  const t = getCurrent().touch;
+  if (!t.preview || !touchActive() || state.modeling || previewing || returning) { clearArmed(); return false; }
+  const d = state.cells.get(el.dataset.key);
+  if (!d) return false;
+  if (armed && armed.key === el.dataset.key && armed.el === el && performance.now() - armed.at < PREVIEW_WINDOW_MS) { clearArmed(); return false; }
+  clearArmed();
+  armed = { key: el.dataset.key, at: performance.now(), el };
+  el.classList.add("previewed");
+  const v = getCurrent().voice;
+  speak(d.kind === "home" ? "back" : d.label, "word", { ...v, pitch: Math.max(0.5, (v.pitch || 1) - 0.45), rate: Math.min(1.5, (v.rate || 1) * 1.08) });
+  return true;
+}
+
 // True while repeated taps are being ignored.
 function tapsBlocked() {
   const t = getCurrent().touch;
@@ -1119,7 +1145,7 @@ async function start() {
     onOpenChange: (open) => { $("app").classList.toggle("typing", open); },
   });
 
-  attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked, dialMs, openDial: openWordDial });
+  attachPressHandling($("board"), onCellTap, ".cell.tap", { holdMs, blocked: tapsBlocked, dialMs, openDial: openWordDial, touch: touchOpts, preview: previewTap });
 
   // Message bar: tap text to speak the sentence; Delete / Clear
   attachPressHandling($("message-bar"), (el) => {

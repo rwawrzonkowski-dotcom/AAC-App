@@ -190,6 +190,38 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
   let holdOverlay = null;
   let dialTimer = null;  // running only while waiting to open the dial
   let dialEl = null, dialPointer = null, afterSelect = false;
+  let tracking = false;  // (lift-off) a finger is down somewhere on this container
+  let fingerId = null;   // the finger this press belongs to (keyguard mode ignores any other finger)
+  // Beta 3.20 touch options (the child's board only; js/app.js passes options.touch). All off = the behaviour of earlier versions.
+  const opts = () => (options.touch && options.touch()) || {};
+  // Speak on touch (options.preview(el) -> true when the touch was only a preview) comes before every activation.
+  const activate = (el) => { if (options.preview && options.preview(el)) return; onActivate(el); };
+
+  // The button at a screen point, with the touch options: Keyguard = only the middle of a button counts; Larger touch zones = a point
+  // in a gap belongs to the nearest button (never further than about one gap). Buttons never move or change size for any of this.
+  function cellAt(x, y) {
+    const under = document.elementFromPoint(x, y);
+    if (!under || !container.contains(under)) return null;
+    let el = under.closest(selector);
+    if (el && !container.contains(el)) el = null;
+    const o = opts();
+    if (el && o.keyguard) {
+      const r = el.getBoundingClientRect(), mx = r.width * 0.14, my = r.height * 0.14;
+      if (x < r.left + mx || x > r.right - mx || y < r.top + my || y > r.bottom - my) return null;
+    }
+    if (!el && o.zones && !o.keyguard) {
+      const reach = Math.max(window.innerWidth, window.innerHeight) * 0.035;
+      let best = null, bestD = Infinity;
+      for (const c of container.querySelectorAll(selector)) {
+        const r = c.getBoundingClientRect();
+        const dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom);
+        const dist = Math.hypot(dx, dy);
+        if (dist < bestD) { bestD = dist; best = c; }
+      }
+      if (best && bestD <= reach) el = best;
+    }
+    return el;
+  }
 
   const clear = () => {
     if (down) down.classList.remove("pressed");
@@ -207,19 +239,24 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
 
   // The filling ring is an absolutely positioned layer inside the button, so
   // it cannot change the button's size or the image area.
-  function startHold(el, ms) {
-    holdOverlay = document.createElement("div");
-    holdOverlay.className = "touch-hold";
-    holdOverlay.style.setProperty("--hold-ms", ms + "ms");
-    holdOverlay.innerHTML =
+  function ring(el, ms, cls = "") {
+    const o = document.createElement("div");
+    o.className = "touch-hold" + (cls ? " " + cls : "");
+    o.style.setProperty("--hold-ms", ms + "ms");
+    o.innerHTML =
       '<svg viewBox="0 0 40 40" aria-hidden="true"><circle class="th-bg" cx="20" cy="20" r="16"/>' +
       '<circle class="th-fg" cx="20" cy="20" r="16" pathLength="100"/></svg>';
-    el.appendChild(holdOverlay);
+    el.appendChild(o);
+    return o;
+  }
+  function startHold(el, ms) {
+    holdOverlay = ring(el, ms);
     holdTimer = setTimeout(() => {
       const start = down;
       clear();
+      tracking = false;
       if (dialTimer !== null) afterSelect = true;   // the dial may still open later in this same press
-      if (start) onActivate(start);   // held long enough: select it now
+      if (start) activate(start);   // held long enough: select it now
     }, ms);
   }
 
@@ -227,15 +264,33 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
   function fireDial() {
     const el = dialEl, pointer = dialPointer, after = afterSelect;
     clearDial();
-    if (el && options.openDial && options.openDial(el, { pointer, afterSelect: after })) clear();   // the dial now owns this press
+    if (el && options.openDial && options.openDial(el, { pointer, afterSelect: after })) { clear(); tracking = false; }   // the dial now owns this press
+  }
+
+  // Lift-off: the press follows the finger to whichever button it is on now (a hold starts again on the new button).
+  function retarget(el) {
+    if (el === down) return;
+    if (down) down.classList.remove("pressed");
+    clearTimeout(holdTimer); holdTimer = null;
+    if (holdOverlay) { holdOverlay.remove(); holdOverlay = null; }
+    down = el;
+    if (!el) return;
+    el.classList.add("pressed");
+    const ms = options.holdMs ? options.holdMs() : 0;
+    if (ms > 0) startHold(el, ms);
   }
 
   container.addEventListener("pointerdown", (e) => {
-    const el = e.target.closest(selector);
-    if (!el) return;
+    const o = opts();
+    if (o.keyguard && e.pointerType === "touch" && fingerId !== null && e.pointerId !== fingerId) return;   // a hand resting on the keyguard
+    const el = cellAt(e.clientX, e.clientY);
+    if (!el && !(o.liftOff && e.target.closest && container.contains(e.target))) return;
     if (options.blocked && options.blocked()) return;   // ignore-repeats window: show nothing
     clear();
     clearDial();
+    fingerId = e.pointerId;
+    tracking = !!o.liftOff;
+    if (!el) return;                   // (lift-off: the finger may slide onto a button before it lifts)
     down = el;
     el.classList.add("pressed");
     const ms = options.holdMs ? options.holdMs() : 0;
@@ -247,30 +302,58 @@ export function attachPressHandling(container, onActivate, selector = ".cell.tap
     }
   });
   container.addEventListener("pointerup", (e) => {
+    if (fingerId !== null && e.pointerId !== fingerId && opts().keyguard) return;
+    fingerId = null;
     clearDial();                      // released before the dial opened: an ordinary tap
-    if (!down) return;
+    const lift = tracking;
+    tracking = false;
+    if (!down && !lift) return;
     const start = down;
     const wasHolding = holdTimer !== null;
     clear();
     if (wasHolding) return;           // released before the hold time: cancel, no speech
+    if (options.blocked && options.blocked()) return;
     // Touch pointers are captured to the start element, so check what is under the finger.
-    const under = document.elementFromPoint(e.clientX, e.clientY);
-    if (under && under.closest(selector) === start &&
-        !(options.blocked && options.blocked())) onActivate(start);
+    const under = cellAt(e.clientX, e.clientY);
+    if (lift) { if (under && !(options.holdMs && options.holdMs() > 0)) activate(under); return; }   // lift-off: the button under the finger now
+    if (under && under === start) activate(start);
   });
-  const cancelAll = () => { clear(); clearDial(); };
+  const cancelAll = () => { clear(); clearDial(); tracking = false; fingerId = null; };
   container.addEventListener("pointercancel", cancelAll);
-  container.addEventListener("pointerleave", cancelAll);
-  // Moving off the button visually un-presses it (and the tap is ignored).
+  container.addEventListener("pointerleave", (e) => { if (e.pointerType !== "touch" || !tracking) cancelAll(); cancelDwell(); dwellDone = null; });
+  // Moving off the button visually un-presses it (and the tap is ignored). With lift-off on, the press follows the finger instead.
   container.addEventListener("pointermove", (e) => {
+    if (e.buttons === 0 && e.pointerType !== "touch") { dwellMove(e); return; }
+    if (fingerId !== null && e.pointerId !== fingerId) return;
     if (dialTimer !== null) {         // sliding off the button before the dial opens cancels the dial
-      const at = document.elementFromPoint(e.clientX, e.clientY);
-      if (!at || at.closest(selector) !== dialEl) clearDial();
+      if (cellAt(e.clientX, e.clientY) !== dialEl) clearDial();
     }
+    if (tracking) { retarget(cellAt(e.clientX, e.clientY)); return; }
     if (!down) return;
-    const under = document.elementFromPoint(e.clientX, e.clientY);
-    const on = !!under && under.closest(selector) === down;
+    const on = cellAt(e.clientX, e.clientY) === down;
     if (!on && holdTimer !== null) { clear(); return; }   // slid off during a hold: cancel
     down.classList.toggle("pressed", on);
   });
+
+  // Dwell to select (Beta 3.20): a mouse, trackpad or head-tracking pointer that rests on a button (no click) for the dwell time chooses
+  // it. A ring fills while it rests. After choosing, the pointer must leave the button before it can choose it again.
+  let dwellEl = null, dwellTimer = null, dwellRing = null, dwellDone = null;
+  function cancelDwell() {
+    clearTimeout(dwellTimer); dwellTimer = null;
+    if (dwellRing) { dwellRing.remove(); dwellRing = null; }
+    dwellEl = null;
+  }
+  function dwellMove(e) {
+    const o = opts();
+    if (!o.dwellOn) return;
+    const el = cellAt(e.clientX, e.clientY);
+    if (el !== dwellDone) dwellDone = null;
+    if (el === dwellEl) return;
+    cancelDwell();
+    if (!el || el === dwellDone || (options.blocked && options.blocked())) return;
+    const ms = Math.round((o.dwellSec || 1) * 1000);
+    dwellEl = el;
+    dwellRing = ring(el, ms, "dwell");
+    dwellTimer = setTimeout(() => { const t = dwellEl; cancelDwell(); dwellDone = t; if (t && t.isConnected) activate(t); }, ms);
+  }
 }

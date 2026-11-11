@@ -116,7 +116,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
           const v = (window.speechSynthesis && speechSynthesis.getVoices().find((x) => x.voiceURI === cur.voice.voiceURI)) || null;
           return v ? v.name.replace(/\s*\(.*\)$/, "") : "Default";
         }
-        case "touch": return cur.touch.holdOn || cur.touch.ignoreOn ? "On" : "Off";
+        case "touch": { const t = cur.touch; return ["holdOn", "ignoreOn", "liftOff", "zones", "keyguard", "preview", "dwellOn"].some((k) => t[k]) ? "On" : "Off"; }
         case "teaching": { const n = getTargets().length; return n + (n === 1 ? " target" : " targets"); }
         case "data": return isRecording(cur.id) ? "On" : "Off";
         case "scenes": { const n = getScenes().length; return n + " saved"; }
@@ -615,7 +615,32 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         help: "After a word is spoken, taps on any board button are ignored for this long (nothing is shown or said). " +
           "Helps when a child taps the same button again and again. Opening a category does not start the wait.",
       }),
-      h("p", { class: "muted", text: "These do not affect the message bar, Delete, Clear or the adult screens." }));
+      h("h3", { class: "access-h", text: "More ways to choose (Beta 3.20)" }),
+      onOff({ id: "touch-lift", key: "liftOff", title: "Choose when the finger lifts",
+        help: "The button under the finger when it LIFTS is chosen, so a child can touch, slide to the right word and let go. The pressed button follows the finger. With Hold to select on, holding still on the new button chooses it." }),
+      onOff({ id: "touch-zones", key: "zones", title: "Touches between buttons go to the nearest one",
+        help: "A touch that lands in a gap counts for the nearest button (only when it is very close). Not used with Keyguard mode." }),
+      onOff({ id: "touch-keyguard", key: "keyguard", title: "Keyguard mode",
+        help: "For a plastic keyguard over the iPad: only the middle of each button responds, so touching the keyguard's edges does nothing, and other fingers resting on the keyguard are ignored. Set Button spacing (Accessibility) to match the keyguard's holes." }),
+      onOff({ id: "touch-preview", key: "preview", title: "Speak on touch (hear before choosing)",
+        help: "The first touch on a button only says its word, in a lower voice, and outlines it; touching it again within 5 seconds chooses it. For learners who scan by listening (low vision) or who need to check before choosing. Off while modeling." }),
+      setting({
+        id: "touch-dwell", title: "Dwell to select (mouse, trackpad or head pointer)", onKey: "dwellOn", secKey: "dwellSec",
+        min: 0.5, max: 3, step: 0.1, decimals: 1,
+        help: "Resting a pointer on a button for this long chooses it (a purple ring fills). Not for fingers. On an iPad with Eye Tracking or AssistiveTouch, the iPad's own Dwell control already taps for the learner: leave this Off there.",
+      }),
+      h("p", { class: "muted", text: "These do not affect the message bar, Delete, Clear or the adult screens. Only the board's buttons use the options under More ways to choose." }));
+  }
+  // One plain Off / On setting (Beta 3.20 touch options).
+  function onOff({ id, key, title, help }) {
+    const cur = getCurrent(), t = cur.touch;
+    const set = (v) => async () => { t[key] = v; await saveProfile(cur); refresh(); };
+    return h("div", { class: "field touch-setting", id },
+      h("label", { text: title }),
+      h("div", { class: "seg-row touch-seg" },
+        h("button", { type: "button", class: "seg" + (t[key] ? "" : " on"), id: id + "-off", text: "Off", onclick: set(false) }),
+        h("button", { type: "button", class: "seg" + (t[key] ? " on" : ""), id: id + "-on", text: "On", onclick: set(true) })),
+      h("p", { class: "muted", text: help }));
   }
 
   // ---------- Backup and restore ----------

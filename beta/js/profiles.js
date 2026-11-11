@@ -28,6 +28,7 @@
 //     touch: {                          // touch supports (adult menu > Touch)
 //       holdOn: false, holdSec: 0.5,    // hold to select
 //       ignoreOn: false, ignoreSec: 1,  // ignore repeated taps
+//       liftOff, zones, keyguard, preview, dwellOn, dwellSec   // Beta 3.20 (see DEFAULT_TOUCH)
 //     },
 //     model: {                          // what Model mode shows (adult menu > Model prompt)
 //       style: "ring", ringOpacity: 100, critterOpacity: 100,   // see js/critters.js
@@ -100,7 +101,12 @@ export function cleanWordDial(v) {
   };
 }
 
-export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1 };
+// Beta 3.20 adds: liftOff (choose the button under the finger when it LIFTS, so a child can slide to correct), zones (a touch between
+// buttons goes to the nearest one), keyguard (only the middle of each button responds; extra fingers are ignored), preview (speak on
+// touch: the first touch says the word in a lower voice, a second touch on it chooses it), dwellOn/dwellSec (a mouse, trackpad or head
+// pointer resting on a button chooses it).
+export const DEFAULT_TOUCH = { holdOn: false, holdSec: 0.5, ignoreOn: false, ignoreSec: 1,
+  liftOff: false, zones: false, keyguard: false, preview: false, dwellOn: false, dwellSec: 1 };
 
 function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
   return {

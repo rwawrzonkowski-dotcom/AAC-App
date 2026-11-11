@@ -1439,3 +1439,9 @@ html[data-theme="dark"] #app .lw-item { --edge: #c4b5fd; }
   .par-stat, .par-chip { background: #fff; }
   .par-b { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* Beta 3.20 touch options: dwell ring (a different colour from Hold to select) and the "previewed" button of Speak on touch */
+.touch-hold.dwell { background: rgba(255, 255, 255, 0.22); }
+.touch-hold.dwell .th-fg { stroke: #7c3aed; }
+#board .cell.previewed { outline: 0.6vmin dashed #1d4ed8; outline-offset: -0.7vmin; }
+html[data-theme="dark"] #board .cell.previewed, html[data-theme="cvi"] #board .cell.previewed, html[data-theme="dim"] #board .cell.previewed { outline-color: #ffffff; }

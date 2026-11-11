@@ -292,6 +292,9 @@ function cleanLearner(raw, index, version) {
     holdSec: clamp(num(t.holdSec, DEFAULT_TOUCH.holdSec), 0.1, 2),
     ignoreOn: t.ignoreOn === true,
     ignoreSec: clamp(num(t.ignoreSec, DEFAULT_TOUCH.ignoreSec), 0.25, 3),
+    // Beta 3.20 (still file version 18): a backup without these gets them Off
+    liftOff: t.liftOff === true, zones: t.zones === true, keyguard: t.keyguard === true, preview: t.preview === true,
+    dwellOn: t.dwellOn === true, dwellSec: clamp(num(t.dwellSec, DEFAULT_TOUCH.dwellSec), 0.5, 3),
   };
 
   // Backups older than version 3 have no Model prompt settings: use the defaults.

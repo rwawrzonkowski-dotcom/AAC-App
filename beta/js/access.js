@@ -44,12 +44,12 @@ export function cleanAccess(raw) {
 // ---------- Presets ----------
 // touch: changes to the learner's Touch settings (js/profiles.js DEFAULT_TOUCH), or null to leave them.
 export const PRESETS = [
-  { id: "lowvision", title: "Low vision", text: "High-contrast dark theme, very large labels, easy-to-read font, wider gaps, hidden spots not drawn, words light up as they are said.",
-    set: { theme: "dark", font: "atkinson", labelSize: "xl", spacing: "wide", hidden: "invisible", highlight: true, glow: true } },
+  { id: "lowvision", title: "Low vision", text: "High-contrast dark theme, very large labels, easy-to-read font, wider gaps, hidden spots not drawn, words light up as they are said, and Speak on touch (hear a word before choosing it).",
+    set: { theme: "dark", font: "atkinson", labelSize: "xl", spacing: "wide", hidden: "invisible", highlight: true, glow: true }, touch: { preview: true } },
   { id: "cvi", title: "CVI", text: "Black background with one bright colour (yellow), simple and uncluttered, hidden spots not drawn, no movement.",
     set: { theme: "cvi", font: "atkinson", labelSize: "l", spacing: "wide", hidden: "invisible", motion: "reduce" } },
-  { id: "motor", title: "Motor", text: "The widest gaps between buttons, so a near miss lands on nothing, and repeated taps are ignored for 1 second.",
-    set: { spacing: "wider", hidden: "invisible" }, touch: { ignoreOn: true, ignoreSec: 1 } },
+  { id: "motor", title: "Motor", text: "The widest gaps between buttons, choose when the finger lifts (slide to the right word, then let go), and repeated taps are ignored for 1 second.",
+    set: { spacing: "wider", hidden: "invisible" }, touch: { ignoreOn: true, ignoreSec: 1, liftOff: true } },
   { id: "hearing", title: "Hearing partner", text: "A Show button puts the message full screen for the listener; the message bar glows while VOICE talks, and words light up as they are said.",
     set: { listener: true, glow: true, highlight: true } },
   { id: "sensory", title: "Sensory-sensitive", text: "Soft, low-glare colours, no movement or flashing, hidden spots not drawn.",
