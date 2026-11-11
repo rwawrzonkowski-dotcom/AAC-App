@@ -42,11 +42,12 @@ brand. Shared under CC BY-SA 4.0.
 
 ## Fonts (Accessibility)
 
-Two optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. Both are licensed under
-the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`):
+Three optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. All are licensed under
+the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`, `fonts/OFL-opendyslexic.txt`):
 
 - **Atkinson Hyperlegible** (c) 2020 Braille Institute of America, Inc. https://www.brailleinstitute.org/freefont
 - **Lexend** (c) 2019 The Lexend Project Authors. https://github.com/googlefonts/lexend
+- **OpenDyslexic** (c) 2012-2019 Abbie Gonzalez, with Reserved Font Name OpenDyslexic (used unmodified). https://opendyslexic.org
 
 ## Object recognition (Scenes)
 
@@ -526,7 +527,6 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | music | `images/symbols/music.svg` | music | CC BY-SA 4.0 |
 | Music | `images/symbols/t-music.svg` | musical_instruments | CC BY-SA 4.0 |
 | music room | `images/symbols/music-room.svg` | music_room | CC BY-SA 4.0 |
-| my turn | `images/symbols/my-turn.svg` | I | CC BY-SA 4.0 |
 | neck | `images/symbols/neck.svg` | neck | CC BY-SA 4.0 |
 | necklace | `images/symbols/necklace.svg` | necklace | CC BY-SA 4.0 |
 | need a hug | `images/symbols/need-hug.svg` | hug_,_to | CC BY-SA 4.0 |
@@ -682,6 +682,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | school time | `images/symbols/school-time.svg` | school_bag | CC BY-SA 4.0 |
 | scissors | `images/symbols/scissors.svg` | scissors | CC BY-SA 4.0 |
 | scoop | `images/symbols/scoop.svg` | scoop_,_to | CC BY-SA 4.0 |
+| scratch | `images/symbols/scratch.svg` | itch | CC BY-SA 4.0 |
 | sea turtle | `images/symbols/sea-turtle.svg` | turtle | CC BY-SA 4.0 |
 | seahorse | `images/symbols/seahorse.svg` | seahorse | CC BY-SA 4.0 |
 | seal | `images/symbols/seal.svg` | seal | CC BY-SA 4.0 |
@@ -925,7 +926,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | zip | `images/symbols/zip.svg` | zip | CC BY-SA 4.0 |
 | Zoo | `images/symbols/a-zoo.svg` | giraffe | CC BY-SA 4.0 |
 
-### OpenMoji (397 pictures)
+### OpenMoji (398 pictures)
 
 | Word | File | Original name | License |
 |---|---|---|---|
@@ -1153,6 +1154,7 @@ https://creativecommons.org/licenses/by-sa/4.0/legalcode
 | mushroom | `images/symbols/mushroom.svg` | 1F344 mushroom | CC BY-SA 4.0 |
 | my | `images/symbols/my.svg` | 1F91A raised back of hand | CC BY-SA 4.0 |
 | my body | `images/symbols/my-body.svg` | 1F9CD person standing | CC BY-SA 4.0 |
+| my turn | `images/symbols/my-turn.svg` | 1F64B person raising hand, with a turn-taking badge drawn for this project | CC BY-SA 4.0 |
 | name | `images/symbols/name.svg` | 1F4DB name badge | CC BY-SA 4.0 |
 | nanny | `images/symbols/nanny.svg` | 1F469-200D-1F37C woman feeding baby | CC BY-SA 4.0 |
 | nap | `images/symbols/nap.svg` | 1F634 sleeping face | CC BY-SA 4.0 |

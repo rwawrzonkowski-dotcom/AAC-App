@@ -7,6 +7,7 @@
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
+| **VOICE 3.2** | Nov 11 | **Promoted to stable**: Beta 3.25 to 3.25.3 (the 24 board, OpenDyslexic, new "my turn" picture, Reports on upright screens; the security fixes were already in 3.1.2). Upgrade from 3.1.2 tested: learners, edited words, teaching targets and everyday data kept. | (see Betas 3.25 to 3.25.3) |
 | **Beta 3.25.3** | Nov 11 | Reports on a phone or upright iPad: the top bar wraps (Close no longer cut off, subtitle under the title) and the range and tab buttons wrap onto two lines (Export no longer cut off), with slightly smaller buttons so the report keeps room. | styles.css |
 | **Beta 3.25.2** | Nov 11 | "my turn" had the letter I as its picture. New picture: OpenMoji's child raising a hand with a small two-arrow turn-taking badge (so it differs from "me"); used everywhere "my turn" appears. | images/symbols/my-turn.svg, data/image-sources.json |
 | **Beta 3.25.1** | Nov 11 | **OpenDyslexic** added to Accessibility > Letters (SIL Open Font License, bundled, works offline; from the Fontsource package 5.3.0, unmodified). Labels are re-fitted when a chosen font finishes loading (fixes labels measured in the fallback font, e.g. "bathroom" running over); the little-word strip uses slightly smaller letters in this wide font. Credits list it with its licence. | fonts/, styles.css, js/access.js, js/accessui.js, js/board.js, tools/make-credits.py |

@@ -268,6 +268,16 @@ button { font: inherit; touch-action: manipulation; }
 #board[data-size="84"] .cell-image .placeholder { font-size: min(3.6vw, 5.4dvh); }
 #board[data-size="84"] .cell.empty-slot .plus { font-size: 3.4vmin; }
 
+/* 24-location board (Beta 3.25): six large buttons a row, so bigger letters, rounder corners and a little more room between buttons.
+   (js/board.js fitLabels still shrinks a long label such as "Body and feelings" to fit.) */
+#board[data-size="24"] { --radius: 2vmin; gap: var(--cell-gap, calc(var(--gap) * 1.6)); }
+#board[data-size="24"] .cell { border-radius: 2vmin; border-width: 0.35vmin; }
+#board[data-size="24"] .cell-label { font-size: calc(2.6vw * var(--lbl-k, 1)); }
+#board[data-size="24"] .cell.text-only .cell-label { font-size: calc(4.2vw * var(--lbl-k, 1)); }
+#board[data-size="24"] .cell-image .placeholder { font-size: min(8vw, 12dvh); }
+#board[data-size="24"] .cell.empty-slot .plus { font-size: 7vmin; }
+#board[data-size="24"] .type-home { border-width: 0.7vmin; }
+
 /* ---------- Hold to select: filling ring on the pressed button ----------
    A layer on top of the button (absolute, so nothing is resized or moved). */
 .touch-hold {
@@ -942,6 +952,20 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 .rp-tabs { flex: 0 0 auto; padding: 6px 20px; background: #fff; border-bottom: 1px solid #d5dde6; }
 .rp-body { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 20px 28px; transition: opacity 0.15s; }
 .rp-body.busy { opacity: 0.55; }
+/* Phone, or any narrow / upright screen (Nov 11): the top bar wraps (title and Close on one line, the subtitle under the title) and the
+   range and tab buttons wrap onto a second line instead of running off the right edge. Smaller buttons leave more room for the report. */
+@media (max-width: 760px), (orientation: portrait) and (max-width: 900px) {
+  .rp-head { flex-wrap: wrap; gap: 4px 12px; padding: 10px 14px; }
+  .rp-head h1 { flex: 1 1 0; min-width: 0; font-size: 1.3em; }
+  .rp-head h1 small { display: block; margin-top: 2px; font-size: 0.5em; }
+  .rp-head #rp-close { flex: 0 0 auto; }
+  .rp-controls { padding: 6px 14px 4px; }
+  .rp-ranges { min-width: 0; flex-wrap: wrap; }
+  .rp-tabs { flex-wrap: wrap; padding: 6px 14px; }
+  .rp-ranges .seg { flex: 1 1 18%; min-height: 38px; padding: 4px; font-size: 0.82em; }
+  .rp-tabs .seg { flex: 1 1 30%; min-height: 38px; padding: 4px; font-size: 0.82em; }
+  .rp-body { padding: 10px 14px 24px; }
+}
 .rp-h { margin: 18px 0 8px; font-size: 1.15em; }
 .rp-range { margin: 0 0 8px; }
 .rp-banner { background: #fffbeb; border: 1px solid #f59e0b; border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
@@ -1265,6 +1289,14 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 @font-face { font-family: "Lexend"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/lexend-latin-700-normal.woff2") format("woff2"); }
 html[data-font="atkinson"] #app, html[data-font="atkinson"] .listener-view, html[data-font="atkinson"] #dial-layer { font-family: "Atkinson Hyperlegible", -apple-system, Arial, sans-serif; }
 html[data-font="lexend"] #app, html[data-font="lexend"] .listener-view, html[data-font="lexend"] #dial-layer { font-family: "Lexend", -apple-system, Arial, sans-serif; }
+/* OpenDyslexic (Nov 11): weighted letter bottoms for readers with dyslexia. Its letters are wide, so labels get normal letter spacing
+   (fitLabels still shrinks a long label to fit its button). */
+@font-face { font-family: "OpenDyslexic"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/opendyslexic-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "OpenDyslexic"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/opendyslexic-latin-700-normal.woff2") format("woff2"); }
+html[data-font="opendyslexic"] #app, html[data-font="opendyslexic"] .listener-view, html[data-font="opendyslexic"] #dial-layer { font-family: "OpenDyslexic", -apple-system, Arial, sans-serif; }
+html[data-font="opendyslexic"] #board .cell-label { letter-spacing: 0; }
+/* The little-word strip is not re-fitted: its short words get slightly smaller letters in this wide font, so "there" and "where" fit. */
+html[data-font="opendyslexic"] .lw-item.text-only .cell-label { font-size: min(2.1vmin, 2.9dvh); letter-spacing: 0; }
 
 /* Label size: the letters scale (and, for L and XL, the label row gets a little more of the button; the picture box shrinks to match).
    js/board.js fitLabels still shrinks a label that would not fit. */

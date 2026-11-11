@@ -1,6 +1,6 @@
 # VOICE — Project Status and Reference
 
-*Last updated: Nov 10, 2026 (VOICE 3.1.2 stable, Nov 11 security fixes; beta = Beta 3.25.1: the 24 board, OpenDyslexic). Read this first in any new session instead of re-reading old chats.*
+*Last updated: Nov 10, 2026 (VOICE 3.2 stable, promoted Nov 11; beta = the same; next: stage 5). Read this first in any new session instead of re-reading old chats.*
 
 **VOICE** = Variable Output for Individualized Communication and Expression. A free, iPad-first AAC (speech) app for nonvocal children new to AAC, built by **Richard Wawrzonkowski, M.S., LBA, BCBA**. Pilot with his clients now; public release later.
 
@@ -8,9 +8,9 @@
 
 | What | Where |
 |---|---|
-| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 3.1.2" (Nov 11: everything through Beta 3.24.1, plus the Nov 11 security fixes) |
+| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "VOICE 3.2" (promoted Nov 11: everything through Beta 3.25.3) |
 | Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 3.23": VOICE 2.0 plus **camera scenes** (Phase 3), **scene-name vocabulary**, **My things** and the **camera button** (see below) |
-| Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE), `stable-1.1` (VOICE 1.1), `stable-2.0` (VOICE 2.0), `stable-3.0` (VOICE 3.0) and `stable-3.1` (VOICE 3.1) |
+| Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE), `stable-1.1` (VOICE 1.1), `stable-2.0` (VOICE 2.0), `stable-3.0` (VOICE 3.0), `stable-3.1` (VOICE 3.1.2) and `stable-3.2` (VOICE 3.2) |
 | Planning doc (source of truth for decisions) | https://claude.ai/code/artifact/133274d9-e0f2-4009-8086-6f527aebe3af |
 | Website plan | https://claude.ai/code/artifact/35106cdc-bca5-4b24-8e2f-c5c6a34d44d0 |
 | This status file | Project doc `claude/VOICE-status.md` and repo `docs/VOICE-STATUS.md` |
@@ -148,7 +148,7 @@ Scene switcher = 1-second hold on the scene name; session hides the strip, Model
 
 - About 60 weak or self-drawn symbols to review (stand-ins like granola bar, ranch, kinship words); real photos will help most.
 - Default photos for nouns: currently symbols, with adults adding real photos per learner.
-- The 24 board is built in Beta 3.25 (not yet in stable).
+- The 24 board is in stable since VOICE 3.2.
 - Optional visual cue during the dial's half-second hold.
 - Insect "fly" shares a label with the verb in Forms.
 - Optional later: VOICE's own built-in offline voice (allows volume boost and the same voice on every device; adds 20–60 MB). Revisit if loudness complaints continue.

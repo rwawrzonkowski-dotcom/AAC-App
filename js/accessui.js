@@ -7,8 +7,9 @@ import { PRESETS, applyPreset, cleanAccess, DEFAULT_ACCESS } from "./access.js";
 const OPTIONS = [
   { key: "theme", title: "Colours (theme)", choices: [["standard", "Standard"], ["dark", "High contrast"], ["cvi", "CVI"], ["cbsafe", "Colour-blind safe"], ["dim", "Dim"]],
     help: "High contrast: black background, the word type shows as a thick coloured edge, pictures on white. CVI: black with one bright colour (yellow). Colour-blind safe: white buttons with a coloured patch behind the picture. Dim: soft dark colours with less glare (evenings, light sensitivity)." },
-  { key: "font", title: "Letters (font)", choices: [["system", "VOICE standard"], ["atkinson", "Atkinson Hyperlegible"], ["lexend", "Lexend"]],
-    help: "Atkinson Hyperlegible was made for readers with low vision; Lexend is designed to be easy to read. Both are free and work offline." },
+  { key: "font", title: "Letters (font)", choices: [["system", "VOICE standard"], ["atkinson", "Atkinson Hyperlegible"], ["lexend", "Lexend"], ["opendyslexic", "OpenDyslexic"]],
+    help: "Atkinson Hyperlegible was made for readers with low vision; Lexend is designed to be easy to read; OpenDyslexic has heavier letter bottoms, " +
+      "which some readers with dyslexia find easier. All are free and work offline." },
   { key: "labelSize", title: "Label size", choices: [["s", "Small"], ["m", "Medium"], ["l", "Large"], ["xl", "Extra large"]],
     help: "Large and Extra large give the word more room and the picture a little less. A long word still shrinks to fit its button." },
   { key: "labelPos", title: "Label position", choices: [["bottom", "Below the picture"], ["top", "Above the picture"]] },

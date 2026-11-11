@@ -4,7 +4,7 @@
 import { h, openOverlay, askConfirm } from "./ui.js";
 import { getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto } from "./profiles.js";
 import { buildModel } from "./boardmodel.js";
-import { progressFor, MAX_STAGE } from "./stagerule.js";
+import { progressFor, hasNextStep, MOVE_UP } from "./stagerule.js";
 import { downscaleImage } from "./editor.js";
 import * as T from "./teaching.js";
 import * as data from "./teachdata.js";
@@ -277,7 +277,7 @@ export async function runEndFlow(result, ctx) {
   }
   // Next stage (Beta 3.22): enough of this stage's main-board words are proficient (mastered target or used on their own on enough days),
   // by the clinician's rule (Adult menu > Vocabulary stage). Only suggested; the adult decides.
-  if (cur.stage < MAX_STAGE) {
+  if (hasNextStep(cur)) {
     const prog = await progressFor(cur, buildModel(ctx.board, cur.gridSize), data.getTargets());
     if (prog.ready) await askStage(cur, ctx, prog);
   }
@@ -287,6 +287,33 @@ export async function runEndFlow(result, ctx) {
 }
 
 const TONE_SUGGEST_MASTERED = 3;
+
+/** Which proficient words, in one sentence (both rules). */
+const proficientText = (cur, prog) => prog.mode === "words"
+  ? `All ${prog.need} of the stage ${cur.stage} words you chose are proficient: ${prog.items.filter((i) => i.chosen).map((i) => i.label).join(", ")}.`
+  : `${prog.have} of ${prog.items.length} stage ${cur.stage} words are proficient (the rule is ${prog.pct}%): ${prog.items.filter((i) => i.proficient).map((i) => i.label).join(", ")}.`;
+
+// The 24 board's last stage is done (Beta 3.25): suggest moving up to the 45 board at stage 2. A new motor plan, so the adult decides.
+function askMoveUp(cur, ctx, prog) {
+  return new Promise((resolve) => {
+    const finish = () => { o.close(); resolve(); };
+    const o = openOverlay([
+      h("h2", { id: "stage-title", text: `Move ${cur.name} up to the 45 board?` }),
+      h("p", { class: "confirm-text", id: "stage-detail", text: proficientText(cur, prog) +
+        ` ${cur.name} has finished the 24 board's stages. The 45 board has smaller buttons and many more words, and its words are in ` +
+        `different places, so this is a new motor plan, like changing devices. ${cur.name} would start at 45-board stage ${MOVE_UP.stage}. ` +
+        `Teaching targets and everyday data carry over. Words and photos you added to the 24 board stay with it and come back if you switch back.` }),
+      h("div", { class: "btn-row" },
+        h("button", { type: "button", class: "btn", id: "stage-no", text: "Not yet", onclick: finish }),
+        h("button", { type: "button", class: "btn primary", id: "stage-yes", text: "Move to the 45 board", onclick: async () => {
+          cur.gridSize = MOVE_UP.gridSize; cur.stage = MOVE_UP.stage;
+          await saveProfile(cur);
+          (ctx.onBoardSizeChanged || ctx.onVocabChanged)();
+          finish();
+        } })),
+    ], { sheetClass: "small" });
+  });
+}
 function askToneWheel(cur, mastered) {
   return new Promise((resolve) => {
     const finish = async (on) => { cur.toneSuggested = true; if (on) cur.toneWheel = "on"; await saveProfile(cur); o.close(); resolve(); };
@@ -374,6 +401,7 @@ function askPhase(t) {
 }
 
 function askStage(cur, ctx, prog) {
+  if (prog.moveUp) return askMoveUp(cur, ctx, prog);
   return new Promise((resolve) => {
     const next = cur.stage + 1;
     const finish = () => { o.close(); resolve(); };

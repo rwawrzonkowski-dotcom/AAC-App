@@ -4,6 +4,7 @@
 //   Full board, 84 buttons   -> gridSize 84, stage 4 (every word)
 //   Full board, 45 buttons   -> gridSize 45, stage 4
 //   New AAC learner          -> gridSize 45, stage 1 (6 words; reveal more as the learner grows)
+//   Big buttons, 24          -> gridSize 24, stage 1 (Beta 3.25: its own large-button board for early learners; 6 words)
 // Words and keyboard buttons stay on Auto (so they show from stage 3).
 // On the first open there is also a "Restore from a backup file" link (uses the existing restore flow).
 import { h } from "./ui.js";
@@ -20,6 +21,8 @@ export const SETUP_CHOICES = [
     text: "Every word is shown on the standard board." },
   { id: "new", title: "New AAC learner", gridSize: 45, stage: 1,
     text: "Starts with 6 words. Reveal more as the learner grows." },
+  { id: "big24", title: "Big buttons — 24", gridSize: 24, stage: 1,
+    text: "Large buttons for early skills: requests, breaks, finished, yes / no, and telling you something hurts. Starts with 6 words." },
 ];
 
 // Show the setup card. `first` = true on a brand-new device (adds the Restore link, no Cancel).
@@ -37,7 +40,7 @@ export function showSetup({ first = false } = {}) {
     // On a phone, the 45-button choice is marked "Recommended for phones" (choices and defaults are unchanged).
     const phone = looksLikePhone();
     const choices = SETUP_CHOICES.map((c) =>
-      h("button", { type: "button", class: "setup-choice" + (c.id === "new" ? " new" : ""), id: "setup-" + c.id,
+      h("button", { type: "button", class: "setup-choice" + (c.id === "new" || c.id === "big24" ? " new" : ""), id: "setup-" + c.id,
         "data-grid": c.gridSize, "data-stage": c.stage, onclick: () => choose(c) },
         h("span", { class: "setup-choice-title", text: c.title }),
         h("span", { class: "setup-choice-text", text: c.text }),

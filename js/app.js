@@ -16,7 +16,7 @@ import {
   speak, speakMessage, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isMessagePlaying, pauseMs, onSpeakingChange } from "./speech.js";
 import { createTyping } from "./keyboard.js";
 import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js";
-import { buildModel, getPage, pathToCore, resolvePage, posKey, MAX_DEPTH } from "./boardmodel.js";
+import { buildModel, getPage, pathToCore, resolvePage, posKey, gridOf, MAX_DEPTH } from "./boardmodel.js";
 import { loadBoardData } from "./boarddata.js";
 import {
   initProfiles, hasProfiles, listProfiles, addProfile, chooseCurrent, getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto, newPageId, deleteAdultPage,
@@ -124,13 +124,15 @@ let typing = null;    // the keyboard / number pad overlay (js/keyboard.js), cre
 
 // ---------- The Words button ----------
 // "auto" shows it from stage 3 up; "always" and "never" are the adult's choice (adult menu).
-const wordsButtonShown = (p) => p.wordsButton === "always" || (p.wordsButton !== "never" && p.stage >= 3);
+// On the 24 board (Beta 3.25) "auto" means OFF at every stage: its learners start with the board only. Each can still be set to Always.
+const autoOn = (p) => p.stage >= 3 && p.gridSize !== 24;
+const wordsButtonShown = (p) => p.wordsButton === "always" || (p.wordsButton !== "never" && autoOn(p));
 // The ABC (keyboard) button works the same way, with its own setting: Auto = from stage 3.
-const keyboardButtonShown = (p) => p.keyboardButton === "always" || (p.keyboardButton !== "never" && p.stage >= 3);
+const keyboardButtonShown = (p) => p.keyboardButton === "always" || (p.keyboardButton !== "never" && autoOn(p));
 // The camera button (Beta 3.1, js/camerabtn.js) works the same way, with its own setting: Auto = from stage 3.
 // The little-word strip (Beta 3.7): Auto shows it from stage 3, like the camera and ABC.
-const littleStripShown = (p) => p.littleStrip === "always" || (p.littleStrip !== "never" && p.stage >= 3);
-const cameraButtonShown = (p) => p.cameraButton === "always" || (p.cameraButton !== "never" && p.stage >= 3);
+const littleStripShown = (p) => p.littleStrip === "always" || (p.littleStrip !== "never" && autoOn(p));
+const cameraButtonShown = (p) => p.cameraButton === "always" || (p.cameraButton !== "never" && autoOn(p));
 // True while the Words menu or any page opened from it is showing.
 const onWordsPage = (pageId = state.page) => {
   const profile = getCurrent();
@@ -255,7 +257,7 @@ function renderAll() {
 
   renderBoard($("board"), cells, {
     editing: state.editing, photoUrl: getPhotoUrl, backImage: state.board.backImage,
-    cols: model.cols, rows: model.rows, size: model.size, wordsOnly: profile.wordsOnly,
+    ...gridOf(model, page), wordsOnly: profile.wordsOnly,
   });
 
   // Visual cue that the page changed: tinted background + page title.
@@ -408,7 +410,7 @@ function playMessage(toneId, from = "wheel") {
 // Press and hold the message bar (learners at stage 4 with "Tone wheel" on): 8 feelings around the finger. A pick says the message
 // once in that tone; resting 1 second on a feeling first sets it as the learner's MOOD (every message in that tone until changed;
 // a small face shows in the message bar); the centre, "Normal", clears the mood. The mood lasts while VOICE is open.
-const toneWheelOn = (p) => p.toneWheel === "on" && p.stage >= 4;
+const toneWheelOn = (p) => p.toneWheel === "on" && (p.stage >= 4 || p.gridSize === 24);   // (the 24 board has no stage 4: On means on)
 function toneDialMs(el) {
   if (el.id !== "message-text" || !toneWheelOn(getCurrent()) || !state.sentence.length) return 0;
   if (state.dial || state.editing || state.choosing || returning || previewing || teach.isActive() || (typing && typing.isOpen())) return 0;
@@ -575,7 +577,7 @@ function closeForms() { if (state.forms) { state.forms.close(); state.forms = nu
 
 // ---------- The word-forms dial (press and hold a word) ----------
 // "Auto" turns the dial on from stage 3, like the Words and ABC buttons; "always" and "never" are the adult's choice.
-const wordDialOn = (p) => p.wordDial.mode === "always" || (p.wordDial.mode !== "never" && p.stage >= 3);
+const wordDialOn = (p) => p.wordDial.mode === "always" || (p.wordDial.mode !== "never" && autoOn(p));
 function closeDial() { if (state.dial) state.dial.close(); }
 
 // The dial this board button can show, or null (then it is an ordinary button: holding it behaves like a tap).
@@ -798,7 +800,7 @@ async function editCell(d) {
   const profile = getCurrent();
   const page = currentPageDef();
   // (Never on a built-in folder page: those may sit deeper than the limit, see js/boardmodel.js.)
-  const canMakePage = d.kind === "empty" && page.depth < MAX_DEPTH && !page.folder;
+  const canMakePage = d.kind === "empty" && page.depth < MAX_DEPTH && !page.folder && !page.grid;   // (not on a 24-board learner's Words pages, drawn on the 45 grid)
   const result = await openCellEditor(d, getPhotoUrl(d.photoKey), { onOpenPage: goTo, canMakePage });
   if (!result) return;
 
@@ -1192,7 +1194,8 @@ async function start() {
     modelNow, getPageId: () => state.page, getCells: () => state.cells, goTo,
     wordsButtonAvailable: () => wordsButtonShown(getCurrent()),
     onSessionChange: () => renderAll(),
-    runEndFlow: (result) => runEndFlow(result, { board: state.board, onVocabChanged: renderAll }),
+    runEndFlow: (result) => runEndFlow(result, { board: state.board, onVocabChanged: renderAll,
+      onBoardSizeChanged: () => { utteranceEnds("clear"); closeDial(); state.sentence.length = 0; drawMessage(); state.page = "core"; renderAll(); } }),
     // Sentence targets (Beta 3.12):
     clearMessage: () => { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; drawMessage(); },
     addWords: (items) => {                        // backward chaining: the first words, put in the message bar silently
