@@ -1,0 +1,9 @@
+# Secrets never belong in this public repository (security review, Nov 11). VOICE has none: it has no server, accounts or keys.
+.env
+.env.*
+*.pem
+*.key
+
+# Tools
+node_modules/
+.DS_Store

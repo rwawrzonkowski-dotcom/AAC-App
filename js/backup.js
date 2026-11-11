@@ -369,7 +369,10 @@ function cleanLearner(raw, index, version) {
 // or throws an Error whose message is safe to show to the adult.
 export async function readBackupFile(file) {
   let data;
-  try { data = JSON.parse(await file.text()); }
+  // Keys that mean something special to JavaScript ("__proto__", "constructor", "prototype") are dropped as the file is read, so a
+  // hand-edited file cannot change how a learner's settings are looked up (security review, Nov 11). VOICE never writes such keys.
+  const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+  try { data = JSON.parse(await file.text(), (k, v) => (UNSAFE_KEYS.has(k) ? undefined : v)); }
   catch (e) { bad("That file is not a backup from this app (it could not be read)."); }
   if (!isObj(data) || data.app !== BACKUP_APP) bad("That file is not a backup from this app.");
   if (!Number.isInteger(data.version) || data.version < 1) bad("This backup has no valid version number.");
