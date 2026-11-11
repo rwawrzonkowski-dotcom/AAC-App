@@ -4,7 +4,7 @@
 //   {
 //     id, name, created, v: 3,
 //     stage: 1..4,                      // how many core words are revealed
-//     gridSize: 45 | 84,                // which board this learner uses
+//     gridSize: 24 | 45 | 84,           // which board this learner uses (24 = Beta 3.25: its own layout, stages 1-3)
 //     words: {                          // changes to BUILT-IN words, by word id.
 //       "want": { show: true|false, label: "...", spoken: "..." },   // They follow
 //       "about-name": { fill: "Sam" },                               // the word to
@@ -75,6 +75,7 @@ import { deleteThings, importThings } from "./things.js";
 import { cleanAccess } from "./access.js";
 import { cleanScan } from "./scan.js";
 import { cleanStageRule } from "./stagerule.js";
+import { normSize, maxStageFor } from "./boardmodel.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
@@ -198,7 +199,7 @@ async function upgradeProfile(p, board) {
   }
   p.words = p.words || {}; p.cells = p.cells || {}; p.pages = p.pages || {}; p.pins = p.pins || {};
   p.notices = Array.isArray(p.notices) ? p.notices : [];
-  p.gridSize = Number(p.gridSize) === 84 ? 84 : 45;
+  p.gridSize = normSize(p.gridSize);
 }
 
 export async function initProfiles(board) {
@@ -266,9 +267,10 @@ export async function switchTo(id) {
   await loadPhotos();
 }
 
-// opts: { gridSize: 45 | 84, stage: 1..4 } (from the quick setup screen; the default is the usual new learner)
+// opts: { gridSize: 24 | 45 | 84, stage: 1..4 (1..3 on the 24 board) } (from the quick setup screen; the default is the usual new learner)
 export async function addProfile(name, { gridSize = 45, stage = 1 } = {}) {
-  const p = makeProfile(name, stage, CHILD_VOICE, gridSize === 84 ? 84 : 45);
+  const size = normSize(gridSize);
+  const p = makeProfile(name, Math.min(stage, maxStageFor(size)), CHILD_VOICE, size);
   profiles.push(p);
   await saveProfile(p);
   return p;

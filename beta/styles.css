@@ -268,6 +268,16 @@ button { font: inherit; touch-action: manipulation; }
 #board[data-size="84"] .cell-image .placeholder { font-size: min(3.6vw, 5.4dvh); }
 #board[data-size="84"] .cell.empty-slot .plus { font-size: 3.4vmin; }
 
+/* 24-location board (Beta 3.25): six large buttons a row, so bigger letters, rounder corners and a little more room between buttons.
+   (js/board.js fitLabels still shrinks a long label such as "Body and feelings" to fit.) */
+#board[data-size="24"] { --radius: 2vmin; gap: var(--cell-gap, calc(var(--gap) * 1.6)); }
+#board[data-size="24"] .cell { border-radius: 2vmin; border-width: 0.35vmin; }
+#board[data-size="24"] .cell-label { font-size: calc(2.6vw * var(--lbl-k, 1)); }
+#board[data-size="24"] .cell.text-only .cell-label { font-size: calc(4.2vw * var(--lbl-k, 1)); }
+#board[data-size="24"] .cell-image .placeholder { font-size: min(8vw, 12dvh); }
+#board[data-size="24"] .cell.empty-slot .plus { font-size: 7vmin; }
+#board[data-size="24"] .type-home { border-width: 0.7vmin; }
+
 /* ---------- Hold to select: filling ring on the pressed button ----------
    A layer on top of the button (absolute, so nothing is resized or moved). */
 .touch-hold {

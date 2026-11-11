@@ -30,7 +30,7 @@ export const PAGES = [
   { id: "learner", title: "Learners", group: null, icon: "👤", color: "#64748b", views: VIEWS, oldIds: ["sec-learner", "sec-notice"],
     keywords: ["learner", "child", "student", "add learner", "switch learner", "rename", "delete learner", "name", "notes about the board"] },
   { id: "size", title: "Board size", group: "board", icon: "▦", color: "#2563eb", views: VIEWS, oldIds: ["sec-size"],
-    keywords: ["board size", "45", "84", "grid", "locations", "buttons", "bigger board"] },
+    keywords: ["board size", "24", "45", "84", "big buttons", "grid", "locations", "buttons", "bigger board"] },
   { id: "access", title: "Accessibility", group: "board", icon: "♿", color: "#1d4ed8", views: VIEWS,
     keywords: ["accessibility", "presets", "low vision", "cvi", "cortical visual impairment", "motor", "hearing", "deaf", "sensory", "theme", "dark",
       "high contrast", "contrast", "colour-blind", "color blind", "dim", "night", "font", "letters", "dyslexia", "label size", "bigger words", "large labels",

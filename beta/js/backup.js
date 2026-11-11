@@ -62,6 +62,8 @@
 // and sentence trials (links, method, phase). An older app would turn them into broken word targets, so it refuses a version 18 file.
 // Beta 3.18 (still version 18) adds `access` (Accessibility: theme, font, labels, spacing...; js/access.js); a backup without it gets the defaults.
 // Beta 3.16 (still version 18) adds `toneWheel` ("off" | "on"); a backup without it gets "off".
+// Version 20 (beta 3.25) allows `gridSize` 24 (the 24 board: cell keys end in "@24", stages 1-3). An older app would show such a learner
+// on the 45 board, so it refuses a version 20 file.
 // Version 17 (beta 3.7) added `littleStrip` ("auto" | "always" | "never": the little-word strip). Older backups get Auto.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
 // backups (made before the model critter) and version 3 backups (made before the category
@@ -83,7 +85,7 @@ import { exportThings, cleanThingsBackup } from "./things.js";
 import { cleanTarget, cleanSession, cleanTrial } from "./teaching.js";
 import { getEdits, hasEdits, cleanEdits, replaceEdits, editedCount } from "./templates.js";
 import { getBoardData } from "./boarddata.js";
-import { SIZES, MAX_DEPTH } from "./boardmodel.js";
+import { SIZES, MAX_DEPTH, normSize, maxStageFor } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE, LAYOUT8_NOTE } from "./migrate.js";
 import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
@@ -92,7 +94,7 @@ import { cleanScan } from "./scan.js";
 import { cleanStageRule } from "./stagerule.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 19;   // 19 = Beta 3.23 (Actions folder layout)
+export const BACKUP_VERSION = 20;   // 19 = Beta 3.23 (Actions folder layout); 20 = Beta 3.25 (the 24 board)
 
 // ---------------------------------------------------------------- saving
 
@@ -193,7 +195,7 @@ const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 const num = (v, fallback) => (typeof v === "number" && isFinite(v) ? v : fallback);
 const str = (v, max) => (typeof v === "string" ? v.slice(0, max) : "");
-const CELL_KEY = /^[A-Za-z0-9_-]{1,40}:(\d{1,2}),(\d{1,2})(@84)?$/;
+const CELL_KEY = /^[A-Za-z0-9_-]{1,40}:(\d{1,2}),(\d{1,2})(@84|@24)?$/;
 const WORD_KEY = /^w:[A-Za-z0-9_-]{1,40}$/;
 const ID = /^[A-Za-z0-9_-]{1,40}$/;
 
@@ -201,7 +203,7 @@ const ID = /^[A-Za-z0-9_-]{1,40}$/;
 function validCellKey(key) {
   const m = CELL_KEY.exec(key);
   if (!m) return false;
-  const g = SIZES[m[3] ? 84 : 45];
+  const g = SIZES[m[3] ? Number(m[3].slice(1)) : 45];
   return +m[1] < g.rows && +m[2] < g.cols;
 }
 // A photo key: a built-in word ("w:want"), a cell, or the learner's own critter picture.
@@ -259,7 +261,7 @@ function cleanLearner(raw, index, version) {
     ({ words, cells, pins } = migrateCells(board, old));
     photoKey = (k) => mapLegacyKey(board, k);
   } else {
-    gridSize = Number(raw.gridSize) === 84 ? 84 : 45;
+    gridSize = normSize(raw.gridSize);
     for (const [id, ov] of Object.entries(isObj(raw.words) ? raw.words : {})) {
       if (!ID.test(id) || !isObj(ov)) bad(`${name}: a word entry is not valid.`);
       if (board.words[id]) words[id] = cleanOverride(ov);        // unknown words are ignored
@@ -274,7 +276,7 @@ function cleanLearner(raw, index, version) {
     }
     for (const [id, pg] of Object.entries(isObj(raw.pages) ? raw.pages : {})) {
       if (!ID.test(id) || !isObj(pg) || !isObj(pg.at)) bad(`${name}: an adult-made page is not valid.`);
-      const size = Number(pg.size) === 84 ? 84 : 45;
+      const size = normSize(pg.size);
       const depth = Math.round(num(pg.depth, 0));
       const row = Math.round(num(pg.at.row, -1)), col = Math.round(num(pg.at.col, -1));
       if (depth < 1 || depth > MAX_DEPTH || row < 0 || col < 0 || row >= SIZES[size].rows || col >= SIZES[size].cols ||
@@ -362,14 +364,17 @@ function cleanLearner(raw, index, version) {
   const stageRule = cleanStageRule(raw.stageRule);          // Beta 3.22 (still version 18): a backup without it gets 50% of the stage
   const scan = cleanScan(raw.scan);                        // Beta 3.21 (still version 18): a backup without it has scanning Off
   const access = cleanAccess(raw.access);                  // Beta 3.18 (still version 18): a backup without it gets the standard look
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, access, scan, stageRule, wordDial, notices, teaching, everyday, scenes, things, photos };
+  return { name, stage: Math.min(stage, maxStageFor(gridSize)), gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, access, scan, stageRule, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }
 // or throws an Error whose message is safe to show to the adult.
 export async function readBackupFile(file) {
   let data;
-  try { data = JSON.parse(await file.text()); }
+  // Keys that mean something special to JavaScript ("__proto__", "constructor", "prototype") are dropped as the file is read, so a
+  // hand-edited file cannot change how a learner's settings are looked up (security review, Nov 11). VOICE never writes such keys.
+  const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+  try { data = JSON.parse(await file.text(), (k, v) => (UNSAFE_KEYS.has(k) ? undefined : v)); }
   catch (e) { bad("That file is not a backup from this app (it could not be read)."); }
   if (!isObj(data) || data.app !== BACKUP_APP) bad("That file is not a backup from this app.");
   if (!Number.isInteger(data.version) || data.version < 1) bad("This backup has no valid version number.");

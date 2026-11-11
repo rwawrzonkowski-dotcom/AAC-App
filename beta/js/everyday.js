@@ -480,7 +480,7 @@ export function cleanEvent(raw) {
   if (!HOWS.includes(raw.how) || !MODES.includes(raw.mode)) return null;
   const e = { id: typeof raw.id === "string" && KEYID_RE.test(raw.id) ? raw.id : newKeyId(raw.time), time: Math.floor(raw.time),
     wordId: typeof raw.wordId === "string" && ID_RE.test(raw.wordId) ? raw.wordId : null, label: txt(raw.label, 60), spoken: txt(raw.spoken, 160),
-    how: raw.how, mode: raw.mode, gridSize: raw.gridSize === 84 ? 84 : 45, stage: stageOf(raw.stage) };
+    how: raw.how, mode: raw.mode, gridSize: raw.gridSize === 84 || raw.gridSize === 24 ? raw.gridSize : 45, stage: stageOf(raw.stage) };
   if (Array.isArray(raw.pages)) { const p = raw.pages.filter((x) => typeof x === "string" && ID_RE.test(x)).slice(0, 8); if (p.length) e.pages = p; }
   if (typeof raw.form === "string" && raw.form) e.form = txt(raw.form, 40);
   if (typeof raw.base === "string" && raw.base) e.base = txt(raw.base, 60);
@@ -497,7 +497,7 @@ export function cleanUtterance(raw) {
   return { id: typeof raw.id === "string" && KEYID_RE.test(raw.id) ? raw.id : newKeyId(end), time: end,
     start: typeof raw.start === "number" && raw.start <= end ? Math.floor(raw.start) : end, end, chips,
     spokenAsSentence: raw.endedBy === "barSpeak", endedBy: raw.endedBy, mixed: raw.mixed === true,
-    gridSize: raw.gridSize === 84 ? 84 : 45, stage: stageOf(raw.stage),
+    gridSize: raw.gridSize === 84 || raw.gridSize === 24 ? raw.gridSize : 45, stage: stageOf(raw.stage),
     ...(TONE_IDS.includes(raw.tone) ? { tone: raw.tone, toneFrom: raw.toneFrom === "mood" ? "mood" : "wheel" } : {}) };
 }
 export function cleanDay(raw, date) {

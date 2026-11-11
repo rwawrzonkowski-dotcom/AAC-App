@@ -17,9 +17,24 @@
 //     Back cell (the top-bar button reads "Close"). Its page buttons open the word pages (depth 2).
 //     A page with "starter": "all" shows all of its words whenever the page is open.
 //
-// Two grid sizes exist: 45 (9 columns x 5 rows) and 84 (12 x 7). Each learner uses one.
+// Three grid sizes exist: 24 (6 columns x 4 rows), 45 (9 x 5) and 84 (12 x 7). Each learner uses one.
+//
+// THE 24 BOARD (Beta 3.25) is its OWN layout with large buttons, for early learners working on the Essential 8 skills
+// (Essentials for Living). It is not a cut-down 45 board: moving up to 45 later is a new motor plan, like changing devices.
+//   - main grid: layouts["24"].main; layouts["24"].stages gives each word's stage ON THIS BOARD (stages 1-3 only; the word's
+//     own "stage" is for the 45 and 84 boards).
+//   - its folders are their own pages marked "sizes": [24] (Food, Drinks, Toys, People, Places, Body and feelings). They are
+//     "items" pages: the words fill the 6 x 4 page left to right, top to bottom, skipping the Back cell. "starter" words show
+//     whenever the page is open; the others show from stage 3 (pageNewWordStage).
+//   - pages WITHOUT "sizes" are 45 and 84 pages; the 24 board never shows them.
+// Word ids are shared with the bigger boards, so teaching and everyday data carry over when a learner moves up.
 
-export const SIZES = { 45: { cols: 9, rows: 5 }, 84: { cols: 12, rows: 7 } };
+export const SIZES = { 24: { cols: 6, rows: 4 }, 45: { cols: 9, rows: 5 }, 84: { cols: 12, rows: 7 } };
+export const GRID_SIZES = [24, 45, 84];
+/** Any value -> 24, 45 or 84 (45 when unknown). */
+export const normSize = (v) => { const n = Number(v); return n === 24 || n === 84 ? n : 45; };
+/** The highest stage a board offers: 3 on the 24 board (its "stage 4" is moving up to the 45 board), 4 otherwise. */
+export const maxStageFor = (size) => (normSize(size) === 24 ? 3 : 4);
 // How deep a page an ADULT may make is limited: main board = 0, a page from it = 1, a page from that = 2
 // (3 taps to a word). "Make this a page" is never offered at depth 2 or more.
 //
@@ -41,10 +56,12 @@ export const MAX_DEPTH = 2;
 // Every cell has a permanent key that is used to store things an adult adds there.
 //   45 board: "<page>:<row>,<col>"        e.g. "favorites:0,0"
 //   84 board: "<page>:<row>,<col>@84"     e.g. "favorites:0,0@84"
+//   24 board: "<page>:<row>,<col>@24"     e.g. "g-people:1,2@24"
 // (The "@84" keeps the two boards' data apart: a word an adult adds to an empty
 // cell belongs to that grid size only.)
 export function posKey(size, pageId, row, col) {
-  return `${pageId}:${row},${col}` + (Number(size) === 84 ? "@84" : "");
+  const n = normSize(size);
+  return `${pageId}:${row},${col}` + (n === 45 ? "" : "@" + n);
 }
 
 // Key for a built-in word's own data (renamed label, photo, show/hide, filled blank).
@@ -55,7 +72,7 @@ const models = new Map();
 
 // Build (and remember) the model for one grid size.
 export function buildModel(board, size) {
-  size = Number(size) === 84 ? 84 : 45;
+  size = normSize(size);
   const cached = models.get(board);
   if (cached && cached[size]) return cached[size];
 
@@ -65,15 +82,18 @@ export function buildModel(board, size) {
 
   // Main grid: one entry per cell
   const main = [];
-  geo.main.forEach((rowIds, row) => rowIds.forEach((id, col) => main.push({ ...word(id), row, col })));
+  const stages = geo.stages || null;                 // the 24 board's own stages
+  geo.main.forEach((rowIds, row) => rowIds.forEach((id, col) => main.push({ ...word(id), row, col, ...(stages && stages[id] ? { stage: stages[id] } : {}) })));
 
   // Which pages exist on this size, and the items on each (filtered by "sizes").
   // A word entry is "id" or { id, sizes: [45] }.
   const onSize = (o) => !o.sizes || o.sizes.includes(size);
+  // A page without "sizes" belongs to the 45 and 84 boards; the 24 board has only its own pages.
+  const pageOnSize = (p) => (p.sizes ? p.sizes.includes(size) : size !== 24);
   const asEntry = (it) => (typeof it === "string" ? { id: it } : it);
   const defs = {};
   for (const [pid, p] of Object.entries(board.pages)) {
-    if (!onSize(p)) continue;
+    if (!pageOnSize(p)) continue;
     const ids = p.groups
       ? p.groups.flatMap((g) => [...g.words.map(asEntry).filter(onSize), ...(size === 84 ? (g.adds || []).map(asEntry) : [])]).map((e) => e.id)
       : (p.items || []).map(asEntry).filter(onSize).map((e) => e.id);
@@ -135,11 +155,16 @@ export function buildModel(board, size) {
         if (size === 84) (g.adds || []).map(asEntry).forEach((e, i) => put(e, g.row, 9 + i));
       }
     } else {
+      // Items pages (Favorites; the 24 board's folders). A page that lists "starter" gates its other words to stage 3, like
+      // the group pages; a page without one (Favorites) shows everything.
+      const gate = Array.isArray(d.starter) && d.starter.length ? new Set(d.starter) : null;
+      const NEW_STAGE = board.pageNewWordStage || 3;
       let i = 0;
       for (let r = 0; r < rows && i < d.itemIds.length; r++) {
         for (let c = 0; c < cols && i < d.itemIds.length; c++) {
           if (at && at.row === r && at.col === c) continue;   // the Back cell
-          items.push({ ...word(d.itemIds[i]), row: r, col: c });
+          const id = d.itemIds[i];
+          items.push({ ...word(id), row: r, col: c, ...(gate ? { pageStage: gate.has(id) ? 1 : NEW_STAGE } : {}) });
           i++;
         }
       }
@@ -150,6 +175,16 @@ export function buildModel(board, size) {
   }
   for (const pid of Object.keys(defs)) if (openerOf[pid]) layout(pid);   // pages nobody opens are not reachable
 
+  // 24 board: the Words pages (opened from the top bar, only when an adult turns the Words button on) keep their 45-board layout
+  // (9 x 5, smaller buttons), because their rows of nine words cannot fit six columns. Each such page carries its own "grid".
+  // Their cell keys are the 45 board's, so words an adult adds there are shared with the 45 board.
+  if (size === 24) {
+    const m45 = buildModel(board, 45);
+    for (const [pid, pg] of Object.entries(m45.pages)) {
+      if (pathToCore(m45, null, pid).includes("words")) pages[pid] = { ...pg, grid: { cols: m45.cols, rows: m45.rows, size: 45 } };
+    }
+  }
+
   const model = { size, cols, rows, main, pages, word };
   models.set(board, { ...(models.get(board) || {}), [size]: model });   // (the 45 model may have been built meanwhile)
   return model;
@@ -157,10 +192,13 @@ export function buildModel(board, size) {
 
 // Any page by id for this learner: "core", a built-in page, or an adult-made page.
 // Returns { id, name, parent, at, depth, items, builtin, folder } or null.
+/** The grid a page is drawn on: its own (a 24-board learner's Words pages) or the board's. */
+export const gridOf = (model, page) => (page && page.grid) || { cols: model.cols, rows: model.rows, size: model.size };
+
 export function getPage(model, profile, pageId) {
   if (pageId === "core") return { id: "core", name: "", parent: null, at: null, depth: 0, items: model.main, builtin: true };
   if (model.pages[pageId]) return model.pages[pageId];
-  const ap = profile.pages && profile.pages[pageId];
+  const ap = profile && profile.pages && profile.pages[pageId];
   if (ap && Number(ap.size) === model.size) {
     return { id: pageId, name: ap.name, parent: ap.parent, at: ap.at, depth: ap.depth, items: [], builtin: false };
   }
@@ -191,7 +229,7 @@ export function pathToCore(model, profile, pageId) {
 //   ov                   the adult's changes for this button (may be {})
 //   label, spoken, wordType, loadBoard, visible, custom, photoKey ...
 export function resolvePage(page, profile, model) {
-  const { cols, rows, size } = model;
+  const { cols, rows, size } = page.grid || model;          // (a 24-board learner's Words pages use the 45 grid)
   const byPos = new Map();
   for (const it of page.items) byPos.set(it.row + "," + it.col, it);
   const cells = [];

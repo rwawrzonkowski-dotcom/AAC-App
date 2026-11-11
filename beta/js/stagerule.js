@@ -10,9 +10,13 @@
 //   words    every word the clinician ticked for this stage is proficient (a separate list for each stage)
 // Settings live per learner in profile.stageRule = { mode, pct, words: { "1": [ids], "2": [...] }, days, weeks }.
 import { listDaily, localDate } from "./everyday.js";
+import { normSize, maxStageFor } from "./boardmodel.js";
 
 export const DEFAULT_STAGE_RULE = { mode: "percent", pct: 50, words: {}, days: 3, weeks: 4 };
 export const MAX_STAGE = 4;
+// THE 24 BOARD (Beta 3.25) has stages 1-3. Its "next stage" is moving up to the 45 board, where the learner starts at stage 2
+// (a new motor plan; word ids are shared, so targets and everyday use carry over). progressFor() says so with moveUp: true.
+export const MOVE_UP = { gridSize: 45, stage: 2 };
 
 export function cleanStageRule(raw) {
   const o = raw && typeof raw === "object" ? raw : {};
@@ -55,7 +59,7 @@ export function usageDays(daily, weeks, now = Date.now()) {
  *   days        Map word id -> days of independent everyday use in the window
  * Returns { items: [{ id, label, proficient, why, days, chosen }], have, need, ready, mode, note }
  */
-export function stageProgress({ stage, stageWords, targets, days, rule }) {
+export function stageProgress({ stage, stageWords, targets, days, rule, max = MAX_STAGE, moveUp = false }) {
   const r = cleanStageRule(rule);
   const mastered = new Set(targets.filter((t) => !t.removed && t.kind !== "chain" && (t.status === "mastered" || t.status === "maintenance")).map((t) => t.wordId));
   const chosen = new Set((r.words[String(stage)] || []).filter((id) => stageWords.some((w) => w.id === id)));
@@ -77,8 +81,8 @@ export function stageProgress({ stage, stageWords, targets, days, rule }) {
     need = Math.max(1, Math.ceil((r.pct / 100) * items.length));
     ready = items.length > 0 && have >= need;
   }
-  if (stage >= MAX_STAGE) ready = false;
-  return { items, have, need, ready, mode: r.mode, pct: r.pct, note };
+  if (stage >= max && !moveUp) ready = false;
+  return { items, have, need, ready, mode: r.mode, pct: r.pct, note, moveUp };
 }
 
 /** Everything together for a learner (reads the daily summaries). model = buildModel(board, profile.gridSize). */
@@ -86,5 +90,12 @@ export async function progressFor(profile, model, targets) {
   const rule = cleanStageRule(profile.stageRule);
   const stageWords = model.main.filter((b) => b.stage === profile.stage).map((b) => ({ id: b.id, label: (profile.words && profile.words[b.id] && profile.words[b.id].label) || b.label }));
   const days = usageDays(await listDaily(profile.id), rule.weeks);
-  return stageProgress({ stage: profile.stage, stageWords, targets, days, rule });
+  const max = maxStageFor(profile.gridSize);
+  const moveUp = normSize(profile.gridSize) === 24 && profile.stage >= max;   // 24 board, last stage: the next step is the 45 board
+  return stageProgress({ stage: profile.stage, stageWords, targets, days, rule, max, moveUp });
+}
+
+/** Is there a next step to suggest for this learner (a next stage, or the 24 board's move up)? */
+export function hasNextStep(profile) {
+  return profile.stage < maxStageFor(profile.gridSize) || normSize(profile.gridSize) === 24;
 }

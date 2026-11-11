@@ -8410,5 +8410,11 @@
   "source": "OpenMoji",
   "originalName": "1F443 nose",
   "license": "CC BY-SA 4.0"
+ },
+ "scratch": {
+  "file": "images/symbols/scratch.svg",
+  "source": "Mulberry",
+  "originalName": "itch",
+  "license": "CC BY-SA 4.0"
  }
 }

@@ -60,6 +60,9 @@ export function loadRecognizer(onProgress = () => {}) {
 function loadReal(onProgress) {
   if (detectorPromise) return detectorPromise;
   detectorPromise = (async () => {
+    // The library's bundled "regenerator" helper assigns a global regeneratorRuntime and, if that fails, evaluates a string as code,
+    // which VOICE's Content Security Policy forbids (index.html, Nov 11). Making the global exist first means the fallback never runs.
+    if (!("regeneratorRuntime" in window)) window.regeneratorRuntime = undefined;
     if (!window.tf) await loadScript("vendor/tf.min.js");
     onProgress(0.05);
     if (!window.cocoSsd) await loadScript("vendor/coco-ssd.min.js");

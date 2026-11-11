@@ -100,10 +100,10 @@ export const LAYOUT8_NOTE = "New Actions folder on the main board (verbs; shows 
 export const RANCH_NOTE = "ranch moved into More food \u2192 Sauces and spreads (the Food page's last button in row 5 is now More food). " +
   "Anything you changed on ranch, such as its picture or name, moved with it.";
 
-const KEY_ANY = /^([A-Za-z0-9_-]{1,40}):(\d{1,2}),(\d{1,2})(@84)?$/;
+const KEY_ANY = /^([A-Za-z0-9_-]{1,40}):(\d{1,2}),(\d{1,2})(@84|@24)?$/;
 function parseKey(key) {
   const m = KEY_ANY.exec(key);
-  return m ? { page: m[1], row: +m[2], col: +m[3], size: m[4] ? 84 : 45 } : null;
+  return m ? { page: m[1], row: +m[2], col: +m[3], size: m[4] ? Number(m[4].slice(1)) : 45 } : null;
 }
 
 // cells = adult-added things by position; pages = adult-made pages.

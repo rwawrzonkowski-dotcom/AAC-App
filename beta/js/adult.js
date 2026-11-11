@@ -19,7 +19,7 @@ import { dataSafetyLine, needsHomeScreen, homeScreenSteps } from "./keepdata.js"
 import { showCoach } from "./adulthint.js";
 import { TONES } from "./tones.js";
 import { showSetup } from "./setup.js";
-import { buildModel } from "./boardmodel.js";
+import { buildModel, maxStageFor } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 import { VERSION_LABEL } from "./channel.js";
 import { openAbout } from "./about.js";
@@ -34,7 +34,7 @@ import { isRecording } from "./everyday.js";
 import { getScenes } from "./scenestrip.js";
 import { getView, setView, groupedPages, pageById, pageForOldId, visibleIn, searchPages } from "./settingsnav.js";
 import { accessSection, accessSummary } from "./accessui.js";
-import { progressFor, cleanStageRule, MAX_STAGE } from "./stagerule.js";
+import { progressFor, cleanStageRule, hasNextStep, MOVE_UP } from "./stagerule.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -49,6 +49,9 @@ const PREVIEW_WORD = "bubbles";                      // "Preview a word"
 //                       the app runs the prompt and then opens the menu again)
 //   startAt             id of a section to scroll to when the menu opens (optional)
 //   teach               the Teaching section (Phase 2): { sessionActive(), onChooseTargets(), onStartSession(opts) }
+// The "Auto" choice of the top-bar buttons, the little-word strip and the forms dial: from stage 3, but never on the 24 board (Beta 3.25).
+const autoLabel = (cur) => (cur.gridSize === 24 ? "Auto (off on the 24 board)" : "Auto (stage 3 and up)");
+
 export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged, onBoardSizeChanged, onEdit, onModel,
   onPreviewPrompt, teach, isModeling = () => false, onStopModel = () => {} }) {
   let stopVoiceListener = () => {};
@@ -303,14 +306,17 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       type: "button", class: "seg" + (cur.gridSize === n ? " on" : ""), id: `size-${n}`, "data-size": n, text,
       onclick: async () => {
         if (cur.gridSize === n) return;
+        // Stage on the new board: the 24 board has stages 1-3; moving up from 24 always starts at stage 2 there (Beta 3.25, Richard's rule).
+        const newStage = cur.gridSize === 24 && n !== 24 ? MOVE_UP.stage : Math.min(cur.stage, maxStageFor(n));
+        const stageText = newStage === cur.stage ? `The stage (${cur.stage}) is kept. ` : `The stage changes from ${cur.stage} to ${newStage}. `;
         const sure = await askConfirm(
           `Switch ${cur.name} to the ${n}-location board? Word locations will change, so ${cur.name} will have to learn where ` +
           `words are again. This is a relearning event: only switch when ${cur.name} is ready. ` +
-          `The stage (${cur.stage}) is kept. Photos, renamed labels and show/hide choices for built-in words move with each word. ` +
+          stageText + `Photos, renamed labels and show/hide choices for built-in words move with each word. ` +
           `Words and pages you added to empty buttons stay with the ${cur.gridSize}-location board and come back if you switch back.`,
           `Switch to ${n}`);
         if (!sure) return;
-        cur.gridSize = n;
+        cur.gridSize = n; cur.stage = newStage;
         await saveProfile(cur);
         onBoardSizeChanged();
         refresh();
@@ -318,9 +324,11 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     });
     return h("section", { class: "panel", id: "sec-size" },
       h("h2", { text: "Board size (for this learner)" }),
-      h("p", { class: "muted", text: "45 locations (9 x 5) is the starting board. 84 locations (12 x 7) is a larger board with more words. " +
-        "The first four rows are the same on both; the bottom row of the 45 board moves down to the bottom row of the 84 board." }),
-      h("div", { class: "seg-row size-seg" }, btn(45, "45 locations"), btn(84, "84 locations")),
+      h("p", { class: "muted", text: "24 locations (6 x 4) has large buttons and its own layout for early learners: requesting, waiting, " +
+        "breaks, \"finished\", yes and no, and saying something hurts (the Essential 8 skills). It has stages 1-3; after that VOICE suggests moving up to the 45 board. " +
+        "45 locations (9 x 5) is the usual starting board. 84 locations (12 x 7) is a larger board with more words. " +
+        "The first four rows are the same on 45 and 84; the bottom row of the 45 board moves down to the bottom row of the 84 board." }),
+      h("div", { class: "seg-row size-seg" }, btn(24, "24 locations"), btn(45, "45 locations"), btn(84, "84 locations")),
       // On a phone, nudge toward the smaller board while 84 is selected
       looksLikePhone() && cur.gridSize === 84 ? h("p", { class: "phone-size-tip", id: "size-phone-tip", text: PHONE_BOARD_TIP }) : null);
   }
@@ -331,11 +339,14 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const model = buildModel(board, cur.gridSize);
     const wordsFor = (n) => model.main.filter((b) => b.stage === n).map((b) => b.label).join(", ");
     const note = { 1: "Starting words", 2: "Adds", 3: "Adds", 4: "Adds" };
+    const stages = Array.from({ length: maxStageFor(cur.gridSize) }, (_, i) => i + 1);
     return h("section", { class: "panel", id: "sec-stage" },
       h("h2", { text: "Vocabulary stage" }),
       h("p", { class: "muted", text: "Each stage reveals more words in their permanent spots. Nothing moves. " +
         "On the category pages the original words always show; the newer words on them appear from stage 3 (or use Always show on a word)." }),
-      h("div", { class: "stage-grid" }, [1, 2, 3, 4].map((n) =>
+      cur.gridSize === 24 ? h("p", { class: "muted", id: "stage-24-note", text: "The 24 board has stages 1-3. On the category folders, the first words show " +
+        "as soon as the folder appears; the rest appear at stage 3. When stage 3 is done, VOICE suggests moving up to the 45 board (at its stage 2)." }) : null,
+      h("div", { class: "stage-grid" }, stages.map((n) =>
         h("button", {
           type: "button", class: "stage-btn" + (cur.stage === n ? " on" : ""), "data-stage": n,
           onclick: async () => {
@@ -355,12 +366,12 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
   // Ready for the next stage? (Beta 3.22, js/stagerule.js). Filled in once the everyday summaries are read.
   function stageProgressBlock(cur, model) {
     const box = h("div", { class: "stage-progress", id: "stage-progress" }, h("p", { class: "muted", text: "Checking progress..." }));
-    if (cur.stage >= MAX_STAGE) { box.replaceChildren(h("p", { class: "muted", text: `Stage ${MAX_STAGE} is the last stage for now.` })); return box; }
+    if (!hasNextStep(cur)) { box.replaceChildren(h("p", { class: "muted", text: `Stage ${cur.stage} is the last stage for now.` })); return box; }
     progressFor(cur, model, getTargets()).then((pr) => {
       const r = cleanStageRule(cur.stageRule);
       const pct = pr.need ? Math.min(100, Math.round((pr.have / pr.need) * 100)) : 0;
       box.replaceChildren(
-        h("div", { class: "sp-head" }, h("strong", { text: `Ready for stage ${cur.stage + 1}?` }),
+        h("div", { class: "sp-head" }, h("strong", { text: pr.moveUp ? "Ready for the 45 board?" : `Ready for stage ${cur.stage + 1}?` }),
           h("span", { class: "muted", text: pr.mode === "words" ? "Rule: the chosen words" : `Rule: ${pr.pct}% of stage ${cur.stage} words` })),
         h("div", { class: "sp-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(pr.need), "aria-valuenow": String(Math.min(pr.have, pr.need)) },
           h("div", { class: "sp-fill" + (pr.ready ? " done" : ""), style: `width: ${pct}%` })),
@@ -425,7 +436,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     });
     return h("div", { class: "field touch-setting", id: "setting-words-button" },
       h("label", { text: "Show Words button" }),
-      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("div", { class: "seg-row" }, btn("auto", autoLabel(cur)), btn("always", "Always"), btn("never", "Never")),
       h("p", { class: "muted", text: "The Words button in the top bar opens pages of little words, actions, describing words, time, colors, " +
         "numbers, clothes, outside words and things (every Dolch sight word is on them, at most 3 taps away). " +
         "The Forms button next to it shows other forms of the last word (go: went, going...). " +
@@ -451,7 +462,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     });
     return h("div", { class: "field touch-setting", id: "setting-word-dial" },
       h("label", { text: "Word forms dial (press and hold a word)" }),
-      h("div", { class: "seg-row" }, modeBtn("auto", "Auto (stage 3 and up)"), modeBtn("always", "Always"), modeBtn("never", "Never")),
+      h("div", { class: "seg-row" }, modeBtn("auto", autoLabel(cur)), modeBtn("always", "Always"), modeBtn("never", "Never")),
       h("p", { class: "muted", text: "Press and hold a word such as go, eat, big, dog or I: its other forms appear around it, always in the same " +
         "directions (past = up, -ing = right, -s = down, past participle = left). Lift on a form, or lift and then tap one, to say it and add it " +
         "to the message bar. Tap outside to cancel. A quick tap still just says the word, with no delay. Words with no forms act like a normal tap. " +
@@ -474,7 +485,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     });
     return h("div", { class: "field touch-setting", id: "setting-keyboard-button" },
       h("label", { text: "Show keyboard button (ABC)" }),
-      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("div", { class: "seg-row" }, btn("auto", autoLabel(cur)), btn("always", "Always"), btn("never", "Never")),
       h("p", { class: "muted", text: "The ABC button in the top bar opens a large keyboard over the board. The child types a word; Space or Done " +
         "turns it into a chip and says it. The keyboard has a 123 key for the number pad (the Numbers page has its own Number pad button). " +
         "The keyboard uses ordinary taps: Hold to select and Ignore repeated taps do not apply to it." }));
@@ -488,7 +499,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     });
     return h("div", { class: "field touch-setting", id: "setting-camera-button" },
       h("label", { text: "Show camera button" }),
-      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("div", { class: "seg-row" }, btn("auto", autoLabel(cur)), btn("always", "Always"), btn("never", "Never")),
       h("p", { class: "muted", text: "The camera button at the right end of the strip under the message bar makes a scene from a photo in one step: hold it for 1 second until it turns green and reads “Tap”, " +
         "then tap it once. A quick tap on its own does nothing. The camera opens, everything VOICE finds in the photo (and anything it remembers from My things) is ticked, " +
         "and “Use now” puts the scene on the strip. It needs no passcode and is switched off while a teaching session runs. " +
@@ -508,7 +519,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "question, calm, sad, mad, scared), always in the same spots. Pick one to say the message once in that tone. Rest on one for 1 second (a lock fills in) " +
         "to set it as the learner's mood: every message is said in it until it is changed or VOICE is reopened, and a small face shows in the message bar. " +
         "The centre, Normal, clears the mood. Tones change pitch, speed and the ending of the sentence; Enhanced or Premium voices sound best." +
-        (cur.stage < 4 ? " This learner is at stage " + cur.stage + ", so the wheel will start working at stage 4." : "") }),
+        (cur.stage < 4 && cur.gridSize !== 24 ? " This learner is at stage " + cur.stage + ", so the wheel will start working at stage 4." : "") }),
       h("div", { class: "btn-row left tone-samples" }, h("span", { class: "muted", text: "Hear the tones:" }), TONES.map(sample)));
   }
   const SAMPLE_TONE_TEXT = "I want to go outside";
@@ -521,7 +532,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     });
     return h("div", { class: "field touch-setting", id: "setting-little-strip" },
       h("label", { text: "Show little-word strip" }),
-      h("div", { class: "seg-row" }, btn("auto", "Auto (stage 3 and up)"), btn("always", "Always"), btn("never", "Never")),
+      h("div", { class: "seg-row" }, btn("auto", autoLabel(cur)), btn("always", "Always"), btn("never", "Never")),
       h("p", { class: "muted", text: "Eight little words (a, is, and, to, will, has, him, there) in the strip under the message bar, always in the same spots. " +
         "Tap one to say it. Press and hold one to open a dial of four more, each always in the same direction: a → an, the, any, every; " +
         "is → was, are, am, were; and → but, or, so, because; to → of, for, with, from; will → would, could, may, must; " +
