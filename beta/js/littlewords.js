@@ -20,6 +20,7 @@
 import { h } from "./ui.js";
 import { fitLabels } from "./board.js";
 import { wordInfo } from "./scenewords.js";
+import { caseLabel } from "./access.js";
 
 export const GROUPS = [
   { head: "a",     N: "an",    E: "the",   S: "any",  W: "every" },
@@ -89,7 +90,7 @@ function render() {
       img.append(im);
     } else el.classList.add("text-only");
     // four tiny dots at the edges say "this button has a dial" (the adult can still read the plain word)
-    el.append(img, h("div", { class: "cell-label" }, h("span", { class: "lbl", text: wi.label })), h("span", { class: "lw-dots", "aria-hidden": "true" }));
+    el.append(img, h("div", { class: "cell-label" }, h("span", { class: "lbl", text: caseLabel(wi.label) })), h("span", { class: "lw-dots", "aria-hidden": "true" }));
     bar.append(el);
   });
   fitLabels(bar);

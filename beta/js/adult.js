@@ -33,6 +33,7 @@ import { getTargets } from "./teachdata.js";
 import { isRecording } from "./everyday.js";
 import { getScenes } from "./scenestrip.js";
 import { getView, setView, groupedPages, pageById, pageForOldId, visibleIn, searchPages } from "./settingsnav.js";
+import { accessSection, accessSummary } from "./accessui.js";
 
 const PREVIEW_TEXT = "I want more bubbles please";   // "Hear a sample sentence"
 const PREVIEW_WORD = "bubbles";                      // "Preview a word"
@@ -109,6 +110,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         case "size": return cur.gridSize + " buttons";
         case "stage": return "Stage " + cur.stage;
         case "reading": return cur.wordsOnly ? "Words only" : "";
+        case "access": return accessSummary(cur.access);
         case "voice": {
           const v = (window.speechSynthesis && speechSynthesis.getVoices().find((x) => x.voiceURI === cur.voice.voiceURI)) || null;
           return v ? v.name.replace(/\s*\(.*\)$/, "") : "Default";
@@ -177,6 +179,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       case "stage": return [stageSection()];
       case "buttons": return [buttonsSection()];
       case "reading": return [readingSection()];
+      case "access": return [accessSection({ onChanged: onVocabChanged, refresh })];
       case "voice": return [voiceSection()];
       case "touch": return [touchSection()];
       case "teaching": return [teachingSection({ refresh, closeMenu: close, ...teach })];

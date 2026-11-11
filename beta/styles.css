@@ -192,7 +192,7 @@ button { font: inherit; touch-action: manipulation; }
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  gap: var(--gap);
+  gap: var(--cell-gap, var(--gap));            /* Accessibility > Button spacing (Beta 3.18) */
   min-height: 0; min-width: 0;
 }
 .cell {
@@ -241,7 +241,7 @@ button { font: inherit; touch-action: manipulation; }
 .cell-image img.photo { width: 100%; height: 100%; object-fit: cover; }
 .cell-label {
   flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 1.7vw; font-weight: 800; letter-spacing: -0.01em;
+  font-size: calc(1.7vw * var(--lbl-k, 1)); font-weight: 800; letter-spacing: -0.01em;
   overflow: hidden; pointer-events: none;
 }
 /* The label text. js/board.js (fitLabels) wraps a long label onto two lines or
@@ -257,14 +257,14 @@ button { font: inherit; touch-action: manipulation; }
    laid over the WHOLE button so the word can be big. js/board.js fitLabels() still shrinks a long
    word to fit. */
 .cell.text-only .cell-label {
-  position: absolute; inset: 0; font-size: 3vw; letter-spacing: -0.02em; padding: 0 0.3vw; z-index: 1;
+  position: absolute; inset: 0; font-size: calc(3vw * var(--lbl-k, 1)); letter-spacing: -0.02em; padding: 0 0.3vw; z-index: 1;
 }
-#board[data-size="84"] .cell.text-only .cell-label { font-size: 2.3vw; padding: 0 0.2vw; }
+#board[data-size="84"] .cell.text-only .cell-label { font-size: calc(2.3vw * var(--lbl-k, 1)); padding: 0 0.2vw; }
 
 /* 84-location board: more, smaller buttons, so smaller letters (and emoji fallback) */
 #board[data-size="84"] { --radius: 0.9vmin; }
 #board[data-size="84"] .cell { border-radius: 0.9vmin; border-width: 0.2vmin; }
-#board[data-size="84"] .cell-label { font-size: 1.3vw; letter-spacing: -0.02em; padding: 0 0.15vw; }
+#board[data-size="84"] .cell-label { font-size: calc(1.3vw * var(--lbl-k, 1)); letter-spacing: -0.02em; padding: 0 0.15vw; }
 #board[data-size="84"] .cell-image .placeholder { font-size: min(3.6vw, 5.4dvh); }
 #board[data-size="84"] .cell.empty-slot .plus { font-size: 3.4vmin; }
 
@@ -1223,3 +1223,157 @@ body.peeking .overlay { visibility: hidden; }          /* "Preview" in the ladde
 #mood-badge:not([hidden]) ~ #message-chips { padding-left: 7vmin; }
 .tone-samples { flex-wrap: wrap; align-items: center; }
 .tone-sample { min-height: 38px; padding: 4px 12px; }
+
+
+/* =====================================================================================================================================
+   ACCESSIBILITY (Beta 3.18, js/access.js). Set per learner as data- attributes on <html>. Only the CHILD'S screen changes (the adult
+   menu and sheets keep their own look). Nothing here moves a word: colours, fonts, label size and case, the gaps, hidden-spot drawing.
+   ===================================================================================================================================== */
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Lexend"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/lexend-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Lexend"; font-weight: 700 900; font-style: normal; font-display: swap; src: url("fonts/lexend-latin-700-normal.woff2") format("woff2"); }
+html[data-font="atkinson"] #app, html[data-font="atkinson"] .listener-view, html[data-font="atkinson"] #dial-layer { font-family: "Atkinson Hyperlegible", -apple-system, Arial, sans-serif; }
+html[data-font="lexend"] #app, html[data-font="lexend"] .listener-view, html[data-font="lexend"] #dial-layer { font-family: "Lexend", -apple-system, Arial, sans-serif; }
+
+/* Label size: the letters scale (and, for L and XL, the label row gets a little more of the button; the picture box shrinks to match).
+   js/board.js fitLabels still shrinks a label that would not fit. */
+html[data-label-size="s"]  { --lbl-k: 0.85; }
+html[data-label-size="l"]  { --lbl-k: 1.25; }
+html[data-label-size="xl"] { --lbl-k: 1.55; }
+html[data-label-size="l"]  #app .cell-image { flex-basis: 60%; }
+html[data-label-size="xl"] #app .cell-image { flex-basis: 54%; }
+/* Label above the picture */
+html[data-label-pos="top"] #app .cell { flex-direction: column-reverse; }
+
+/* Button spacing: wider gaps only (every word keeps its row and column) */
+html[data-spacing="wide"]  #board { --cell-gap: 1.5vmin; }
+html[data-spacing="wider"] #board { --cell-gap: 2.6vmin; }
+
+/* Hidden spots */
+html[data-hidden="dots"] #app .cell.hidden {
+  background-color: transparent; border: 0.25vmin dashed var(--hid-edge, #c3cad4);
+  background-image: radial-gradient(circle, var(--hid-dot, #b8c0cc) 0.18vmin, transparent 0.22vmin); background-size: 1.6vmin 1.6vmin;
+}
+html[data-hidden="invisible"] #app .cell.hidden { background: transparent; border-color: transparent; }
+
+/* VOICE is talking (Glow while speaking) */
+#message-text.talking { box-shadow: 0 0 0 0.6vmin #f59e0b, 0 0 2.6vmin 0.8vmin rgba(245, 158, 11, 0.55); }
+
+/* Reduce motion: animations and transitions end at once. The fill-up rings that show how long to HOLD keep their timing (they are
+   information, not decoration). "auto" follows the iPad's own setting (Settings > Accessibility > Motion > Reduce Motion). */
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion="auto"] *, html[data-motion="auto"] *::before, html[data-motion="auto"] *::after {
+    animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+  }
+}
+html[data-motion] .holding .ring-fg, html[data-motion] .touch-hold .th-fg { animation-duration: var(--hold-ms) !important; }
+
+/* ---------- Show to listener ---------- */
+.listener-view { position: fixed; inset: 0; z-index: 200; background: #fff; color: #000; display: flex; flex-direction: column; }
+.listener-view .lv-inner { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 4vmin 5vmin; }
+.listener-view .lv-inner.flipped { transform: rotate(180deg); }
+.listener-view .lv-text { font-weight: 800; text-align: center; line-height: 1.1; overflow-wrap: anywhere; max-width: 100%; }
+.listener-view .lv-bar { flex: 0 0 auto; display: flex; justify-content: center; gap: 3vmin; padding: 0 0 calc(3vmin + var(--safe-b)); }
+.listener-view .lv-btn { font-size: 3vmin; font-weight: 800; padding: 1.6vmin 5vmin; border-radius: 1.6vmin; border: 0.4vmin solid currentColor; background: transparent; color: inherit; cursor: pointer; }
+.listener-view .lv-done { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+#show-btn { background: #c7dcf7; }
+html[data-theme="dark"] .listener-view, html[data-theme="dim"] .listener-view { background: #000; color: #fff; }
+html[data-theme="cvi"] .listener-view { background: #000; color: #ffd600; }
+
+/* ---------- Theme: High contrast (dark). Category colour moves to a thick border; symbols sit on white plates. ---------- */
+html[data-theme="dark"], html[data-theme="dark"] body, html[data-theme="dark"] #app { background: #000; }
+html[data-theme="dark"] #app.on-category { background: #1f1405; }
+html[data-theme="dark"] #message-text { background: #000; border-color: #fff; }
+html[data-theme="dark"] .chip { background: #1f2937; border-color: #fff; color: #fff; }
+html[data-theme="dark"] .chip.speaking { background: #facc15; border-color: #facc15; color: #000; }
+html[data-theme="dark"] #learner-name { color: #9ca3af; }
+html[data-theme="dark"] .bar-btn { background: #111 !important; color: #fff; border-color: #fff; }
+html[data-theme="dark"] #words-btn { border-color: #5eead4; } html[data-theme="dark"] #forms-btn { border-color: #c4b5fd; }
+html[data-theme="dark"] #abc-btn { border-color: #fde047; } html[data-theme="dark"] #delete-btn { border-color: #fdba74; }
+html[data-theme="dark"] #clear-btn { border-color: #fca5a5; } html[data-theme="dark"] #show-btn { border-color: #93c5fd; }
+html[data-theme="dark"] #camera-btn { background: #111; color: #fff; border-color: #93c5fd; }
+html[data-theme="dark"] #context-strip { background: #111; border-color: #444; }
+html[data-theme="dark"] .on-category #context-strip { background: #3b2208; border-color: #f59e0b; }
+html[data-theme="dark"] #page-title { color: #fbbf24; }
+html[data-theme="dark"] #adult-hold { color: #6b7280; background: rgba(255,255,255,0.06); }
+html[data-theme="dark"] #app .cell { background: #121212; border: 0.55vmin solid var(--edge, #fff); color: #fff; }
+html[data-theme="dark"] #app .type-people { --edge: #ffe14d; } html[data-theme="dark"] #app .type-action { --edge: #5ee36b; }
+html[data-theme="dark"] #app .type-describing, html[data-theme="dark"] #app .type-place { --edge: #58a6ff; }
+html[data-theme="dark"] #app .type-question { --edge: #c49bff; } html[data-theme="dark"] #app .type-social { --edge: #ff7ab6; }
+html[data-theme="dark"] #app .type-category { --edge: #ffa23a; } html[data-theme="dark"] #app .type-noun { --edge: #ffb38a; }
+html[data-theme="dark"] #app .type-little { --edge: #e7dcc8; } html[data-theme="dark"] #app .type-home { --edge: #f59e0b; background: #2a1a05; }
+html[data-theme="dark"] #app .cell-image img.symbol { background: #fff; border-radius: 0.8vmin; }
+html[data-theme="dark"] #app .cell.hidden { background: #1a1a1a; border-color: transparent; --hid-dot: #4b5563; --hid-edge: #374151; }
+html[data-theme="dark"] #app .cell.pressed { filter: none; background: #374151; }
+
+/* ---------- Theme: CVI. Black field, ONE salient colour (yellow), no category colours. ---------- */
+html[data-theme="cvi"], html[data-theme="cvi"] body, html[data-theme="cvi"] #app, html[data-theme="cvi"] #app.on-category { background: #000; }
+html[data-theme="cvi"] #message-text { background: #000; border-color: #ffd600; }
+html[data-theme="cvi"] .chip { background: #000; border-color: #ffd600; color: #ffd600; }
+html[data-theme="cvi"] .chip.speaking { background: #ffd600; color: #000; }
+html[data-theme="cvi"] #learner-name { color: #6b7280; }
+html[data-theme="cvi"] .bar-btn, html[data-theme="cvi"] #camera-btn { background: #000 !important; color: #ffd600; border-color: #ffd600; }
+html[data-theme="cvi"] #context-strip, html[data-theme="cvi"] .on-category #context-strip { background: #000; border: 0.2vmin solid #ffd600; }
+html[data-theme="cvi"] #page-title { color: #ffd600; }
+html[data-theme="cvi"] #adult-hold { color: #4b5563; background: rgba(255,255,255,0.05); }
+html[data-theme="cvi"] #app .cell { background: #000; border: 0.5vmin solid #ffd600; color: #ffd600; }
+html[data-theme="cvi"] #app .cell-image img.symbol { background: #fff; border-radius: 0.8vmin; }
+html[data-theme="cvi"] #app .cell.hidden { background: #000; border-color: transparent; --hid-dot: #3f3f00; --hid-edge: #3f3f00; }
+html[data-theme="cvi"] #app .cell.pressed { filter: none; background: #4d4100; }
+
+/* ---------- Theme: Colour-blind safe. White buttons with a dark edge; the category shows as a light plate behind the picture
+   (the plates differ in lightness as well as hue). ---------- */
+html[data-theme="cbsafe"], html[data-theme="cbsafe"] body, html[data-theme="cbsafe"] #app { background: #f8fafc; }
+html[data-theme="cbsafe"] #app.on-category { background: #ffe8c7; }
+html[data-theme="cbsafe"] #message-text { border-color: #1f2937; }
+html[data-theme="cbsafe"] #app .cell { background: #fff; border: 0.4vmin solid #1f2937; color: #111; }
+html[data-theme="cbsafe"] #app .cell-image { margin: 0.5vmin 0.5vmin 0; border-radius: 0.8vmin; }
+html[data-theme="cbsafe"] #app .type-people .cell-image { background: #fde68a; } html[data-theme="cbsafe"] #app .type-action .cell-image { background: #a7f3d0; }
+html[data-theme="cbsafe"] #app .type-describing .cell-image, html[data-theme="cbsafe"] #app .type-place .cell-image { background: #bfdbfe; }
+html[data-theme="cbsafe"] #app .type-question .cell-image { background: #e9d5ff; } html[data-theme="cbsafe"] #app .type-social .cell-image { background: #fecdd3; }
+html[data-theme="cbsafe"] #app .type-category .cell-image { background: #fed7aa; } html[data-theme="cbsafe"] #app .type-noun .cell-image { background: #f5e1d3; }
+html[data-theme="cbsafe"] #app .type-home { background: #fed7aa; border-color: #7c2d12; }
+html[data-theme="cbsafe"] #app .cell.hidden { background: #e5e7eb; border-color: transparent; }
+
+/* ---------- Theme: Dim (soft dark, low glare: bedtime, light sensitivity) ---------- */
+html[data-theme="dim"], html[data-theme="dim"] body, html[data-theme="dim"] #app { background: #1e2128; }
+html[data-theme="dim"] #app.on-category { background: #2b241b; }
+html[data-theme="dim"] #message-text { background: #2a2e37; border-color: #4b5262; }
+html[data-theme="dim"] .chip { background: #3a3f4a; border-color: #5b6272; color: #e5e7eb; }
+html[data-theme="dim"] .chip.speaking { background: #8a6d1f; color: #fff; }
+html[data-theme="dim"] .bar-btn, html[data-theme="dim"] #camera-btn { background: #343945 !important; color: #e5e7eb; border-color: #5b6272; }
+html[data-theme="dim"] #context-strip { background: #262a33; border-color: #3a3f4a; }
+html[data-theme="dim"] .on-category #context-strip { background: #5a3d1c; border-color: #7a5428; }
+html[data-theme="dim"] #page-title { color: #f3d3a8; }
+html[data-theme="dim"] #app .cell { border-color: rgba(255,255,255,0.12); color: #e5e7eb; }
+html[data-theme="dim"] #app .type-people { background: #5c5636; } html[data-theme="dim"] #app .type-action { background: #3f5a3d; }
+html[data-theme="dim"] #app .type-describing, html[data-theme="dim"] #app .type-place { background: #3d4f63; }
+html[data-theme="dim"] #app .type-question { background: #4f4563; } html[data-theme="dim"] #app .type-social { background: #63414f; }
+html[data-theme="dim"] #app .type-category { background: #66513a; } html[data-theme="dim"] #app .type-noun { background: #5e4b40; }
+html[data-theme="dim"] #app .type-little { background: #4d4840; } html[data-theme="dim"] #app .type-home { background: #6b4a26; border-color: #8a5f2e; }
+html[data-theme="dim"] #app .cell-image img.symbol { background: #d4d4d4; border-radius: 0.8vmin; filter: brightness(0.92); }
+html[data-theme="dim"] #app .cell.hidden { background: #262a33; --hid-dot: #4b5262; --hid-edge: #3a3f4a; }
+/* The hidden-spot choice wins over each theme's own hidden colour (higher specificity on purpose). */
+html[data-hidden="invisible"][data-theme] #app .cell.hidden { background: transparent; border-color: transparent; }
+html[data-hidden="dots"][data-theme] #app .cell.hidden {
+  background-color: transparent; border: 0.25vmin dashed var(--hid-edge, #c3cad4);
+  background-image: radial-gradient(circle, var(--hid-dot, #b8c0cc) 0.18vmin, transparent 0.22vmin); background-size: 1.6vmin 1.6vmin;
+}
+
+/* Adult menu > Accessibility page (js/accessui.js) */
+.access-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin: 6px 0 4px; }
+.access-preset { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid #d1d5db; background: #fff; cursor: pointer; }
+.access-preset:active { background: #eef2ff; }
+.access-preset .ap-title { font-weight: 800; font-size: 16px; color: #1e3a8a; }
+.access-preset .ap-text { font-size: 13px; color: #4b5563; line-height: 1.35; }
+.access-h { margin: 18px 0 4px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; color: #6b7280; }
+.access-status { min-height: 1.2em; color: #166534; font-weight: 600; }
+.access-seg { flex-wrap: wrap; }
+/* Little-word strip in the dark themes (its own light colours otherwise stay) */
+html[data-theme="dim"] #app .lw-item { background: #3a3f4a; border-color: #8b80d6; }
+html[data-theme="dark"] #app .lw-item { --edge: #c4b5fd; }

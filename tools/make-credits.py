@@ -59,6 +59,14 @@ The five animals (puppy, kitten, bunny, frog, owl) and the three accessories
 original shapes. They are not based on any existing character, mascot or
 brand. Shared under CC BY-SA 4.0.
 
+## Fonts (Accessibility)
+
+Two optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. Both are licensed under
+the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`):
+
+- **Atkinson Hyperlegible** (c) 2020 Braille Institute of America, Inc. https://www.brailleinstitute.org/freefont
+- **Lexend** (c) 2019 The Lexend Project Authors. https://github.com/googlefonts/lexend
+
 ## Object recognition (Scenes)
 
 The Scenes feature finds everyday objects in a photo on the device itself (nothing is sent anywhere).

@@ -44,6 +44,7 @@
 //     cameraButton: "auto",             // the top-bar camera button (hold 1 s: quick scene): "auto" (from stage 3), "always" or "never"
 //     matchStrictness: "medium",        // Scenes > My things: "low" | "medium" | "high" (js/things.js)
 //     speakLetters: false,              // the keyboard says each letter's name as it is typed
+//     access: { theme, font, labelSize, ... }  // Accessibility (Beta 3.18): the child screen's look and listener helps (js/access.js)
 //     wordDial: {                       // press-and-hold word-forms dial (beta; adult menu > Vocabulary stage)
 //       mode: "auto",                   //   "auto" (from stage 3), "always" or "never"
 //       holdSec: 0.5,                   //   how long to hold a word before the dial opens (0.3 to 1.0)
@@ -68,6 +69,7 @@ import { deleteTeaching, importTeaching } from "./teachdata.js";
 import { deleteEveryday, importEveryday } from "./everyday.js";
 import { deleteScenes, importScenes } from "./scenedata.js";
 import { deleteThings, importThings } from "./things.js";
+import { cleanAccess } from "./access.js";
 
 export const CHILD_VOICE = { voiceURI: "", pitch: 1.5, rate: 1.05, sentenceRate: 0.9, pause: "off" };
 export const ADULT_VOICE = { voiceURI: "", pitch: 1.0, rate: 1.0, sentenceRate: 0.9, pause: "off" };
@@ -107,7 +109,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
     voice: { ...voice }, touch: { ...DEFAULT_TOUCH }, model: { ...DEFAULT_MODEL },
     wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false,
     cameraButton: "auto", matchStrictness: "medium", littleStrip: "auto", toneWheel: "off", toneSuggested: false,
-    wordDial: { ...DEFAULT_WORD_DIAL },
+    wordDial: { ...DEFAULT_WORD_DIAL }, access: cleanAccess(null),
   };
 }
 
@@ -197,6 +199,7 @@ export async function initProfiles(board) {
     if (!MATCH_STRICTNESS_CHOICES.includes(p.matchStrictness)) p.matchStrictness = "medium";
     if (!CAMERA_BUTTON_CHOICES.includes(p.littleStrip)) p.littleStrip = "auto";      // Beta 3.7: same three choices
     if (p.toneWheel !== "on") p.toneWheel = "off";                                     // Beta 3.16
+    p.access = cleanAccess(p.access);                                                  // Beta 3.18
     p.toneSuggested = p.toneSuggested === true;
   }
   // Learners saved before the word-forms dial: Auto (from stage 3), hold 0.5 s, markers on.
@@ -347,6 +350,7 @@ export async function importLearner(data, replaceId = null) {
     p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
     if (data.littleStrip) p.littleStrip = data.littleStrip;
     if (data.toneWheel) p.toneWheel = data.toneWheel;
+    p.access = cleanAccess(data.access);
     p.wordDial = cleanWordDial(data.wordDial);
     // Reward pictures belong to the teaching data: when the backup has none, the learner keeps theirs.
     if (!data.teaching) keepRewards = (await db.getPrefix("photos", p.id + "|reward:")).filter((r) => r.value && r.value.blob);
@@ -361,6 +365,9 @@ export async function importLearner(data, replaceId = null) {
     p.wordsButton = data.wordsButton; p.wordsOnly = data.wordsOnly;
     p.keyboardButton = data.keyboardButton; p.speakLetters = data.speakLetters;
     p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
+    if (data.littleStrip) p.littleStrip = data.littleStrip;      // (Beta 3.18: a NEW learner from a backup now keeps these too)
+    if (data.toneWheel) p.toneWheel = data.toneWheel;
+    p.access = cleanAccess(data.access);
     p.wordDial = cleanWordDial(data.wordDial);
     profiles.push(p);
   }

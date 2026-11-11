@@ -60,6 +60,7 @@
 // over an existing learner leaves that learner's things alone.
 // Version 18 (beta 3.12) can hold SENTENCE targets in the teaching data (kind "chain": links, method, phase, linkPos... see js/teaching.js)
 // and sentence trials (links, method, phase). An older app would turn them into broken word targets, so it refuses a version 18 file.
+// Beta 3.18 (still version 18) adds `access` (Accessibility: theme, font, labels, spacing...; js/access.js); a backup without it gets the defaults.
 // Beta 3.16 (still version 18) adds `toneWheel` ("off" | "on"); a backup without it gets "off".
 // Version 17 (beta 3.7) added `littleStrip` ("auto" | "always" | "never": the little-word strip). Older backups get Auto.
 // Version 1 backups (made before Phase 1.5A, keyed only by position), version 2
@@ -86,6 +87,7 @@ import { SIZES, MAX_DEPTH } from "./boardmodel.js";
 import { migrateCells, mapLegacyKey, relocateAdultWords, moveMap, describeMoves, RANCH_NOTE } from "./migrate.js";
 import { cleanModel } from "./critters.js";
 import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
+import { cleanAccess } from "./access.js";
 
 export const BACKUP_APP = "AAC-App";
 export const BACKUP_VERSION = 18;
@@ -132,6 +134,7 @@ export async function buildBackup(learners, { teaching = true, templates = false
       cameraButton: p.cameraButton,
       littleStrip: p.littleStrip,
       toneWheel: p.toneWheel,
+      access: p.access,
       matchStrictness: p.matchStrictness,
       wordDial: p.wordDial,
       ...(teaching ? { teaching: await exportTeaching(p.id) } : {}),
@@ -347,7 +350,8 @@ function cleanLearner(raw, index, version) {
   const things = version >= 16 ? cleanThingsBackup(raw.things) : null;
   const littleStrip = version >= 17 && CAMERA_BUTTON_CHOICES.includes(raw.littleStrip) ? raw.littleStrip : "auto";
   const toneWheel = raw.toneWheel === "on" ? "on" : "off";
-  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, wordDial, notices, teaching, everyday, scenes, things, photos };
+  const access = cleanAccess(raw.access);                  // Beta 3.18 (still version 18): a backup without it gets the standard look
+  return { name, stage, gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, cameraButton, matchStrictness, littleStrip, toneWheel, access, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

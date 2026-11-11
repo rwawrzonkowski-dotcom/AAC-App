@@ -8,6 +8,8 @@
 // data/core-board.json, credited in CREDITS.md). These emoji are only an
 // internal FALLBACK, used if a symbol file ever fails to load. An adult's own
 // photo (edit mode) always wins over the built-in symbol.
+import { caseLabel } from "./access.js";
+
 const PLACEHOLDERS = {
   i: "\u{1F9D1}", you: "\u{1FAF5}", it: "\u{1F4E6}", that: "\u{1F449}", what: "❓",
   where: "\u{1F4CD}", who: "\u{1F9D1}‍\u{1F91D}‍\u{1F9D1}", when: "\u{1F552}", why: "\u{1F914}",
@@ -65,7 +67,7 @@ export function renderBoard(boardEl, cells, { editing, photoUrl, backImage, cols
       cell.className = "cell tap type-home";
       cell.setAttribute("role", "button");
       cell.setAttribute("aria-label", "Back");
-      cell.innerHTML = '<div class="cell-image"></div><div class="cell-label"><span class="lbl">Back</span></div>';
+      cell.innerHTML = '<div class="cell-image"></div><div class="cell-label"><span class="lbl">' + caseLabel("Back") + '</span></div>';
       if (wordsOnly) cell.classList.add("text-only");
       else showSymbol(cell.querySelector(".cell-image"), backImage, "\u2B05\uFE0F");
     } else if (d.kind === "word" && (d.visible || editing)) {
@@ -92,7 +94,7 @@ export function renderBoard(boardEl, cells, { editing, photoUrl, backImage, cols
       } else {
         area.querySelector(".placeholder").textContent = letter;   // adult-added word, no picture yet
       }
-      cell.querySelector(".lbl").textContent = d.label;
+      cell.querySelector(".lbl").textContent = caseLabel(d.label);      // Accessibility: letter case (js/access.js)
     } else if (editing) {
       cell.className = "cell tap ghost empty-slot";   // empty cell, editable
       cell.setAttribute("role", "button");

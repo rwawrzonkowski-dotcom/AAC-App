@@ -13,8 +13,7 @@
 //     a board word (onSceneItem below) and the word's permanent board spot glows. The recognition library is loaded only when an adult
 //     makes a scene, never at app start.
 import {
-  speak, speakMessage, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isMessagePlaying, pauseMs,
-} from "./speech.js";
+  speak, speakMessage, initSpeech, setVoiceSettings, stopSpeech, speakSequence, isMessagePlaying, pauseMs, onSpeakingChange } from "./speech.js";
 import { createTyping } from "./keyboard.js";
 import { renderBoard, attachPressHandling, fitLabelsOnResize } from "./board.js";
 import { buildModel, getPage, pathToCore, resolvePage, posKey, MAX_DEPTH } from "./boardmodel.js";
@@ -45,6 +44,7 @@ import { openDial } from "./dial.js";
 import * as everyday from "./everyday.js";
 import * as scenes from "./scenestrip.js";
 import * as little from "./littlewords.js";
+import { applyAccess, getAccess, showToListener } from "./access.js";
 import { openModelSentence } from "./modelsentence.js";
 import { openToneWheel } from "./tonewheel.js";
 import { toneById } from "./tones.js";
@@ -151,9 +151,21 @@ function currentPageDef() {
   return page;
 }
 
+// ---------- Accessibility (Beta 3.18, js/access.js) ----------
+// The learner's look (theme, font, labels, spacing, hidden spots, motion) is set on <html> before the board is drawn; the Show button
+// and the "talking" glow follow their settings. Cheap enough to run on every redraw (nothing changes when nothing changed).
+let stopGlow = null;
+function syncAccess(profile) {
+  const a = applyAccess(profile.access);
+  $("show-btn").hidden = !a.listener;
+  if (a.glow && !stopGlow) stopGlow = onSpeakingChange((on) => $("message-text").classList.toggle("talking", on));
+  else if (!a.glow && stopGlow) { stopGlow(); stopGlow = null; $("message-text").classList.remove("talking"); }
+}
+
 // Redraw everything that depends on page / learner / mode.
 function renderAll() {
   const profile = getCurrent();
+  syncAccess(profile);
   const model = modelNow();
   if (state.page !== "core" && !wordsButtonShown(profile) && onWordsPage()) state.page = "core";   // the adult turned Words off
   const page = currentPageDef();
@@ -268,6 +280,19 @@ function drawMessage() {
 function highlightChip(i) {
   document.querySelectorAll("#message-chips .chip:not(.draft)").forEach((c, n) => c.classList.toggle("speaking", n === i));
 }
+// Accessibility > Highlight each word (Beta 3.18): the sentence is one utterance, so the voice's word positions (character offsets in
+// the joined text) are mapped back to chips. Chips with no spoken text are skipped, as playMessage skips them.
+function wordHighlighter() {
+  const starts = [];                       // [character offset, chip index]
+  let at = 0;
+  state.sentence.forEach((w, i) => { if (!w.spoken) return; starts.push([at, i]); at += String(w.spoken).length + 1; });
+  return (ci) => {
+    if (ci < 0) { highlightChip(-1); return; }
+    let chip = -1;
+    for (const [off, i] of starts) if (off <= ci) chip = i;
+    highlightChip(chip);
+  };
+}
 // toneId (Beta 3.16): undefined = the learner's mood (if any); a tone id = that tone, once (from the tone wheel); null = Normal.
 function playMessage(toneId, from = "wheel") {
   const chunks = state.sentence.map((w) => w.spoken).filter(Boolean);
@@ -277,6 +302,7 @@ function playMessage(toneId, from = "wheel") {
   const tone = toneById(fromWheel ? toneId : state.mood);
   const gap = pauseMs();
   if (gap > 0) speakSequence(chunks, gap, { onChunk: highlightChip, onEnd: () => highlightChip(-1), tone });
+  else if (getAccess().highlight) speakMessage(chunks.join(" "), tone, { onWord: wordHighlighter() });
   else speakMessage(chunks.join(" "), tone);
   if (tone) recordTap({ id: tone.wordId, label: tone.label, spoken: tone.label, how: "tone" });   // (not counted as a word)
   utteranceEnds("barSpeak", tone ? { tone: tone.id, toneFrom: fromWheel ? from : "mood" } : null);   // (after the speech has started)
@@ -353,7 +379,8 @@ function updateLittle() {
   $("app").classList.toggle("little-on", on);
   if (!on) return;
   // Redraw the buttons when the learner (or their stage) changed, so a renamed word shows its new label.
-  const key = p.id + "|" + p.stage + "|" + JSON.stringify(p.words || {}).length;
+  const a = getAccess();
+  const key = p.id + "|" + p.stage + "|" + JSON.stringify(p.words || {}).length + "|" + a.labelCase + a.labelSize + a.font + a.spacing;
   if (key !== littleKey) { littleKey = key; little.refresh(); } else little.layout();
 }
 
@@ -1100,6 +1127,7 @@ async function start() {
     if (el.id === "message-text") { playMessage(); teach.onSelect({ type: "speak" }); }   // (a sentence target's "say the sentence" step)
     else if (el.id === "delete-btn") { stopSpeech(); state.sentence.pop(); drawMessage(); chipsChanged(false); }   // removes a whole chip
     else if (el.id === "clear-btn") { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; typing.clearDraft(); drawMessage(); }
+    else if (el.id === "show-btn") showToListener(state.sentence.map((w) => w.label).join(" "));   // Accessibility: the message for a listener
     else if (el.id === "words-btn") {
       if (!returning && !previewing && !typing.isOpen()) {
         // (Opening the Words menu is a choice the teaching trial must classify before the page changes.)

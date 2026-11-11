@@ -6,6 +6,7 @@
 // never catches a tap (pointer-events: none), so a child can always still tap the
 // board, and nothing on the board moves, resizes or reflows.
 import { buildCritter, critterTop, SIZE_PCT } from "./critters.js";
+import { motionReduced } from "./access.js";
 
 export const RING_MS = 1200;         // how long the ring on the tapped button stays
 export const RING_PATH_MS = 800;     // ... and on each button of the path back
@@ -107,7 +108,10 @@ async function showCritter(cell, m, customUrl) {
   getLayer().append(slot);
 
   let arriveMs = 0;
-  if (arrival === "hop") {
+  if (motionReduced()) {
+    // Accessibility > Movement: Reduce (Beta 3.18): the critter simply appears in place (no hop, peek or grow); it still fades out later.
+    el.animate([{ opacity: op }, { opacity: op }], { duration: 1, fill: "both" });
+  } else if (arrival === "hop") {
     arriveMs = 800;
     const dx = -side * 1.3 - (rect.left + left);                       // starts just off the left edge ...
     const dy = window.innerHeight + side * 0.3 - (rect.top + top);     // ... and just below the bottom
