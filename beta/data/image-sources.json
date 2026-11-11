@@ -691,8 +691,8 @@
  },
  "my-turn": {
   "file": "images/symbols/my-turn.svg",
-  "source": "Mulberry",
-  "originalName": "I",
+  "source": "OpenMoji",
+  "originalName": "1F64B person raising hand, with a turn-taking badge drawn for this project",
   "license": "CC BY-SA 4.0"
  },
  "your-turn": {

@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v42";
+const CACHE_VERSION = "beta-aac-v43";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -18,7 +18,7 @@ const FILES = [
   "data/about.json?v=b3853e0b57",
   "data/core-board.json?v=4aa2e7919c",
   "data/embed-mean.json?v=ebde647933",
-  "data/image-sources.json?v=8a505f5993",
+  "data/image-sources.json?v=96532322f8",
   "data/scene-places.json?v=f02a8f2075",
   "data/scene-related.json?v=de05050f08",
   "data/scene-words.json?v=57e718aa3b",
@@ -805,7 +805,7 @@ const FILES = [
   "images/symbols/music.svg?v=649a11b855",
   "images/symbols/mustard.svg?v=4afb8a15b8",
   "images/symbols/my-body.svg?v=34de974718",
-  "images/symbols/my-turn.svg?v=db46add556",
+  "images/symbols/my-turn.svg?v=d93edc5650",
   "images/symbols/my.svg?v=0a7d265771",
   "images/symbols/name.svg?v=e687e6f776",
   "images/symbols/nanny.svg?v=e836422422",
@@ -1460,7 +1460,7 @@ const FILES = [
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=3f97f40d3f",
   "js/camerabtn.js?v=114b8ebc7a",
-  "js/channel.js?v=a645154ef1",
+  "js/channel.js?v=c66ded2013",
   "js/critters.js?v=0008315f67",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=d0c538ff70",
