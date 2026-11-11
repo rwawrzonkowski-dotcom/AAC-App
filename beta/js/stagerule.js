@@ -12,7 +12,21 @@
 import { listDaily, localDate } from "./everyday.js";
 import { normSize, maxStageFor } from "./boardmodel.js";
 
-export const DEFAULT_STAGE_RULE = { mode: "percent", pct: 50, words: {}, days: 3, weeks: 4 };
+export const DEFAULT_STAGE_RULE = { mode: "percent", pct: 50, words: {}, days: 3, weeks: 4, s5: null };
+// STAGE 5 (Beta 3.26, Richard's numbers, Nov 11): stage 4 -> 5 is not about main-board words (stage 5 adds folders only). It is
+// suggested when ALL of these are true (Clinician view can change each number):
+//   targets    mastered targets (word and sentence targets; Mastered or Maintenance)            default 10
+//   sentences  of which sentence targets                                                          default 1
+//   words      different words used on their own (everyday use, learner taps) in the last weeks  default 100
+//   multiPct   share of messages with 2 or more words in the same weeks                          default 30%
+//   weeks      the everyday-use window                                                            default 4
+export const DEFAULT_S5 = { targets: 10, sentences: 1, words: 100, multiPct: 30, weeks: 4 };
+export const cleanS5 = (raw) => {
+  const o = raw && typeof raw === "object" ? raw : {};
+  const int = (v, d, lo, hi) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, Math.round(v))) : d);
+  return { targets: int(o.targets, 10, 0, 200), sentences: int(o.sentences, 1, 0, 50), words: int(o.words, 100, 0, 2000),
+    multiPct: int(o.multiPct, 30, 0, 100), weeks: int(o.weeks, 4, 1, 12) };
+};
 export const MAX_STAGE = 4;
 // THE 24 BOARD (Beta 3.25) has stages 1-3. Its "next stage" is moving up to the 45 board, where the learner starts at stage 2
 // (a new motor plan; word ids are shared, so targets and everyday use carry over). progressFor() says so with moveUp: true.
@@ -33,6 +47,7 @@ export function cleanStageRule(raw) {
     words,
     days: int(o.days, 3, 1, 14),
     weeks: int(o.weeks, 4, 1, 12),
+    s5: cleanS5(o.s5),
   };
 }
 
@@ -85,9 +100,38 @@ export function stageProgress({ stage, stageWords, targets, days, rule, max = MA
   return { items, have, need, ready, mode: r.mode, pct: r.pct, note, moveUp };
 }
 
+/**
+ * Pure: readiness for stage 5 (see DEFAULT_S5). daily = the learner's daily summaries (any range; only the last `weeks` count).
+ * Returns the same shape as stageProgress: { items: [{ id, label, proficient, why }], have, need, ready, mode: "stage5", note, s5 }.
+ */
+export function stage5Progress({ targets, daily, s5, now = Date.now() }) {
+  const r = cleanS5(s5);
+  const live = targets.filter((t) => !t.removed && (t.status === "mastered" || t.status === "maintenance"));
+  const sentences = live.filter((t) => t.kind === "chain").length;
+  const from = localDate(now - r.weeks * 7 * 86400000);
+  const seen = new Set(); let msgs = 0, multi = 0;
+  for (const d of daily) {
+    if (d.date <= from) continue;
+    for (const k of d.uniqueWords || Object.keys(d.wordCounts || {})) if (!String(k).startsWith("~")) seen.add(String(k).split("+")[0]);
+    msgs += d.utterances || 0; multi += d.multiWordUtterances || 0;
+  }
+  const pct = msgs ? Math.round((multi / msgs) * 100) : 0;
+  const items = [
+    { id: "s5-targets", label: "Mastered targets", have: live.length, need: r.targets, why: `${live.length} of ${r.targets}` },
+    { id: "s5-sentences", label: "Mastered sentence targets", have: sentences, need: r.sentences, why: `${sentences} of ${r.sentences}` },
+    { id: "s5-words", label: `Different words used on their own (last ${r.weeks} weeks)`, have: seen.size, need: r.words, why: `${seen.size} of ${r.words}` },
+    { id: "s5-multi", label: `Messages with 2 or more words (last ${r.weeks} weeks)`, have: pct, need: r.multiPct, why: msgs ? `${pct}% of ${msgs} (needs ${r.multiPct}%)` : "No messages yet" },
+  ].map((i) => ({ ...i, proficient: i.have >= i.need }));
+  const have = items.filter((i) => i.proficient).length;
+  return { items, have, need: items.length, ready: have === items.length, mode: "stage5", pct: 0, note: "", moveUp: false, s5: r };
+}
+
 /** Everything together for a learner (reads the daily summaries). model = buildModel(board, profile.gridSize). */
 export async function progressFor(profile, model, targets) {
   const rule = cleanStageRule(profile.stageRule);
+  if (profile.stage === 4 && normSize(profile.gridSize) !== 24) {
+    return stage5Progress({ targets, daily: await listDaily(profile.id), s5: rule.s5 });
+  }
   const stageWords = model.main.filter((b) => b.stage === profile.stage).map((b) => ({ id: b.id, label: (profile.words && profile.words[b.id] && profile.words[b.id].label) || b.label }));
   const days = usageDays(await listDaily(profile.id), rule.weeks);
   const max = maxStageFor(profile.gridSize);

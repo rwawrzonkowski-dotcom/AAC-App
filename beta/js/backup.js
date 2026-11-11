@@ -62,6 +62,7 @@
 // and sentence trials (links, method, phase). An older app would turn them into broken word targets, so it refuses a version 18 file.
 // Beta 3.18 (still version 18) adds `access` (Accessibility: theme, font, labels, spacing...; js/access.js); a backup without it gets the defaults.
 // Beta 3.16 (still version 18) adds `toneWheel` ("off" | "on"); a backup without it gets "off".
+// Version 21 (beta 3.26) allows stage 5 and `stageRule.s5` (the stage 5 readiness numbers). An older app refuses it.
 // Version 20 (beta 3.25) allows `gridSize` 24 (the 24 board: cell keys end in "@24", stages 1-3). An older app would show such a learner
 // on the 45 board, so it refuses a version 20 file.
 // Version 17 (beta 3.7) added `littleStrip` ("auto" | "always" | "never": the little-word strip). Older backups get Auto.
@@ -94,7 +95,7 @@ import { cleanScan } from "./scan.js";
 import { cleanStageRule } from "./stagerule.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 20;   // 19 = Beta 3.23 (Actions folder layout); 20 = Beta 3.25 (the 24 board)
+export const BACKUP_VERSION = 21;   // 19 = Beta 3.23 (Actions folder layout); 20 = Beta 3.25 (the 24 board); 21 = Beta 3.26 (stage 5)
 
 // ---------------------------------------------------------------- saving
 
@@ -241,7 +242,7 @@ function cleanLearner(raw, index, version) {
   const board = getBoardData();
 
   const stage = Math.round(num(raw.stage, 1));
-  if (stage < 1 || stage > 4) bad(`${name}: the vocabulary stage is not valid.`);
+  if (stage < 1 || stage > 5) bad(`${name}: the vocabulary stage is not valid.`);
 
   if (raw.cells !== undefined && !isObj(raw.cells)) bad(`${name}: the button changes are not readable.`);
   if (raw.photos !== undefined && !Array.isArray(raw.photos)) bad(`${name}: the photos are not readable.`);

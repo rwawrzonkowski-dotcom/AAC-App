@@ -8416,5 +8416,221 @@
   "source": "Mulberry",
   "originalName": "itch",
   "license": "CC BY-SA 4.0"
+ },
+ "above": {
+  "file": "images/symbols/above.svg",
+  "source": "Mulberry",
+  "originalName": "above",
+  "license": "CC BY-SA 4.0"
+ },
+ "below": {
+  "file": "images/symbols/below.svg",
+  "source": "Mulberry",
+  "originalName": "below",
+  "license": "CC BY-SA 4.0"
+ },
+ "behind": {
+  "file": "images/symbols/behind.svg",
+  "source": "Mulberry",
+  "originalName": "behind",
+  "license": "CC BY-SA 4.0"
+ },
+ "between": {
+  "file": "images/symbols/between.svg",
+  "source": "Mulberry",
+  "originalName": "between",
+  "license": "CC BY-SA 4.0"
+ },
+ "beside": {
+  "file": "images/symbols/beside.svg",
+  "source": "Mulberry",
+  "originalName": "beside_next_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "near": {
+  "file": "images/symbols/near.svg",
+  "source": "Mulberry",
+  "originalName": "near",
+  "license": "CC BY-SA 4.0"
+ },
+ "inside": {
+  "file": "images/symbols/inside.svg",
+  "source": "Mulberry",
+  "originalName": "inside_room",
+  "license": "CC BY-SA 4.0"
+ },
+ "through": {
+  "file": "images/symbols/through.svg",
+  "source": "Mulberry",
+  "originalName": "through",
+  "license": "CC BY-SA 4.0"
+ },
+ "across": {
+  "file": "images/symbols/across.svg",
+  "source": "Mulberry",
+  "originalName": "across",
+  "license": "CC BY-SA 4.0"
+ },
+ "middle": {
+  "file": "images/symbols/middle.svg",
+  "source": "Mulberry",
+  "originalName": "middle",
+  "license": "CC BY-SA 4.0"
+ },
+ "front": {
+  "file": "images/symbols/front.svg",
+  "source": "Mulberry",
+  "originalName": "front",
+  "license": "CC BY-SA 4.0"
+ },
+ "teach": {
+  "file": "images/symbols/teach.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9D1-200D-1F3EB teach",
+  "license": "CC BY-SA 4.0"
+ },
+ "guess": {
+  "file": "images/symbols/guess.svg",
+  "source": "Mulberry",
+  "originalName": "guess_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "wonder": {
+  "file": "images/symbols/wonder.svg",
+  "source": "OpenMoji",
+  "originalName": "1F914 wonder",
+  "license": "CC BY-SA 4.0"
+ },
+ "imagine": {
+  "file": "images/symbols/imagine.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4AD imagine",
+  "license": "CC BY-SA 4.0"
+ },
+ "wrong": {
+  "file": "images/symbols/wrong.svg",
+  "source": "Mulberry",
+  "originalName": "mistake_no_wrong",
+  "license": "CC BY-SA 4.0"
+ },
+ "important": {
+  "file": "images/symbols/important.svg",
+  "source": "OpenMoji",
+  "originalName": "2757 important",
+  "license": "CC BY-SA 4.0"
+ },
+ "special": {
+  "file": "images/symbols/special.svg",
+  "source": "OpenMoji",
+  "originalName": "2B50 special",
+  "license": "CC BY-SA 4.0"
+ },
+ "safe": {
+  "file": "images/symbols/safe.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6E1 safe",
+  "license": "CC BY-SA 4.0"
+ },
+ "broken": {
+  "file": "images/symbols/broken.svg",
+  "source": "Mulberry",
+  "originalName": "broken",
+  "license": "CC BY-SA 4.0"
+ },
+ "busy": {
+  "file": "images/symbols/busy.svg",
+  "source": "Mulberry",
+  "originalName": "busy",
+  "license": "CC BY-SA 4.0"
+ },
+ "answer": {
+  "file": "images/symbols/answer.svg",
+  "source": "Mulberry",
+  "originalName": "answer",
+  "license": "CC BY-SA 4.0"
+ },
+ "idea": {
+  "file": "images/symbols/idea.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4A1 idea",
+  "license": "CC BY-SA 4.0"
+ },
+ "word": {
+  "file": "images/symbols/word.svg",
+  "source": "OpenMoji",
+  "originalName": "1F524 word",
+  "license": "CC BY-SA 4.0"
+ },
+ "page": {
+  "file": "images/symbols/page.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4C4 page",
+  "license": "CC BY-SA 4.0"
+ },
+ "homework": {
+  "file": "images/symbols/homework.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4DD homework",
+  "license": "CC BY-SA 4.0"
+ },
+ "test": {
+  "file": "images/symbols/test.svg",
+  "source": "Mulberry",
+  "originalName": "test",
+  "license": "CC BY-SA 4.0"
+ },
+ "lunch": {
+  "file": "images/symbols/lunch.svg",
+  "source": "Mulberry",
+  "originalName": "lunch_1",
+  "license": "CC BY-SA 4.0"
+ },
+ "class": {
+  "file": "images/symbols/class.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3EB class",
+  "license": "CC BY-SA 4.0"
+ },
+ "science": {
+  "file": "images/symbols/science.svg",
+  "source": "Mulberry",
+  "originalName": "science",
+  "license": "CC BY-SA 4.0"
+ },
+ "history": {
+  "file": "images/symbols/history.svg",
+  "source": "Mulberry",
+  "originalName": "history",
+  "license": "CC BY-SA 4.0"
+ },
+ "save": {
+  "file": "images/symbols/save.svg",
+  "source": "Mulberry",
+  "originalName": "save",
+  "license": "CC BY-SA 4.0"
+ },
+ "screen": {
+  "file": "images/symbols/screen.svg",
+  "source": "OpenMoji",
+  "originalName": "1F5A5 screen",
+  "license": "CC BY-SA 4.0"
+ },
+ "app": {
+  "file": "images/symbols/app.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4F1 app",
+  "license": "CC BY-SA 4.0"
+ },
+ "boss": {
+  "file": "images/symbols/boss.svg",
+  "source": "OpenMoji",
+  "originalName": "1F47E boss",
+  "license": "CC BY-SA 4.0"
+ },
+ "ws-int": {
+  "file": "images/symbols/ws-int.svg",
+  "source": "OpenMoji",
+  "originalName": "1F308 rainbow (My interests folders)",
+  "license": "CC BY-SA 4.0"
  }
 }

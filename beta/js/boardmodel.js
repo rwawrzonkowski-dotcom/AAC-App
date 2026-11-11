@@ -33,8 +33,9 @@ export const SIZES = { 24: { cols: 6, rows: 4 }, 45: { cols: 9, rows: 5 }, 84: {
 export const GRID_SIZES = [24, 45, 84];
 /** Any value -> 24, 45 or 84 (45 when unknown). */
 export const normSize = (v) => { const n = Number(v); return n === 24 || n === 84 ? n : 45; };
-/** The highest stage a board offers: 3 on the 24 board (its "stage 4" is moving up to the 45 board), 4 otherwise. */
-export const maxStageFor = (size) => (normSize(size) === 24 ? 3 : 4);
+/** The highest stage a board offers: 3 on the 24 board (its "stage 4" is moving up to the 45 board), 5 otherwise (stage 5: Beta 3.26). */
+export const maxStageFor = (size) => (normSize(size) === 24 ? 3 : 5);
+export const TOP_STAGE = 5;
 // How deep a page an ADULT may make is limited: main board = 0, a page from it = 1, a page from that = 2
 // (3 taps to a word). "Make this a page" is never offered at depth 2 or more.
 //
@@ -98,7 +99,7 @@ export function buildModel(board, size) {
       ? p.groups.flatMap((g) => [...g.words.map(asEntry).filter(onSize), ...(size === 84 ? (g.adds || []).map(asEntry) : [])]).map((e) => e.id)
       : (p.items || []).map(asEntry).filter(onSize).map((e) => e.id);
     defs[pid] = { id: pid, name: p.name, groups: p.groups || null, starter: p.starter || [], items: p.items || [], itemIds: ids,
-                  fromBar: !!p.fromBar, newWords: new Set(p.newWords || []) };
+                  fromBar: !!p.fromBar, newWords: new Set(p.newWords || []), wordStages: p.wordStages || {} };
   }
 
   // Where is each page opened from? (the main grid, the top bar, or an item on another page)
@@ -142,7 +143,8 @@ export function buildModel(board, size) {
       const starter = d.starter === "all" ? { has: (id) => !d.newWords.has(id) } : new Set(d.starter);
       const NEW_STAGE = board.pageNewWordStage || 3;
       // pageStage: from which stage the word shows on this page (original items: always)
-      const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: starter.has(e.id) ? 1 : NEW_STAGE });
+      // "wordStages" (Beta 3.26) names the stage of particular words on the page, e.g. the stage-5 folders on the Words menu.
+      const put = (e, row, col) => items.push({ ...word(e.id), row, col, pageStage: d.wordStages[e.id] ?? (starter.has(e.id) ? 1 : NEW_STAGE) });
       for (const g of d.groups) {
         const skip = back45 && back45.row === g.row ? back45.col : -1;
         let col = 0;

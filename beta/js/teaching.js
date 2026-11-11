@@ -598,7 +598,7 @@ export function masteryCheck(target, sessions, trials) {
 // The vocabulary stage is ready to move on when the learner has targets among the words of the current stage
 // on the main board and every one of them is mastered (or in maintenance). `stageWordIds` = ids of that stage's words.
 export function stageReady(stage, stageWordIds, activeTargets) {
-  if (stage >= 4) return false;
+  if (stage >= 5) return false;
   const set = new Set(stageWordIds);
   const mine = activeTargets.filter((t) => set.has(t.wordId));
   return mine.length > 0 && mine.every((t) => t.status === "mastered" || t.status === "maintenance");

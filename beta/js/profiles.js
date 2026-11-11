@@ -3,7 +3,7 @@
 // A profile looks like this:
 //   {
 //     id, name, created, v: 3,
-//     stage: 1..4,                      // how many core words are revealed
+//     stage: 1..5,                      // how many words are revealed (5 = Beta 3.26; 1..3 on the 24 board)
 //     gridSize: 24 | 45 | 84,           // which board this learner uses (24 = Beta 3.25: its own layout, stages 1-3)
 //     words: {                          // changes to BUILT-IN words, by word id.
 //       "want": { show: true|false, label: "...", spoken: "..." },   // They follow

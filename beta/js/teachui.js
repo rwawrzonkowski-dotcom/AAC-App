@@ -289,7 +289,9 @@ export async function runEndFlow(result, ctx) {
 const TONE_SUGGEST_MASTERED = 3;
 
 /** Which proficient words, in one sentence (both rules). */
-const proficientText = (cur, prog) => prog.mode === "words"
+const proficientText = (cur, prog) => prog.mode === "stage5"
+  ? `All the stage 5 checks are met: ${prog.items.map((i) => i.label.toLowerCase() + " " + i.why).join("; ")}.`
+  : prog.mode === "words"
   ? `All ${prog.need} of the stage ${cur.stage} words you chose are proficient: ${prog.items.filter((i) => i.chosen).map((i) => i.label).join(", ")}.`
   : `${prog.have} of ${prog.items.length} stage ${cur.stage} words are proficient (the rule is ${prog.pct}%): ${prog.items.filter((i) => i.proficient).map((i) => i.label).join(", ")}.`;
 
@@ -407,10 +409,9 @@ function askStage(cur, ctx, prog) {
     const finish = () => { o.close(); resolve(); };
     const o = openOverlay([
       h("h2", { id: "stage-title", text: `Move ${cur.name} to stage ${next}?` }),
-      h("p", { class: "confirm-text", id: "stage-detail", text: (prog.mode === "words"
-        ? `All ${prog.need} of the stage ${cur.stage} words you chose are proficient: ${prog.items.filter((i) => i.chosen).map((i) => i.label).join(", ")}.`
-        : `${prog.have} of ${prog.items.length} stage ${cur.stage} words are proficient (the rule is ${prog.pct}%): ${prog.items.filter((i) => i.proficient).map((i) => i.label).join(", ")}.`) +
-        ` Stage ${next} reveals more words in their permanent spots; nothing moves.` }),
+      h("p", { class: "confirm-text", id: "stage-detail", text: proficientText(cur, prog) +
+        (next === 5 ? " Stage 5 adds 14 folders on the Words menu (where words, thinking words, school and games words, reading words, and three " +
+          "My interests folders for you to name and fill); nothing moves." : ` Stage ${next} reveals more words in their permanent spots; nothing moves.`) }),
       h("div", { class: "btn-row" },
         h("button", { type: "button", class: "btn", id: "stage-no", text: "Not yet", onclick: finish }),
         h("button", { type: "button", class: "btn primary", id: "stage-yes", text: `Move to stage ${next}`, onclick: async () => {

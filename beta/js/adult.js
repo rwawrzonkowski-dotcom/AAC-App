@@ -338,7 +338,10 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     const cur = getCurrent();
     const model = buildModel(board, cur.gridSize);
     const wordsFor = (n) => model.main.filter((b) => b.stage === n).map((b) => b.label).join(", ");
-    const note = { 1: "Starting words", 2: "Adds", 3: "Adds", 4: "Adds" };
+    const note = { 1: "Starting words", 2: "Adds", 3: "Adds", 4: "Adds", 5: "Adds" };
+    // Stage 5 (Beta 3.26) adds no main-board words: it adds folders on the Words menu.
+    const S5_TEXT = "14 folders on the Words menu: where words, some and every, thinking words, how often, joining words, more describing, " +
+      "school talk, school subjects, games and screens, two reading-word folders and three My interests folders you fill";
     const stages = Array.from({ length: maxStageFor(cur.gridSize) }, (_, i) => i + 1);
     return h("section", { class: "panel", id: "sec-stage" },
       h("h2", { text: "Vocabulary stage" }),
@@ -358,7 +361,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         },
         h("span", { class: "stage-title", text: "Stage " + n }),
         h("span", { class: "stage-note", text: note[n] + ":" }),
-        h("span", { class: "stage-words", text: wordsFor(n) })))),
+        h("span", { class: "stage-words", text: n === 5 ? S5_TEXT : wordsFor(n) })))),
       stageProgressBlock(cur, model),
       view === "clinician" ? stageRuleBlock(cur, model) : null);
   }
@@ -372,14 +375,16 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       const pct = pr.need ? Math.min(100, Math.round((pr.have / pr.need) * 100)) : 0;
       box.replaceChildren(
         h("div", { class: "sp-head" }, h("strong", { text: pr.moveUp ? "Ready for the 45 board?" : `Ready for stage ${cur.stage + 1}?` }),
-          h("span", { class: "muted", text: pr.mode === "words" ? "Rule: the chosen words" : `Rule: ${pr.pct}% of stage ${cur.stage} words` })),
+          h("span", { class: "muted", text: pr.mode === "stage5" ? "Rule: stage 5 readiness" : pr.mode === "words" ? "Rule: the chosen words" : `Rule: ${pr.pct}% of stage ${cur.stage} words` })),
         h("div", { class: "sp-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(pr.need), "aria-valuenow": String(Math.min(pr.have, pr.need)) },
           h("div", { class: "sp-fill" + (pr.ready ? " done" : ""), style: `width: ${pct}%` })),
-        h("p", { id: "stage-progress-text", text: pr.note || `${pr.have} of ${pr.mode === "words" ? pr.need : pr.items.length} words proficient · needs ${pr.need}` + (pr.ready ? " · Ready: VOICE will suggest it at the end of the next session." : "") }),
-        h("div", { class: "sp-list" }, pr.items.filter((i) => pr.mode === "percent" || i.chosen).map((i) =>
+        h("p", { id: "stage-progress-text", text: (pr.mode === "stage5" ? `${pr.have} of ${pr.need} checks met` : pr.note || `${pr.have} of ${pr.mode === "words" ? pr.need : pr.items.length} words proficient · needs ${pr.need}`) + (pr.ready ? " · Ready: VOICE will suggest it at the end of the next session." : "") }),
+        h("div", { class: "sp-list" }, pr.items.filter((i) => pr.mode !== "words" || i.chosen).map((i) =>
           h("div", { class: "sp-row", "data-word": i.id }, h("span", { text: i.label }),
             h("span", { class: "sp-chip " + (i.why === "Mastered target" ? "m" : i.proficient ? "e" : "n"), text: i.why })))),
-        h("p", { class: "muted", text: `Proficient = a mastered target, or used on their own (not modeled, not in a session) on ${r.days}+ days in the last ${r.weeks} weeks.` }));
+        h("p", { class: "muted", text: pr.mode === "stage5"
+          ? "Stage 5 adds folders, not main-board words, so its readiness looks at the whole picture: mastered targets, sentence targets, how many different words the learner uses on their own, and how often their messages have 2 or more words."
+          : `Proficient = a mastered target, or used on their own (not modeled, not in a session) on ${r.days}+ days in the last ${r.weeks} weeks.` }));
     }).catch(() => box.replaceChildren(h("p", { class: "muted", text: "Progress could not be read." })));
     return box;
   }
@@ -401,6 +406,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       sel.value = String(r[key]);
       return sel;
     };
+    if (cur.stage === 4 && cur.gridSize !== 24) return stage5RuleBlock(cur, r, save);
     return h("div", { class: "field stage-rule", id: "stage-rule" },
       h("h3", { class: "access-h", text: "When to suggest the next stage (clinician)" }),
       h("div", { class: "seg-row" }, modeBtn("percent", "A share of the stage's words"), modeBtn("words", "Words I choose")),
@@ -413,6 +419,27 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("div", { class: "sr-line" }, h("span", { text: "Everyday use counts after" }), num("days", 1, 14, "Days"), h("span", { text: "days of use in the last" }),
         num("weeks", 1, 12, "Weeks"), h("span", { text: "weeks." })),
       h("p", { class: "muted", text: "VOICE only suggests the next stage at the end of a teaching session; you decide. The progress above is shown in both views." }));
+  }
+
+  // Stage 4 -> 5 readiness numbers (Beta 3.26, js/stagerule.js DEFAULT_S5). All must be met.
+  function stage5RuleBlock(cur, r, save) {
+    const s5 = r.s5;
+    const field = (key, label, min, max, step, unit = "") => {
+      const val = h("span", { class: "slider-num", id: "s5-" + key + "-val", text: s5[key] + unit });
+      const input = h("input", { type: "range", id: "s5-" + key, min, max, step, value: s5[key],
+        oninput: () => { val.textContent = input.value + unit; }, onchange: () => save({ s5: { ...s5, [key]: Number(input.value) } }) });
+      return h("div", { class: "slider-row" }, h("label", { for: "s5-" + key, text: label }), input, val);
+    };
+    return h("div", { class: "field stage-rule", id: "stage-rule" },
+      h("h3", { class: "access-h", text: "When to suggest stage 5 (clinician)" }),
+      h("p", { class: "muted", text: "All of these must be met. Stage 5 adds folders on the Words menu, so it looks at overall language use instead of main-board words." }),
+      field("targets", "Mastered targets", 0, 50, 1),
+      field("sentences", "...of which sentence targets", 0, 10, 1),
+      field("words", "Different words used on their own", 0, 400, 10),
+      field("multiPct", "Messages with 2+ words", 0, 100, 5, "%"),
+      field("weeks", "Everyday use window (weeks)", 1, 12, 1),
+      h("button", { type: "button", class: "btn", id: "s5-defaults", text: "Back to 10 / 1 / 100 / 30% / 4 weeks", onclick: () => save({ s5: null }) }),
+      h("p", { class: "muted", text: "VOICE only suggests stage 5 at the end of a teaching session; you decide." }));
   }
 
   // "Buttons on the board" (Beta 3.9): the five Auto / Always / Never choices for the buttons around the board, on one page.
