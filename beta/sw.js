@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v47";
+const CACHE_VERSION = "beta-aac-v48";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -1488,7 +1488,7 @@ const FILES = [
   "js/about.js?v=5bda0bb73f",
   "js/access.js?v=662f65d543",
   "js/accessui.js?v=348e5e7940",
-  "js/adult.js?v=23de75d58d",
+  "js/adult.js?v=bdf55e00ed",
   "js/adulthint.js?v=21b269cb20",
   "js/app.js?v=96f8debb92",
   "js/backup.js?v=da516d51d3",
@@ -1496,7 +1496,7 @@ const FILES = [
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=a5ac8a084f",
   "js/camerabtn.js?v=114b8ebc7a",
-  "js/channel.js?v=2f8ef92e4f",
+  "js/channel.js?v=2f215b3dfc",
   "js/critters.js?v=0008315f67",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=d0c538ff70",
@@ -1510,7 +1510,7 @@ const FILES = [
   "js/instrcard.js?v=f47cb8f9eb",
   "js/instrui.js?v=ee3af4f621",
   "js/keepdata.js?v=65e624a7c2",
-  "js/keyboard.js?v=e8a541921d",
+  "js/keyboard.js?v=d234414b9e",
   "js/ladderui.js?v=60d996c6e9",
   "js/littlewords.js?v=358cd2ae4c",
   "js/lock.js?v=1ad71b40d0",

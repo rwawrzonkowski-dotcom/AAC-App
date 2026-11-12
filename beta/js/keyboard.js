@@ -32,14 +32,16 @@ export const LETTER_NAMES = {
   u: "you", v: "vee", w: "double you", x: "ex", y: "why", z: "zee", "'": "apostrophe",
 };
 
-// What the "Letter sounds" choice says for each key (Beta 3.28): the sound the letter most often makes at the start of a word,
-// spelled so the iPad voice says it (short vowels; c and g hard; x as "ks"). Voices differ, so this table is the one place to
-// adjust a sound that comes out wrong.
-export const LETTER_SOUNDS = {
-  a: "aah", b: "buh", c: "kuh", d: "duh", e: "eh", f: "fff", g: "guh", h: "huh", i: "ih", j: "juh",
-  k: "kuh", l: "lll", m: "mmm", n: "nnn", o: "ahh", p: "puh", q: "kwuh", r: "rrr", s: "sss", t: "tuh",
-  u: "uh", v: "vvv", w: "wuh", x: "ks", y: "yuh", z: "zzz", "'": "apostrophe",
+// What the "Letter sounds" choice says for each key (Beta 3.29): the letter and a key word that starts with its usual sound
+// ("bee, ball"). Temporary: iPad voices cannot say a sound on its own (Beta 3.28's "rrr" / "ks" spellings were read letter
+// by letter), so this stays until recorded letter sounds are added. Short vowels; hard c and g; x is the sound at the end of "box".
+export const LETTER_KEYWORDS = {
+  a: "apple", b: "ball", c: "cat", d: "dog", e: "egg", f: "fish", g: "goat", h: "hat", i: "igloo", j: "jam",
+  k: "kite", l: "lamp", m: "moon", n: "nest", o: "octopus", p: "pig", q: "queen", r: "red", s: "sun", t: "top",
+  u: "up", v: "van", w: "web", x: "box", y: "yes", z: "zoo",
 };
+export const LETTER_SOUNDS = Object.fromEntries(Object.keys(LETTER_NAMES).map((k) =>
+  [k, LETTER_KEYWORDS[k] ? LETTER_NAMES[k] + ", " + LETTER_KEYWORDS[k] : LETTER_NAMES[k]]));
 
 // Keyboard rows. The grid has 20 columns so the rows can be staggered like a real keyboard.
 // (The apostrophe key, for "don't" and "I'm", sits in the bottom row next to Space: see buildLetters.)

@@ -580,9 +580,9 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("div", { class: "field touch-setting", id: "setting-speak-letters" },
       h("label", { text: "Speak each letter while typing" }),
       h("div", { class: "seg-row touch-seg" }, btn(false, "Off"), btn(true, "On")),
-      cur.speakLetters ? h("div", { class: "seg-row touch-seg", id: "letter-mode" }, mode("names", "Letter names"), mode("sounds", "Letter sounds")) : null,
-      h("p", { class: "muted", text: "On: every key speaks as it is tapped. Letter names say \"bee\", \"oh\"; letter sounds say \"buh\", \"ahh\" " +
-        "(the sound the letter usually makes at the start of a word). The iPad voice decides exactly how a sound comes out, so listen to a few first." }));
+      cur.speakLetters ? h("div", { class: "seg-row touch-seg", id: "letter-mode" }, mode("names", "Letter names"), mode("sounds", "Letter + key word")) : null,
+      h("p", { class: "muted", text: "On: every key speaks as it is tapped. Letter names say \"bee\", \"oh\"; Letter + key word says the letter and a word that starts with its sound (\"bee, ball\", \"ess, sun\"). " +
+        "Recorded letter sounds will replace this later; iPad voices cannot say a sound on its own." }));
   }
 
   // Word guesses above the keyboard (Beta 3.28, default off).
