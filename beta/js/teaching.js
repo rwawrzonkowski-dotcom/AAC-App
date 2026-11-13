@@ -554,7 +554,7 @@ export function summarizeSession(session, trials, targets) {
       trials: scored.length, planned: scored.filter((x) => x.type === "planned").length, net: scored.filter((x) => x.type === "NET").length,
       skipped: mine.length - scored.length, correct, independent,
       errorTrials: scored.filter((x) => x.result === "error").length, noResponse: scored.filter((x) => x.result === "noResponse").length,
-      pctIndependent: scored.length ? Math.round((independent / scored.length) * 100) : null,
+      pctIndependent: scored.length ? Math.floor((independent / scored.length) * 100 + 1e-9) : null,   // rounded down (Beta 3.30)
       changes, startStep: changes.length ? stepText(changes[0].from) : (t ? posName(t) : null),
       endStep: changes.length ? stepText(changes[changes.length - 1].to) : (t ? posName(t) : null),
     });
@@ -583,11 +583,13 @@ export function masteryCheck(target, sessions, trials) {
     .sort((a, b) => b.start - a.start).slice(0, rule.sessions);
   const info = used.map((s) => {
     const list = bySession.get(s.id);
-    return { id: s.id, start: s.start, who: s.who, where: s.where, trials: list.length,
-      pct: Math.round((list.filter(isIndependent).length / list.length) * 100) };
+    // (Beta 3.30) Compared EXACTLY: 35 of 44 is 79.5%, which does not meet an 80% rule. The shown percent is rounded DOWN so it
+    // never reads as meeting the rule when it does not (79%, not 80%).
+    const exact = (list.filter(isIndependent).length / list.length) * 100;
+    return { id: s.id, start: s.start, who: s.who, where: s.where, trials: list.length, exact, pct: Math.floor(exact + 1e-9) };
   });
   if (info.length < rule.sessions) return { met: false, reason: `only ${info.length} of ${rule.sessions} sessions so far`, sessions: info };
-  if (info.some((s) => s.pct < rule.pct)) return { met: false, reason: `a session was under ${rule.pct}% independent`, sessions: info };
+  if (info.some((s) => s.exact < rule.pct)) return { met: false, reason: `a session was under ${rule.pct}% independent`, sessions: info };
   const whos = new Set(info.map((s) => s.who).filter(Boolean)), wheres = new Set(info.map((s) => s.where).filter(Boolean));
   if (whos.size < rule.differentTags && wheres.size < rule.differentTags) {
     return { met: false, reason: `needs ${rule.differentTags} different people or settings`, sessions: info };

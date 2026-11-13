@@ -115,12 +115,13 @@ export function stage5Progress({ targets, daily, s5, now = Date.now() }) {
     for (const k of d.uniqueWords || Object.keys(d.wordCounts || {})) if (!String(k).startsWith("~")) seen.add(String(k).split("+")[0]);
     msgs += d.utterances || 0; multi += d.multiWordUtterances || 0;
   }
-  const pct = msgs ? Math.round((multi / msgs) * 100) : 0;
+  const exact = msgs ? (multi / msgs) * 100 : 0;
+  const pct = Math.floor(exact + 1e-9);                 // shown rounded down; compared exactly (Beta 3.30)
   const items = [
     { id: "s5-targets", label: "Mastered targets", have: live.length, need: r.targets, why: `${live.length} of ${r.targets}` },
     { id: "s5-sentences", label: "Mastered sentence targets", have: sentences, need: r.sentences, why: `${sentences} of ${r.sentences}` },
     { id: "s5-words", label: `Different words used on their own (last ${r.weeks} weeks)`, have: seen.size, need: r.words, why: `${seen.size} of ${r.words}` },
-    { id: "s5-multi", label: `Messages with 2 or more words (last ${r.weeks} weeks)`, have: pct, need: r.multiPct, why: msgs ? `${pct}% of ${msgs} (needs ${r.multiPct}%)` : "No messages yet" },
+    { id: "s5-multi", label: `Messages with 2 or more words (last ${r.weeks} weeks)`, have: exact, need: r.multiPct, why: msgs ? `${pct}% of ${msgs} (needs ${r.multiPct}%)` : "No messages yet" },
   ].map((i) => ({ ...i, proficient: i.have >= i.need }));
   const have = items.filter((i) => i.proficient).length;
   return { items, have, need: items.length, ready: have === items.length, mode: "stage5", pct: 0, note: "", moveUp: false, s5: r };

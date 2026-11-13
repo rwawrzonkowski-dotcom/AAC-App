@@ -58,7 +58,7 @@ export function targetBlock(tm, shapes, { plotH = 170, helpH = 92, withTable = t
   if (tm.chain) card.append(chainTable(tm));
   card.append(h("details", { class: "tbl-view no-print" }, h("summary", { text: "Show as table" }),
     tableEl(["Session", "Date", "Who", "Where", "Trials", "Independent", "% independent", "Average help", "Status"],
-      tm.series.map((p) => [p.n, p.date, p.who, p.where, p.trials, p.independent, n0(p.pct) + "%", n0(p.help * 100) + "%", T.STATUS_LABELS[p.status]]))));
+      tm.series.map((p) => [p.n, p.date, p.who, p.where, p.trials, p.independent, Math.floor(p.pct + 1e-9) + "%", n0(p.help * 100) + "%", T.STATUS_LABELS[p.status]]))));
   return card;
 }
 
