@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<!-- The L: VOICE model critter (Beta 3.32). class="line" parts take the chosen L line's color (styles.css, --line). -->
+<g stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M8 93H92" fill="none" stroke="#6b7280" stroke-width="3.4"/>
+<circle cx="30" cy="87" r="5.5" fill="#4b4a5e"/><circle cx="70" cy="87" r="5.5" fill="#4b4a5e"/>
+<rect x="24" y="7" width="52" height="11" rx="4" fill="#aeb4c0"/>
+<rect x="17" y="13" width="66" height="70" rx="12" fill="#cfd4dd"/>
+<rect class="line" x="30" y="18" width="40" height="9" rx="2.5" fill="#c60c30"/>
+<rect x="23" y="31" width="23" height="21" rx="5" fill="#2f3e55"/>
+<rect x="54" y="31" width="23" height="21" rx="5" fill="#2f3e55"/>
+<rect class="line" x="17" y="61" width="66" height="7" fill="#c60c30"/>
+<path d="M41 55Q50 60 59 55" fill="none" stroke-width="2.6"/>
+<circle cx="27" cy="74" r="4" fill="#fff4c2"/><circle cx="73" cy="74" r="4" fill="#fff4c2"/>
+<rect x="14" y="79" width="72" height="6" rx="3" fill="#7b8190"/>
+</g>
+<path d="M50 14v4" stroke="#3d3a4f" stroke-width="2"/>
+<circle cx="34.5" cy="42" r="7" fill="#fff" stroke="#3d3a4f" stroke-width="1.6"/><circle cx="65.5" cy="42" r="7" fill="#fff" stroke="#3d3a4f" stroke-width="1.6"/>
+<circle cx="35.5" cy="43" r="3.6" fill="#211d2b"/><circle cx="66.5" cy="43" r="3.6" fill="#211d2b"/>
+<circle cx="34.4" cy="41.6" r="1.2" fill="#fff"/><circle cx="65.4" cy="41.6" r="1.2" fill="#fff"/>
+<path d="M26 34l5-2M57 34l5-2" stroke="#7f8fa8" stroke-width="2" stroke-linecap="round"/>
+</svg>

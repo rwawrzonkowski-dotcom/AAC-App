@@ -8,7 +8,7 @@ import { h } from "./ui.js";
 import { getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto } from "./profiles.js";
 import { downscaleImage } from "./editor.js";
 import {
-  ANIMALS, COLORS, ACCESSORIES, CRITTER_INFO, COSTUME_INFO, NATURAL, recolorable, SIZES, ARRIVALS, SIZE_PCT, MODEL_SPEEDS, buildCritter, critterSvg, critterTop,
+  ANIMALS, COLORS, ACCESSORIES, CRITTER_INFO, COSTUME_INFO, NATURAL, recolorable, costumesFor, costumeInfo, isTrain, lineColorOf, LINES, SIZES, ARRIVALS, SIZE_PCT, MODEL_SPEEDS, buildCritter, critterSvg, critterTop,
 } from "./critters.js";
 import { usesRing } from "./modelprompt.js";
 
@@ -76,12 +76,17 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
   const animalThumbs = ANIMALS.map((a) => {
     const thumb = h("span", { class: "mp-thumb" + (m.color !== NATURAL && recolorable(a) ? " recolor" : "") });
     thumb.style.setProperty("--body", m.color);
+    if (isTrain(a)) thumb.style.setProperty("--line", lineColorOf(isTrain(m.animal) ? m.accessory : LINES[0].id));
     critterSvg(a, "none").then((svg) => { thumb.innerHTML = svg; thumb.firstChild.classList.add("critter-art"); }).catch(() => {});
     const info = CRITTER_INFO[a];
     return h("button", {
       type: "button", class: "seg animal-btn" + (m.animal === a ? " on" : ""), id: `mp-animal-${a}`, "data-value": a,
       "aria-label": `${info.name}: ${info.story}`, disabled: own,
-      onclick: () => { m.animal = a; persist(); refresh(); },
+      onclick: () => {
+        // The L's choices are its lines; switching to or from it starts that list fresh.
+        if (isTrain(a) !== isTrain(m.animal)) m.accessory = isTrain(a) ? LINES[0].id : "none";
+        m.animal = a; persist(); refresh();
+      },
     }, thumb, h("span", { class: "animal-name", text: info.name }), h("span", { class: "animal-story", text: info.story }));
   });
 
@@ -92,7 +97,7 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
     disabled: !canColor, style: c.value === NATURAL ? "" : `background:${c.value}`,
     onclick: () => { m.color = c.value; persist(); refresh(); },
   }));
-  const costumeLine = m.accessory !== "none" && !own ? h("p", { class: "mp-costume-line", id: "mp-costume-line", text: COSTUME_INFO[m.accessory].line }) : null;
+  const costumeLine = m.accessory !== "none" && !own ? h("p", { class: "mp-costume-line", id: "mp-costume-line", text: costumeInfo(m.accessory).line }) : null;
 
   const fileIn = h("input", { type: "file", accept: "image/*", id: "mp-photo", class: "file-hidden",
     onchange: async () => {
@@ -131,9 +136,9 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
       h("h3", { text: "Critter" }),
       h("div", { class: "field" }, h("label", { text: "Choose a Chicago critter" }), h("div", { class: "seg-row mp-seg mp-animals" }, animalThumbs)),
       h("div", { class: "field" }, h("label", { text: "Color" }), h("div", { class: "mp-swatches" }, swatches),
-        recolorable(m.animal) ? null : h("p", { class: "muted", text: "Sue is a skeleton, so she keeps her bone color." })),
-      h("div", { class: "field" }, h("label", { text: "Costume" }),
-        choices("mp-acc", ACCESSORIES, m.accessory, (v) => COSTUME_INFO[v].name, (v) => { m.accessory = v; }, own), costumeLine),
+        recolorable(m.animal) ? null : h("p", { class: "muted", text: isTrain(m.animal) ? "The L takes its color from the line you pick below." : "Sue is a skeleton, so she keeps her bone color." })),
+      h("div", { class: "field" }, h("label", { text: isTrain(m.animal) ? "L line" : "Costume" }),
+        choices("mp-acc", costumesFor(m.animal), m.accessory, (v) => costumeInfo(v).name, (v) => { m.accessory = v; }, own), costumeLine),
       h("div", { class: "field" }, h("label", { text: "Size (compared with a button)" }),
         choices("mp-size", SIZES, m.size, sizeLabel, (v) => { m.size = v; })),
       h("div", { class: "field" }, h("label", { text: "How it arrives" }),

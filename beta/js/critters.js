@@ -12,7 +12,7 @@
 // A learner's own picture (if any) is stored like a button photo under the key "critter".
 
 // The Chicago critters (Beta 3.31). Dibs the pigeon is the default and also gives adults tips (js/dibs.js).
-export const ANIMALS = ["dibs", "chance", "ivy", "hiram", "monty", "sue"];
+export const ANIMALS = ["dibs", "chance", "ivy", "hiram", "monty", "sue", "train"];
 export const CRITTER_INFO = {
   dibs:   { name: "Dibs",   story: "A Chicago pigeon. Dibs on the parking spot!" },
   chance: { name: "Chance", story: "Chance the Snapper, the Humboldt Park alligator." },
@@ -20,7 +20,25 @@ export const CRITTER_INFO = {
   hiram:  { name: "Hiram",  story: "A bulldog in a burgundy sweater, for Hiram H. Belding Elementary." },
   monty:  { name: "Monty",  story: "Monty and Rose, the Montrose Beach piping plovers." },
   sue:    { name: "Sue",    story: "Sue the T. rex, the Field Museum's famous skeleton." },
+  train:  { name: "The L",  story: "Chicago's L train. Doors closing!" },
 };
+// The L (Beta 3.32) wears no costume: its "costume" choice is which L line it runs on, which colors its sign and stripe.
+export const LINES = [
+  { id: "line-red",    name: "Red Line",    value: "#c60c30", line: "Red Line: Howard to 95th/Dan Ryan." },
+  { id: "line-blue",   name: "Blue Line",   value: "#00a1de", line: "Blue Line: O'Hare to Forest Park." },
+  { id: "line-brown",  name: "Brown Line",  value: "#62361b", line: "Brown Line: Kimball to the Loop." },
+  { id: "line-green",  name: "Green Line",  value: "#009b3a", line: "Green Line: Harlem/Lake to Ashland/63rd and Cottage Grove." },
+  { id: "line-orange", name: "Orange Line", value: "#f9461c", line: "Orange Line: Midway to the Loop." },
+  { id: "line-purple", name: "Purple Line", value: "#522398", line: "Purple Line: Linden to Howard." },
+  { id: "line-pink",   name: "Pink Line",   value: "#e27ea6", line: "Pink Line: 54th/Cermak to the Loop." },
+  { id: "line-yellow", name: "Yellow Line", value: "#f9e300", line: "Yellow Line: Dempster-Skokie to Howard." },
+];
+export const isTrain = (animal) => animal === "train";
+/** The costume choices for a critter: the L lines for the L, the costumes for everyone else. */
+export const costumesFor = (animal) => (isTrain(animal) ? LINES.map((l) => l.id) : ACCESSORIES);
+/** A costume's (or L line's) name and its little comment. */
+export const costumeInfo = (id) => { const l = LINES.find((x) => x.id === id); return l ? { name: l.name, line: l.line } : COSTUME_INFO[id] || COSTUME_INFO.none; };
+const lineColor = (id) => (LINES.find((x) => x.id === id) || LINES[0]).value;
 // Costumes. "line" is the little comment shown when an adult picks it.
 export const ACCESSORIES = ["none", "horns", "cap-blue", "cap-black", "football", "stick", "scarf"];
 export const COSTUME_INFO = {
@@ -36,7 +54,7 @@ export const COSTUME_INFO = {
 const OLD_ANIMAL = { puppy: "hiram", owl: "monty", frog: "chance", kitten: "dibs", bunny: "dibs" };
 const OLD_ACCESSORY = { hat: "cap-blue", bow: "scarf", glasses: "none" };
 /** Sue is a skeleton: she always keeps her bone color. */
-export const recolorable = (animal) => animal !== "sue";
+export const recolorable = (animal) => animal !== "sue" && animal !== "train";
 export const STYLES = ["ring", "critter", "both"];
 export const SIZES = ["small", "medium", "large"];
 export const ARRIVALS = ["hop", "peek", "appear"];
@@ -95,6 +113,12 @@ const opacity = (v, fallback) => {
 // Turn anything (missing, old, or from a file) into a complete, valid settings object.
 export function cleanModel(raw) {
   const m = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const out = cleanFields(m);
+  out.accessory = isTrain(out.animal) ? pick(m.accessory, costumesFor("train"), LINES[0].id)
+    : pick(OLD_ACCESSORY[m.accessory] ?? m.accessory, ACCESSORIES, DEFAULT_MODEL.accessory);
+  return out;
+}
+function cleanFields(m) {
   return {
     style: pick(m.style, STYLES, DEFAULT_MODEL.style),
     ringOpacity: opacity(m.ringOpacity, DEFAULT_MODEL.ringOpacity),
@@ -104,7 +128,7 @@ export function cleanModel(raw) {
     // (The old default orange, never really chosen by most adults, becomes the new critter's own colors.)
     color: OLD_ANIMAL[m.animal] && String(m.color).toLowerCase() === "#f5a04a" ? NATURAL
       : pick(typeof m.color === "string" ? m.color.toLowerCase() : "", [NATURAL, ...COLORS.map((c) => c.value)], DEFAULT_MODEL.color),
-    accessory: pick(OLD_ACCESSORY[m.accessory] ?? m.accessory, ACCESSORIES, DEFAULT_MODEL.accessory),
+    accessory: null,                // set just below: it depends on the critter
     size: pick(m.size, SIZES, DEFAULT_MODEL.size),
     arrival: pick(m.arrival, ARRIVALS, DEFAULT_MODEL.arrival),
     speed: pick(m.speed, MODEL_SPEEDS, "medium"),
@@ -135,10 +159,12 @@ export function preloadCritterArt() {
 }
 
 // The finished SVG text for one animal with an optional accessory.
+/** The L line color for a line id (for previews that build their own picture). */
+export const lineColorOf = lineColor;
 export async function critterSvg(animal, accessory) {
   animal = pick(animal, ANIMALS, DEFAULT_MODEL.animal);
   let acc = "";
-  if (accessory && SLOT[accessory]) {
+  if (accessory && SLOT[accessory] && !isTrain(animal)) {
     const [slot, y0] = SLOT[accessory];
     let [x, y, s, r] = ANCHORS[animal][slot];
     if (accessory === "stick") { s *= 1.7; y -= 8; }        // the stick is long: bigger, held a little higher
@@ -169,6 +195,7 @@ export async function buildCritter(m, customUrl, px) {
     const art = document.createElement("div");
     art.className = "critter-art";
     if (m.color !== NATURAL && recolorable(m.animal)) { art.classList.add("recolor"); el.style.setProperty("--body", m.color); }
+    if (isTrain(m.animal)) el.style.setProperty("--line", lineColor(m.accessory));
     art.innerHTML = await critterSvg(m.animal, m.accessory);   // our own files, not user text
     el.append(art);
   }
