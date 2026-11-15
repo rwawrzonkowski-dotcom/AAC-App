@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v52";
+const CACHE_VERSION = "beta-aac-v53";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -1501,7 +1501,7 @@ const FILES = [
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=a5ac8a084f",
   "js/camerabtn.js?v=114b8ebc7a",
-  "js/channel.js?v=acaae38e06",
+  "js/channel.js?v=26e9536c98",
   "js/critters.js?v=a4dbe1b5b5",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=d0c538ff70",
@@ -1610,7 +1610,25 @@ self.addEventListener("fetch", (e) => {
     }))));
     return;
   }
-  e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || fetch(e.request))
-  );
+  e.respondWith(fromCache(e.request, path));
 });
+
+// Beta 3.34: a FAST cache lookup. The page asks for "images/symbols/x.svg"; the cache holds "images/symbols/x.svg?v=<fingerprint>".
+// Matching with ignoreSearch makes the browser compare the address against every saved file in every cache (several thousand on a
+// device that has both the stable app and the beta), and on iPad (Safari) that made opening a folder of 40 pictures noticeably slow.
+// So the worker keeps a list of path -> saved address (from FILES) and looks the file up EXACTLY in its own cache; ignoreSearch is
+// only the fallback for anything not on the list.
+const SAVED = new Map(FILES.map((f) => { const u = new URL(f, self.location.href); return [u.pathname, u.href]; }));
+let ownCache = null;
+async function fromCache(req, path) {
+  const key = SAVED.get(path) || (path.endsWith("/") ? SAVED.get(new URL("./", self.location.href).pathname) : null);
+  if (key) {
+    try {
+      ownCache = ownCache || (await caches.open(CACHE_VERSION));
+      const hit = await ownCache.match(key);
+      if (hit) return hit;
+    } catch (err) { /* fall through */ }
+  }
+  const hit = await caches.match(req, { ignoreSearch: true });
+  return hit || fetch(req);
+}
