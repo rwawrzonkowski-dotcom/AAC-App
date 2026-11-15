@@ -1,6 +1,7 @@
 // The adult screens for teaching (Phase 2, Round A, beta): the "Teaching" section of the adult menu, the list of targets and
 // each target's settings, the "Start a session" form, and the screens at the end of a session (summary, "Mark as mastered?"
 // and "Move to the next stage?"). The rules themselves are in js/teaching.js; saving is in js/teachdata.js.
+import { dibsTip } from "./dibs.js";
 import { h, openOverlay, askConfirm } from "./ui.js";
 import { getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto } from "./profiles.js";
 import { buildModel } from "./boardmodel.js";
@@ -300,6 +301,7 @@ function askMoveUp(cur, ctx, prog) {
   return new Promise((resolve) => {
     const finish = () => { o.close(); resolve(); };
     const o = openOverlay([
+      dibsTip(`${cur.name} has finished the big-button board!`, "dibs-stage"),
       h("h2", { id: "stage-title", text: `Move ${cur.name} up to the 45 board?` }),
       h("p", { class: "confirm-text", id: "stage-detail", text: proficientText(cur, prog) +
         ` ${cur.name} has finished the 24 board's stages. The 45 board has smaller buttons and many more words, and its words are in ` +
@@ -335,6 +337,11 @@ function fmtDuration(ms) {
   return m < 1 ? "under a minute" : m === 1 ? "1 minute" : m + " minutes";
 }
 
+// What Dibs says under the session summary: the share of independent trials, then a reminder that the adult gives the praise.
+function dibsSummaryLine(rows) {
+  const n = rows.reduce((s, r) => s + r.trials, 0), ind = rows.reduce((s, r) => s + (r.independent || 0), 0);
+  return `Nice work! ${ind} of ${n} ${n === 1 ? "trial was" : "trials were"} independent today. Prompts fade on their own as the learner succeeds; the praise and rewards are yours to give.`;
+}
 function showSummary({ session, trials, targets }) {
   const rows = T.summarizeSession(session, trials, targets);
   const when = new Date(session.start);
@@ -359,6 +366,7 @@ function showSummary({ session, trials, targets }) {
       h("p", { class: "muted", id: "sum-meta", text: `${session.who}, ${session.where}  |  ${when.toLocaleDateString()}  |  ${fmtDuration((session.end || Date.now()) - session.start)}` }),
       table,
       h("p", { class: "muted", id: "sum-total", text: `${total} ${total === 1 ? "trial" : "trials"} scored` + (skipped ? `, ${skipped} skipped (not scored)` : "") + ". The session is saved." }),
+      total ? dibsTip(dibsSummaryLine(rows), "dibs-sum") : null,
       h("div", { class: "btn-row" }, h("button", { type: "button", class: "btn primary", id: "sum-done", text: "Done", onclick: done })),
     ], { sheetClass: "editor tall" });
   });
@@ -408,6 +416,7 @@ function askStage(cur, ctx, prog) {
     const next = cur.stage + 1;
     const finish = () => { o.close(); resolve(); };
     const o = openOverlay([
+      dibsTip(`${cur.name} is doing great!`, "dibs-stage"),
       h("h2", { id: "stage-title", text: `Move ${cur.name} to stage ${next}?` }),
       h("p", { class: "confirm-text", id: "stage-detail", text: proficientText(cur, prog) +
         (next === 5 ? " Stage 5 adds 14 folders on the Words menu (where words, thinking words, school and games words, reading words, and three " +

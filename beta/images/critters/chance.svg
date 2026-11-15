@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<!-- Chance: VOICE model critter (Beta 3.31). class="body" parts take the chosen body color. -->
+<g stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M68 82Q92 82 94 60Q86 72 70 72Z" class="body" fill="#5c9a4a"/>
+<path d="M76 74l3-5M82 72l3-6M88 68l3-5" fill="none" stroke-width="2.2"/>
+<ellipse cx="38" cy="91" rx="9" ry="5" class="body" fill="#5c9a4a"/><ellipse cx="62" cy="91" rx="9" ry="5" class="body" fill="#5c9a4a"/>
+<ellipse cx="50" cy="69" rx="26" ry="23" class="body" fill="#6fae5a"/>
+<ellipse cx="25" cy="70" rx="6" ry="9" class="body" fill="#5c9a4a" transform="rotate(20 25 70)"/><ellipse cx="75" cy="70" rx="6" ry="9" class="body" fill="#5c9a4a" transform="rotate(-20 75 70)"/>
+<ellipse cx="50" cy="73" rx="15" ry="16" fill="#ece5b8"/>
+<path d="M38 66h24M36 73h28M38 80h24" fill="none" stroke-width="2"/>
+<ellipse cx="50" cy="38" rx="25" ry="17" class="body" fill="#6fae5a"/>
+<rect x="29" y="37" width="42" height="17" rx="8.5" class="body" fill="#7dbd68"/>
+<path d="M33 47Q50 53 67 47" fill="none" stroke-width="2.4"/>
+<circle cx="40" cy="22" r="9" class="body" fill="#6fae5a"/><circle cx="60" cy="22" r="9" class="body" fill="#6fae5a"/>
+</g>
+<path d="M38 48.6l2 3 2-2.6M47 50.4l2 3 2-2.8M56 49.6l2 3 2-3" fill="#fff" stroke="#3d3a4f" stroke-width="1.2" stroke-linejoin="round"/>
+<circle cx="45" cy="41" r="1.5" fill="#3d3a4f"/><circle cx="55" cy="41" r="1.5" fill="#3d3a4f"/>
+<circle cx="40" cy="23" r="5.6" fill="#f2c94c" stroke="#3d3a4f" stroke-width="2"/><circle cx="40" cy="23" r="2.80" fill="#211d2b"/><circle cx="39" cy="21.8" r="1.00" fill="#fff"/><circle cx="60" cy="23" r="5.6" fill="#f2c94c" stroke="#3d3a4f" stroke-width="2"/><circle cx="60" cy="23" r="2.80" fill="#211d2b"/><circle cx="59" cy="21.8" r="1.00" fill="#fff"/></svg>

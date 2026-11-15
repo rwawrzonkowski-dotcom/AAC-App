@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<!-- Monty: VOICE model critter (Beta 3.31). class="body" parts take the chosen body color. -->
+<g stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M44 84v10M56 84v10" fill="none" stroke="#f2903f"/>
+<path d="M44 94l-4 3M44 94l4 3M56 94l-4 3M56 94l4 3" fill="none" stroke="#f2903f" stroke-width="2.4"/>
+<path d="M73 60L88 57L80 70Z" class="body" fill="#c2ad87"/>
+<ellipse cx="51" cy="68" rx="26" ry="19" class="body" fill="#d8c4a0"/>
+<ellipse cx="48" cy="73" rx="17" ry="13" fill="#fbf8f1"/>
+<path d="M58 62Q72 60 76 70Q66 76 58 72Z" class="body" fill="#c2ad87"/>
+<circle cx="47" cy="38" r="16" class="body" fill="#d8c4a0"/>
+<path d="M32 42Q38 54 52 53Q60 50 62 44Q50 48 32 42Z" fill="#fbf8f1"/>
+<path d="M33 50Q48 60 64 50L62 56Q48 64 35 56Z" fill="#2f2b33"/>
+<path d="M36 28Q46 22 57 28L56 31.5Q46 26 37 31.5Z" fill="#2f2b33"/>
+<path d="M32 38L21 40L32 44Z" fill="#f2903f"/>
+</g>
+<path d="M21 40L25 39.3L25 41.4Z" fill="#211d2b"/>
+<rect x="53" y="86" width="6" height="3" rx="1" fill="#3b82c4" stroke="#3d3a4f" stroke-width="1"/>
+<circle cx="41" cy="37" r="4.2" fill="#3d3a4f" stroke="#3d3a4f" stroke-width="2"/><circle cx="41" cy="37" r="2.10" fill="#211d2b"/><circle cx="40" cy="35.8" r="1.00" fill="#fff"/></svg>

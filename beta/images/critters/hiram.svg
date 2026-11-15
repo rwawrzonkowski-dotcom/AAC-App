@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<!-- Hiram: VOICE model critter (Beta 3.31). class="body" parts take the chosen body color. -->
+<g stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<ellipse cx="50" cy="72" rx="27" ry="21" class="body" fill="#d9a46b"/>
+<path d="M24 67Q26 53 50 53Q74 53 76 67Q78 84 66 90L34 90Q22 84 24 67Z" fill="#7a1f3d"/><path d="M26 69Q50 65 74 69" fill="none" stroke="#e8b84a" stroke-width="2.4"/><text x="50" y="85" text-anchor="middle" font-family="Arial Black, Helvetica, sans-serif" font-weight="900" font-size="15" fill="#e8b84a" stroke="#3d3a4f" stroke-width="1.2" paint-order="stroke">B</text>
+
+<ellipse cx="36" cy="91" rx="10" ry="5.5" fill="#f4ece0"/><ellipse cx="64" cy="91" rx="10" ry="5.5" fill="#f4ece0"/><path d="M27 24L18 21L23 36Z" fill="#7a1f3d"/><path d="M73 24L82 21L77 36Z" fill="#7a1f3d"/>
+<ellipse cx="50" cy="41" rx="28" ry="22" class="body" fill="#d9a46b"/>
+<path d="M50 20v12" fill="none" stroke="#f4ece0" stroke-width="7"/>
+<path d="M40 27q10-4 20 0M42 31q8-3 16 0" fill="none" stroke-width="2"/>
+<ellipse cx="50" cy="51" rx="18" ry="11" fill="#f4ece0"/>
+<path d="M36 53Q43 60 50 53Q57 60 64 53" fill="none" stroke-width="2.4"/>
+</g>
+<path d="M42 55l2-4.6 2 4.4ZM54 55l2-4.4 2 4.6Z" fill="#fff" stroke="#3d3a4f" stroke-width="1.2" stroke-linejoin="round"/>
+<ellipse cx="50" cy="45" rx="6.5" ry="4.2" fill="#2f2b33"/><ellipse cx="48" cy="43.8" rx="2" ry="1" fill="#6b6578"/>
+<circle cx="38" cy="38" r="5.4" fill="#7a4e2a" stroke="#3d3a4f" stroke-width="2"/><circle cx="38" cy="38" r="2.70" fill="#211d2b"/><circle cx="37" cy="36.8" r="1.00" fill="#fff"/><circle cx="62" cy="38" r="5.4" fill="#7a4e2a" stroke="#3d3a4f" stroke-width="2"/><circle cx="62" cy="38" r="2.70" fill="#211d2b"/><circle cx="61" cy="36.8" r="1.00" fill="#fff"/></svg>

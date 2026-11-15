@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M27 62Q27 30 50 30Q73 30 73 62Z" fill="#1f4fa6"/>
+<path d="M50 31V61M38 34Q34 46 35 61M62 34Q66 46 65 61" fill="none" stroke="#7fa3e0" stroke-width="1.6"/>
+<path d="M20 62Q50 55 80 62Q84 68 76 69Q50 64 24 69Q16 68 20 62Z" fill="#1f4fa6"/>
+<circle cx="50" cy="29.5" r="3" fill="#1f4fa6"/>
+</g></svg>

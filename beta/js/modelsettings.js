@@ -3,11 +3,12 @@
 // friendly animal (the "critter"), or both, each with its own opacity so the
 // prompt can be faded out as the child succeeds. The choices are saved on the
 // learner (profile.model); see js/critters.js for what they can be.
+import { dibsTip } from "./dibs.js";
 import { h } from "./ui.js";
 import { getCurrent, saveProfile, getPhotoUrl, setPhoto, removePhoto } from "./profiles.js";
 import { downscaleImage } from "./editor.js";
 import {
-  ANIMALS, COLORS, ACCESSORIES, SIZES, ARRIVALS, SIZE_PCT, MODEL_SPEEDS, buildCritter, critterSvg, critterTop,
+  ANIMALS, COLORS, ACCESSORIES, CRITTER_INFO, COSTUME_INFO, NATURAL, recolorable, SIZES, ARRIVALS, SIZE_PCT, MODEL_SPEEDS, buildCritter, critterSvg, critterTop,
 } from "./critters.js";
 import { usesRing } from "./modelprompt.js";
 
@@ -71,23 +72,27 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
 
   // ----- the critter's picture: the drawn animals, or the learner's own -----
   const own = !!customUrl;
+  // Beta 3.31: the Chicago critters, each with a one-line story; shown in their own colors unless a body color is picked.
   const animalThumbs = ANIMALS.map((a) => {
-    const thumb = h("span", { class: "mp-thumb" });
+    const thumb = h("span", { class: "mp-thumb" + (m.color !== NATURAL && recolorable(a) ? " recolor" : "") });
     thumb.style.setProperty("--body", m.color);
     critterSvg(a, "none").then((svg) => { thumb.innerHTML = svg; thumb.firstChild.classList.add("critter-art"); }).catch(() => {});
+    const info = CRITTER_INFO[a];
     return h("button", {
       type: "button", class: "seg animal-btn" + (m.animal === a ? " on" : ""), id: `mp-animal-${a}`, "data-value": a,
-      "aria-label": cap(a), disabled: own,
+      "aria-label": `${info.name}: ${info.story}`, disabled: own,
       onclick: () => { m.animal = a; persist(); refresh(); },
-    }, thumb, h("span", { text: cap(a) }));
+    }, thumb, h("span", { class: "animal-name", text: info.name }), h("span", { class: "animal-story", text: info.story }));
   });
 
-  const swatches = COLORS.map((c) => h("button", {
-    type: "button", class: "swatch" + (m.color === c.value ? " on" : ""), id: `mp-color-${c.name.toLowerCase()}`,
-    "data-value": c.value, "aria-label": c.name, title: c.name, disabled: own,
-    style: `background:${c.value}`,
+  const canColor = !own && recolorable(m.animal);
+  const swatches = [{ name: "Natural", value: NATURAL }, ...COLORS].map((c) => h("button", {
+    type: "button", class: "swatch" + (c.value === NATURAL ? " natural" : "") + (m.color === c.value ? " on" : ""), id: `mp-color-${c.name.toLowerCase()}`,
+    "data-value": c.value, "aria-label": c.value === NATURAL ? "Its own colors" : c.name, title: c.value === NATURAL ? "Its own colors" : c.name,
+    disabled: !canColor, style: c.value === NATURAL ? "" : `background:${c.value}`,
     onclick: () => { m.color = c.value; persist(); refresh(); },
   }));
+  const costumeLine = m.accessory !== "none" && !own ? h("p", { class: "mp-costume-line", id: "mp-costume-line", text: COSTUME_INFO[m.accessory].line }) : null;
 
   const fileIn = h("input", { type: "file", accept: "image/*", id: "mp-photo", class: "file-hidden",
     onchange: async () => {
@@ -120,13 +125,15 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
     opacitySlider("mp-ring-op", "Ring opacity", "ringOpacity", m.style !== "critter"),
     opacitySlider("mp-critter-op", "Critter opacity", "critterOpacity", m.style !== "ring"),
     h("p", { class: "muted", text: "At 0% that prompt is off. The model is still recorded." }),
+    dibsTip("Tip: when the child finds a word with the critter at full strength a few times, lower its opacity one step. Fade me out and the child does it alone!", "dibs-model-tip"),
 
     h("div", { class: "mp-critter" },
       h("h3", { text: "Critter" }),
-      h("div", { class: "field" }, h("label", { text: "Animal" }), h("div", { class: "seg-row mp-seg mp-animals" }, animalThumbs)),
-      h("div", { class: "field" }, h("label", { text: "Color" }), h("div", { class: "mp-swatches" }, swatches)),
-      h("div", { class: "field" }, h("label", { text: "Accessory" }),
-        choices("mp-acc", ACCESSORIES, m.accessory, cap, (v) => { m.accessory = v; }, own)),
+      h("div", { class: "field" }, h("label", { text: "Choose a Chicago critter" }), h("div", { class: "seg-row mp-seg mp-animals" }, animalThumbs)),
+      h("div", { class: "field" }, h("label", { text: "Color" }), h("div", { class: "mp-swatches" }, swatches),
+        recolorable(m.animal) ? null : h("p", { class: "muted", text: "Sue is a skeleton, so she keeps her bone color." })),
+      h("div", { class: "field" }, h("label", { text: "Costume" }),
+        choices("mp-acc", ACCESSORIES, m.accessory, (v) => COSTUME_INFO[v].name, (v) => { m.accessory = v; }, own), costumeLine),
       h("div", { class: "field" }, h("label", { text: "Size (compared with a button)" }),
         choices("mp-size", SIZES, m.size, sizeLabel, (v) => { m.size = v; })),
       h("div", { class: "field" }, h("label", { text: "How it arrives" }),
@@ -143,7 +150,7 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
             h("button", { type: "button", class: "btn", id: "mp-photo-remove", text: "Remove picture", disabled: !own,
               onclick: async () => { await removePhoto("critter"); refresh(); } }))),
         h("p", { class: "muted", text: "Pick something the child loves, like a favorite toy." }),
-        own ? h("p", { class: "muted", text: "The animal, color and accessory are not used while your own picture is in use." }) : null,
+        own ? h("p", { class: "muted", text: "The critter, color and costume are not used while your own picture is in use." }) : null,
         photoMsg)),
 
     h("div", { class: "mp-preview-row" },

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs><clipPath id="scarf-b"><path d="M12 44Q50 62 88 44L88 56Q50 74 12 56Z"/></clipPath><clipPath id="scarf-t"><path d="M58 54L70 92L82 88L72 52Z"/></clipPath></defs>
+<path d="M58 54L70 92L82 88L72 52Z" fill="#1f7a45"/>
+<g clip-path="url(#scarf-t)" fill="none" stroke="#f2c230" stroke-width="4"><path d="M58 66L84 58M58 76L86 68M60 86L88 78"/></g>
+<path d="M12 44Q50 62 88 44L88 56Q50 74 12 56Z" fill="#1f7a45"/>
+<g clip-path="url(#scarf-b)" fill="none" stroke="#f2c230" stroke-width="6"><path d="M28 40V75M46 40V75M64 40V75M80 40V75"/></g>
+<path d="M58 54L70 92L82 88L72 52 M12 44Q50 62 88 44L88 56Q50 74 12 56Z" fill="none" stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round"/></svg>
