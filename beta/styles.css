@@ -303,7 +303,7 @@ button { font: inherit; touch-action: manipulation; }
 #rotate-message .rotate-art { width: min(72vmin, 420px); height: auto; margin-bottom: 4vmin; overflow: visible; }
 .rotate-art .ra-device { transform-box: view-box; transform-origin: 110px 110px; animation: ra-turn 4s ease-in-out infinite; }
 .rotate-art .ra-arrow { animation: ra-arrow 4s ease-in-out infinite; }
-.rotate-art .ra-check { opacity: 0; transform-box: view-box; transform-origin: 176px 176px; animation: ra-check 4s ease-in-out infinite; }
+.rotate-art .ra-check { opacity: 0; transform-box: view-box; transform-origin: 203px 110px; animation: ra-check 4s ease-in-out infinite; }
 @keyframes ra-turn { 0%, 22% { transform: rotate(0deg); } 50%, 88% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
 @keyframes ra-arrow { 0%, 22% { opacity: 1; } 40%, 92% { opacity: 0.25; } 100% { opacity: 1; } }
 @keyframes ra-check { 0%, 52% { opacity: 0; transform: scale(0.4); } 60%, 86% { opacity: 1; transform: scale(1); } 94%, 100% { opacity: 0; transform: scale(0.9); } }

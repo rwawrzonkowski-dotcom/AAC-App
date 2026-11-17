@@ -24,16 +24,17 @@
     <!-- Beta 3.35: the learner's own model critter (Dibs unless chosen otherwise) tips over onto its side, then a green check
          (styles.css "Portrait" section). With Reduce Motion it simply shows the critter sideways with the arrow. -->
     <svg class="rotate-art" viewBox="0 0 220 220" aria-hidden="true">
-      <!-- (Beta 3.37) the arc and its arrowhead fade as ONE group, so their overlap never shows as a darker seam -->
-      <g class="ra-arrow">
-        <path d="M 168 56 A 82 82 0 0 0 52 56" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
-        <path d="M 40 44 L 52 70 L 72 48 Z" fill="#ffffff"/>
+      <!-- (Beta 3.38) Two matching curved arrows, turned half a turn from each other around the circle's centre (110, 110), both
+           counter-clockwise like the turn. Each arrow is ONE shape (shaft and head together) and both fade as one group, so no seams. -->
+      <g class="ra-arrow" fill="#ffffff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">
+        <path d="M 181.2 50.2 A 93.0 93.0 0 0 0 54.0 35.7 L 48.6 28.5 L 42.6 53.4 L 65.5 50.9 L 60.0 43.7 A 83.0 83.0 0 0 1 173.6 56.6 A 5.0 5.0 0 0 0 181.2 50.2 Z"/>
+        <path d="M 38.8 169.8 A 93.0 93.0 0 0 0 166.0 184.3 L 171.4 191.5 L 177.4 166.6 L 154.5 169.1 L 160.0 176.3 A 83.0 83.0 0 0 1 46.4 163.4 A 5.0 5.0 0 0 0 38.8 169.8 Z"/>
       </g>
       <g class="ra-device">
         <circle cx="110" cy="110" r="66" fill="#ffffff" stroke="#0b2f57" stroke-width="5"/>
         <g id="rotate-critter"></g>
       </g>
-      <g class="ra-check"><circle cx="176" cy="176" r="24" fill="#16a34a" stroke="#ffffff" stroke-width="4"/><path d="M 164 177 L 173 186 L 189 167" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <g class="ra-check"><circle cx="203" cy="110" r="22" fill="#16a34a" stroke="#ffffff" stroke-width="4"/><path d="M 192 111 L 200 119 L 214 102" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>
     </svg>
     <p id="rotate-text">Turn the iPad sideways</p>
     <!-- For adults (Beta 3.35, iPad only): Chance's tip to lock the screen sideways. Small and silent. -->
