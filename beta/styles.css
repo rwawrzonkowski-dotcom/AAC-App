@@ -319,7 +319,7 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .rotate-art .line { fill: var(--line, #c60c30); }
 #rotate-message .rotate-tip { position: absolute; left: 50%; bottom: calc(3vmin + var(--safe-b)); transform: translateX(-50%); width: min(86vw, 640px);
   display: flex; gap: 2vmin; align-items: center; text-align: left; font-size: max(13px, 2.1vmin); font-weight: 600; line-height: 1.35;
-  background: rgba(11, 47, 87, 0.55); border-radius: 2vmin; padding: 1.6vmin 2.2vmin; color: #ffffff; }
+  background: rgba(11, 47, 87, 0.88); border-radius: 2vmin; padding: 1.6vmin 2.2vmin; color: #ffffff; }
 #rotate-message .rotate-tip img { width: 7vmin; height: 7vmin; min-width: 40px; min-height: 40px; flex: none; }
 #rotate-message .rotate-tip[hidden] { display: none; }
 /* The adult circle on the turn screen (same look and hold as on the board) */
@@ -331,7 +331,17 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 #adult-hold-portrait .hold-ring { position: absolute; inset: 0; }
 #adult-hold-portrait .adult-gear { width: 52%; height: 52%; pointer-events: none; }
 #adult-hold-portrait .hold-ring .ring-fg { stroke: #ffffff; }
+/* Beta 3.40: Chicago flair on the turn screen: a flag-style band (light-blue stripes, white middle, four red stars) near the top and
+   a darker-blue skyline along the bottom. Both sit behind the critter and the words and never take taps. */
+#rotate-message .rotate-art, #rotate-message #rotate-text { position: relative; z-index: 1; }
+#rotate-message #adult-hold-portrait, #rotate-message .rotate-tip { z-index: 2; }
+#rotate-message .chi-band { position: absolute; left: 0; right: 0; top: calc(var(--safe-t) + 13vmin); height: 13vmin; pointer-events: none;
+  background: linear-gradient(#41b6e6 0 22%, #ffffff 22% 78%, #41b6e6 78% 100%); }
+#rotate-message .chi-band svg { display: block; width: 100%; height: 100%; }
+#rotate-message .chi-skyline { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 22vh; pointer-events: none; }
 @media (orientation: portrait) {
+  /* (Beta 3.40) the page behind the turn screen is the same blue, so no light band shows under Safari's toolbar on a phone */
+  html, body { background: #1e6ec8; }
   #rotate-message { display: flex; }
   #app { display: none; }
 }
