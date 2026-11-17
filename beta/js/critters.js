@@ -92,16 +92,27 @@ export const DEFAULT_MODEL = {
 
 // Where each costume sits on each critter, in the critter's 100 x 100 drawing: x, y = where the costume's anchor point goes,
 // s = its size (1 = the whole 100 x 100 costume drawing), r = tilt in degrees. Costume drawings are 100 x 100 too; their anchor
-// point is (50, 62) for hats and horns (the brim) and (50, 50) for the scarf and the things held in a hand.
+// point is (50, 62) for hats and horns (the brim), (50, 50) for the scarf, the football's near end (30, 52) and the stick's grip near its top (62, 20).
+// Beta 3.39 geometry pass: hats sit above the eyes (never over them), held things are gripped by a small "hand" drawn ON TOP of them,
+// costume outlines are as thick as the critter's own, and the picture has room above the head so tall hats and horns are not cut off.
 const ANCHORS = {
-  dibs:   { hat: [50, 16, 0.6, -6],   scarf: [50, 54, 0.56, 0],  hand: [82, 72, 0.34, -20] },
-  chance: { hat: [50, 13, 0.52, -4],  scarf: [50, 56, 0.6, 0],   hand: [80, 70, 0.34, -20] },
-  ivy:    { hat: [43, 16, 0.36, -12], scarf: [42, 46, 0.3, -8],  hand: [72, 74, 0.3, -20] },
-  hiram:  { hat: [50, 21, 0.66, -5],  scarf: [50, 63, 0.6, 0],   hand: [84, 76, 0.34, -20] },
-  monty:  { hat: [47, 26, 0.48, -8],  scarf: [48, 56, 0.5, 0],   hand: [78, 74, 0.3, -20] },
-  sue:    { hat: [37, 13, 0.5, -10],  scarf: [54, 47, 0.34, 28], hand: [30, 63, 0.28, -20] },
+  dibs:   { hat: [50, 15, 0.6, -6],   scarf: [50, 54, 0.56, 0],  hand: [80, 76, 0.34, -20] },
+  chance: { hat: [50, 11, 0.52, -4],  scarf: [50, 56, 0.6, 0],   hand: [77, 74, 0.34, -20] },
+  ivy:    { hat: [48, 13, 0.32, -12], scarf: [42, 46, 0.3, -8],  hand: [76, 72, 0.3, -20] },
+  hiram:  { hat: [50, 21, 0.66, -5],  scarf: [50, 63, 0.6, 0],   hand: [80, 76, 0.34, -20] },
+  monty:  { hat: [47, 26, 0.48, -8],  scarf: [48, 56, 0.5, 0],   hand: [74, 70, 0.3, -20] },
+  sue:    { hat: [37, 10, 0.5, -10],  scarf: [54, 47, 0.34, 28], hand: [29, 63, 0.28, -20] },
 };
-const SLOT = { horns: ["hat", 62], "cap-blue": ["hat", 62], "cap-black": ["hat", 62], football: ["hand", 50], stick: ["hand", 50], scarf: ["scarf", 50] };
+// [slot, anchor x, anchor y] in each costume drawing; the stick is long, so it is drawn bigger.
+const SLOT = { horns: ["hat", 50, 62], "cap-blue": ["hat", 50, 62], "cap-black": ["hat", 50, 62], football: ["hand", 30, 52], stick: ["hand", 62, 20], scarf: ["scarf", 50, 50] };
+const SIZE = { stick: 1.45 };
+// The stick is gripped near its top and held a little higher, so its blade stays inside the picture.
+const RAISE = { stick: 18 };
+// The little hand drawn over a held thing, so the critter grips it: wing tip, paw, claw (critter colors; "body" parts recolor).
+const HAND = { dibs: ["#a1a8c0", true], chance: ["#5c9a4a", true], ivy: ["#7d6b58", true], hiram: ["#f4ece0", false], monty: ["#c2ad87", true], sue: ["#efe4cc", false] };
+// The critter drawings are 100 x 100; the picture shows a little more (room above the head for hats and horns, and at the sides).
+export const CRITTER_VIEWBOX = "-8 -16 116 116";
+const OUTLINE = 2.8;    // costume outline thickness in the critter's own units (the critters use 3)
 
 // ---------- Checking settings (used when restoring a backup) ----------
 const pick = (v, list, fallback) => (list.includes(v) ? v : fallback);
@@ -165,12 +176,20 @@ export async function critterSvg(animal, accessory) {
   animal = pick(animal, ANIMALS, DEFAULT_MODEL.animal);
   let acc = "";
   if (accessory && SLOT[accessory] && !isTrain(animal)) {
-    const [slot, y0] = SLOT[accessory];
+    const [slot, x0, y0] = SLOT[accessory];
     let [x, y, s, r] = ANCHORS[animal][slot];
-    if (accessory === "stick") { s *= 1.7; y -= 8; }        // the stick is long: bigger, held a little higher
-    acc = `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s}) translate(-50 -${y0})">${inner(await loadSvg("acc-" + accessory))}</g>`;
+    s *= SIZE[accessory] || 1;
+    y -= RAISE[accessory] || 0;
+    // Outlines: the costume is drawn smaller than its own 100 x 100, so thicken its dark outlines to match the critter's.
+    const art = inner(await loadSvg("acc-" + accessory))
+      .replace(/stroke="#3d3a4f" stroke-width="([\d.]+)"/g, (m, w) => `stroke="#3d3a4f" stroke-width="${(OUTLINE * Number(w) / 3 / s).toFixed(2)}"`);
+    acc = `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s}) translate(-${x0} -${y0})">${art}</g>`;
+    if (slot === "hand") {
+      const [fill, body] = HAND[animal];
+      acc += `<ellipse${body ? ' class="body"' : ""} cx="${x}" cy="${y}" rx="4.6" ry="4" fill="${fill}" stroke="#3d3a4f" stroke-width="2.4"/>`;
+    }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${CRITTER_VIEWBOX}" aria-hidden="true">` +
          inner(await loadSvg(animal)) + acc + `</svg>`;
 }
 
