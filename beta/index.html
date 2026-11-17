@@ -24,8 +24,11 @@
     <!-- Beta 3.35: the learner's own model critter (Dibs unless chosen otherwise) tips over onto its side, then a green check
          (styles.css "Portrait" section). With Reduce Motion it simply shows the critter sideways with the arrow. -->
     <svg class="rotate-art" viewBox="0 0 220 220" aria-hidden="true">
-      <path class="ra-arrow" d="M 168 56 A 82 82 0 0 0 52 56" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
-      <path class="ra-arrow" d="M 40 44 L 52 70 L 72 48 Z" fill="#ffffff"/>
+      <!-- (Beta 3.37) the arc and its arrowhead fade as ONE group, so their overlap never shows as a darker seam -->
+      <g class="ra-arrow">
+        <path d="M 168 56 A 82 82 0 0 0 52 56" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+        <path d="M 40 44 L 52 70 L 72 48 Z" fill="#ffffff"/>
+      </g>
       <g class="ra-device">
         <circle cx="110" cy="110" r="66" fill="#ffffff" stroke="#0b2f57" stroke-width="5"/>
         <g id="rotate-critter"></g>
