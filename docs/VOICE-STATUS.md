@@ -1,6 +1,6 @@
 # VOICE — Project Status and Reference
 
-*Last updated: Nov 11, 2026 (VOICE 3.2 stable, promoted Nov 11; beta = Beta 3.31: stage 5, second copies of its words and folders, keyboard letter + key word and word guesses, review leftovers fixed, Chicago critters, the L train critter and Dibs tips, faster folder opening (service worker exact lookup), learner's critter on the turn screen + Chance's landscape-lock tip; Beta 3.35). Read this first in any new session instead of re-reading old chats.*
+*Last updated: Nov 11, 2026 (VOICE 3.2 stable, promoted Nov 11; beta = Beta 3.31: stage 5, second copies of its words and folders, keyboard letter + key word and word guesses, review leftovers fixed, Chicago critters, the L train critter and Dibs tips, faster folder opening (service worker exact lookup), learner's critter on the turn screen + Chance's landscape-lock tip, audit fixes (hashed passcode, 30 s wait after 5 wrong tries, frame block, contrast/labels, on-demand adult code); Beta 3.36). Read this first in any new session instead of re-reading old chats.*
 
 **VOICE** = Variable Output for Individualized Communication and Expression. A free, iPad-first AAC (speech) app for nonvocal children new to AAC, built by **Richard Wawrzonkowski, M.S., LBA, BCBA**. Pilot with his clients now; public release later.
 

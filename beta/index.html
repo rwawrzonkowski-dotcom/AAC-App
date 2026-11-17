@@ -5,6 +5,7 @@
 <!-- Security (Nov 11): only VOICE's own files may run or load; photos are on-device blob: pictures; no outside connections. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob: data:; font-src 'self'; connect-src 'self' blob: data:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
+<meta name="description" content="VOICE: a free, private AAC speech board for iPad. Words never move, vocabulary grows by stages, and everything stays on the device.">
 <title>VOICE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -44,7 +45,8 @@
   <main id="app">
     <!-- Message bar: tapped words appear here. Tap the text area to speak the sentence. -->
     <header id="message-bar">
-      <div id="message-text" role="button" aria-label="Speak the whole message">
+      <span id="message-label" hidden>Speak the whole message:</span>
+      <div id="message-text" role="button" aria-labelledby="message-label message-text">
         <!-- The learner's mood (Beta 3.16, js/tonewheel.js): a small face at the left while a mood is set -->
         <span id="mood-badge" hidden></span>
         <div id="message-chips"></div>

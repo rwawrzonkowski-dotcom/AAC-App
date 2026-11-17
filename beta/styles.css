@@ -502,7 +502,7 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .setup-view-row .seg { min-height: 44px; padding: 6px 10px; }
 .setup-view small { flex-basis: 100%; text-align: center; margin: 0; }
 .panel { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #d5dde6; }
-.muted { color: #64748b; margin: 4px 0 12px; }
+.muted { color: #475569; margin: 4px 0 12px; }   /* (Beta 3.36: darker for 4.5:1 contrast on light panels) */
 .panel.notice { background: #fffbeb; border-color: #f59e0b; }
 .notice-list { margin: 0 0 8px; padding-left: 22px; line-height: 1.5; }
 .confirm-text { margin: 0 0 18px; line-height: 1.4; }

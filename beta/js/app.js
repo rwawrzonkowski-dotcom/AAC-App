@@ -23,7 +23,7 @@ import {
 } from "./profiles.js";
 import { attachHold } from "./hold.js";
 import { requestAdultAccess } from "./lock.js";
-import { openAdultMenu } from "./adult.js";
+// (Beta 3.36) adult.js, teachui.js and sceneadult.js load on demand: about 200 KB less to read at start-up. See loadLater() below.
 import { askConfirm, toast } from "./ui.js";
 import { MAX_CHAIN } from "./teaching.js";
 import { showSetup } from "./setup.js";
@@ -38,7 +38,6 @@ import { preloadCritterArt, critterSvg, cleanModel, recolorable, isTrain, lineCo
 import { LANDSCAPE_LOCK_TIP } from "./dibs.js";
 import { CHANNEL } from "./channel.js";
 import * as teach from "./session.js";
-import { runEndFlow } from "./teachui.js";
 import { loadTeaching, getTargets, isTarget, addTarget, addChainTarget, removeTarget, closeOrphanSessions } from "./teachdata.js";
 import { loadForms, formsFor, dialFor, openFormsPopover } from "./forms.js";
 import { openDial } from "./dial.js";
@@ -56,6 +55,13 @@ import { MODEL_STEP_MS as STEP_MS_BY_SPEED } from "./critters.js";
 import { initCameraButton } from "./camerabtn.js";
 import * as predictor from "./predict.js";
 import { checkOpenProblem, showNotSavingTag, watchWriteProblems } from "./datawarning.js";
+
+// Beta 3.36: VOICE never runs inside another website's page (a frame), where taps could be tricked. Servers usually block this with a
+// header, but GitHub Pages cannot send one, so the app checks for itself and stops.
+if (window.top !== window.self) {
+  document.body.textContent = "VOICE can only be used on its own page. Open it directly in Safari.";
+  throw new Error("VOICE was opened inside a frame");
+}
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
 // Model mode: how long to pause on each page while stepping back out (ring only: 600 ms;
@@ -1091,7 +1097,8 @@ let adultBusy = false;
 
 // Show the adult menu (the passcode has already been entered). `startAt` is the id of a
 // section to scroll to, used when the menu reopens after "Preview on board".
-function showAdultMenu(startAt) {
+async function showAdultMenu(startAt) {
+  const { openAdultMenu } = await import("./adult.js");
   openAdultMenu({
     board: state.board,
     startAt,
@@ -1176,6 +1183,8 @@ async function start() {
   // screen as if the iPad were new (js/datawarning.js).
   if (await checkOpenProblem()) showNotSavingTag($("message-text"));
   initRotateScreen();       // (before setup too: the turn screen can show during the very first setup)
+  // Read the adult-menu code in the background a few seconds after start-up, so the first menu open is not delayed.
+  setTimeout(() => { import("./adult.js").catch(() => {}); import("./teachui.js").catch(() => {}); }, 5000);
   if (!hasProfiles()) {
     // Very first open on this device: quick setup (or restore a backup), then start.
     const c = await showSetup({ first: true });
@@ -1198,7 +1207,7 @@ async function start() {
     modelNow, getPageId: () => state.page, getCells: () => state.cells, goTo,
     wordsButtonAvailable: () => wordsButtonShown(getCurrent()),
     onSessionChange: () => renderAll(),
-    runEndFlow: (result) => runEndFlow(result, { board: state.board, onVocabChanged: renderAll,
+    runEndFlow: async (result) => (await import("./teachui.js")).runEndFlow(result, { board: state.board, onVocabChanged: renderAll,
       onBoardSizeChanged: () => { utteranceEnds("clear"); closeDial(); state.sentence.length = 0; drawMessage(); state.page = "core"; renderAll(); } }),
     // Sentence targets (Beta 3.12):
     clearMessage: () => { stopSpeech(); utteranceEnds("clear"); state.sentence.length = 0; drawMessage(); },
