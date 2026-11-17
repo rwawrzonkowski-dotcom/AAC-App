@@ -34,7 +34,8 @@ import {
   runPrompt, sustainStep, clearCritter, stepPauseMs, usesCritter, ringBriefly, RING_MS, RING_PATH_MS, CRITTER_TOTAL_MS,
 } from "./modelprompt.js";
 import { setPreviewHook } from "./ladderui.js";
-import { preloadCritterArt } from "./critters.js";
+import { preloadCritterArt, critterSvg, cleanModel, recolorable, isTrain, lineColorOf, NATURAL } from "./critters.js";
+import { LANDSCAPE_LOCK_TIP } from "./dibs.js";
 import { CHANNEL } from "./channel.js";
 import * as teach from "./session.js";
 import { runEndFlow } from "./teachui.js";
@@ -248,6 +249,7 @@ let scanner = null;
 
 // Redraw everything that depends on page / learner / mode.
 function renderAll() {
+  paintRotateCritter();      // (Beta 3.35) keep the turn screen's critter in step with the learner
   const profile = getCurrent();
   syncAccess(profile);
   const model = modelNow();
@@ -1173,6 +1175,7 @@ async function start() {
   // Beta 3.17: the saved data could not be opened. Warn first (Try again / Continue without saving) instead of showing the setup
   // screen as if the iPad were new (js/datawarning.js).
   if (await checkOpenProblem()) showNotSavingTag($("message-text"));
+  initRotateScreen();       // (before setup too: the turn screen can show during the very first setup)
   if (!hasProfiles()) {
     // Very first open on this device: quick setup (or restore a backup), then start.
     const c = await showSetup({ first: true });
@@ -1250,7 +1253,7 @@ async function start() {
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);
   attachHold($("adult-hold-portrait"), HOLD_TO_OPEN_MS, openAdult);    // the turn-sideways screen has its own adult circle (Beta 3.24)
   initAdultHint($("adult-hold-portrait"));
-  $("rotate-text").textContent = looksLikePhone() ? "Turn the phone sideways" : "Turn the iPad sideways";
+
   initAdultHint($("adult-hold"));          // a quick tap shows "Adults: hold 3 seconds to open the menu"
   initModelEnd();                          // End modeling: two taps on a button inside the message bar (Beta 3.11)
   onBannerTap($("edit-done"), stopEditing);
@@ -1280,3 +1283,37 @@ async function start() {
 }
 
 start();
+
+// The turn-sideways screen (Beta 3.24, critter and tip Beta 3.35): "phone" or "iPad" in its words; on an iPad, Chance's tip for
+// adults to lock the screen sideways (an iPhone can only lock upright, so phones do not get it).
+function initRotateScreen() {
+  $("rotate-text").textContent = looksLikePhone() ? "Turn the phone sideways" : "Turn the iPad sideways";
+  if (!looksLikePhone()) {
+    const tip = $("rotate-tip");
+    tip.replaceChildren(Object.assign(document.createElement("img"), { src: "images/critters/chance.svg", alt: "" }),
+      Object.assign(document.createElement("span"), { textContent: "For adults: " + LANDSCAPE_LOCK_TIP }));
+    tip.hidden = false;
+  }
+  paintRotateCritter();
+  if (window.matchMedia) window.matchMedia("(orientation: portrait)").addEventListener("change", (e) => { if (e.matches) paintRotateCritter(); });
+}
+
+// The turn-sideways screen shows the current learner's model critter (Beta 3.35), in its costume and colors. Our own drawings only.
+async function paintRotateCritter() {
+  try {
+    let cur = null;
+    try { cur = getCurrent(); } catch (e) { /* no learner yet (first setup): Dibs */ }
+    const m = cleanModel(cur && cur.model);
+    const svg = await critterSvg(m.animal, m.accessory);
+    const g = document.getElementById("rotate-critter");
+    if (!g) return;
+    g.innerHTML = svg;
+    const inner = g.firstElementChild;
+    if (inner) { inner.setAttribute("x", "50"); inner.setAttribute("y", "50"); inner.setAttribute("width", "120"); inner.setAttribute("height", "120"); }
+    const art = g.closest("svg.rotate-art");
+    const recolor = m.color !== NATURAL && recolorable(m.animal);
+    art.classList.toggle("recolor", recolor);
+    art.style.setProperty("--body", recolor ? m.color : "");
+    art.style.setProperty("--line", isTrain(m.animal) ? lineColorOf(m.accessory) : "");
+  } catch (e) { /* the turn screen still shows its words and arrow */ }
+}

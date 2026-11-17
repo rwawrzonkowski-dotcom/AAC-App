@@ -23,6 +23,7 @@ import { buildModel, maxStageFor } from "./boardmodel.js";
 import { modelSection } from "./modelsettings.js";
 import { VERSION_LABEL } from "./channel.js";
 import { openAbout } from "./about.js";
+import { friendTip, LANDSCAPE_LOCK_TIP } from "./dibs.js";
 import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesHelp } from "./devicetips.js";
 import { teachingSection } from "./teachui.js";
 import { dataSection } from "./datapanel.js";
@@ -330,7 +331,8 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         "The first four rows are the same on 45 and 84; the bottom row of the 45 board moves down to the bottom row of the 84 board." }),
       h("div", { class: "seg-row size-seg" }, btn(24, "24 locations"), btn(45, "45 locations"), btn(84, "84 locations")),
       // On a phone, nudge toward the smaller board while 84 is selected
-      looksLikePhone() && cur.gridSize === 84 ? h("p", { class: "phone-size-tip", id: "size-phone-tip", text: PHONE_BOARD_TIP }) : null);
+      looksLikePhone() && cur.gridSize === 84 ? h("p", { class: "phone-size-tip", id: "size-phone-tip", text: PHONE_BOARD_TIP }) : null,
+      looksLikePhone() ? null : friendTip("chance", "Chance the alligator", LANDSCAPE_LOCK_TIP, "tip-landscape-lock"));
   }
 
   // ---------- Vocabulary stage ----------

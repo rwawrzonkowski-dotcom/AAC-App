@@ -314,6 +314,14 @@ button { font: inherit; touch-action: manipulation; }
 }
 html[data-motion="reduce"] .rotate-art .ra-device { animation: none !important; transform: rotate(-90deg); }
 html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; opacity: 0; }
+/* Beta 3.35: the critter on the turn screen takes the learner's chosen colors */
+.rotate-art.recolor .body { fill: var(--body); }
+.rotate-art .line { fill: var(--line, #c60c30); }
+#rotate-message .rotate-tip { position: absolute; left: 50%; bottom: calc(3vmin + var(--safe-b)); transform: translateX(-50%); width: min(86vw, 640px);
+  display: flex; gap: 2vmin; align-items: center; text-align: left; font-size: max(13px, 2.1vmin); font-weight: 600; line-height: 1.35;
+  background: rgba(11, 47, 87, 0.55); border-radius: 2vmin; padding: 1.6vmin 2.2vmin; color: #ffffff; }
+#rotate-message .rotate-tip img { width: 7vmin; height: 7vmin; min-width: 40px; min-height: 40px; flex: none; }
+#rotate-message .rotate-tip[hidden] { display: none; }
 /* The adult circle on the turn screen (same look and hold as on the board) */
 #adult-hold-portrait {
   position: absolute; left: calc(1.4vmin + var(--safe-x)); top: calc(1.4vmin + var(--safe-t)); width: 10vmin; height: 10vmin;
