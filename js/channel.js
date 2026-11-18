@@ -7,5 +7,8 @@
 // and nobody's saved learners change. Beta's prefix is "beta-", so beta has its own empty storage.
 // tools/make-beta.sh writes the beta version of this file; tools/promote-beta.sh never overwrites this one.
 export const CHANNEL = "stable";             // "stable" or "beta"
-export const VERSION_LABEL = "VOICE 3.3";   // shown small in the adult menu and on the setup screen
+// The app's name (Nov 17): written V.O.I.C.E., read aloud as "voice" (js/ui.js wrapName).
+export const APP_NAME = "V.O.I.C.E.";
+export const FULL_NAME = "Variable Output for Individualized Communication and Expression";
+export const VERSION_LABEL = "V.O.I.C.E. 3.4";   // shown small in the adult menu and on the setup screen
 export const STORAGE_PREFIX = "";            // "" for stable, "beta-" for beta

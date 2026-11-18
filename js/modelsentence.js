@@ -71,7 +71,7 @@ export function openModelSentence({ wordsButtonShown, onModel }) {
     review.replaceChildren(...(words.length ? words.map((w) => h("span", {
       class: "ms-word ms-" + w.status, title: w.status === "model" ? (w.viaForm ? `modeled as “${w.label}”` : "will be modeled")
         : w.status === "hidden" ? "hidden at this stage: skipped" : "not on this board: skipped",
-      text: w.viaForm && w.status === "model" ? `${w.text} → ${w.label}` : w.text })) : [h("span", { class: "muted", text: "The words VOICE can model will be shown here." })]));
+      text: w.viaForm && w.status === "model" ? `${w.text} → ${w.label}` : w.text })) : [h("span", { class: "muted", text: "The words V.O.I.C.E. can model will be shown here." })]));
   };
   input.addEventListener("input", paint);
   const go = () => { const list = words.filter((w) => w.status === "model"); if (!list.length) return; o.close(); onModel(list); };
@@ -79,7 +79,7 @@ export function openModelSentence({ wordsButtonShown, onModel }) {
   goBtn.addEventListener("click", go);
   const o = openOverlay([
     h("h2", { text: "Model a sentence" }),
-    h("p", { class: "muted", text: "Type what you said. VOICE models each word the child can see, in order, along its real path on the board. " +
+    h("p", { class: "muted", text: "Type what you said. V.O.I.C.E. models each word the child can see, in order, along its real path on the board. " +
       "Green words will be modeled; gray words are skipped (hidden at this stage or not on the board)." }),
     input, review,
     h("div", { class: "btn-row" }, h("button", { type: "button", class: "btn", id: "ms-cancel", text: "Cancel", onclick: () => o.close() }), goBtn),

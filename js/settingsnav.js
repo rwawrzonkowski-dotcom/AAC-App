@@ -61,7 +61,7 @@ export const PAGES = [
     keywords: ["scenes", "scene", "photo", "camera", "my things", "remember this", "match strictness", "object recognition", "download recognition"] },
   { id: "backup", title: "Backup and data safety", group: "device", icon: "💾", color: "#475569", views: VIEWS, oldIds: ["sec-backup"],
     keywords: ["backup", "restore", "save", "home screen", "data safety", "protected", "move to another ipad", "files"] },
-  { id: "about", title: "About VOICE", group: "device", icon: "ⓘ", color: "#6b7280", views: VIEWS, oldIds: ["sec-about"],
+  { id: "about", title: "About V.O.I.C.E.", group: "device", icon: "ⓘ", color: "#6b7280", views: VIEWS, oldIds: ["sec-about"],
     keywords: ["about", "version", "credits", "privacy", "where is the adult menu", "help", "contact"] },
 ];
 

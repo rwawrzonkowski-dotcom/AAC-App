@@ -24,7 +24,7 @@ import {
 import { attachHold } from "./hold.js";
 import { requestAdultAccess } from "./lock.js";
 // (Beta 3.36) adult.js, teachui.js and sceneadult.js load on demand: about 200 KB less to read at start-up. See loadLater() below.
-import { askConfirm, toast } from "./ui.js";
+import { askConfirm, toast, watchName } from "./ui.js";
 import { MAX_CHAIN } from "./teaching.js";
 import { showSetup } from "./setup.js";
 import { requestPersistence, maybeShowNotice } from "./keepdata.js";
@@ -59,8 +59,8 @@ import { checkOpenProblem, showNotSavingTag, watchWriteProblems } from "./datawa
 // Beta 3.36: VOICE never runs inside another website's page (a frame), where taps could be tricked. Servers usually block this with a
 // header, but GitHub Pages cannot send one, so the app checks for itself and stops.
 if (window.top !== window.self) {
-  document.body.textContent = "VOICE can only be used on its own page. Open it directly in Safari.";
-  throw new Error("VOICE was opened inside a frame");
+  document.body.textContent = "V.O.I.C.E. can only be used on its own page. Open it directly in Safari.";
+  throw new Error("V.O.I.C.E. was opened inside a frame");
 }
 
 const HOLD_TO_OPEN_MS = 3000;   // adult corner target
@@ -1182,6 +1182,7 @@ async function start() {
   // Beta 3.17: the saved data could not be opened. Warn first (Try again / Continue without saving) instead of showing the setup
   // screen as if the iPad were new (js/datawarning.js).
   if (await checkOpenProblem()) showNotSavingTag($("message-text"));
+  watchName();              // the name V.O.I.C.E. is read aloud as "voice" (js/ui.js)
   initRotateScreen();       // (before setup too: the turn screen can show during the very first setup)
   // Read the adult-menu code in the background a few seconds after start-up, so the first menu open is not delayed.
   setTimeout(() => { import("./adult.js").catch(() => {}); import("./teachui.js").catch(() => {}); }, 5000);

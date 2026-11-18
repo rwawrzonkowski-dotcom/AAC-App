@@ -228,7 +228,7 @@ export function createVoicePicker({ voice, persist, state }) {
     }
 
     status.textContent = loaded ? "" : (tries >= MAX_TRIES
-      ? "No voices were found on this device. Open Get more voices below, then fully close and reopen VOICE."
+      ? "No voices were found on this device. Open Get more voices below, then fully close and reopen V.O.I.C.E."
       : "Loading the voices on this device…");
 
     list.replaceChildren();

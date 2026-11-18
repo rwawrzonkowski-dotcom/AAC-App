@@ -22,8 +22,8 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
 | Website plan (pages, audiences, look, hosting, launch checklist) | "VOICE Website Plan": https://claude.ai/artifact/7Z3uiNn1zhikg4rAroqzvB |
 | Approved visual direction (website artboard) | "VOICE style mockups" canvas: https://claude.ai/artifact/GrohBofPwBiz27ThAHrfJ5 |
 | App planning doc | "Portable AAC App — Planning Doc": https://claude.ai/artifact/3NVVeKFmhMpPofYq5kqFee |
-| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ (VOICE 3.3) |
-| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ (VOICE Beta 3.41) |
+| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ (V.O.I.C.E. 3.4) |
+| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ (V.O.I.C.E. Beta 3.43) |
 | Where the site will live | A new GitHub repository, `rwawrzonkowski-dotcom.github.io`, published free on GitHub Pages and kept separate from the app |
 
 ## Decisions already made
@@ -55,6 +55,7 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
 - The app's About screen has five link spots that the site should eventually fill: **Website, Resources, Trainings, Reserve a training, Contact.**
 
 **Branding**
+- **Name (decided Nov 17):** written **V.O.I.C.E.** (with the final period), short for Variable Output for Individualized Communication and Expression. The app's first setup screen says "Find your V.O.I.C.E.!". Screen readers should hear "voice": in HTML, wrap the name as <span role="text" aria-label="VOICE">V.O.I.C.E.</span>.
 - The VOICE icon is an indigo speech bubble with a "V" and five colored dots.
 - At public release, the App Store name will need to be something like "VOICE AAC", because the name "Voice" alone is taken.
 
@@ -84,7 +85,7 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
   - All 318 Dolch sight words are within 3 taps.
 - **Stage 5:** 14 folders, including Where words, Thinking words, Joining words, School talk, Games and screens, extra reading words, and three "My interests" folders that adults fill.
 - **Same word in more than one place:** a word can appear wherever a child or adult would look for it (TouchChat-style), without moving anything already placed.
-- **Pictures:** realistic photos for objects, and simple symbols where a photo can't show the word (Mulberry Symbols, OpenMoji). Adults can take their own photos.
+- **Pictures:** open symbols (Mulberry Symbols, OpenMoji) on every button, with large print where no good symbol exists. Adults can add their own photos to any button.
 
 **Speaking and typing**
 - **Speech:** instant, with separate word and sentence speeds, an optional pause between words, and child or adult voices.

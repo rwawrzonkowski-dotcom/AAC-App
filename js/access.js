@@ -50,7 +50,7 @@ export const PRESETS = [
     set: { theme: "cvi", font: "atkinson", labelSize: "l", spacing: "wide", hidden: "invisible", motion: "reduce" } },
   { id: "motor", title: "Motor", text: "The widest gaps between buttons, choose when the finger lifts (slide to the right word, then let go), and repeated taps are ignored for 1 second.",
     set: { spacing: "wider", hidden: "invisible" }, touch: { ignoreOn: true, ignoreSec: 1, liftOff: true } },
-  { id: "hearing", title: "Hearing partner", text: "A Show button puts the message full screen for the listener; the message bar glows while VOICE talks, and words light up as they are said.",
+  { id: "hearing", title: "Hearing partner", text: "A Show button puts the message full screen for the listener; the message bar glows while V.O.I.C.E. talks, and words light up as they are said.",
     set: { listener: true, glow: true, highlight: true } },
   { id: "sensory", title: "Sensory-sensitive", text: "Soft, low-glare colours, no movement or flashing, hidden spots not drawn.",
     set: { theme: "dim", motion: "reduce", hidden: "invisible", glow: false } },

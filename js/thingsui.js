@@ -13,8 +13,8 @@ export function thingsSection(ctx) {
   const cur = getCurrent();
   const box = h("div", { class: "my-things", id: "my-things" },
     h("h3", { text: "My things" }),
-    h("p", { class: "muted", text: "VOICE learns from your photos on this iPad only. When you draw a box around something in a scene photo and leave “Remember this” ticked, " +
-      "VOICE keeps a small picture of it and a fingerprint of how it looks. In later photos it suggests “Remembered: …” with a box. Nothing is sent anywhere." }));
+    h("p", { class: "muted", text: "V.O.I.C.E. learns from your photos on this iPad only. When you draw a box around something in a scene photo and leave “Remember this” ticked, " +
+      "V.O.I.C.E. keeps a small picture of it and a fingerprint of how it looks. In later photos it suggests “Remembered: …” with a box. Nothing is sent anywhere." }));
 
   // Match strictness.
   const strictBtn = (v) => h("button", { type: "button", class: "seg" + (cur.matchStrictness === v ? " on" : ""), id: `strict-${v}`, text: things.STRICTNESS_LABEL[v],
@@ -22,7 +22,7 @@ export function thingsSection(ctx) {
   box.append(h("div", { class: "field touch-setting", id: "setting-match-strictness" },
     h("label", { text: "Match strictness" }),
     h("div", { class: "seg-row" }, things.STRICTNESS.map(strictBtn)),
-    h("p", { class: "muted", text: "How sure VOICE must be before it says it recognizes one of your things. Low suggests more, and is wrong more often; High suggests fewer, " +
+    h("p", { class: "muted", text: "How sure V.O.I.C.E. must be before it says it recognizes one of your things. Low suggests more, and is wrong more often; High suggests fewer, " +
       "and is wrong less often. You always see the suggestion and can untick it before anything is saved." })));
 
   const list = h("div", { class: "thing-list", id: "thing-list" }, h("p", { class: "muted", text: "Loading…" }));
@@ -54,7 +54,7 @@ export function thingsSection(ctx) {
           } }),
           h("button", { type: "button", class: "btn thing-again", text: "Teach again", onclick: () => teachAgain(t, paint) }),
           h("button", { type: "button", class: "btn danger thing-delete", text: "Delete", onclick: async () => {
-            if (!(await askConfirm(`Make VOICE forget "${t.label}"? Scenes that already use it keep their buttons.`, "Forget it"))) return;
+            if (!(await askConfirm(`Make V.O.I.C.E. forget "${t.label}"? Scenes that already use it keep their buttons.`, "Forget it"))) return;
             await things.deleteThing(cur.id, t.id); paint();
           } })));
     }));

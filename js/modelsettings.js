@@ -125,7 +125,7 @@ export function modelSection({ refresh, closeMenu, onPreviewPrompt }) {
 
     h("div", { class: "field" }, h("label", { text: "Model a sentence: speed" }),
       choices("mp-speed", MODEL_SPEEDS, m.speed || "medium", cap, (v) => { m.speed = v; })),
-    h("p", { class: "muted", text: "In Model mode, “Model a sentence” lets you type what you said; VOICE then models each word on the board along its real path, says it, and adds it to the message bar. Medium is about one step per second. (In Model mode it is the “⌨ Type” button next to End modeling.)" }),
+    h("p", { class: "muted", text: "In Model mode, “Model a sentence” lets you type what you said; V.O.I.C.E. then models each word on the board along its real path, says it, and adds it to the message bar. Medium is about one step per second. (In Model mode it is the “⌨ Type” button next to End modeling.)" }),
 
     opacitySlider("mp-ring-op", "Ring opacity", "ringOpacity", m.style !== "critter"),
     opacitySlider("mp-critter-op", "Critter opacity", "critterOpacity", m.style !== "ring"),

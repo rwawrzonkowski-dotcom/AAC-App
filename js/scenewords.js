@@ -230,5 +230,5 @@ export function placeTag(wordId, opts) {
     title: w.where ? "On the board inside " + w.where + ". Tapping it in the strip makes that folder button glow." : "On the main board. Tapping it in the strip makes its button glow." };
   if (w.status === "hidden") return { text: w.where ? "Hidden for now · " + w.where : "Hidden for now", cls: "hidden",
     title: "This word has a permanent spot on the board but is not revealed at this stage yet. It still works in the scene strip; nothing glows." };
-  return { text: "Not on this board", cls: "only", title: "This VOICE word is not on this board size. It works in the scene strip only." };
+  return { text: "Not on this board", cls: "only", title: "This V.O.I.C.E. word is not on this board size. It works in the scene strip only." };
 }

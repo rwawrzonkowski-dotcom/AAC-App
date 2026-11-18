@@ -17,5 +17,5 @@ export function friendTip(critter, alt, text, id) {
 
 // Chance's tip (Beta 3.35). On an iPad, Rotation Lock keeps the screen the way it is held, so it must be turned on while the iPad is
 // sideways. (An iPhone can only lock upright, so phones do not get this tip.)
-export const LANDSCAPE_LOCK_TIP = "Chance here! Keep VOICE sideways: hold the iPad sideways, swipe down from the top-right corner " +
+export const LANDSCAPE_LOCK_TIP = "Chance here! Keep V.O.I.C.E. sideways: hold the iPad sideways, swipe down from the top-right corner " +
   "to open Control Center, then tap the lock with the circle arrow. The screen stays sideways until you tap it again.";

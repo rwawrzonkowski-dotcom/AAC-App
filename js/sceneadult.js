@@ -421,7 +421,7 @@ async function openEditor(init) {
           r.remembered ? h("small", { class: "se-remembered", text: "Remembered: " + r.label }) : null,
           label,
           r.remembered ? null : tagEl(r.wordId)),           // where the word lives, under its name (Beta 3.6)
-        h("label", { class: "se-remlabel", title: "VOICE learns this thing from your photo, on this iPad only" }, rem,
+        h("label", { class: "se-remlabel", title: "V.O.I.C.E. learns this thing from your photo, on this iPad only" }, rem,
           h("span", { text: r.remembered ? "Teach again" : "Remember this" })));
     }) : [h("p", { class: "muted", text: "Nothing yet. Use “Add a thing by hand”." })]));
   }
@@ -500,7 +500,7 @@ async function openEditor(init) {
     if (!wanted.length) return "";
     try {
       const det = await loadRecognizer();
-      if (!det || !det.features) return "VOICE could not remember the things (recognition is not available).";
+      if (!det || !det.features) return "V.O.I.C.E. could not remember the things (recognition is not available).";
       await things.loadMean();
       const mine = await things.listThings(cur.id);
       let n = 0;
@@ -510,7 +510,7 @@ async function openEditor(init) {
         let t = mine.find(same);
         if (t) things.addViews(t, views);
         else {
-          if (mine.length >= things.MAX_THINGS) return "VOICE is already remembering " + things.MAX_THINGS + " things. Delete one in Scenes > My things first.";
+          if (mine.length >= things.MAX_THINGS) return "V.O.I.C.E. is already remembering " + things.MAX_THINGS + " things. Delete one in Scenes > My things first.";
           t = { id: things.newThingId(), learnerId: cur.id, label: r.label, spoken: r.spoken || r.label, wordId: r.wordId || null, created: Date.now(), photos: 1,
             picture: await canvasBlob(cropCanvas(canvas, r.box), 0.85), views };
           mine.push(t);
@@ -521,7 +521,7 @@ async function openEditor(init) {
       return "";
     } catch (e) {
       console.warn("Could not remember the things:", e);
-      return "The scene was saved, but VOICE could not remember the things (" + (e && e.message ? e.message : "unknown problem") + ").";
+      return "The scene was saved, but V.O.I.C.E. could not remember the things (" + (e && e.message ? e.message : "unknown problem") + ").";
     }
   }
   // Save the scene. `quickSave`: the "Use now" button (auto name, ends by showing the scene on the strip, nothing else changes).

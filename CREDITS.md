@@ -30,7 +30,7 @@ No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
 - **Drawn for this project** - simple pictures made for this app (for example
   the name tag on the About me page), shared under the same CC BY-SA 4.0 license.
 
-- **VOICE app icon** (`tools/icon/voice-icon.svg`) - an original speech bubble with a "V" and five
+- **V.O.I.C.E. app icon** (`tools/icon/voice-icon.svg`) - an original speech bubble with a "V" and five
   colored dots, drawn for this project, CC BY-SA 4.0.
 
 ## Model critters
@@ -40,7 +40,7 @@ goose, Hiram the bulldog, Monty the piping plover, Sue the T. rex skeleton and t
 L train), their costumes (bull horns, blue cap, black cap, football, hockey stick,
 myrtle and gold scarf) and the L line colors in `images/critters/` were drawn for
 this project as original shapes. They nod to Chicago animals and places but are
-not based on any existing character, mascot, logo or brand, and VOICE is not
+not based on any existing character, mascot, logo or brand, and V.O.I.C.E. is not
 affiliated with any team, school, museum or the CTA. Shared under CC BY-SA 4.0.
 
 ## Fonts (Accessibility)

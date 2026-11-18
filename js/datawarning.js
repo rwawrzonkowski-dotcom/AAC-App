@@ -17,12 +17,12 @@ export async function checkOpenProblem() {
   await new Promise((resolve) => {
     const screen = h("div", { class: "setup-screen data-warning", id: "data-warning", role: "alertdialog", "aria-labelledby": "dw-title" },
       h("div", { class: "setup-card dw-card" },
-        h("h1", { id: "dw-title", text: "VOICE could not open its saved data" }),
-        h("p", { class: "dw-text", text: "Your learners and their words are most likely still on this iPad. VOICE just could not reach them this time." }),
+        h("h1", { id: "dw-title", text: "V.O.I.C.E. could not open its saved data" }),
+        h("p", { class: "dw-text", text: "Your learners and their words are most likely still on this iPad. V.O.I.C.E. just could not reach them this time." }),
         h("ol", { class: "keep-steps dw-steps" },
           h("li", { text: "Tap Try again." }),
-          h("li", { text: "If this screen comes back: close VOICE fully (swipe up from the bottom, then swipe VOICE away) and open it again." }),
-          h("li", { text: "Still here? Restart the iPad, then open VOICE." })),
+          h("li", { text: "If this screen comes back: close V.O.I.C.E. fully (swipe up from the bottom, then swipe V.O.I.C.E. away) and open it again." }),
+          h("li", { text: "Still here? Restart the iPad, then open V.O.I.C.E." })),
         h("div", { class: "btn-row dw-buttons" },
           h("button", { type: "button", class: "btn primary dw-retry", id: "dw-retry", text: "Try again", onclick: () => location.reload() })),
         h("p", { class: "dw-continue-note muted", text: "Need to talk right now? You can continue, but nothing done now will be saved, and the setup screen will appear. Do not set up the learner again or restore a backup this way." }),
@@ -45,12 +45,12 @@ export function watchWriteProblems({ busy, tagHost }) {
     if (busy && busy()) { setTimeout(show, 3000); return; }
     showNotSavingTag(tagHost);
     const o = openOverlay([
-      h("h2", { id: "dw-write-title", text: "VOICE could not save" }),
-      h("p", { text: "A change could not be saved on this iPad. The most common reason is that the iPad is out of storage space. Recent changes (words, settings, teaching or everyday data) may be lost when VOICE closes." }),
+      h("h2", { id: "dw-write-title", text: "V.O.I.C.E. could not save" }),
+      h("p", { text: "A change could not be saved on this iPad. The most common reason is that the iPad is out of storage space. Recent changes (words, settings, teaching or everyday data) may be lost when V.O.I.C.E. closes." }),
       h("ol", { class: "keep-steps" },
         h("li", { text: "Free up space: Settings > General > iPad Storage (delete unused apps, videos or photos)." }),
         h("li", { text: "Then save a backup: Adult menu > Backup > “Save backup of all learners”." }),
-        h("li", { text: "Close VOICE fully and open it again." })),
+        h("li", { text: "Close V.O.I.C.E. fully and open it again." })),
       h("div", { class: "btn-row" },
         h("button", { type: "button", class: "btn primary", id: "dw-write-ok", text: "Got it", onclick: () => o.close() })),
     ], { sheetClass: "small keep-notice dw-write" });
