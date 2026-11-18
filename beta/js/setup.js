@@ -66,10 +66,12 @@ export function showSetup({ first = false } = {}) {
         onclick: () => { setView(v); paintView(); } })));
     if (first) paintView();
 
-    const screen = h("div", { class: "setup-screen", id: "setup-screen", role: "dialog", "aria-label": "Set up V.O.I.C.E." },
+    const screen = h("div", { class: "setup-screen", id: "setup-screen", role: "dialog", "aria-label": first ? "Set up V.O.I.C.E." : "Add a learner" },
       h("div", { class: "setup-card" },
-        h("h1", { text: "Set up V.O.I.C.E." }),
-        h("p", { class: "setup-fullname", id: "setup-fullname", text: FULL_NAME }),
+        // First setup (Nov 17): "Find your V.O.I.C.E.!" with the full name and a plain line; adding a learner later: "Add a learner".
+        h("h1", { text: first ? "Find your V.O.I.C.E.!" : "Add a learner" }),
+        first ? h("p", { class: "setup-fullname", id: "setup-fullname", text: FULL_NAME }) : null,
+        first ? h("p", { class: "setup-lead", id: "setup-lead", text: "Let's set up your first learner." }) : null,
         h("div", { class: "setup-name-row" },
           h("label", { for: "setup-name", text: first ? "Learner name (optional)" : "Learner name" }), nameIn),
         first ? h("div", { class: "setup-view", id: "setup-view" },

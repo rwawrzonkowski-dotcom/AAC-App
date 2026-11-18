@@ -735,7 +735,8 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .setup-card { width: min(900px, calc(96vw - 2 * var(--safe-x))); text-align: center;
   margin: auto; }   /* auto margins centre it when it fits and let it scroll from the top when it does not (phones) */
 .setup-card h1 { margin: 0 0 0.4vmin; font-size: 4.4vmin; }
-.setup-fullname { margin: 0 0 1.4vmin; font-weight: 600; color: #475569; font-size: 2.1vmin; }
+.setup-fullname { margin: 0; font-weight: 600; color: #475569; font-size: 2.1vmin; }
+.setup-lead { margin: 0.4vmin 0 1.4vmin; font-size: 2.3vmin; }
 .setup-name-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 2vmin; font-size: 2.2vmin; }
 .setup-name-row .text-input { width: 30vmin; }
 .setup-choices { display: flex; flex-direction: column; gap: 1.6vmin; }

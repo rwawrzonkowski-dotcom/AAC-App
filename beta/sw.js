@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v61";
+const CACHE_VERSION = "beta-aac-v62";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -1553,7 +1553,7 @@ const FILES = [
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=a5ac8a084f",
   "js/camerabtn.js?v=65ff571ae0",
-  "js/channel.js?v=84e1e5f7be",
+  "js/channel.js?v=37f79f4b5a",
   "js/critters.js?v=de320f311e",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=35e21da07c",
@@ -1593,7 +1593,7 @@ const FILES = [
   "js/scenewords.js?v=14792a490e",
   "js/session.js?v=0d52886c6c",
   "js/settingsnav.js?v=ffca421565",
-  "js/setup.js?v=d2c63cf5ef",
+  "js/setup.js?v=f1e1f2e996",
   "js/speech.js?v=3ac88eccc4",
   "js/stagerule.js?v=1e7175f7ef",
   "js/storage.js?v=2e81ec1d38",
@@ -1608,7 +1608,7 @@ const FILES = [
   "js/ui.js?v=a82b20d3ba",
   "js/voicepicker.js?v=c326609a5b",
   "manifest.webmanifest?v=2beb7416f6",
-  "styles.css?v=9b379d73bd",
+  "styles.css?v=4e30b7dc61",
 ];
 // END FILE LIST
 
