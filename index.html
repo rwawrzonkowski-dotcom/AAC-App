@@ -5,6 +5,7 @@
 <!-- Security (Nov 11): only VOICE's own files may run or load; photos are on-device blob: pictures; no outside connections. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob: data:; font-src 'self'; connect-src 'self' blob: data:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
+<meta name="description" content="VOICE: a free, private AAC speech board for iPad. Words never move, vocabulary grows by stages, and everything stays on the device.">
 <title>VOICE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,24 +21,36 @@
 <body>
   <!-- Shown only when the iPad is held upright (see styles.css) -->
   <div id="rotate-message" role="alert">
-    <!-- An iPad with a little VOICE board turns from upright to sideways, then a green check (styles.css "Portrait" section).
-         With Reduce Motion it simply shows the device sideways with the arrow. -->
+    <!-- Beta 3.35: the learner's own model critter (Dibs unless chosen otherwise) tips over onto its side, then a green check
+         (styles.css "Portrait" section). With Reduce Motion it simply shows the critter sideways with the arrow. -->
+    <!-- Beta 3.40: Chicago flair (decoration only, silent, behind everything): a band like the city flag (two light-blue stripes and
+         four red six-pointed stars) and a skyline along the bottom with two famous towers. -->
+    <div class="chi-band" aria-hidden="true">
+      <svg viewBox="0 0 400 60" preserveAspectRatio="xMidYMid meet"><g fill="#e4002b" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"><polygon points="125.0,17.0 128.1,24.6 136.3,23.5 131.2,30.0 136.3,36.5 128.1,35.4 125.0,43.0 121.9,35.4 113.7,36.5 118.8,30.0 113.7,23.5 121.9,24.6"/><polygon points="175.0,17.0 178.1,24.6 186.3,23.5 181.2,30.0 186.3,36.5 178.1,35.4 175.0,43.0 171.9,35.4 163.7,36.5 168.8,30.0 163.7,23.5 171.9,24.6"/><polygon points="225.0,17.0 228.1,24.6 236.3,23.5 231.2,30.0 236.3,36.5 228.1,35.4 225.0,43.0 221.9,35.4 213.7,36.5 218.8,30.0 213.7,23.5 221.9,24.6"/><polygon points="275.0,17.0 278.1,24.6 286.3,23.5 281.2,30.0 286.3,36.5 278.1,35.4 275.0,43.0 271.9,35.4 263.7,36.5 268.8,30.0 263.7,23.5 271.9,24.6"/></g></svg>
+    </div>
+    <svg class="chi-skyline" viewBox="0 0 800 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <g fill="#175aa3"><path d="M0 120V92H22V80H40V96H58V70H74V88H92V62H110V84H128V74H146V90H160V56H178V78H196V66H214V86H232V60H250V80H268V50H290V72H300V120Z"/><path d="M308 120V44H314V30H320V18H340V30H346V44H352V120Z"/><path d="M352 120V76H370V60H388V82H404V52H420V70H436V120Z"/><path d="M444 120L452 34H476L484 120Z"/><path d="M484 120V68H502V84H520V56H540V76H556V64H574V90H592V58H612V80H628V70H646V88H664V60H682V82H700V74H718V92H736V66H754V84H772V78H800V120Z"/></g>
+      <path d="M325 18V2M335 18V4 M458 34V12M470 34V14" stroke="#175aa3" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M447 110L481 70M481 110L447 70M450 74L478 44M478 74L450 44" stroke="#2a74c4" stroke-width="1.6" fill="none"/>
+      <g fill="#ffe08a" opacity="0.8"><rect x="64" y="96" width="4" height="5"/><rect x="186" y="84" width="4" height="5"/><rect x="326" y="60" width="4" height="5"/><rect x="334" y="86" width="4" height="5"/><rect x="410" y="80" width="4" height="5"/><rect x="530" y="92" width="4" height="5"/><rect x="602" y="74" width="4" height="5"/><rect x="690" y="96" width="4" height="5"/></g>
+    </svg>
     <svg class="rotate-art" viewBox="0 0 220 220" aria-hidden="true">
-      <path class="ra-arrow" d="M 168 56 A 82 82 0 0 0 52 56" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
-      <path class="ra-arrow" d="M 40 44 L 52 70 L 72 48 Z" fill="#ffffff"/>
-      <g class="ra-device">
-        <rect x="62" y="40" width="96" height="140" rx="16" fill="#0b2f57" stroke="#ffffff" stroke-width="5"/>
-        <rect x="72" y="52" width="76" height="116" rx="6" fill="#f1f5f9"/>
-        <g class="ra-tiles">
-          <rect x="76" y="56" width="21" height="23" rx="3" fill="#fff3a8"/><rect x="99.5" y="56" width="21" height="23" rx="3" fill="#bfe8b8"/><rect x="123" y="56" width="21" height="23" rx="3" fill="#bcd9f5"/>
-          <rect x="76" y="83" width="21" height="23" rx="3" fill="#bfe8b8"/><rect x="99.5" y="83" width="21" height="23" rx="3" fill="#f8c4d8"/><rect x="123" y="83" width="21" height="23" rx="3" fill="#d9c6f0"/>
-          <rect x="76" y="110" width="21" height="23" rx="3" fill="#bcd9f5"/><rect x="99.5" y="110" width="21" height="23" rx="3" fill="#bfe8b8"/><rect x="123" y="110" width="21" height="23" rx="3" fill="#fcd6a6"/>
-          <rect x="76" y="137" width="21" height="23" rx="3" fill="#f8c4d8"/><rect x="99.5" y="137" width="21" height="23" rx="3" fill="#fcd6a6"/><rect x="123" y="137" width="21" height="23" rx="3" fill="#fff3a8"/>
-        </g>
+      <defs><clipPath id="rotate-clip"><circle cx="110" cy="110" r="63.5"/></clipPath></defs>
+      <!-- (Beta 3.38) Two matching curved arrows, turned half a turn from each other around the circle's centre (110, 110), both
+           counter-clockwise like the turn. Each arrow is ONE shape (shaft and head together) and both fade as one group, so no seams. -->
+      <g class="ra-arrow" fill="#ffffff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">
+        <path d="M 181.2 50.2 A 93.0 93.0 0 0 0 54.0 35.7 L 48.6 28.5 L 42.6 53.4 L 65.5 50.9 L 60.0 43.7 A 83.0 83.0 0 0 1 173.6 56.6 A 5.0 5.0 0 0 0 181.2 50.2 Z"/>
+        <path d="M 38.8 169.8 A 93.0 93.0 0 0 0 166.0 184.3 L 171.4 191.5 L 177.4 166.6 L 154.5 169.1 L 160.0 176.3 A 83.0 83.0 0 0 1 46.4 163.4 A 5.0 5.0 0 0 0 38.8 169.8 Z"/>
       </g>
-      <g class="ra-check"><circle cx="176" cy="176" r="24" fill="#16a34a" stroke="#ffffff" stroke-width="4"/><path d="M 164 177 L 173 186 L 189 167" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <g class="ra-device">
+        <circle cx="110" cy="110" r="66" fill="#ffffff" stroke="#0b2f57" stroke-width="5"/>
+        <g id="rotate-critter" clip-path="url(#rotate-clip)"></g>
+      </g>
+      <g class="ra-check"><circle cx="203" cy="110" r="22" fill="#16a34a" stroke="#ffffff" stroke-width="4"/><path d="M 192 111 L 200 119 L 214 102" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>
     </svg>
     <p id="rotate-text">Turn the iPad sideways</p>
+    <!-- For adults (Beta 3.35, iPad only): Chance's tip to lock the screen sideways. Small and silent. -->
+    <p id="rotate-tip" class="rotate-tip" hidden></p>
     <!-- Adults can still open the menu while the device is upright (Beta 3.24): same 3-second hold and passcode. -->
     <button id="adult-hold-portrait" type="button" aria-label="Adult menu (press and hold 3 seconds)">
       <svg class="adult-gear" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(45 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(90 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(135 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(180 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(225 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(270 12 12)"/><rect x="10.4" y="1.6" width="3.2" height="4.6" rx="0.9" transform="rotate(315 12 12)"/></g><circle cx="12" cy="12" r="5.2" fill="none" stroke="currentColor" stroke-width="3.4"/></svg>
@@ -48,7 +61,8 @@
   <main id="app">
     <!-- Message bar: tapped words appear here. Tap the text area to speak the sentence. -->
     <header id="message-bar">
-      <div id="message-text" role="button" aria-label="Speak the whole message">
+      <span id="message-label" hidden>Speak the whole message:</span>
+      <div id="message-text" role="button" aria-labelledby="message-label message-text">
         <!-- The learner's mood (Beta 3.16, js/tonewheel.js): a small face at the left while a mood is set -->
         <span id="mood-badge" hidden></span>
         <div id="message-chips"></div>

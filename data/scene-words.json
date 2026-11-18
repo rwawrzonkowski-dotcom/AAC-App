@@ -167,33 +167,19 @@
   "wine glass": {
    "label": "glass"
   },
-  "bowl": {
-   "label": "bowl"
-  },
-  "spoon": {
-   "label": "spoon"
-  },
-  "fork": {
-   "label": "fork"
-  },
+  "bowl": {"id": "bowl"},
+  "spoon": {"id": "spoon"},
+  "fork": {"id": "fork"},
   "knife": {
    "label": "knife"
   },
-  "refrigerator": {
-   "label": "refrigerator"
-  },
-  "oven": {
-   "label": "oven"
-  },
-  "microwave": {
-   "label": "microwave"
-  },
+  "refrigerator": {"id": "fridge"},
+  "oven": {"id": "oven"},
+  "microwave": {"id": "microwave"},
   "vase": {
    "label": "vase"
   },
-  "bench": {
-   "label": "bench"
-  },
+  "bench": {"id": "bench"},
   "kite": {
    "label": "kite"
   },

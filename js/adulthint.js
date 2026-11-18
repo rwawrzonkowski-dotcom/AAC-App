@@ -7,6 +7,7 @@
 // Nothing here changes the board: the pointer is a layer on top that goes away with "Got it".
 import { h, toast } from "./ui.js";
 import * as store from "./storage.js";
+import { DIBS_SRC } from "./dibs.js";
 
 const QUICK_TAP_MS = 700;
 const seenKey = (learnerId) => "adultHintSeen." + learnerId;
@@ -39,7 +40,8 @@ export function showCoach(onDone) {
   ring.style.cssText = `left:${r.left - pad}px; top:${r.top - pad}px; width:${r.width + 2 * pad}px; height:${r.height + 2 * pad}px;`;
   const close = () => { layer.remove(); if (onDone) onDone(); };
   const bubble = h("div", { class: "coach-bubble", role: "dialog", "aria-label": "Where the adult menu is" },
-    h("h3", { text: "This is the adult menu" }),
+    h("div", { class: "dibs-head" }, h("img", { src: DIBS_SRC, alt: "Dibs the pigeon" }),
+      h("h3", { text: "Hi, I'm Dibs! This is the adult menu" })),
     h("p", { text: "Hold this circle for 3 seconds to open it: learners, editing, teaching, scenes, reports, voice and backup." }),
     h("p", { class: "muted", text: "A quick tap only shows a reminder, and the menu asks for your 4-digit passcode, so a child can't open it by accident." }),
     h("div", { class: "btn-row" }, h("button", { class: "btn primary", type: "button", text: "Got it", onclick: close })));

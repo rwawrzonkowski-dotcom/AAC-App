@@ -303,7 +303,7 @@ button { font: inherit; touch-action: manipulation; }
 #rotate-message .rotate-art { width: min(72vmin, 420px); height: auto; margin-bottom: 4vmin; overflow: visible; }
 .rotate-art .ra-device { transform-box: view-box; transform-origin: 110px 110px; animation: ra-turn 4s ease-in-out infinite; }
 .rotate-art .ra-arrow { animation: ra-arrow 4s ease-in-out infinite; }
-.rotate-art .ra-check { opacity: 0; transform-box: view-box; transform-origin: 176px 176px; animation: ra-check 4s ease-in-out infinite; }
+.rotate-art .ra-check { opacity: 0; transform-box: view-box; transform-origin: 203px 110px; animation: ra-check 4s ease-in-out infinite; }
 @keyframes ra-turn { 0%, 22% { transform: rotate(0deg); } 50%, 88% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
 @keyframes ra-arrow { 0%, 22% { opacity: 1; } 40%, 92% { opacity: 0.25; } 100% { opacity: 1; } }
 @keyframes ra-check { 0%, 52% { opacity: 0; transform: scale(0.4); } 60%, 86% { opacity: 1; transform: scale(1); } 94%, 100% { opacity: 0; transform: scale(0.9); } }
@@ -314,6 +314,14 @@ button { font: inherit; touch-action: manipulation; }
 }
 html[data-motion="reduce"] .rotate-art .ra-device { animation: none !important; transform: rotate(-90deg); }
 html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; opacity: 0; }
+/* Beta 3.35: the critter on the turn screen takes the learner's chosen colors */
+.rotate-art.recolor .body { fill: var(--body); }
+.rotate-art .line { fill: var(--line, #c60c30); }
+#rotate-message .rotate-tip { position: absolute; left: 50%; bottom: calc(3vmin + var(--safe-b)); transform: translateX(-50%); width: min(86vw, 640px);
+  display: flex; gap: 2vmin; align-items: center; text-align: left; font-size: max(13px, 2.1vmin); font-weight: 600; line-height: 1.35;
+  background: rgba(11, 47, 87, 0.88); border-radius: 2vmin; padding: 1.6vmin 2.2vmin; color: #ffffff; }
+#rotate-message .rotate-tip img { width: 7vmin; height: 7vmin; min-width: 40px; min-height: 40px; flex: none; }
+#rotate-message .rotate-tip[hidden] { display: none; }
 /* The adult circle on the turn screen (same look and hold as on the board) */
 #adult-hold-portrait {
   position: absolute; left: calc(1.4vmin + var(--safe-x)); top: calc(1.4vmin + var(--safe-t)); width: 10vmin; height: 10vmin;
@@ -323,7 +331,17 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 #adult-hold-portrait .hold-ring { position: absolute; inset: 0; }
 #adult-hold-portrait .adult-gear { width: 52%; height: 52%; pointer-events: none; }
 #adult-hold-portrait .hold-ring .ring-fg { stroke: #ffffff; }
+/* Beta 3.40: Chicago flair on the turn screen: a flag-style band (light-blue stripes, white middle, four red stars) near the top and
+   a darker-blue skyline along the bottom. Both sit behind the critter and the words and never take taps. */
+#rotate-message .rotate-art, #rotate-message #rotate-text { position: relative; z-index: 1; }
+#rotate-message #adult-hold-portrait, #rotate-message .rotate-tip { z-index: 2; }
+#rotate-message .chi-band { position: absolute; left: 0; right: 0; top: calc(var(--safe-t) + 13vmin); height: 13vmin; pointer-events: none;
+  background: linear-gradient(#41b6e6 0 22%, #ffffff 22% 78%, #41b6e6 78% 100%); }
+#rotate-message .chi-band svg { display: block; width: 100%; height: 100%; }
+#rotate-message .chi-skyline { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 22vh; pointer-events: none; }
 @media (orientation: portrait) {
+  /* (Beta 3.40) the page behind the turn screen is the same blue, so no light band shows under Safari's toolbar on a phone */
+  html, body { background: #1e6ec8; }
   #rotate-message { display: flex; }
   #app { display: none; }
 }
@@ -399,7 +417,17 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .critter * { pointer-events: none; }
 .critter-art, .critter-art svg { display: block; width: 100%; height: 100%; }
 /* The animal's main body color (the "body" parts of each drawing) comes from --body. */
-.critter-art .body, .critter-art.body { fill: var(--body, #f5a04a); }
+.critter-art.recolor .body { fill: var(--body); }
+.critter-art .line, .mp-thumb .line { fill: var(--line, #c60c30); }
+/* The L line buttons carry their line color as a band along the bottom (Beta 3.32). */
+.seg[data-value="line-red"] { box-shadow: inset 0 -0.9vmin 0 #c60c30; }
+.seg[data-value="line-blue"] { box-shadow: inset 0 -0.9vmin 0 #00a1de; }
+.seg[data-value="line-brown"] { box-shadow: inset 0 -0.9vmin 0 #62361b; }
+.seg[data-value="line-green"] { box-shadow: inset 0 -0.9vmin 0 #009b3a; }
+.seg[data-value="line-orange"] { box-shadow: inset 0 -0.9vmin 0 #f9461c; }
+.seg[data-value="line-purple"] { box-shadow: inset 0 -0.9vmin 0 #522398; }
+.seg[data-value="line-pink"] { box-shadow: inset 0 -0.9vmin 0 #e27ea6; }
+.seg[data-value="line-yellow"] { box-shadow: inset 0 -0.9vmin 0 #f9e300; }
 .critter-photo {
   display: block; width: 100%; height: 100%; object-fit: cover;
   border-radius: 22%; border: 0.5vmin solid #fff; box-shadow: 0 0.6vmin 1.6vmin rgba(0, 0, 0, 0.35);
@@ -484,7 +512,7 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .setup-view-row .seg { min-height: 44px; padding: 6px 10px; }
 .setup-view small { flex-basis: 100%; text-align: center; margin: 0; }
 .panel { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #d5dde6; }
-.muted { color: #64748b; margin: 4px 0 12px; }
+.muted { color: #475569; margin: 4px 0 12px; }   /* (Beta 3.36: darker for 4.5:1 contrast on light panels) */
 .panel.notice { background: #fffbeb; border-color: #f59e0b; }
 .notice-list { margin: 0 0 8px; padding-left: 22px; line-height: 1.5; }
 .confirm-text { margin: 0 0 18px; line-height: 1.4; }
@@ -581,10 +609,22 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .mp-seg .seg { min-width: 120px; }
 .mp-slider { grid-template-columns: 150px 1fr 60px; }
 .mp-slider.off { opacity: 0.4; }
-.mp-animals .animal-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 96px; padding: 8px 6px; }
+.mp-seg.mp-animals { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+.mp-animals .animal-btn { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; min-width: 0; padding: 10px 8px; text-align: center; }
+.mp-animals .animal-name { font-weight: 800; }
+.mp-animals .animal-story { font-size: 0.78em; font-weight: 400; line-height: 1.25; color: #475569; }
+.mp-animals .animal-btn.on .animal-story { color: inherit; }
+.swatch.natural { background: conic-gradient(#a2a9c0 0 25%, #6fae5a 0 50%, #d9a46b 0 75%, #d8c4a0 0); }
+.mp-costume-line { margin: 8px 0 0; font-weight: 700; color: #3b2f9e; }
+/* Dibs the pigeon gives adults tips (Beta 3.31): only on adult screens and coaching steps, never on the child's board. */
+.dibs-tip { display: flex; gap: 1.2vmin; align-items: flex-start; margin: 1vmin 0; }
+.dibs-tip img { width: 7vmin; height: 7vmin; min-width: 44px; min-height: 44px; flex: none; }
+.dibs-tip .dibs-said { position: relative; background: #eef3ff; border: 2px solid #c9d6f5; border-radius: 1.4vmin; padding: 1vmin 1.4vmin; margin: 0; color: #1e1b4b; line-height: 1.4; }
+.coach-bubble .dibs-head { display: flex; gap: 1.2vmin; align-items: center; }
+.coach-bubble .dibs-head img { width: 8vmin; height: 8vmin; min-width: 48px; min-height: 48px; }
 .mp-thumb { display: block; width: 56px; height: 56px; }
 .mp-thumb svg { display: block; width: 100%; height: 100%; }
-.mp-thumb .body { fill: var(--body, #f5a04a); }
+.mp-thumb.recolor .body { fill: var(--body); }
 .seg[disabled], .swatch[disabled] { opacity: 0.4; cursor: default; }
 .mp-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
 .swatch { width: 52px; height: 52px; border-radius: 50%; border: 3px solid #94a3b8; cursor: pointer; padding: 0; }
@@ -674,6 +714,11 @@ html[data-motion="reduce"] .rotate-art .ra-check { animation: none !important; o
 .kb-switch { background: #ddd6fe; font-size: min(5.2vmin, 7dvh); }
 .kb-head .kb-key { flex: 0 0 auto; padding: 0 3.5vmin; font-size: min(3.8vmin, 5.4dvh); min-height: 0; }
 .kb-close { background: #e5e7eb; }
+/* Word guesses (Beta 3.28): three fixed boxes in the keyboard's top band, where the title is when they are off. The keys below never move. */
+.kb-predict { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2vmin; }
+.kb-head .kb-slot { padding: 0 1vmin; background: #fef9c3; border-color: #ca8a04; font-size: min(4.2vmin, 5.6dvh); font-weight: 800;
+  text-transform: none; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.kb-head .kb-slot.empty { background: #f8fafc; border-style: dashed; border-color: #cbd5e1; }
 .kb-pad .kb-done { font-size: min(6vmin, 8dvh); }
 
 /* ---------- Passcode: stay unlocked ---------- */

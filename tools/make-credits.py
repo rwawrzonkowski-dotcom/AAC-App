@@ -54,10 +54,13 @@ No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
 
 ## Model critters
 
-The five animals (puppy, kitten, bunny, frog, owl) and the three accessories
-(hat, bow, glasses) in `images/critters/` were drawn for this project as
-original shapes. They are not based on any existing character, mascot or
-brand. Shared under CC BY-SA 4.0.
+The seven Chicago critters (Dibs the pigeon, Chance the alligator, Ivy the
+goose, Hiram the bulldog, Monty the piping plover, Sue the T. rex skeleton and the
+L train), their costumes (bull horns, blue cap, black cap, football, hockey stick,
+myrtle and gold scarf) and the L line colors in `images/critters/` were drawn for
+this project as original shapes. They nod to Chicago animals and places but are
+not based on any existing character, mascot, logo or brand, and VOICE is not
+affiliated with any team, school, museum or the CTA. Shared under CC BY-SA 4.0.
 
 ## Fonts (Accessibility)
 

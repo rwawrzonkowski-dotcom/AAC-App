@@ -22,8 +22,8 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
 | Website plan (pages, audiences, look, hosting, launch checklist) | "VOICE Website Plan": https://claude.ai/artifact/7Z3uiNn1zhikg4rAroqzvB |
 | Approved visual direction (website artboard) | "VOICE style mockups" canvas: https://claude.ai/artifact/GrohBofPwBiz27ThAHrfJ5 |
 | App planning doc | "Portable AAC App — Planning Doc": https://claude.ai/artifact/3NVVeKFmhMpPofYq5kqFee |
-| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ (VOICE 3.2) |
-| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ (VOICE Beta 3.28) |
+| Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ (VOICE 3.3) |
+| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ (VOICE Beta 3.41) |
 | Where the site will live | A new GitHub repository, `rwawrzonkowski-dotcom.github.io`, published free on GitHub Pages and kept separate from the app |
 
 ## Decisions already made

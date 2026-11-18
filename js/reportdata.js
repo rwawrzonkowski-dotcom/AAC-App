@@ -185,7 +185,7 @@ function targetModel(target, inScope, per, allSessions, allTrials, range) {
     startPhase: series.length ? series[0].status : target.status,
     segments: segmentsOf(series, lines),
     sessionCount: series.length, trialCount: trialsTotal, pctAll: trialsTotal ? (indepTotal / trialsTotal) * 100 : null,
-    last3: series.slice(-3).map((p) => Math.round(p.pct)),
+    last3: series.slice(-3).map((p) => Math.floor(p.pct + 1e-9)),
     stepText: stepNow(target), masteryPct: target.mastery.pct,
     mastery: masteryProgress(target, allSessions.filter((s) => s.start < range.to), allTrials),
     trailing: lines.some((l) => l.x > series.length + 0.25),
@@ -195,7 +195,9 @@ function targetModel(target, inScope, per, allSessions, allTrials, range) {
 
 // The vertical "phase change" lines of one target's graph. A line sits BETWEEN two sessions (x = 3.5 is between sessions 3 and 4):
 //   - every change of status (Baseline / Teaching / Mastered / Maintenance), at the first session that started after the change;
-//   - every change of prompt ladder or step size, seen in the ladder id saved with the trials (plus the changes the adult logged).
+//   - every change of prompt ladder or step size, seen in the ladder id saved with the trials (plus the changes the adult logged);
+//   - (Beta 3.30) for a sentence target, every word added to the chain ("2 of 3 words") and every change of chaining method
+//     ("Method: Backward chaining"), so the dip that usually follows is not read as regression.
 // A change before the first session shown is not a line (the first phase is named at the left edge); one after the last session is a
 // line at the right edge.
 function phaseLines(target, series, range) {
@@ -220,6 +222,13 @@ function phaseLines(target, series, range) {
     const k = before(c.time);
     if (k > 0 && !(lines.get(k + 0.5) || { kinds: [] }).kinds.includes("ladder")) add(k, "Ladder changed", "ladder");
   }
+  for (const c of target.history || []) {
+    if (c.time >= range.to || !/next word added|chaining method/i.test(c.reason || "")) continue;
+    const m = /^([^:]+): (?:all (\d+)|(\d+) of (\d+)) words/.exec(c.to || "");
+    if (!m) continue;
+    const k = before(c.time);
+    if (k > 0) add(k, /method/i.test(c.reason) ? "Method: " + m[1] : m[2] ? `All ${m[2]} words` : `${m[3]} of ${m[4]} words`, "chain");
+  }
   return [...lines.values()].sort((a, b) => a.x - b.x);
 }
 // The runs of sessions that are joined by a line (a run ends at each phase line).
@@ -240,7 +249,7 @@ export function masteryProgress(target, sessions, trials) {
   const rule = target.mastery;
   const check = T.masteryCheck(target, sessions, trials);
   const used = check.sessions;
-  const good = used.filter((s) => s.trials >= rule.minTrials && s.pct >= rule.pct).length;
+  const good = used.filter((s) => s.trials >= rule.minTrials && s.exact >= rule.pct).length;
   const whos = new Set(used.map((s) => s.who).filter(Boolean)), wheres = new Set(used.map((s) => s.where).filter(Boolean));
   const people = Math.max(whos.size, wheres.size);
   return { met: check.met, goodSessions: good, needSessions: rule.sessions, people, needPeople: rule.differentTags, usedSessions: used.length,

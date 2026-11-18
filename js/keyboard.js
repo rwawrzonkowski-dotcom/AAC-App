@@ -32,6 +32,17 @@ export const LETTER_NAMES = {
   u: "you", v: "vee", w: "double you", x: "ex", y: "why", z: "zee", "'": "apostrophe",
 };
 
+// What the "Letter sounds" choice says for each key (Beta 3.29): the letter and a key word that starts with its usual sound
+// ("bee, ball"). Temporary: iPad voices cannot say a sound on its own (Beta 3.28's "rrr" / "ks" spellings were read letter
+// by letter), so this stays until recorded letter sounds are added. Short vowels; hard c and g; x is the sound at the end of "box".
+export const LETTER_KEYWORDS = {
+  a: "apple", b: "ball", c: "cat", d: "dog", e: "egg", f: "fish", g: "goat", h: "hat", i: "igloo", j: "jam",
+  k: "kite", l: "lamp", m: "moon", n: "nest", o: "octopus", p: "pig", q: "queen", r: "red", s: "sun", t: "top",
+  u: "up", v: "van", w: "web", x: "box", y: "yes", z: "zoo",
+};
+export const LETTER_SOUNDS = Object.fromEntries(Object.keys(LETTER_NAMES).map((k) =>
+  [k, LETTER_KEYWORDS[k] ? LETTER_NAMES[k] + ", " + LETTER_KEYWORDS[k] : LETTER_NAMES[k]]));
+
 // Keyboard rows. The grid has 20 columns so the rows can be staggered like a real keyboard.
 // (The apostrophe key, for "don't" and "I'm", sits in the bottom row next to Space: see buildLetters.)
 const LETTER_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
@@ -50,6 +61,9 @@ function key(k, label, cls, span, col, extra = {}) {
 // opts:
 //   host                the element the overlay is added to (#app)
 //   speakLetters()      true if the current learner wants each letter spoken
+//   letterMode()        "names" or "sounds" (Beta 3.28)
+//   predictOn()         true if the three word-guess slots are on (Beta 3.28; letters keyboard only)
+//   predict(draft)      up to three words for the slots
 //   allowLetters()      false if the learner's keyboard setting is Never (the number pad then has no ABC key)
 //   onDraft(text, kind) the draft changed ("" = nothing typed). kind is "letters" or "number".
 //   onCommit(info)      a chip is finalized: { label, spoken, kind: "letters"|"number", speak: bool }
@@ -68,6 +82,20 @@ export function createTyping(opts) {
   function setDraft(text) {
     draft = text;
     opts.onDraft(draft, mode === "number" ? "number" : "letters");
+    fillSlots();
+  }
+
+  // The three word-guess slots: always three, always in the same places; an empty slot is blank and does nothing.
+  const slotsShown = () => mode === "letters" && !!(opts.predictOn && opts.predictOn());
+  function fillSlots() {
+    if (!overlay || !slotsShown()) return;
+    const words = draft ? (opts.predict(draft) || []) : [];
+    overlay.querySelectorAll(".kb-slot").forEach((b, i) => {
+      const w = words[i] || "";
+      b.textContent = w; b.dataset.word = w;
+      b.classList.toggle("empty", !w);
+      b.setAttribute("aria-label", w ? "Say " + w : "No guess");
+    });
   }
 
   // Finalize the draft into a chip. Returns true if there was something to finalize.
@@ -126,16 +154,24 @@ export function createTyping(opts) {
     const head = document.createElement("div");
     head.className = "kb-head";
     head.append(key("close", "✕  Close", "kb-close", 1, 1));
-    const title = document.createElement("span");
-    title.className = "kb-title";
-    title.textContent = mode === "number" ? "Numbers" : "Type a word";
-    head.append(title);
+    if (slotsShown()) {
+      const row = document.createElement("div");
+      row.className = "kb-predict";
+      for (let i = 0; i < 3; i++) row.append(key("slot" + i, "", "kb-slot empty", 1, 1));
+      head.append(row);
+    } else {
+      const title = document.createElement("span");
+      title.className = "kb-title";
+      title.textContent = mode === "number" ? "Numbers" : "Type a word";
+      head.append(title);
+    }
     if (mode === "number" && opts.allowLetters()) head.append(key("abc", "ABC", "kb-switch kb-abc", 1, 1, { aria: "Keyboard" }));
     head.querySelectorAll(".kb-key").forEach((b) => (b.style.gridColumn = "auto"));
 
     const body = mode === "number" ? buildNumbers() : buildLetters();
     overlay.className = "typing-" + mode;
     overlay.replaceChildren(head, body);
+    fillSlots();
   }
 
   // ---- a key press ----
@@ -151,6 +187,11 @@ export function createTyping(opts) {
     };
 
     if (k === "close") { close(); return; }
+    if (k.startsWith("slot")) {                                       // a word guess: it becomes the chip and is spoken
+      const w = el.dataset.word;
+      if (!w) return;
+      setDraft(w); commit(); return;
+    }
     if (k === "done") { commit(); close(); return; }
     if (k === "back") { if (draft) setDraft(draft.slice(0, -1)); return; }
     if (k === "space") { commit(); return; }
@@ -164,7 +205,10 @@ export function createTyping(opts) {
     }
     if (draft.length >= MAX_LETTERS) { refuse(); return; }
     setDraft(draft + k);
-    if (opts.speakLetters() && LETTER_NAMES[k]) opts.onLetter(LETTER_NAMES[k]);
+    if (opts.speakLetters()) {
+      const say = (opts.letterMode && opts.letterMode() === "sounds" ? LETTER_SOUNDS : LETTER_NAMES)[k];
+      if (say) opts.onLetter(say);
+    }
   }
 
   function switchTo(newMode) {
@@ -207,5 +251,5 @@ export function createTyping(opts) {
   // Throw away what is being typed (the top-bar Clear button), leaving the overlay open.
   function clearDraft() { if (overlay && draft) setDraft(""); }
 
-  return { open, close, clearDraft, isOpen, mode: () => mode, draft: () => draft };
+  return { open, close, clearDraft, isOpen, mode: () => mode, draft: () => draft, refreshSlots: fillSlots };
 }

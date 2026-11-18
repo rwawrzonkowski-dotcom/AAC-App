@@ -472,7 +472,7 @@ const KEYID_RE = /^\d{13}-[A-Za-z0-9]{1,12}$/;
 const txt = (v, max) => (typeof v === "string" ? v.slice(0, max) : "");
 const nat = (v) => (typeof v === "number" && isFinite(v) && v >= 0 ? Math.floor(v) : 0);
 const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
-const stageOf = (v) => Math.min(4, Math.max(1, Math.round(v) || 1));
+const stageOf = (v) => Math.min(5, Math.max(1, Math.round(v) || 1));
 
 /** Keep only the known fields of a stored/backed-up word event; null if it is not usable. */
 export function cleanEvent(raw) {

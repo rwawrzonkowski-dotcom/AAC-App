@@ -123,7 +123,7 @@ export function relocateAdultWords(board, cells, pages) {
     // Cells a built-in word (or the Back button) now owns on this page.
     const owned = (pid) => {
       const pg = model.pages[pid];
-      const set = new Set(pg.items.map((x) => x.row + "," + x.col));
+      const set = new Set(pg.items.filter((x) => !x.late).map((x) => x.row + "," + x.col));   // late buttons give way (boardmodel.js)
       if (pg.at) set.add(pg.at.row + "," + pg.at.col);
       return set;
     };

@@ -9,7 +9,7 @@
 // "armed" for 5 seconds: the real (invisible) photo control is laid exactly over the button, the button turns green and reads "Tap", and the next
 // tap lands on that control, which Safari always allows.
 import { h, toast } from "./ui.js";
-import { startFromPhoto } from "./sceneadult.js";
+// (Beta 3.36) sceneadult.js loads when a photo is taken, not at start-up.
 
 export const HOLD_MS = 1000;
 export const ARMED_MS = 5000;
@@ -28,7 +28,7 @@ export function initCameraButton({ button, blocked }) {
       const f = el.files && el.files[0];
       disarm();
       if (!f) return;
-      await startFromPhoto(f, { quick: true });
+      await (await import("./sceneadult.js")).startFromPhoto(f, { quick: true });
     });
     // The tap on the armed control: let the browser open the camera, then put the button back shortly after.
     el.addEventListener("click", () => setTimeout(disarm, 400));

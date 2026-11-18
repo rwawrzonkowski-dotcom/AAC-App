@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<!-- Ivy: VOICE model critter (Beta 3.31). class="body" parts take the chosen body color. -->
+<g stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M74 62L93 56L85 73Z" fill="#4a4038"/>
+<path d="M44 86v8M58 86v8" fill="none" stroke="#4a4550"/>
+<path d="M44 94l-5 3M44 94l5 3M58 94l-5 3M58 94l5 3" fill="none" stroke="#4a4550" stroke-width="2.6"/>
+<ellipse cx="54" cy="70" rx="28" ry="19" class="body" fill="#9a8670"/>
+<ellipse cx="40" cy="72" rx="14" ry="14" fill="#efe6d6"/>
+<path d="M52 62Q74 57 82 70Q68 81 52 75Z" class="body" fill="#7d6b58"/>
+<path d="M60 66q8 1 14 5M58 71q8 1 13 3" fill="none" stroke-width="2"/>
+<path d="M36 62Q31 42 37 26L49 25Q44 42 49 62Z" fill="#2f2b33"/>
+<ellipse cx="43" cy="22" rx="12" ry="10" fill="#2f2b33"/>
+<path d="M32 21L21 24L32 28Z" fill="#55505c"/>
+</g>
+<path d="M39 25Q42 34 51 29Q50 22 45 21Z" fill="#fff" stroke="#3d3a4f" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="38" cy="18" r="3.6" fill="#fff" stroke="#3d3a4f" stroke-width="1.2"/><circle cx="37.6" cy="18" r="2" fill="#211d2b"/><circle cx="37" cy="17.2" r=".8" fill="#fff"/></svg>

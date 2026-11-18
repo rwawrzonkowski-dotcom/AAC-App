@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<!-- Sue: VOICE model critter (Beta 3.31). class="body" parts take the chosen body color. -->
+
+<path d="M64 62Q82 58 95 74" fill="none" stroke="#3d3a4f" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M64 62Q82 58 95 74" fill="none" stroke="#efe4cc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M72 59.5l1.5 5M79 60l1 5.5M86 63l-.5 5.5M91 67l-1.5 5" fill="none" stroke="#3d3a4f" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M46 66L41 80L44 90" fill="none" stroke="#3d3a4f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M46 66L41 80L44 90" fill="none" stroke="#efe4cc" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M58 66L62 80L58 90" fill="none" stroke="#3d3a4f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M58 66L62 80L58 90" fill="none" stroke="#efe4cc" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M37 91h12M53 91h12" fill="none" stroke="#3d3a4f" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 91h12M53 91h12" fill="none" stroke="#efe4cc" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M50 38Q54 44 56 50" fill="none" stroke="#3d3a4f" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 38Q54 44 56 50" fill="none" stroke="#efe4cc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M38 52Q50 44 64 54Q64 68 52 72Q38 70 38 52Z" fill="#fbf6ea" stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M42 54Q50 50 60 56M41 59Q50 56 61 61M42 64Q50 62 59 66" fill="none" stroke="#3d3a4f" stroke-width="2" stroke-linecap="round"/>
+<path d="M40 58L32 62L28 60M32 62L29 65" fill="none" stroke="#3d3a4f" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 58L32 62L28 60M32 62L29 65" fill="none" stroke="#efe4cc" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<g stroke="#3d3a4f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M14 30Q15 13 36 11Q56 10 60 24Q61 36 52 40L22 41Q13 38 14 30Z" fill="#efe4cc"/>
+<path d="M21 41Q36 50 51 41L50 46Q36 54 23 46Z" fill="#efe4cc"/>
+</g>
+<path d="M22 41l2.5 3 2.5-3 2.5 3 2.5-3 2.5 3 2.5-3 2.5 3 2.5-3 2.5 3 2.5-3" fill="#fff" stroke="#3d3a4f" stroke-width="1.4" stroke-linejoin="round"/>
+<ellipse cx="21" cy="25" rx="3" ry="2" fill="#3d3a4f"/>
+<ellipse cx="52" cy="31" rx="3.4" ry="5" fill="#3d3a4f"/>
+<circle cx="40" cy="23" r="8.6" fill="#3d3a4f"/>
+<circle cx="40" cy="23" r="5.6" fill="#f2903f" stroke="#3d3a4f" stroke-width="2"/><circle cx="40" cy="23" r="2.80" fill="#211d2b"/><circle cx="39" cy="21.8" r="1.00" fill="#fff"/>
+</svg>

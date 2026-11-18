@@ -87,7 +87,7 @@ export function teachingChart(tm, { plotH = 170, shapes = null } = {}) {
   const H = top + plotH + 66;
   const y = (pct) => top + plotH * (1 - pct / 100);
   const whoSet = shapes || whoShapes([...new Set(tm.series.map((p) => p.who))]);
-  const label = `Percent independent per session for ${tm.label}: ` + tm.series.map((p) => `session ${p.n} ${Math.round(p.pct)} percent`).join(", ") +
+  const label = `Percent independent per session for ${tm.label}: ` + tm.series.map((p) => `session ${p.n} ${Math.floor(p.pct + 1e-9)} percent`).join(", ") +
     `. Mastery line at ${tm.masteryPct} percent.`;
   const o = [svgOpen(W, H, label)];
   o.push(text(14, top + plotH / 2, "% independent", { anchor: "middle", fill: COLOR.ink2, extra: `transform="rotate(-90 14 ${top + plotH / 2})"` }));
@@ -125,7 +125,7 @@ export function teachingChart(tm, { plotH = 170, shapes = null } = {}) {
     const shape = whoSet.get(p.who) || "circle";
     o.push(`<g class="pt" transform="translate(${r2(x(p.n))} ${r2(y(p.pct))})" data-session="${p.n}" data-sid="${esc(p.sessionId)}" data-date="${p.date}" data-pct="${p.pct.toFixed(2)}" ` +
       `data-help="${p.help.toFixed(3)}" data-trials="${p.trials}" data-who="${esc(p.who)}" data-where="${esc(p.where)}" data-shape="${shape}" tabindex="0">` +
-      `<title>${esc(`Session ${p.n}, ${niceMD(p.date)}${p.who ? " · " + p.who : ""}${p.where ? ", " + p.where : ""}: ${Math.round(p.pct)}% independent (${p.independent} of ${p.trials} trials)`)}</title>` +
+      `<title>${esc(`Session ${p.n}, ${niceMD(p.date)}${p.who ? " · " + p.who : ""}${p.where ? ", " + p.where : ""}: ${Math.floor(p.pct + 1e-9)}% independent (${p.independent} of ${p.trials} trials)`)}</title>` +
       `<circle r="14" fill="transparent"/>${markerShape(shape, COLOR.s1)}</g>`);
   }
   // x axis: session number, date, where

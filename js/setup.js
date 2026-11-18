@@ -1,8 +1,8 @@
 // Quick setup screen: a large, simple, adult-facing full-screen card (not part of the board).
 // Shown on the very first open on a device (no learners yet) and when an adult taps
 // "Add learner" in the adult menu. Three big choices:
-//   Full board, 84 buttons   -> gridSize 84, stage 4 (every word)
-//   Full board, 45 buttons   -> gridSize 45, stage 4
+//   Full board, 84 buttons   -> gridSize 84, stage 5 (every word; stage 5 since Beta 3.26)
+//   Full board, 45 buttons   -> gridSize 45, stage 5
 //   New AAC learner          -> gridSize 45, stage 1 (6 words; reveal more as the learner grows)
 //   Big buttons, 24          -> gridSize 24, stage 1 (Beta 3.25: its own large-button board for early learners; 6 words)
 // Words and keyboard buttons stay on Auto (so they show from stage 3).
@@ -15,9 +15,9 @@ import { VERSION_LABEL } from "./channel.js";
 import { getView, setView } from "./settingsnav.js";
 
 export const SETUP_CHOICES = [
-  { id: "full84", title: "Full board — 84 buttons", gridSize: 84, stage: 4,
+  { id: "full84", title: "Full board — 84 buttons", gridSize: 84, stage: 5,
     text: "Every word is shown on the larger board. Good for testing or an experienced user." },
-  { id: "full45", title: "Full board — 45 buttons", gridSize: 45, stage: 4,
+  { id: "full45", title: "Full board — 45 buttons", gridSize: 45, stage: 5,
     text: "Every word is shown on the standard board." },
   { id: "new", title: "New AAC learner", gridSize: 45, stage: 1,
     text: "Starts with 6 words. Reveal more as the learner grows." },

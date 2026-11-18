@@ -8416,5 +8416,533 @@
   "source": "Mulberry",
   "originalName": "itch",
   "license": "CC BY-SA 4.0"
+ },
+ "above": {
+  "file": "images/symbols/above.svg",
+  "source": "Mulberry",
+  "originalName": "above",
+  "license": "CC BY-SA 4.0"
+ },
+ "below": {
+  "file": "images/symbols/below.svg",
+  "source": "Mulberry",
+  "originalName": "below",
+  "license": "CC BY-SA 4.0"
+ },
+ "behind": {
+  "file": "images/symbols/behind.svg",
+  "source": "Mulberry",
+  "originalName": "behind",
+  "license": "CC BY-SA 4.0"
+ },
+ "between": {
+  "file": "images/symbols/between.svg",
+  "source": "Mulberry",
+  "originalName": "between",
+  "license": "CC BY-SA 4.0"
+ },
+ "beside": {
+  "file": "images/symbols/beside.svg",
+  "source": "Mulberry",
+  "originalName": "beside_next_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "near": {
+  "file": "images/symbols/near.svg",
+  "source": "Mulberry",
+  "originalName": "near",
+  "license": "CC BY-SA 4.0"
+ },
+ "inside": {
+  "file": "images/symbols/inside.svg",
+  "source": "Mulberry",
+  "originalName": "inside_room",
+  "license": "CC BY-SA 4.0"
+ },
+ "through": {
+  "file": "images/symbols/through.svg",
+  "source": "Mulberry",
+  "originalName": "through",
+  "license": "CC BY-SA 4.0"
+ },
+ "across": {
+  "file": "images/symbols/across.svg",
+  "source": "Mulberry",
+  "originalName": "across",
+  "license": "CC BY-SA 4.0"
+ },
+ "middle": {
+  "file": "images/symbols/middle.svg",
+  "source": "Mulberry",
+  "originalName": "middle",
+  "license": "CC BY-SA 4.0"
+ },
+ "front": {
+  "file": "images/symbols/front.svg",
+  "source": "Mulberry",
+  "originalName": "front",
+  "license": "CC BY-SA 4.0"
+ },
+ "teach": {
+  "file": "images/symbols/teach.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9D1-200D-1F3EB teach",
+  "license": "CC BY-SA 4.0"
+ },
+ "guess": {
+  "file": "images/symbols/guess.svg",
+  "source": "Mulberry",
+  "originalName": "guess_,_to",
+  "license": "CC BY-SA 4.0"
+ },
+ "wonder": {
+  "file": "images/symbols/wonder.svg",
+  "source": "OpenMoji",
+  "originalName": "1F914 wonder",
+  "license": "CC BY-SA 4.0"
+ },
+ "imagine": {
+  "file": "images/symbols/imagine.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4AD imagine",
+  "license": "CC BY-SA 4.0"
+ },
+ "wrong": {
+  "file": "images/symbols/wrong.svg",
+  "source": "Mulberry",
+  "originalName": "mistake_no_wrong",
+  "license": "CC BY-SA 4.0"
+ },
+ "important": {
+  "file": "images/symbols/important.svg",
+  "source": "OpenMoji",
+  "originalName": "2757 important",
+  "license": "CC BY-SA 4.0"
+ },
+ "special": {
+  "file": "images/symbols/special.svg",
+  "source": "OpenMoji",
+  "originalName": "2B50 special",
+  "license": "CC BY-SA 4.0"
+ },
+ "safe": {
+  "file": "images/symbols/safe.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6E1 safe",
+  "license": "CC BY-SA 4.0"
+ },
+ "broken": {
+  "file": "images/symbols/broken.svg",
+  "source": "Mulberry",
+  "originalName": "broken",
+  "license": "CC BY-SA 4.0"
+ },
+ "busy": {
+  "file": "images/symbols/busy.svg",
+  "source": "Mulberry",
+  "originalName": "busy",
+  "license": "CC BY-SA 4.0"
+ },
+ "answer": {
+  "file": "images/symbols/answer.svg",
+  "source": "Mulberry",
+  "originalName": "answer",
+  "license": "CC BY-SA 4.0"
+ },
+ "idea": {
+  "file": "images/symbols/idea.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4A1 idea",
+  "license": "CC BY-SA 4.0"
+ },
+ "word": {
+  "file": "images/symbols/word.svg",
+  "source": "OpenMoji",
+  "originalName": "1F524 word",
+  "license": "CC BY-SA 4.0"
+ },
+ "page": {
+  "file": "images/symbols/page.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4C4 page",
+  "license": "CC BY-SA 4.0"
+ },
+ "homework": {
+  "file": "images/symbols/homework.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4DD homework",
+  "license": "CC BY-SA 4.0"
+ },
+ "test": {
+  "file": "images/symbols/test.svg",
+  "source": "Mulberry",
+  "originalName": "test",
+  "license": "CC BY-SA 4.0"
+ },
+ "lunch": {
+  "file": "images/symbols/lunch.svg",
+  "source": "Mulberry",
+  "originalName": "lunch_1",
+  "license": "CC BY-SA 4.0"
+ },
+ "class": {
+  "file": "images/symbols/class.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3EB class",
+  "license": "CC BY-SA 4.0"
+ },
+ "science": {
+  "file": "images/symbols/science.svg",
+  "source": "Mulberry",
+  "originalName": "science",
+  "license": "CC BY-SA 4.0"
+ },
+ "history": {
+  "file": "images/symbols/history.svg",
+  "source": "Mulberry",
+  "originalName": "history",
+  "license": "CC BY-SA 4.0"
+ },
+ "save": {
+  "file": "images/symbols/save.svg",
+  "source": "Mulberry",
+  "originalName": "save",
+  "license": "CC BY-SA 4.0"
+ },
+ "screen": {
+  "file": "images/symbols/screen.svg",
+  "source": "OpenMoji",
+  "originalName": "1F5A5 screen",
+  "license": "CC BY-SA 4.0"
+ },
+ "app": {
+  "file": "images/symbols/app.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4F1 app",
+  "license": "CC BY-SA 4.0"
+ },
+ "boss": {
+  "file": "images/symbols/boss.svg",
+  "source": "OpenMoji",
+  "originalName": "1F47E boss",
+  "license": "CC BY-SA 4.0"
+ },
+ "ws-int": {
+  "file": "images/symbols/ws-int.svg",
+  "source": "OpenMoji",
+  "originalName": "1F308 rainbow (My interests folders)",
+  "license": "CC BY-SA 4.0"
+ },
+ "plate": {
+  "file": "images/symbols/plate.svg",
+  "source": "Mulberry",
+  "originalName": "plate",
+  "license": "CC BY-SA 4.0"
+ },
+ "bowl": {
+  "file": "images/symbols/bowl.svg",
+  "source": "OpenMoji",
+  "originalName": "1F963 bowl with spoon",
+  "license": "CC BY-SA 4.0"
+ },
+ "spoon": {
+  "file": "images/symbols/spoon.svg",
+  "source": "Mulberry",
+  "originalName": "spoon",
+  "license": "CC BY-SA 4.0"
+ },
+ "fork": {
+  "file": "images/symbols/fork.svg",
+  "source": "Mulberry",
+  "originalName": "fork",
+  "license": "CC BY-SA 4.0"
+ },
+ "fridge": {
+  "file": "images/symbols/fridge.svg",
+  "source": "Mulberry",
+  "originalName": "fridge",
+  "license": "CC BY-SA 4.0"
+ },
+ "microwave": {
+  "file": "images/symbols/microwave.svg",
+  "source": "Mulberry",
+  "originalName": "microwave",
+  "license": "CC BY-SA 4.0"
+ },
+ "toaster": {
+  "file": "images/symbols/toaster.svg",
+  "source": "Mulberry",
+  "originalName": "toaster",
+  "license": "CC BY-SA 4.0"
+ },
+ "dishwasher": {
+  "file": "images/symbols/dishwasher.svg",
+  "source": "Mulberry",
+  "originalName": "dishwasher",
+  "license": "CC BY-SA 4.0"
+ },
+ "pot": {
+  "file": "images/symbols/pot.svg",
+  "source": "OpenMoji",
+  "originalName": "1F372 pot of food",
+  "license": "CC BY-SA 4.0"
+ },
+ "pan": {
+  "file": "images/symbols/pan.svg",
+  "source": "Mulberry",
+  "originalName": "frying_pan",
+  "license": "CC BY-SA 4.0"
+ },
+ "cubby": {
+  "file": "images/symbols/cubby.svg",
+  "source": "Mulberry",
+  "originalName": "locker",
+  "license": "CC BY-SA 4.0"
+ },
+ "whiteboard": {
+  "file": "images/symbols/whiteboard.svg",
+  "source": "Mulberry",
+  "originalName": "whiteboard",
+  "license": "CC BY-SA 4.0"
+ },
+ "schedule": {
+  "file": "images/symbols/schedule.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4CB clipboard",
+  "license": "CC BY-SA 4.0"
+ },
+ "basket": {
+  "file": "images/symbols/basket.svg",
+  "source": "Mulberry",
+  "originalName": "basket",
+  "license": "CC BY-SA 4.0"
+ },
+ "bag": {
+  "file": "images/symbols/bag.svg",
+  "source": "Mulberry",
+  "originalName": "plastic_bag",
+  "license": "CC BY-SA 4.0"
+ },
+ "card": {
+  "file": "images/symbols/card.svg",
+  "source": "Mulberry",
+  "originalName": "bank_card",
+  "license": "CC BY-SA 4.0"
+ },
+ "shopping-list": {
+  "file": "images/symbols/shopping-list.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4DD memo",
+  "license": "CC BY-SA 4.0"
+ },
+ "escalator": {
+  "file": "images/symbols/escalator.svg",
+  "source": "Mulberry",
+  "originalName": "escalator",
+  "license": "CC BY-SA 4.0"
+ },
+ "elevator": {
+  "file": "images/symbols/elevator.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6D7 elevator",
+  "license": "CC BY-SA 4.0"
+ },
+ "receipt": {
+  "file": "images/symbols/receipt.svg",
+  "source": "OpenMoji",
+  "originalName": "1F9FE receipt",
+  "license": "CC BY-SA 4.0"
+ },
+ "menu": {
+  "file": "images/symbols/menu.svg",
+  "source": "Mulberry",
+  "originalName": "menu",
+  "license": "CC BY-SA 4.0"
+ },
+ "tray": {
+  "file": "images/symbols/tray.svg",
+  "source": "Mulberry",
+  "originalName": "tray",
+  "license": "CC BY-SA 4.0"
+ },
+ "high-chair": {
+  "file": "images/symbols/high-chair.svg",
+  "source": "Mulberry",
+  "originalName": "high_chair",
+  "license": "CC BY-SA 4.0"
+ },
+ "ticket": {
+  "file": "images/symbols/ticket.svg",
+  "source": "OpenMoji",
+  "originalName": "1F3AB ticket",
+  "license": "CC BY-SA 4.0"
+ },
+ "seat": {
+  "file": "images/symbols/seat.svg",
+  "source": "OpenMoji",
+  "originalName": "1F4BA seat",
+  "license": "CC BY-SA 4.0"
+ },
+ "balloon": {
+  "file": "images/symbols/balloon.svg",
+  "source": "Mulberry",
+  "originalName": "balloon",
+  "license": "CC BY-SA 4.0"
+ },
+ "prize": {
+  "file": "images/symbols/prize.svg",
+  "source": "Mulberry",
+  "originalName": "medal",
+  "license": "CC BY-SA 4.0"
+ },
+ "map": {
+  "file": "images/symbols/map.svg",
+  "source": "OpenMoji",
+  "originalName": "1F5FA world map",
+  "license": "CC BY-SA 4.0"
+ },
+ "gift-shop": {
+  "file": "images/symbols/gift-shop.svg",
+  "source": "OpenMoji",
+  "originalName": "1F381 wrapped gift",
+  "license": "CC BY-SA 4.0"
+ },
+ "bench": {
+  "file": "images/symbols/bench.svg",
+  "source": "Mulberry",
+  "originalName": "bench",
+  "license": "CC BY-SA 4.0"
+ },
+ "seesaw": {
+  "file": "images/symbols/seesaw.svg",
+  "source": "Mulberry",
+  "originalName": "see_saw",
+  "license": "CC BY-SA 4.0"
+ },
+ "picnic": {
+  "file": "images/symbols/picnic.svg",
+  "source": "Mulberry",
+  "originalName": "picnic",
+  "license": "CC BY-SA 4.0"
+ },
+ "climbing-wall": {
+  "file": "images/symbols/climbing-wall.svg",
+  "source": "Mulberry",
+  "originalName": "climbing_wall",
+  "license": "CC BY-SA 4.0"
+ },
+ "bucket": {
+  "file": "images/symbols/bucket.svg",
+  "source": "Mulberry",
+  "originalName": "bucket",
+  "license": "CC BY-SA 4.0"
+ },
+ "shovel": {
+  "file": "images/symbols/shovel.svg",
+  "source": "Mulberry",
+  "originalName": "spade",
+  "license": "CC BY-SA 4.0"
+ },
+ "shell": {
+  "file": "images/symbols/shell.svg",
+  "source": "OpenMoji",
+  "originalName": "1F41A spiral shell",
+  "license": "CC BY-SA 4.0"
+ },
+ "sunscreen": {
+  "file": "images/symbols/sunscreen.svg",
+  "source": "Mulberry",
+  "originalName": "sunscreen",
+  "license": "CC BY-SA 4.0"
+ },
+ "tent": {
+  "file": "images/symbols/tent.svg",
+  "source": "OpenMoji",
+  "originalName": "26FA tent",
+  "license": "CC BY-SA 4.0"
+ },
+ "campfire": {
+  "file": "images/symbols/campfire.svg",
+  "source": "Mulberry",
+  "originalName": "bonfire",
+  "license": "CC BY-SA 4.0"
+ },
+ "goggles": {
+  "file": "images/symbols/goggles.svg",
+  "source": "OpenMoji",
+  "originalName": "1F97D goggles",
+  "license": "CC BY-SA 4.0"
+ },
+ "seat-belt": {
+  "file": "images/symbols/seat-belt.svg",
+  "source": "Mulberry",
+  "originalName": "seat_belt",
+  "license": "CC BY-SA 4.0"
+ },
+ "suitcase": {
+  "file": "images/symbols/suitcase.svg",
+  "source": "Mulberry",
+  "originalName": "suitcase_2",
+  "license": "CC BY-SA 4.0"
+ },
+ "bridge": {
+  "file": "images/symbols/bridge.svg",
+  "source": "OpenMoji",
+  "originalName": "1F309 bridge at night",
+  "license": "CC BY-SA 4.0"
+ },
+ "sign": {
+  "file": "images/symbols/sign.svg",
+  "source": "OpenMoji",
+  "originalName": "1FAA7 placard",
+  "license": "CC BY-SA 4.0"
+ },
+ "traffic-light": {
+  "file": "images/symbols/traffic-light.svg",
+  "source": "OpenMoji",
+  "originalName": "1F6A5 horizontal traffic light",
+  "license": "CC BY-SA 4.0"
+ },
+ "medicine": {
+  "file": "images/symbols/medicine.svg",
+  "source": "OpenMoji",
+  "originalName": "1F48A pill",
+  "license": "CC BY-SA 4.0"
+ },
+ "shot": {
+  "file": "images/symbols/shot.svg",
+  "source": "OpenMoji",
+  "originalName": "1F489 syringe",
+  "license": "CC BY-SA 4.0"
+ },
+ "thermometer": {
+  "file": "images/symbols/thermometer.svg",
+  "source": "Mulberry",
+  "originalName": "thermometer",
+  "license": "CC BY-SA 4.0"
+ },
+ "stethoscope": {
+  "file": "images/symbols/stethoscope.svg",
+  "source": "OpenMoji",
+  "originalName": "1FA7A stethoscope",
+  "license": "CC BY-SA 4.0"
+ },
+ "mask": {
+  "file": "images/symbols/mask.svg",
+  "source": "Mulberry",
+  "originalName": "mask_dustmask",
+  "license": "CC BY-SA 4.0"
+ },
+ "x-ray": {
+  "file": "images/symbols/x-ray.svg",
+  "source": "Mulberry",
+  "originalName": "xray",
+  "license": "CC BY-SA 4.0"
+ },
+ "th-kitchen": {
+  "file": "images/symbols/th-kitchen.svg",
+  "source": "Mulberry",
+  "originalName": "kettle",
+  "license": "CC BY-SA 4.0"
  }
 }

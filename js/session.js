@@ -228,7 +228,9 @@ function startTrial(type) {
   paintBar();
 }
 
-// The longest a trial can run. (While the app is modeling words of a sentence, the clock waits.)
+// The longest a trial can run. (While the app is modeling words of a sentence, the clock waits.) In a sentence trial the clock
+// restarts at each word and at "say the sentence" (Beta 3.30, Richard's choice): every word gets the full time, like separate steps
+// of a task analysis, so a slow but correct learner is not timed out on a long sentence.
 function armMaxTimer(tr, ms = S.maxTrialMs) {
   clearTimeout(tr.maxTimer);
   tr.maxTimer = setTimeout(() => {
@@ -282,6 +284,7 @@ function beginLink(tr, i) {
   tr.chain = i === SPEAK ? SPEAK_ROUTE : cx.routes[i];
   tr.maxStep = 0; tr.shown = -1;
   tr.base = curRec(tr).startIndex; tr.cur = tr.base;
+  armMaxTimer(tr);
   clearTimeout(tr.settleTimer); clearTimeout(tr.delayTimer);
   clearVisual();
   if (!tr.probe) tr.settleTimer = setTimeout(() => { if (S && S.trial === tr) showStep(tr, tr.cur); }, T.SETTLE_MS);

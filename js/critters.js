@@ -11,13 +11,56 @@
 //     animal, color, accessory, size, arrival }
 // A learner's own picture (if any) is stored like a button photo under the key "critter".
 
-export const ANIMALS = ["puppy", "kitten", "bunny", "frog", "owl"];
-export const ACCESSORIES = ["none", "hat", "bow", "glasses"];
+// The Chicago critters (Beta 3.31). Dibs the pigeon is the default and also gives adults tips (js/dibs.js).
+export const ANIMALS = ["dibs", "chance", "ivy", "hiram", "monty", "sue", "train"];
+export const CRITTER_INFO = {
+  dibs:   { name: "Dibs",   story: "A Chicago pigeon. Dibs on the parking spot!" },
+  chance: { name: "Chance", story: "Chance the Snapper, the Humboldt Park alligator." },
+  ivy:    { name: "Ivy",    story: "A Chicago goose, like the one that nested at Wrigley Field." },
+  hiram:  { name: "Hiram",  story: "A bulldog in a burgundy sweater, for Hiram H. Belding Elementary." },
+  monty:  { name: "Monty",  story: "Monty and Rose, the Montrose Beach piping plovers." },
+  sue:    { name: "Sue",    story: "Sue the T. rex, the Field Museum's famous skeleton." },
+  train:  { name: "The L",  story: "Chicago's L train. Doors closing!" },
+};
+// The L (Beta 3.32) wears no costume: its "costume" choice is which L line it runs on, which colors its sign and stripe.
+export const LINES = [
+  { id: "line-red",    name: "Red Line",    value: "#c60c30", line: "Red Line: Howard to 95th/Dan Ryan." },
+  { id: "line-blue",   name: "Blue Line",   value: "#00a1de", line: "Blue Line: O'Hare to Forest Park." },
+  { id: "line-brown",  name: "Brown Line",  value: "#62361b", line: "Brown Line: Kimball to the Loop." },
+  { id: "line-green",  name: "Green Line",  value: "#009b3a", line: "Green Line: Harlem/Lake to Ashland/63rd and Cottage Grove." },
+  { id: "line-orange", name: "Orange Line", value: "#f9461c", line: "Orange Line: Midway to the Loop." },
+  { id: "line-purple", name: "Purple Line", value: "#522398", line: "Purple Line: Linden to Howard." },
+  { id: "line-pink",   name: "Pink Line",   value: "#e27ea6", line: "Pink Line: 54th/Cermak to the Loop." },
+  { id: "line-yellow", name: "Yellow Line", value: "#f9e300", line: "Yellow Line: Dempster-Skokie to Howard." },
+];
+export const isTrain = (animal) => animal === "train";
+/** The costume choices for a critter: the L lines for the L, the costumes for everyone else. */
+export const costumesFor = (animal) => (isTrain(animal) ? LINES.map((l) => l.id) : ACCESSORIES);
+/** A costume's (or L line's) name and its little comment. */
+export const costumeInfo = (id) => { const l = LINES.find((x) => x.id === id); return l ? { name: l.name, line: l.line } : COSTUME_INFO[id] || COSTUME_INFO.none; };
+const lineColor = (id) => (LINES.find((x) => x.id === id) || LINES[0]).value;
+// Costumes. "line" is the little comment shown when an adult picks it.
+export const ACCESSORIES = ["none", "horns", "cap-blue", "cap-black", "football", "stick", "scarf"];
+export const COSTUME_INFO = {
+  none:        { name: "No costume" },
+  horns:       { name: "Bull horns",          line: "Red bull horns for basketball season." },
+  "cap-blue":  { name: "Blue cap",            line: "A blue baseball cap for the North Side." },
+  "cap-black": { name: "Black cap",           line: "A black baseball cap for the South Side." },
+  football:    { name: "Football",            line: "A blue and orange football." },
+  stick:       { name: "Hockey stick",        line: "A red and black hockey stick." },
+  scarf:       { name: "Myrtle & gold scarf", line: "Feeling fearless and bold!" },
+};
+// Old choices (before Beta 3.31) -> the new critter or costume.
+const OLD_ANIMAL = { puppy: "hiram", owl: "monty", frog: "chance", kitten: "dibs", bunny: "dibs" };
+const OLD_ACCESSORY = { hat: "cap-blue", bow: "scarf", glasses: "none" };
+/** Sue is a skeleton: she always keeps her bone color. */
+export const recolorable = (animal) => animal !== "sue" && animal !== "train";
 export const STYLES = ["ring", "critter", "both"];
 export const SIZES = ["small", "medium", "large"];
 export const ARRIVALS = ["hop", "peek", "appear"];
 
-// Eight friendly colors for the animal's main body color.
+// "natural" (the default, Beta 3.31) = the critter's own colors; or one of eight friendly body colors.
+export const NATURAL = "natural";
 export const COLORS = [
   { name: "Orange", value: "#f5a04a" },
   { name: "Brown",  value: "#b98760" },
@@ -43,20 +86,33 @@ export const MODEL_STEP_MS = { slow: 1400, medium: 950, fast: 600 };
 
 export const DEFAULT_MODEL = {
   style: "ring", ringOpacity: 100, critterOpacity: 100,
-  animal: "puppy", color: COLORS[0].value, accessory: "none", size: "medium", arrival: "hop",
+  animal: "dibs", color: NATURAL, accessory: "none", size: "medium", arrival: "hop",
   speed: "medium",            // Beta 3.15: how fast "Model a sentence" moves (slow / medium / fast)
 };
 
-// Where each accessory sits on each animal, in the animal's 100 x 100 drawing:
-//   x, y = where the accessory's own center point goes; s = how big; r = tilt in degrees.
-// (hat: y is the brim on top of the head; bow: the knot; glasses: between the eyes)
+// Where each costume sits on each critter, in the critter's 100 x 100 drawing: x, y = where the costume's anchor point goes,
+// s = its size (1 = the whole 100 x 100 costume drawing), r = tilt in degrees. Costume drawings are 100 x 100 too; their anchor
+// point is (50, 62) for hats and horns (the brim), (50, 50) for the scarf, the football's near end (30, 52) and the stick's grip near its top (62, 20).
+// Beta 3.39 geometry pass: hats sit above the eyes (never over them), held things are gripped by a small "hand" drawn ON TOP of them,
+// costume outlines are as thick as the critter's own, and the picture has room above the head so tall hats and horns are not cut off.
 const ANCHORS = {
-  puppy:  { hat: [50, 27, 0.62, -8], bow: [50, 73, 0.85, 0], glasses: [50, 40, 0.62, 0] },
-  kitten: { hat: [50, 28, 0.62, -6],  bow: [50, 74, 0.85, 0], glasses: [50, 46, 0.65, 0] },
-  bunny:  { hat: [50, 38, 0.52, -6], bow: [50, 78, 0.85, 0], glasses: [50, 52, 0.62, 0] },
-  frog:   { hat: [50, 38, 0.5, 0],  bow: [50, 80, 0.85, 0], glasses: [50, 35, 0.88, 0] },
-  owl:    { hat: [50, 25, 0.62, -6], bow: [50, 63, 0.8, 0],  glasses: [50, 43, 0.82, 0] },
+  dibs:   { hat: [50, 15, 0.6, -6],   scarf: [50, 54, 0.56, 0],  hand: [80, 76, 0.34, -20] },
+  chance: { hat: [50, 11, 0.52, -4],  scarf: [50, 56, 0.6, 0],   hand: [77, 74, 0.34, -20] },
+  ivy:    { hat: [48, 13, 0.32, -12], scarf: [42, 46, 0.3, -8],  hand: [76, 72, 0.3, -20] },
+  hiram:  { hat: [50, 21, 0.66, -5],  scarf: [50, 63, 0.6, 0],   hand: [80, 76, 0.34, -20] },
+  monty:  { hat: [47, 26, 0.48, -8],  scarf: [48, 56, 0.5, 0],   hand: [74, 70, 0.3, -20] },
+  sue:    { hat: [37, 10, 0.5, -10],  scarf: [54, 47, 0.34, 28], hand: [29, 63, 0.28, -20] },
 };
+// [slot, anchor x, anchor y] in each costume drawing; the stick is long, so it is drawn bigger.
+const SLOT = { horns: ["hat", 50, 62], "cap-blue": ["hat", 50, 62], "cap-black": ["hat", 50, 62], football: ["hand", 30, 52], stick: ["hand", 62, 20], scarf: ["scarf", 50, 50] };
+const SIZE = { stick: 1.45 };
+// The stick is gripped near its top and held a little higher, so its blade stays inside the picture.
+const RAISE = { stick: 18 };
+// The little hand drawn over a held thing, so the critter grips it: wing tip, paw, claw (critter colors; "body" parts recolor).
+const HAND = { dibs: ["#a1a8c0", true], chance: ["#5c9a4a", true], ivy: ["#7d6b58", true], hiram: ["#f4ece0", false], monty: ["#c2ad87", true], sue: ["#efe4cc", false] };
+// The critter drawings are 100 x 100; the picture shows a little more (room above the head for hats and horns, and at the sides).
+export const CRITTER_VIEWBOX = "-8 -16 116 116";
+const OUTLINE = 2.8;    // costume outline thickness in the critter's own units (the critters use 3)
 
 // ---------- Checking settings (used when restoring a backup) ----------
 const pick = (v, list, fallback) => (list.includes(v) ? v : fallback);
@@ -68,13 +124,22 @@ const opacity = (v, fallback) => {
 // Turn anything (missing, old, or from a file) into a complete, valid settings object.
 export function cleanModel(raw) {
   const m = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const out = cleanFields(m);
+  out.accessory = isTrain(out.animal) ? pick(m.accessory, costumesFor("train"), LINES[0].id)
+    : pick(OLD_ACCESSORY[m.accessory] ?? m.accessory, ACCESSORIES, DEFAULT_MODEL.accessory);
+  return out;
+}
+function cleanFields(m) {
   return {
     style: pick(m.style, STYLES, DEFAULT_MODEL.style),
     ringOpacity: opacity(m.ringOpacity, DEFAULT_MODEL.ringOpacity),
     critterOpacity: opacity(m.critterOpacity, DEFAULT_MODEL.critterOpacity),
-    animal: pick(m.animal, ANIMALS, DEFAULT_MODEL.animal),
-    color: pick(typeof m.color === "string" ? m.color.toLowerCase() : "", COLORS.map((c) => c.value), DEFAULT_MODEL.color),
-    accessory: pick(m.accessory, ACCESSORIES, DEFAULT_MODEL.accessory),
+    animal: pick(OLD_ANIMAL[m.animal] || m.animal, ANIMALS, DEFAULT_MODEL.animal),
+    // A body color chosen before Beta 3.31 is kept (it now recolors the new critter); no color = the critter's own colors.
+    // (The old default orange, never really chosen by most adults, becomes the new critter's own colors.)
+    color: OLD_ANIMAL[m.animal] && String(m.color).toLowerCase() === "#f5a04a" ? NATURAL
+      : pick(typeof m.color === "string" ? m.color.toLowerCase() : "", [NATURAL, ...COLORS.map((c) => c.value)], DEFAULT_MODEL.color),
+    accessory: null,                // set just below: it depends on the critter
     size: pick(m.size, SIZES, DEFAULT_MODEL.size),
     arrival: pick(m.arrival, ARRIVALS, DEFAULT_MODEL.arrival),
     speed: pick(m.speed, MODEL_SPEEDS, "medium"),
@@ -101,26 +166,38 @@ const inner = (svg) => (/<svg[^>]*>([\s\S]*)<\/svg>/.exec(svg) || [])[1] || "";
 
 // Start loading all the drawings now, so a critter can appear instantly later.
 export function preloadCritterArt() {
-  return Promise.all([...ANIMALS, "acc-hat", "acc-bow", "acc-glasses"].map((n) => loadSvg(n))).catch(() => {});
+  return Promise.all([...ANIMALS, ...ACCESSORIES.filter((a) => a !== "none").map((a) => "acc-" + a)].map((n) => loadSvg(n))).catch(() => {});
 }
 
 // The finished SVG text for one animal with an optional accessory.
+/** The L line color for a line id (for previews that build their own picture). */
+export const lineColorOf = lineColor;
 export async function critterSvg(animal, accessory) {
   animal = pick(animal, ANIMALS, DEFAULT_MODEL.animal);
   let acc = "";
-  if (accessory && accessory !== "none" && ANCHORS[animal][accessory]) {
-    const [x, y, s, r] = ANCHORS[animal][accessory];
-    acc = `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})">${inner(await loadSvg("acc-" + accessory))}</g>`;
+  if (accessory && SLOT[accessory] && !isTrain(animal)) {
+    const [slot, x0, y0] = SLOT[accessory];
+    let [x, y, s, r] = ANCHORS[animal][slot];
+    s *= SIZE[accessory] || 1;
+    y -= RAISE[accessory] || 0;
+    // Outlines: the costume is drawn smaller than its own 100 x 100, so thicken its dark outlines to match the critter's.
+    const art = inner(await loadSvg("acc-" + accessory))
+      .replace(/stroke="#3d3a4f" stroke-width="([\d.]+)"/g, (m, w) => `stroke="#3d3a4f" stroke-width="${(OUTLINE * Number(w) / 3 / s).toFixed(2)}"`);
+    acc = `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s}) translate(-${x0} -${y0})">${art}</g>`;
+    if (slot === "hand") {
+      const [fill, body] = HAND[animal];
+      acc += `<ellipse${body ? ' class="body"' : ""} cx="${x}" cy="${y}" rx="4.6" ry="4" fill="${fill}" stroke="#3d3a4f" stroke-width="2.4"/>`;
+    }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${CRITTER_VIEWBOX}" aria-hidden="true">` +
          inner(await loadSvg(animal)) + acc + `</svg>`;
 }
 
 // Build one critter as an element, `px` pixels wide and high.
 //   m         = the learner's model settings
 //   customUrl = the learner's own picture (or null)
-// The animal's body color is the CSS variable --body (see styles.css), so recoloring
-// never needs a different file. With a picture of their own, the animal, color and
+// The critter's own colors are drawn in its file; a chosen body color is the CSS variable --body on the "body" parts
+// (styles.css, .recolor), so recoloring never needs a different file. With a picture of their own, the animal, color and
 // accessory are not used.
 export async function buildCritter(m, customUrl, px) {
   const el = document.createElement("div");
@@ -134,9 +211,10 @@ export async function buildCritter(m, customUrl, px) {
     img.src = customUrl;
     el.append(img);
   } else {
-    el.style.setProperty("--body", m.color);
     const art = document.createElement("div");
     art.className = "critter-art";
+    if (m.color !== NATURAL && recolorable(m.animal)) { art.classList.add("recolor"); el.style.setProperty("--body", m.color); }
+    if (isTrain(m.animal)) el.style.setProperty("--line", lineColor(m.accessory));
     art.innerHTML = await critterSvg(m.animal, m.accessory);   // our own files, not user text
     el.append(art);
   }
