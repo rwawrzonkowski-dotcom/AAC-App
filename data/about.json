@@ -5,7 +5,7 @@
   "links": [
     {
       "label": "Website",
-      "url": ""
+      "url": "https://rwawrzonkowski-dotcom.github.io/voice/"
     },
     {
       "label": "Resources",
@@ -23,5 +23,6 @@
       "label": "Contact",
       "url": ""
     }
-  ]
+  ],
+  "privacyUrl": "https://rwawrzonkowski-dotcom.github.io/voice/privacy.html"
 }

@@ -1,0 +1,35 @@
+{
+ "_note": "The one source for credits and licenses (Nov 18). The app's Credits and licenses page (js/about.js) shows it, and tools/make-credits.py writes the top of CREDITS.md from it. 'repo' text is for CREDITS.md only (file paths). Keep it matching LICENSE.",
+ "copyright": "© 2026 Richard Wawrzonkowski. All rights reserved.",
+ "summary": "Pictures, fonts and software from others are used under their own licenses, listed below. The model critters and the app icon were drawn for V.O.I.C.E. and are shared under CC BY-SA 4.0.",
+ "sections": [
+  {"title": "Vocabulary", "items": [
+   {"name": "Universal Core vocabulary", "by": "Center for Literacy and Disability Studies, University of North Carolina at Chapel Hill", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "url": "https://www.project-core.com",
+    "note": "Changed: the words are arranged in V.O.I.C.E.'s own fixed layout, with more words added.",
+    "repo": "The word list in `data/core-board.json` is arranged by this project's own fixed layout; no layout or symbols from LAMP or Prentke Romich (PCS) are used."}
+  ]},
+  {"title": "Pictures", "intro": "Every button shows an open symbol. No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji pictures are used.", "items": [
+   {"name": "Mulberry Symbols", "by": "© 2018-2026 Steve Lee", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/", "url": "https://mulberrysymbols.org",
+    "repo": "Files in `images/symbols/` are unmodified copies, renamed to the word they show."},
+   {"name": "OpenMoji", "by": "All emojis designed by OpenMoji, the open-source emoji and icon project", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/", "url": "https://openmoji.org",
+    "repo": "Color SVGs from the `openmoji` npm package, unmodified, renamed to the word they show."},
+   {"name": "Pictures drawn for V.O.I.C.E.", "by": "© 2026 Richard Wawrzonkowski", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "note": "A few button pictures, the app icon, and the seven Chicago critters with their costumes and L line colors.",
+    "repo": "Listed as \"This project\" in the tables below; the app icon is `tools/icon/voice-icon.svg`; the critters are in `images/critters/`."}
+  ]},
+  {"title": "Fonts", "intro": "Three optional fonts for the child's screen (Adult menu > Accessibility).", "items": [
+   {"name": "Atkinson Hyperlegible", "by": "© 2020 Braille Institute of America, Inc.", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://www.brailleinstitute.org/freefont", "repo": "Full text: `fonts/OFL-atkinson-hyperlegible.txt`."},
+   {"name": "Lexend", "by": "© 2019 The Lexend Project Authors", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://github.com/googlefonts/lexend", "repo": "Full text: `fonts/OFL-lexend.txt`."},
+   {"name": "OpenDyslexic", "by": "© 2012-2019 Abbie Gonzalez, with Reserved Font Name OpenDyslexic (used unmodified)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://opendyslexic.org", "repo": "Full text: `fonts/OFL-opendyslexic.txt`."}
+  ]},
+  {"title": "Camera scenes", "intro": "Objects in a photo are found on this device; nothing is sent anywhere.", "items": [
+   {"name": "TensorFlow.js 4.22.0", "by": "© Google LLC and the TensorFlow authors", "license": "Apache License 2.0", "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://github.com/tensorflow/tfjs", "repo": "`vendor/tf.min.js`; full text `vendor/LICENSE-Apache-2.0.txt`."},
+   {"name": "COCO-SSD 2.2.3", "by": "© Google LLC and the TensorFlow authors; trained on the COCO dataset (labels CC BY 4.0, © COCO Consortium)", "license": "Apache License 2.0", "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd", "repo": "`vendor/coco-ssd.min.js` and the model files in `models/coco-ssd/`."}
+  ]}
+ ],
+ "notices": [
+  "Button colors follow the Modified Fitzgerald Key, a general convention.",
+  "The Chicago critters nod to Chicago animals and places but are original drawings. V.O.I.C.E. is not affiliated with any team, school, museum or the CTA.",
+  "V.O.I.C.E. supports, but does not replace, an individualized AAC assessment by a speech-language pathologist or team. It is not medical advice."
+ ]
+}
