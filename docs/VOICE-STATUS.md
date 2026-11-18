@@ -9,7 +9,7 @@
 | What | Where |
 |---|---|
 | Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ — label "V.O.I.C.E. 3.5" (promoted Nov 18: everything through Beta 3.46; V.O.I.C.E. 3.4 on Nov 17 through Beta 3.43; VOICE 3.3 earlier the same day through Beta 3.41; before that VOICE 3.2, Nov 11, through Beta 3.25.3) |
-| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "VOICE Beta 3.23": VOICE 2.0 plus **camera scenes** (Phase 3), **scene-name vocabulary**, **My things** and the **camera button** (see below) |
+| Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ — label "V.O.I.C.E. Beta 3.46" (same code as stable 3.5) |
 | Code | GitHub repo `rwawrzonkowski-dotcom/AAC-App` (branch `main`); restore points: branches `stable-1.0` (before VOICE), `stable-1.1` (VOICE 1.1), `stable-2.0` (VOICE 2.0), `stable-3.0` (VOICE 3.0), `stable-3.1` (VOICE 3.1.2) `stable-3.2` (VOICE 3.2) `stable-3.3` (VOICE 3.3) `stable-3.4` (V.O.I.C.E. 3.4) and `stable-3.5` (V.O.I.C.E. 3.5) |
 | Planning doc (source of truth for decisions) | https://claude.ai/code/artifact/133274d9-e0f2-4009-8086-6f527aebe3af |
 | Website plan | https://claude.ai/code/artifact/35106cdc-bca5-4b24-8e2f-c5c6a34d44d0 |
@@ -147,14 +147,14 @@ Scene switcher = 1-second hold on the scene name; session hides the strip, Model
 
 ## Next steps
 
-1. **Done Oct 27:** VOICE 1.1 promoted to clients. Pilot iPads update after the app is fully closed and reopened; the home-screen label changes to "VOICE" only if the icon is removed and re-added (save a backup first).
-2. **Send web addresses** for the About links whenever ready.
-3. **Pilot gate:** about two weeks of daily use with clients on the stable app.
-4. **Phase 2 — teaching and data:** Rounds A (targets, sessions, prompting, fading, mastery), B (everyday recording) and C (reports and export) promoted to clients as VOICE 2.0 on Oct 29 (upgrade from 1.1 verified: learners, boards and stage kept). Next: pilot use of reports and teaching sessions.
-5. **Phase 3 — camera scenes + everything since (Beta 3.0–3.14):** device-tested pieces so far: camera button, scenes, little-word strip, phrase labels, sentence targets, Model mode, Done buttons. **Next decision: promote Beta 3.14 to stable as VOICE 3.0** (backup file version 18: backups from it cannot be restored into VOICE 2.0, so promote before relying on beta backups).
-6. **Website:** answer the open questions in the website plan, then build the pilot pages (Home, Get started, For clinicians, About, Privacy) at rwawrzonkowski-dotcom.github.io.
-7. **Before public release:** trademark and domain check, privacy policy, App Store name (e.g. "V.O.I.C.E. AAC"; "Voice" is taken), IP attorney check of LICENSE and paid tiers, move app and site to a custom domain using backup/restore.
-8. **Phase 4 — native iPad app** for the App Store (needs a Mac with Xcode and the $99/year developer account).
+*(Rewritten Nov 18 after the audit: docs/VOICE-review-2026-11-18.md, also claude/VOICE-review-2026-11-18.md.)*
+
+1. **Richard's answers** to the audit: photos (pack, photo shoot or rule change), saving the tests in the repository, a real-iPad checklist, tidying the planning doc, and the core-idea questions.
+2. **Real-iPad check** of everything since VOICE 3.2 on a pilot iPad.
+3. **Pilot:** daily use with clients on V.O.I.C.E. 3.5; collect family and clinician notes.
+4. **Open decisions:** premium details, stage 5 and 24-board word review, letter sound recordings, camera strip rework, Resources link.
+5. **Before public release:** trademark and domain check, App Store name (e.g. "V.O.I.C.E. AAC"; "Voice" is taken), IP attorney check of LICENSE and paid tiers, move app and site to a custom domain using backup/restore.
+6. **Phase 4 — native iPad app** for the App Store (needs a Mac with Xcode and the $99/year developer account; wrap or rebuild still to decide).
 
 ## Open smaller items
 
