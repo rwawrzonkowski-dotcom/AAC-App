@@ -113,3 +113,11 @@ Things a test browser can't judge:
 
 **Pilot learning**
 - **Pilot check-in sheet.** A one-page parent and clinician form each month (what worked, what didn't, words requested), stored with your client records rather than in the app.
+
+## Richard's answers (Nov 18)
+
+- **Photos:** change the rule. Symbols by default, and an easier way to add pictures, including sending items found in a camera scene to their buttons.
+- **First user:** a parent or a school paraprofessional.
+- **FCT mode:** start planning it in beta.
+- **Interest starter packs:** a priority.
+- Plans recorded in the planning doc under "Plans from the Nov 18 audit".

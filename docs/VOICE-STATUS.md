@@ -27,11 +27,13 @@
 ## Fixed design rules
 
 1. A word never moves once placed (motor planning). Hidden words are gray tiles in their spot.
-2. Landscape only. Grid chosen per learner: 45 (9×5) or 84 (12×7). Top four rows match across sizes; the bottom row moves down two rows on 84.
-3. Vocabulary grows by revealing words (stages 1–4), never rearranging.
+2. Landscape only. Grid chosen per learner: 24 (6×4), 45 (9×5) or 84 (12×7). Top four rows match across 45 and 84; the bottom row moves down two rows on 84.
+3. Vocabulary grows by revealing words (stages 1–5; 1–3 on the 24 board), never rearranging.
 4. Privacy: no accounts, ads or tracking; everything stays on the iPad; backups are files the adult saves.
 5. Open sources only: Universal Core (CC BY 4.0), Mulberry Symbols and OpenMoji (CC BY-SA 4.0), plus symbols drawn for this project.
 6. Built-in folders may be up to 4 taps deep; adult-made pages are limited to 3.
+7. **Pictures (changed Nov 18):** open symbols by default; adults add real photos per learner, made easy (photo pass, and found items from camera scenes sent to their buttons). No stock photo pack.
+8. **First users (Nov 18):** parents and school paraprofessionals. New adult tools must work for someone with no AAC or ABA training.
 
 ## What's built (all live)
 
@@ -149,7 +151,7 @@ Scene switcher = 1-second hold on the scene name; session hides the strip, Model
 
 *(Rewritten Nov 18 after the audit: docs/VOICE-review-2026-11-18.md, also claude/VOICE-review-2026-11-18.md.)*
 
-1. **Richard's answers** to the audit: photos (pack, photo shoot or rule change), saving the tests in the repository, a real-iPad checklist, tidying the planning doc, and the core-idea questions.
+1. **Decided Nov 18 (planning doc, "Plans from the Nov 18 audit"):** symbols by default with easier photos; scene items to their buttons; **interest starter packs first**, then easier photos, then **FCT mode** (planned in beta). Waiting on Richard: pack choices and FCT design answers; saving the tests in the repository; a real-iPad checklist; the remaining core-idea questions.
 2. **Real-iPad check** of everything since VOICE 3.2 on a pilot iPad.
 3. **Pilot:** daily use with clients on V.O.I.C.E. 3.5; collect family and clinician notes.
 4. **Open decisions:** premium details, stage 5 and 24-board word review, letter sound recordings, camera strip rework, Resources link.
