@@ -18,7 +18,7 @@ SETLINE="python3 tools/set-line.py"
 
 LABEL="${1:-}"
 if [ -z "$LABEL" ]; then
-  echo "Please give the new version label, for example:  tools/promote-beta.sh \"VOICE 1.1\"" >&2
+  echo "Please give the new version label, for example:  tools/promote-beta.sh \"V.O.I.C.E. 3.4\"" >&2
   exit 1
 fi
 [ -d beta ] || { echo "There is no beta/ folder to promote. Run tools/make-beta.sh first." >&2; exit 1; }
@@ -45,16 +45,16 @@ for d in vendor models; do [ -d "beta/$d" ] && cp -R "beta/$d" . ; done
 cp "$BEFORE/js/channel.js" js/channel.js            # stable keeps its own channel file
 # Manifest: beta's (it lists the maskable icon) with stable's names. Icons: the unbanded VOICE ones, not beta's banded copies.
 cp beta/manifest.webmanifest manifest.webmanifest
-$SETLINE manifest.webmanifest '  "name":' '  "name": "VOICE",'
-$SETLINE manifest.webmanifest '  "short_name":' '  "short_name": "VOICE",'
+$SETLINE manifest.webmanifest '  "name":' '  "name": "V.O.I.C.E.",'
+$SETLINE manifest.webmanifest '  "short_name":' '  "short_name": "V.O.I.C.E.",'
 $SETLINE manifest.webmanifest '  "description":' '  "description": "A free AAC app that grows with the learner. Variable Output for Individualized Communication and Expression.",'
 rm -rf icons
 mkdir icons
 cp tools/icon/*.png icons/
 
 # 2. Undo the beta-only names in index.html (stable says "VOICE", beta says "VOICE Beta").
-$SETLINE index.html '<title>' '<title>VOICE</title>'
-$SETLINE index.html '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="VOICE">'
+$SETLINE index.html '<title>' '<title>V.O.I.C.E.</title>'
+$SETLINE index.html '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="V.O.I.C.E.">'
 
 # 3. Stable service worker settings (the cache number goes up by one).
 $SETLINE sw.js 'const CACHE_VERSION' "const CACHE_VERSION = \"aac-v$((OLD_N + 1))\";"

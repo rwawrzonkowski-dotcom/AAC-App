@@ -7,7 +7,7 @@ import { PRESETS, applyPreset, cleanAccess, DEFAULT_ACCESS } from "./access.js";
 const OPTIONS = [
   { key: "theme", title: "Colours (theme)", choices: [["standard", "Standard"], ["dark", "High contrast"], ["cvi", "CVI"], ["cbsafe", "Colour-blind safe"], ["dim", "Dim"]],
     help: "High contrast: black background, the word type shows as a thick coloured edge, pictures on white. CVI: black with one bright colour (yellow). Colour-blind safe: white buttons with a coloured patch behind the picture. Dim: soft dark colours with less glare (evenings, light sensitivity)." },
-  { key: "font", title: "Letters (font)", choices: [["system", "VOICE standard"], ["atkinson", "Atkinson Hyperlegible"], ["lexend", "Lexend"], ["opendyslexic", "OpenDyslexic"]],
+  { key: "font", title: "Letters (font)", choices: [["system", "V.O.I.C.E. standard"], ["atkinson", "Atkinson Hyperlegible"], ["lexend", "Lexend"], ["opendyslexic", "OpenDyslexic"]],
     help: "Atkinson Hyperlegible was made for readers with low vision; Lexend is designed to be easy to read; OpenDyslexic has heavier letter bottoms, " +
       "which some readers with dyslexia find easier. All are free and work offline." },
   { key: "labelSize", title: "Label size", choices: [["s", "Small"], ["m", "Medium"], ["l", "Large"], ["xl", "Extra large"]],
@@ -24,7 +24,7 @@ const OPTIONS = [
   { key: "listener", title: "Show button (for the listener)", choices: [[false, "Off"], [true, "On"]],
     help: "A Show button in the message bar puts the message full screen in very large letters, with Flip to turn it toward someone across the table. For listeners who are deaf or hard of hearing, or noisy places." },
   { key: "glow", title: "Glow while speaking", choices: [[false, "Off"], [true, "On"]],
-    help: "The message bar glows while VOICE is talking, so a listener who cannot hear it can see that the learner is speaking." },
+    help: "The message bar glows while V.O.I.C.E. is talking, so a listener who cannot hear it can see that the learner is speaking." },
   { key: "highlight", title: "Highlight each word as it is said", choices: [[false, "Off"], [true, "On"]],
     help: "Each word in the message bar lights up as it is said (supports reading). Works with voices that report word timing; with Pause between words on, words always light up." },
 ];

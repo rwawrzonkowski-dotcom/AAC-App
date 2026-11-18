@@ -22,19 +22,19 @@ export function looksLikePhone() {
 }
 
 export const PHONE_BOARD_TIP = "On a phone, the 45-button board is easier to tap.";
-export const VOLUME_TEST_SENTENCE = "This is how loud VOICE will be";
+export const VOLUME_TEST_SENTENCE = "This is how loud V.O.I.C.E. will be";
 
 // The tips for this device, as an array of strings (general line first).
 export function volumeTips() {
-  const tips = ["Turn the device volume up while VOICE is talking."];
+  const tips = ["Turn the device volume up while V.O.I.C.E. is talking."];
   if (isAndroid()) {
-    tips.push("On Android, the volume buttons change the ringer when nothing is playing, so press them while VOICE is talking.");
+    tips.push("On Android, the volume buttons change the ringer when nothing is playing, so press them while V.O.I.C.E. is talking.");
     tips.push("Android: Settings → Sounds and vibration → Volume → Media.");
     tips.push("Samsung: try Google's speech engine: Settings → General management → Text-to-speech → Preferred engine → " +
       "Speech Recognition and Synthesis from Google.");
   }
   if (isIOS()) {
-    tips.push("Open Control Center (swipe down from the top right corner, or up from the bottom on devices with a Home button) and drag the volume slider up while VOICE is talking.");
+    tips.push("Open Control Center (swipe down from the top right corner, or up from the bottom on devices with a Home button) and drag the volume slider up while V.O.I.C.E. is talking.");
     if (isIPhone()) tips.push("iPhone: flip the Ring/Silent switch (or hold the Action button) so the phone is not on silent.");
     if (isIPad()) tips.push("iPad: if a mute icon shows in Control Center, tap it off. A side switch or the sidebar can set Ring/Silent " +
       "(Settings → General → Use Side Switch To).");
@@ -62,12 +62,12 @@ export function volumeTestBlock({ voice, tipsOnTap = false, extraClass = "" } = 
 // Which steps to show: iPad / iPhone text on iOS, Android text on Android, both on anything else (a computer).
 export const IOS_VOICE_STEPS =
   "iPad or iPhone: Settings → Accessibility → Spoken Content → Voices → English → choose a voice and download " +
-  "the Enhanced or Premium version. Then fully close and reopen VOICE (swipe it away and open it again) so it sees the new voice.";
+  "the Enhanced or Premium version. Then fully close and reopen V.O.I.C.E. (swipe it away and open it again) so it sees the new voice.";
 export const ANDROID_VOICE_STEPS =
   "Android: Settings → General management → Text-to-speech → (choose the Google engine, the gear icon beside it) → " +
-  "Install voice data → pick the language and a voice. Then fully close and reopen VOICE.";
+  "Install voice data → pick the language and a voice. Then fully close and reopen V.O.I.C.E.";
 export const VOICE_LIMIT_NOTE =
-  "Some system voices (such as Siri voices) may not be available to web apps like VOICE.";
+  "Some system voices (such as Siri voices) may not be available to web apps like V.O.I.C.E.";
 
 // The device-specific steps as an array of strings.
 export function moreVoicesSteps() {

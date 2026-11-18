@@ -2,9 +2,8 @@
 // The creator and the links come from data/about.json, so they can be filled in later without touching any code
 // (see README, "Filling in the About screen"). Empty values show a clearly marked placeholder so the spot is visible.
 import { h, openOverlay } from "./ui.js";
-import { VERSION_LABEL, CHANNEL } from "./channel.js";
+import { VERSION_LABEL, CHANNEL, FULL_NAME } from "./channel.js";
 
-const FULL_NAME = "Variable Output for Individualized Communication and Expression";
 const ONE_LINE = "A free AAC app that grows with the learner.";
 
 // Read data/about.json. If it is missing or broken, behave as if it were empty (placeholders show).
@@ -68,11 +67,11 @@ export async function openAbout() {
 
   const o = openOverlay([
     h("div", { class: "menu-head" },
-      h("h1", {}, "About VOICE"),
+      h("h1", {}, "About V.O.I.C.E."),
       h("button", { type: "button", class: "btn primary", id: "about-close", text: "Close", onclick: () => o.close() })),
     h("div", { class: "menu-body" },
       h("section", { class: "panel", id: "about-intro" },
-        h("h2", { class: "about-title", text: "VOICE" }),
+        h("h2", { class: "about-title", text: "V.O.I.C.E." }),
         h("p", { class: "about-full", text: FULL_NAME }),
         h("p", { text: ONE_LINE })),
       creator, linkSection, credits, privacy,

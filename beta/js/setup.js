@@ -11,7 +11,7 @@ import { h } from "./ui.js";
 import { restoreFromFile } from "./backup.js";
 import { listProfiles, CHILD_VOICE } from "./profiles.js";
 import { volumeTestBlock, looksLikePhone, PHONE_BOARD_TIP, moreVoicesLine } from "./devicetips.js";
-import { VERSION_LABEL } from "./channel.js";
+import { VERSION_LABEL, FULL_NAME } from "./channel.js";
 import { getView, setView } from "./settingsnav.js";
 
 export const SETUP_CHOICES = [
@@ -66,9 +66,10 @@ export function showSetup({ first = false } = {}) {
         onclick: () => { setView(v); paintView(); } })));
     if (first) paintView();
 
-    const screen = h("div", { class: "setup-screen", id: "setup-screen", role: "dialog", "aria-label": "Set up VOICE" },
+    const screen = h("div", { class: "setup-screen", id: "setup-screen", role: "dialog", "aria-label": "Set up V.O.I.C.E." },
       h("div", { class: "setup-card" },
-        h("h1", { text: "Set up VOICE" }),
+        h("h1", { text: "Set up V.O.I.C.E." }),
+        h("p", { class: "setup-fullname", id: "setup-fullname", text: FULL_NAME }),
         h("div", { class: "setup-name-row" },
           h("label", { for: "setup-name", text: first ? "Learner name (optional)" : "Learner name" }), nameIn),
         first ? h("div", { class: "setup-view", id: "setup-view" },

@@ -37,10 +37,10 @@ export const needsHomeScreen = () => isIOS() && !isHomeScreenApp();
 
 /** One line for Adult menu > Backup: how safe this device's data is. { ok, text } */
 export function dataSafetyLine() {
-  if (needsHomeScreen()) return { ok: false, text: "Not protected: VOICE is open in a Safari tab, so Safari may erase its data after about a week without use. Add VOICE to the Home Screen (see below) and keep a backup." };
-  if (isHomeScreenApp()) return { ok: true, text: "Protected: VOICE is running from the Home Screen, so its data is kept. Still save a backup now and then." };
-  if (persisted === true) return { ok: true, text: "Protected: this browser has agreed to keep VOICE's data. Still save a backup now and then." };
-  return { ok: null, text: "This browser may clear VOICE's data if the device runs low on space. Save a backup now and then." };
+  if (needsHomeScreen()) return { ok: false, text: "Not protected: V.O.I.C.E. is open in a Safari tab, so Safari may erase its data after about a week without use. Add V.O.I.C.E. to the Home Screen (see below) and keep a backup." };
+  if (isHomeScreenApp()) return { ok: true, text: "Protected: V.O.I.C.E. is running from the Home Screen, so its data is kept. Still save a backup now and then." };
+  if (persisted === true) return { ok: true, text: "Protected: this browser has agreed to keep V.O.I.C.E.'s data. Still save a backup now and then." };
+  return { ok: null, text: "This browser may clear V.O.I.C.E.'s data if the device runs low on space. Save a backup now and then." };
 }
 
 /** The how-to, as elements (used by the notice and by Adult menu > Backup). */
@@ -48,7 +48,7 @@ export function homeScreenSteps() {
   return h("ol", { class: "keep-steps" },
     h("li", { text: "In Safari, tap the Share button (the square with an arrow pointing up)." }),
     h("li", { text: "Choose “Add to Home Screen”, then tap Add." }),
-    h("li", { text: "From now on, open VOICE from its new icon, not from Safari." }),
+    h("li", { text: "From now on, open V.O.I.C.E. from its new icon, not from Safari." }),
     h("li", { text: "Already set up learners here in Safari? First save a backup (Adult menu > Backup > “Save backup of all learners”), then open the new icon and choose “Restore from a backup file” on its setup screen. The icon has its own storage and starts empty." }));
 }
 
@@ -65,8 +65,8 @@ export function maybeShowNotice({ busy } = {}) {
   let resolveClosed;
   const closed = new Promise((r) => { resolveClosed = r; });
   const o = openOverlay([
-    h("h2", { text: "Keep VOICE's words and data safe" }),
-    h("p", { text: "VOICE is open in a Safari tab. Safari may erase a website's saved data (learners, button changes, photos, teaching data) after about a week without use. VOICE opened from the Home Screen is kept." }),
+    h("h2", { text: "Keep V.O.I.C.E.'s words and data safe" }),
+    h("p", { text: "V.O.I.C.E. is open in a Safari tab. Safari may erase a website's saved data (learners, button changes, photos, teaching data) after about a week without use. V.O.I.C.E. opened from the Home Screen is kept." }),
     homeScreenSteps(),
     h("div", { class: "btn-row" },
       h("button", { class: "btn primary", type: "button", text: "Got it", onclick: () => { o.close(); resolveClosed(); } })),

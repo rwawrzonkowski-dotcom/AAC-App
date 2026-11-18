@@ -167,18 +167,18 @@ export function newestWordsEl(em, max = 40) {
 }
 
 // ---------------------------------------------------------------- the printable clinical summary
-const FOOT = "Created with VOICE. The data stays on the iPad unless an adult exports or prints it.";
+const FOOT = "Created with V.O.I.C.E. The data stays on the iPad unless an adult exports or prints it.";
 
 function docHeader(title, ctx) {
   return h("header", { class: "rep-dochead" },
-    h("div", { class: "rep-brand", text: "VOICE" }),
+    h("div", { class: "rep-brand", text: "V.O.I.C.E." }),
     h("h1", { text: title }),
     h("table", { class: "rep-meta" }, h("tbody", {},
       h("tr", {}, h("th", { text: "Learner" }), h("td", { id: "doc-learner", text: ctx.name })),
       h("tr", {}, h("th", { text: "Period" }), h("td", { id: "doc-range", text: ctx.range.label })),
       ctx.clinical ? h("tr", {}, h("th", { text: "Filters" }), h("td", { text: `Who: ${ctx.who || "everyone"}   Where: ${ctx.where || "everywhere"}  (teaching sessions only)` })) : null,
       h("tr", {}, h("th", { text: "Created" }), h("td", { id: "doc-generated", text: ctx.generated.toLocaleDateString([], { year: "numeric", month: "long", day: "numeric" }) })),
-      ctx.clinical ? h("tr", {}, h("th", { text: "App" }), h("td", { id: "doc-version", text: `${VERSION_LABEL}  |  Created with VOICE` })) : null)));
+      ctx.clinical ? h("tr", {}, h("th", { text: "App" }), h("td", { id: "doc-version", text: `${VERSION_LABEL}  |  Created with V.O.I.C.E.` })) : null)));
 }
 
 /** The clinical summary page. ctx: { name, range, who, where, tm, em, notes, includeInstr, generated } */
@@ -237,7 +237,7 @@ export function parentDoc(ctx) {
       stat("par-stat-words", t.distinct, t.distinct === 1 ? "different word used" : "different words used"),
       stat("par-stat-new", t.newWords, t.newWords === 1 ? "new word" : "new words"),
       t.longest >= 2 ? stat("par-stat-longest", t.longest, "words in the longest message")
-        : stat("par-stat-days", t.activeDays, t.activeDays === 1 ? "day VOICE was used" : "days VOICE was used")));
+        : stat("par-stat-days", t.activeDays, t.activeDays === 1 ? "day V.O.I.C.E. was used" : "days V.O.I.C.E. was used")));
     const wk = weeklyWords(em);
     if (wk.length >= 2) {
       const top = Math.max(1, ...wk.map((w) => w.n));

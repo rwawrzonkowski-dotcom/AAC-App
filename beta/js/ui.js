@@ -1,6 +1,45 @@
 // Small helpers for the adult-facing screens (overlays, prompts).
 // The child's board does not use these.
 
+// The app's name is written V.O.I.C.E. (Nov 17). Screen readers would spell it letter by letter, so wherever it appears
+// on screen it is wrapped in <span role="text" aria-label="VOICE">, which VoiceOver reads as the word "voice", and in
+// aria labels it is written VOICE. watchName() (called once from app.js) does this for every page change, so code
+// can simply write "V.O.I.C.E." in its text.
+const NAME = "V.O.I.C.E.";
+const SKIP = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "TITLE", "OPTION"]);
+function wrapText(node) {
+  const p = node.parentNode;
+  if (!p || p.nodeType !== 1 || p.classList.contains("app-name") || SKIP.has(p.nodeName) || !node.nodeValue.includes(NAME)) return;
+  const frag = document.createDocumentFragment();
+  node.nodeValue.split(NAME).forEach((part, i) => {
+    if (i) frag.append(h("span", { class: "app-name", role: "text", "aria-label": "VOICE" }, NAME));
+    if (part) frag.append(part);
+  });
+  p.replaceChild(frag, node);
+}
+function wrapIn(root) {
+  if (root.nodeType === 3) { wrapText(root); return; }
+  if (root.nodeType !== 1 || !root.textContent.includes(NAME)) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const found = []; for (let n = w.nextNode(); n; n = w.nextNode()) if (n.nodeValue.includes(NAME)) found.push(n);
+  found.forEach(wrapText);
+}
+function fixAria(el) {
+  if (el.nodeType !== 1) return;
+  for (const a of ["aria-label", "title"]) { const v = el.getAttribute(a); if (v && v.includes(NAME)) el.setAttribute(a, v.split(NAME).join("VOICE")); }
+}
+export function watchName() {
+  wrapIn(document.body);
+  document.querySelectorAll("[aria-label],[title]").forEach(fixAria);
+  new MutationObserver((list) => {
+    for (const m of list) {
+      if (m.type === "characterData") wrapText(m.target);
+      else if (m.type === "attributes") fixAria(m.target);
+      else m.addedNodes.forEach((n) => { wrapIn(n); if (n.nodeType === 1) { fixAria(n); n.querySelectorAll("[aria-label],[title]").forEach(fixAria); } });
+    }
+  }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["aria-label", "title"] });
+}
+
 // h("div", {class: "x", onclick: fn}, child1, "text", ...) -> an element.
 export function h(tag, props = {}, ...kids) {
   const e = document.createElement(tag);

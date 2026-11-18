@@ -37,7 +37,7 @@ cat > "$NEW/js/channel.js" <<'JS'
 // Beta's prefix "beta-" keeps its saved data completely separate from the stable app's.
 // tools/make-beta.sh writes this file; do not copy it over the stable one.
 export const CHANNEL = "beta";               // "stable" or "beta"
-export const VERSION_LABEL = "VOICE Beta 1.0";   // shown small in the adult menu and on the setup screen
+export const VERSION_LABEL = "V.O.I.C.E. Beta 1.0";   // shown small in the adult menu and on the setup screen
 export const STORAGE_PREFIX = "beta-";       // "" for stable, "beta-" for beta
 JS
 
@@ -48,11 +48,11 @@ grep -q '^const MODELS_CACHE' "$NEW/sw.js" && $SETLINE "$NEW/sw.js" 'const MODEL
 $SETLINE "$NEW/sw.js" 'const OTHER_CHANNEL_FOLDER' 'const OTHER_CHANNEL_FOLDER = "";   // beta: nothing to ignore (the stable app does not use this copy)'
 
 # 4. Name, home-screen title and icons, so it installs as a separate "VOICE Beta" icon (the icons come from tools/beta-icons/).
-$SETLINE "$NEW/manifest.webmanifest" '  "name":' '  "name": "VOICE Beta",'
-$SETLINE "$NEW/manifest.webmanifest" '  "short_name":' '  "short_name": "VOICE Beta",'
-$SETLINE "$NEW/manifest.webmanifest" '  "description":' '  "description": "Test copy of VOICE. New features are tried here first.",'
-$SETLINE "$NEW/index.html" '<title>' '<title>VOICE</title>'
-$SETLINE "$NEW/index.html" '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="VOICE Beta">'
+$SETLINE "$NEW/manifest.webmanifest" '  "name":' '  "name": "V.O.I.C.E. Beta",'
+$SETLINE "$NEW/manifest.webmanifest" '  "short_name":' '  "short_name": "V.O.I.C.E. Beta",'
+$SETLINE "$NEW/manifest.webmanifest" '  "description":' '  "description": "Test copy of V.O.I.C.E. New features are tried here first.",'
+$SETLINE "$NEW/index.html" '<title>' '<title>V.O.I.C.E.</title>'
+$SETLINE "$NEW/index.html" '<meta name="apple-mobile-web-app-title"' '<meta name="apple-mobile-web-app-title" content="V.O.I.C.E. Beta">'
 cp tools/beta-icons/*.png "$NEW/icons/"
 
 # 5. Service worker file list for beta (only beta's own files). Needs a sw.js version first.

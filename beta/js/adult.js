@@ -85,7 +85,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
 
   const o = openOverlay([
     h("div", { class: "menu-head" },
-      h("h1", {}, "VOICE", h("small", { class: "version-label", id: "version-label", text: VERSION_LABEL })),
+      h("h1", {}, "V.O.I.C.E.", h("small", { class: "version-label", id: "version-label", text: VERSION_LABEL })),
       viewRow,
       h("button", { type: "button", class: "btn primary", id: "menu-close-top", text: "Close", onclick: close })),
     h("div", { class: "set-split" }, nav, detail),
@@ -326,7 +326,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("section", { class: "panel", id: "sec-size" },
       h("h2", { text: "Board size (for this learner)" }),
       h("p", { class: "muted", text: "24 locations (6 x 4) has large buttons and its own layout for early learners: requesting, waiting, " +
-        "breaks, \"finished\", yes and no, and saying something hurts (the Essential 8 skills). It has stages 1-3; after that VOICE suggests moving up to the 45 board. " +
+        "breaks, \"finished\", yes and no, and saying something hurts (the Essential 8 skills). It has stages 1-3; after that V.O.I.C.E. suggests moving up to the 45 board. " +
         "45 locations (9 x 5) is the usual starting board. 84 locations (12 x 7) is a larger board with more words. " +
         "The first four rows are the same on 45 and 84; the bottom row of the 45 board moves down to the bottom row of the 84 board." }),
       h("div", { class: "seg-row size-seg" }, btn(24, "24 locations"), btn(45, "45 locations"), btn(84, "84 locations")),
@@ -350,7 +350,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("p", { class: "muted", text: "Each stage reveals more words in their permanent spots. Nothing moves. " +
         "On the category pages the original words always show; the newer words on them appear from stage 3 (or use Always show on a word)." }),
       cur.gridSize === 24 ? h("p", { class: "muted", id: "stage-24-note", text: "The 24 board has stages 1-3. On the category folders, the first words show " +
-        "as soon as the folder appears; the rest appear at stage 3. When stage 3 is done, VOICE suggests moving up to the 45 board (at its stage 2)." }) : null,
+        "as soon as the folder appears; the rest appear at stage 3. When stage 3 is done, V.O.I.C.E. suggests moving up to the 45 board (at its stage 2)." }) : null,
       h("div", { class: "stage-grid" }, stages.map((n) =>
         h("button", {
           type: "button", class: "stage-btn" + (cur.stage === n ? " on" : ""), "data-stage": n,
@@ -380,7 +380,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
           h("span", { class: "muted", text: pr.mode === "stage5" ? "Rule: stage 5 readiness" : pr.mode === "words" ? "Rule: the chosen words" : `Rule: ${pr.pct}% of stage ${cur.stage} words` })),
         h("div", { class: "sp-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(pr.need), "aria-valuenow": String(Math.min(pr.have, pr.need)) },
           h("div", { class: "sp-fill" + (pr.ready ? " done" : ""), style: `width: ${pct}%` })),
-        h("p", { id: "stage-progress-text", text: (pr.mode === "stage5" ? `${pr.have} of ${pr.need} checks met` : pr.note || `${pr.have} of ${pr.mode === "words" ? pr.need : pr.items.length} words proficient · needs ${pr.need}`) + (pr.ready ? " · Ready: VOICE will suggest it at the end of the next session." : "") }),
+        h("p", { id: "stage-progress-text", text: (pr.mode === "stage5" ? `${pr.have} of ${pr.need} checks met` : pr.note || `${pr.have} of ${pr.mode === "words" ? pr.need : pr.items.length} words proficient · needs ${pr.need}`) + (pr.ready ? " · Ready: V.O.I.C.E. will suggest it at the end of the next session." : "") }),
         h("div", { class: "sp-list" }, pr.items.filter((i) => pr.mode !== "words" || i.chosen).map((i) =>
           h("div", { class: "sp-row", "data-word": i.id }, h("span", { text: i.label }),
             h("span", { class: "sp-chip " + (i.why === "Mastered target" ? "m" : i.proficient ? "e" : "n"), text: i.why })))),
@@ -420,7 +420,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       r.mode === "words" ? h("p", { class: "muted", text: `Tick the stage ${cur.stage} words that must be proficient. Each stage keeps its own list.` }) : null,
       h("div", { class: "sr-line" }, h("span", { text: "Everyday use counts after" }), num("days", 1, 14, "Days"), h("span", { text: "days of use in the last" }),
         num("weeks", 1, 12, "Weeks"), h("span", { text: "weeks." })),
-      h("p", { class: "muted", text: "VOICE only suggests the next stage at the end of a teaching session; you decide. The progress above is shown in both views." }));
+      h("p", { class: "muted", text: "V.O.I.C.E. only suggests the next stage at the end of a teaching session; you decide. The progress above is shown in both views." }));
   }
 
   // Stage 4 -> 5 readiness numbers (Beta 3.26, js/stagerule.js DEFAULT_S5). All must be met.
@@ -441,7 +441,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       field("multiPct", "Messages with 2+ words", 0, 100, 5, "%"),
       field("weeks", "Everyday use window (weeks)", 1, 12, 1),
       h("button", { type: "button", class: "btn", id: "s5-defaults", text: "Back to 10 / 1 / 100 / 30% / 4 weeks", onclick: () => save({ s5: null }) }),
-      h("p", { class: "muted", text: "VOICE only suggests stage 5 at the end of a teaching session; you decide." }));
+      h("p", { class: "muted", text: "V.O.I.C.E. only suggests stage 5 at the end of a teaching session; you decide." }));
   }
 
   // "Buttons on the board" (Beta 3.9): the five Auto / Always / Never choices for the buttons around the board, on one page.
@@ -530,7 +530,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       h("label", { text: "Show camera button" }),
       h("div", { class: "seg-row" }, btn("auto", autoLabel(cur)), btn("always", "Always"), btn("never", "Never")),
       h("p", { class: "muted", text: "The camera button at the right end of the strip under the message bar makes a scene from a photo in one step: hold it for 1 second until it turns green and reads “Tap”, " +
-        "then tap it once. A quick tap on its own does nothing. The camera opens, everything VOICE finds in the photo (and anything it remembers from My things) is ticked, " +
+        "then tap it once. A quick tap on its own does nothing. The camera opens, everything V.O.I.C.E. finds in the photo (and anything it remembers from My things) is ticked, " +
         "and “Use now” puts the scene on the strip. It needs no passcode and is switched off while a teaching session runs. " +
         "Scenes made this way are named with the date and time and can be renamed in Scenes." }));
   }
@@ -546,7 +546,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("button", { type: "button", class: "seg" + (cur.toneWheel === "on" ? " on" : ""), id: "tone-wheel-on", text: "On", onclick: set("on") })),
       h("p", { class: "muted", text: "For learners at stage 4. Press and hold the message bar: 8 feelings appear around the finger (happy, excited, silly, " +
         "question, calm, sad, mad, scared), always in the same spots. Pick one to say the message once in that tone. Rest on one for 1 second (a lock fills in) " +
-        "to set it as the learner's mood: every message is said in it until it is changed or VOICE is reopened, and a small face shows in the message bar. " +
+        "to set it as the learner's mood: every message is said in it until it is changed or V.O.I.C.E. is reopened, and a small face shows in the message bar. " +
         "The centre, Normal, clears the mood. Tones change pitch, speed and the ending of the sentence; Enhanced or Premium voices sound best." +
         (cur.stage < 4 && cur.gridSize !== 24 ? " This learner is at stage " + cur.stage + ", so the wheel will start working at stage 4." : "") }),
       h("div", { class: "btn-row left tone-samples" }, h("span", { class: "muted", text: "Hear the tones:" }), TONES.map(sample)));
@@ -777,7 +777,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         h("p", { class: "muted", text: "A touch anywhere is the switch (with two switches: the left half moves, the right half chooses). The board's buttons then do not respond to touch. The adult circle still works." })) : null,
       on ? h("div", { class: "field touch-setting" }, h("label", { text: "Say each button as it lights up" }),
         seg("cues", [[false, "Off"], [true, "On"]]),
-        h("p", { class: "muted", text: "Auditory scanning: VOICE quietly says each row's first word and each button, in a lower voice, for learners who choose by listening." })) : null,
+        h("p", { class: "muted", text: "Auditory scanning: V.O.I.C.E. quietly says each row's first word and each button, in a lower voice, for learners who choose by listening." })) : null,
       on ? h("p", { class: "muted", id: "scan-note", text: "On iPad, do not also turn on the iPad's own Switch Control (Settings > Accessibility): it would take the switch presses. Scanning pauses in Edit mode, Model mode, the keyboard and the adult menu." }) : null);
   }
   // One plain Off / On setting (Beta 3.20 touch options).
@@ -848,7 +848,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
     return h("section", { class: "panel", id: "sec-about" },
       h("h2", { text: "About" }),
       h("div", { class: "btn-row left" },
-        h("button", { type: "button", class: "btn", id: "about-open", text: "About VOICE", onclick: () => openAbout() }),
+        h("button", { type: "button", class: "btn", id: "about-open", text: "About V.O.I.C.E.", onclick: () => openAbout() }),
         // Beta 3.5: for new staff or parents, point at the adult-menu circle again (js/adulthint.js)
         h("button", { type: "button", class: "btn", id: "show-adult-hint", text: "Show where the adult menu is",
           onclick: () => { close(); setTimeout(() => showCoach(), 250); } })));

@@ -1,7 +1,7 @@
 {
-  "name": "VOICE Beta",
-  "short_name": "VOICE Beta",
-  "description": "Test copy of VOICE (Variable Output for Individualized Communication and Expression). New features are tried here first.",
+  "name": "V.O.I.C.E. Beta",
+  "short_name": "V.O.I.C.E. Beta",
+  "description": "Test copy of V.O.I.C.E. (Variable Output for Individualized Communication and Expression). New features are tried here first.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
