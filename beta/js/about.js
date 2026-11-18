@@ -7,6 +7,39 @@ import { VERSION_LABEL, CHANNEL, FULL_NAME } from "./channel.js";
 const ONE_LINE = "A free AAC app that grows with the learner.";
 
 // Read data/about.json. If it is missing or broken, behave as if it were empty (placeholders show).
+// Read data/credits.json (Nov 18): the one source for credits and licenses (tools/make-credits.py writes CREDITS.md from it).
+async function loadCredits() {
+  try { const r = await fetch("data/credits.json"); return r.ok ? await r.json() : null; } catch (e) { return null; }
+}
+
+// The Credits and licenses page, opened from About. Text is readable offline; the links need the internet.
+export function openCredits(C) {
+  const link = (url, text) => h("a", { href: url, target: "_blank", rel: "noopener", text });
+  const item = (it) => h("li", { class: "credit-item" },
+    h("strong", { text: it.name }), " ",
+    h("span", { text: "(" + it.by.replace(/\.$/, "") + ")." }), " ",
+    h("span", { text: "License: " }), link(it.licenseUrl, it.license), ".",
+    it.note ? h("span", { text: " " + it.note }) : null,
+    it.url ? h("span", {}, " ", link(it.url, "Website")) : null);
+  const o = openOverlay([
+    h("div", { class: "menu-head" },
+      h("h1", {}, "Credits and licenses"),
+      h("button", { type: "button", class: "btn primary", id: "credits-close", text: "Close", onclick: () => o.close() })),
+    h("div", { class: "menu-body", id: "credits-body" },
+      h("section", { class: "panel" },
+        h("p", { class: "about-copyright", text: C.copyright }),
+        h("p", { text: C.summary })),
+      ...C.sections.map((s) => h("section", { class: "panel" },
+        h("h2", { text: s.title }),
+        s.intro ? h("p", { class: "muted", text: s.intro }) : null,
+        h("ul", { class: "about-list" }, s.items.map(item)))),
+      h("section", { class: "panel" },
+        h("h2", { text: "Notices" }),
+        h("ul", { class: "about-list" }, C.notices.map((n) => h("li", { text: n }))))),
+  ], { sheetClass: "menu about credits" });
+  return o;
+}
+
 async function loadAbout() {
   try {
     const r = await fetch("data/about.json");
@@ -53,13 +86,12 @@ export async function openAbout() {
     h("h2", { text: "Resources" }),
     h("div", { class: "about-link-row" }, linkItems)) : null;
 
+  // Credits: a short summary here; the full list (holders, licenses, links, notices) on its own page.
+  const C = await loadCredits();
   const credits = h("section", { class: "panel", id: "about-credits" },
-    h("h2", { text: "Credits" }),
-    h("ul", { class: "about-list" },
-      h("li", { text: "Vocabulary: Universal Core, Center for Literacy and Disability Studies, UNC Chapel Hill (CC BY 4.0)." }),
-      h("li", { text: "Symbols: Mulberry Symbols and OpenMoji (CC BY-SA 4.0)." }),
-      h("li", { text: "Symbols and critters drawn for this project (CC BY-SA 4.0)." })),
-    h("p", { class: "muted", text: "The full list is in CREDITS.md in the project." }));
+    h("h2", { text: "Credits and licenses" }),
+    h("p", { text: "Words from Universal Core; pictures from Mulberry Symbols and OpenMoji; fonts and camera software from open projects. Each is used under its own license." }),
+    C ? h("button", { type: "button", class: "btn", id: "about-credits-open", text: "See all credits and licenses", onclick: () => openCredits(C) }) : null);
 
   const privacy = h("section", { class: "panel", id: "about-privacy" },
     h("h2", { text: "Privacy" }),
@@ -75,6 +107,7 @@ export async function openAbout() {
         h("p", { class: "about-full", text: FULL_NAME }),
         h("p", { text: ONE_LINE })),
       creator, linkSection, credits, privacy,
+      C ? h("p", { class: "about-copyright", id: "about-copyright", text: C.copyright + " Pictures, fonts and software from others are used under their own licenses." }) : null,
       h("p", { class: "version-label about-version", id: "about-version", text: VERSION_LABEL })),
   ], { sheetClass: "menu about" });
 }

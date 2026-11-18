@@ -1,66 +1,43 @@
 # Credits
 
-## Vocabulary and layout
+© 2026 Richard Wawrzonkowski. All rights reserved. See LICENSE.
 
-- **Universal Core vocabulary** (c) Center for Literacy and Disability Studies,
-  University of North Carolina at Chapel Hill. Licensed under
-  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-  The word list in `data/core-board.json` is arranged by this project's own
-  fixed layout; no layout or symbols from LAMP or Prentke Romich (PCS) are used.
-- Color coding follows the Modified Fitzgerald Key convention (a general
-  convention, not a proprietary asset).
+Pictures, fonts and software from others are used under their own licenses, listed below. The model critters and the app icon were drawn for V.O.I.C.E. and are shared under CC BY-SA 4.0.
 
-## Pictures (symbols)
+## Vocabulary
 
-Every button shows an open-licensed symbol from the sources below. The
-files in `images/symbols/` are unmodified copies of Mulberry and OpenMoji
-files, renamed to the word they show, plus a few pictures drawn for this
-project (listed last). The symbols for objects and food are **temporary stand-ins** until real
-photos of the child's own things are added by an adult (Edit board > photo).
-No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
+- **Universal Core vocabulary** - Center for Literacy and Disability Studies, University of North Carolina at Chapel Hill. Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source: https://www.project-core.com. Changed: the words are arranged in V.O.I.C.E.'s own fixed layout, with more words added. The word list in `data/core-board.json` is arranged by this project's own fixed layout; no layout or symbols from LAMP or Prentke Romich (PCS) are used.
 
-- **Mulberry Symbols** (c) 2018-2026 Steve Lee. Licensed under the
-  [Creative Commons Attribution-Share Alike 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/)
-  (CC BY-SA 4.0). Source: https://mulberrysymbols.org
-- **OpenMoji** - all emojis designed by [OpenMoji](https://openmoji.org/), the
-  open-source emoji and icon project. Licensed under
-  [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
-  Source: https://openmoji.org (color SVGs from the `openmoji` npm package).
+## Pictures
 
-- **Drawn for this project** - simple pictures made for this app (for example
-  the name tag on the About me page), shared under the same CC BY-SA 4.0 license.
+Every button shows an open symbol. No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji pictures are used.
 
-- **V.O.I.C.E. app icon** (`tools/icon/voice-icon.svg`) - an original speech bubble with a "V" and five
-  colored dots, drawn for this project, CC BY-SA 4.0.
+- **Mulberry Symbols** - © 2018-2026 Steve Lee. Licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Source: https://mulberrysymbols.org. Files in `images/symbols/` are unmodified copies, renamed to the word they show.
+- **OpenMoji** - All emojis designed by OpenMoji, the open-source emoji and icon project. Licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Source: https://openmoji.org. Color SVGs from the `openmoji` npm package, unmodified, renamed to the word they show.
+- **Pictures drawn for V.O.I.C.E.** - © 2026 Richard Wawrzonkowski. Licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). A few button pictures, the app icon, and the seven Chicago critters with their costumes and L line colors. Listed as "This project" in the tables below; the app icon is `tools/icon/voice-icon.svg`; the critters are in `images/critters/`.
 
-## Model critters
+## Fonts
 
-The seven Chicago critters (Dibs the pigeon, Chance the alligator, Ivy the
-goose, Hiram the bulldog, Monty the piping plover, Sue the T. rex skeleton and the
-L train), their costumes (bull horns, blue cap, black cap, football, hockey stick,
-myrtle and gold scarf) and the L line colors in `images/critters/` were drawn for
-this project as original shapes. They nod to Chicago animals and places but are
-not based on any existing character, mascot, logo or brand, and V.O.I.C.E. is not
-affiliated with any team, school, museum or the CTA. Shared under CC BY-SA 4.0.
+Three optional fonts for the child's screen (Adult menu > Accessibility).
 
-## Fonts (Accessibility)
+- **Atkinson Hyperlegible** - © 2020 Braille Institute of America, Inc. Licensed under [SIL Open Font License 1.1](https://openfontlicense.org). Source: https://www.brailleinstitute.org/freefont. Full text: `fonts/OFL-atkinson-hyperlegible.txt`.
+- **Lexend** - © 2019 The Lexend Project Authors. Licensed under [SIL Open Font License 1.1](https://openfontlicense.org). Source: https://github.com/googlefonts/lexend. Full text: `fonts/OFL-lexend.txt`.
+- **OpenDyslexic** - © 2012-2019 Abbie Gonzalez, with Reserved Font Name OpenDyslexic (used unmodified). Licensed under [SIL Open Font License 1.1](https://openfontlicense.org). Source: https://opendyslexic.org. Full text: `fonts/OFL-opendyslexic.txt`.
 
-Three optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. All are licensed under
-the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`, `fonts/OFL-opendyslexic.txt`):
+## Camera scenes
 
-- **Atkinson Hyperlegible** (c) 2020 Braille Institute of America, Inc. https://www.brailleinstitute.org/freefont
-- **Lexend** (c) 2019 The Lexend Project Authors. https://github.com/googlefonts/lexend
-- **OpenDyslexic** (c) 2012-2019 Abbie Gonzalez, with Reserved Font Name OpenDyslexic (used unmodified). https://opendyslexic.org
+Objects in a photo are found on this device; nothing is sent anywhere.
 
-## Object recognition (Scenes)
+- **TensorFlow.js 4.22.0** - © Google LLC and the TensorFlow authors. Licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Source: https://github.com/tensorflow/tfjs. `vendor/tf.min.js`; full text `vendor/LICENSE-Apache-2.0.txt`.
+- **COCO-SSD 2.2.3** - © Google LLC and the TensorFlow authors; trained on the COCO dataset (labels CC BY 4.0, © COCO Consortium). Licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Source: https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd. `vendor/coco-ssd.min.js` and the model files in `models/coco-ssd/`.
 
-The Scenes feature finds everyday objects in a photo on the device itself (nothing is sent anywhere).
-It uses open-source software and a model, all licensed under the Apache License 2.0
-(`vendor/LICENSE-Apache-2.0.txt`):
+## Notices
 
-- **TensorFlow.js** 4.22.0 (c) Google LLC / TensorFlow authors - `vendor/tf.min.js`. https://github.com/tensorflow/tfjs
-- **COCO-SSD** 2.2.3 (c) Google LLC / TensorFlow authors - `vendor/coco-ssd.min.js` and the model files in `models/coco-ssd/`
-  (SSD with MobileNet v2, trained on the COCO dataset, whose labels are CC BY 4.0, (c) COCO Consortium). https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
+- Button colors follow the Modified Fitzgerald Key, a general convention.
+- The Chicago critters nod to Chicago animals and places but are original drawings. V.O.I.C.E. is not affiliated with any team, school, museum or the CTA.
+- V.O.I.C.E. supports, but does not replace, an individualized AAC assessment by a speech-language pathologist or team. It is not medical advice.
+
+The symbols for objects and food are temporary stand-ins until an adult adds real photos of the child's own things (Edit board > photo).
 
 **License summary (CC BY-SA 4.0).** You may copy, share and adapt these
 pictures, including commercially, if you (1) give credit to the creators, as

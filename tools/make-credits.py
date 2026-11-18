@@ -17,70 +17,25 @@ labels = {"back": "Back"}
 for wid, w in board["words"].items():
     labels[wid] = w["label"]
 
-head = """# Credits
-
-## Vocabulary and layout
-
-- **Universal Core vocabulary** (c) Center for Literacy and Disability Studies,
-  University of North Carolina at Chapel Hill. Licensed under
-  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-  The word list in `data/core-board.json` is arranged by this project's own
-  fixed layout; no layout or symbols from LAMP or Prentke Romich (PCS) are used.
-- Color coding follows the Modified Fitzgerald Key convention (a general
-  convention, not a proprietary asset).
-
-## Pictures (symbols)
-
-Every button shows an open-licensed symbol from the sources below. The
-files in `images/symbols/` are unmodified copies of Mulberry and OpenMoji
-files, renamed to the word they show, plus a few pictures drawn for this
-project (listed last). The symbols for objects and food are **temporary stand-ins** until real
-photos of the child's own things are added by an adult (Edit board > photo).
-No ARASAAC, PCS, SymbolStix, LAMP or Apple emoji images are used.
-
-- **Mulberry Symbols** (c) 2018-2026 Steve Lee. Licensed under the
-  [Creative Commons Attribution-Share Alike 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/)
-  (CC BY-SA 4.0). Source: https://mulberrysymbols.org
-- **OpenMoji** - all emojis designed by [OpenMoji](https://openmoji.org/), the
-  open-source emoji and icon project. Licensed under
-  [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
-  Source: https://openmoji.org (color SVGs from the `openmoji` npm package).
-
-- **Drawn for this project** - simple pictures made for this app (for example
-  the name tag on the About me page), shared under the same CC BY-SA 4.0 license.
-
-- **V.O.I.C.E. app icon** (`tools/icon/voice-icon.svg`) - an original speech bubble with a "V" and five
-  colored dots, drawn for this project, CC BY-SA 4.0.
-
-## Model critters
-
-The seven Chicago critters (Dibs the pigeon, Chance the alligator, Ivy the
-goose, Hiram the bulldog, Monty the piping plover, Sue the T. rex skeleton and the
-L train), their costumes (bull horns, blue cap, black cap, football, hockey stick,
-myrtle and gold scarf) and the L line colors in `images/critters/` were drawn for
-this project as original shapes. They nod to Chicago animals and places but are
-not based on any existing character, mascot, logo or brand, and V.O.I.C.E. is not
-affiliated with any team, school, museum or the CTA. Shared under CC BY-SA 4.0.
-
-## Fonts (Accessibility)
-
-Three optional fonts for the child's screen (Adult menu > Accessibility), bundled in `fonts/` so they work offline. All are licensed under
-the SIL Open Font License 1.1 (full text with each font: `fonts/OFL-atkinson-hyperlegible.txt`, `fonts/OFL-lexend.txt`, `fonts/OFL-opendyslexic.txt`):
-
-- **Atkinson Hyperlegible** (c) 2020 Braille Institute of America, Inc. https://www.brailleinstitute.org/freefont
-- **Lexend** (c) 2019 The Lexend Project Authors. https://github.com/googlefonts/lexend
-- **OpenDyslexic** (c) 2012-2019 Abbie Gonzalez, with Reserved Font Name OpenDyslexic (used unmodified). https://opendyslexic.org
-
-## Object recognition (Scenes)
-
-The Scenes feature finds everyday objects in a photo on the device itself (nothing is sent anywhere).
-It uses open-source software and a model, all licensed under the Apache License 2.0
-(`vendor/LICENSE-Apache-2.0.txt`):
-
-- **TensorFlow.js** 4.22.0 (c) Google LLC / TensorFlow authors - `vendor/tf.min.js`. https://github.com/tensorflow/tfjs
-- **COCO-SSD** 2.2.3 (c) Google LLC / TensorFlow authors - `vendor/coco-ssd.min.js` and the model files in `models/coco-ssd/`
-  (SSD with MobileNet v2, trained on the COCO dataset, whose labels are CC BY 4.0, (c) COCO Consortium). https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
-
+# The top of CREDITS.md comes from data/credits.json (the same file the app's Credits and licenses page shows).
+# Before beta is promoted the stable folder has no credits.json yet, so the beta copy is used.
+cpath = os.path.join(ROOT, "data", "credits.json")
+if not os.path.exists(cpath): cpath = os.path.join(ROOT, "beta", "data", "credits.json")
+C = json.load(open(cpath, encoding="utf-8"))
+lines = ["# Credits", "", C["copyright"] + " See LICENSE.", "", C["summary"], ""]
+for sec in C["sections"]:
+    lines += ["## " + sec["title"], ""]
+    if sec.get("intro"): lines += [sec["intro"], ""]
+    for it in sec["items"]:
+        t = f"- **{it['name']}** - {it['by'].rstrip('.')}. Licensed under [{it['license']}]({it['licenseUrl']})."
+        if it.get("url"): t += f" Source: {it['url']}."
+        if it.get("note"): t += f" {it['note']}"
+        if it.get("repo"): t += f" {it['repo']}"
+        lines.append(t)
+    lines.append("")
+lines += ["## Notices", ""] + ["- " + n for n in C["notices"]] + [""]
+lines += ["The symbols for objects and food are temporary stand-ins until an adult adds real photos of the child's own things (Edit board > photo).", ""]
+head = "\n".join(lines) + """
 **License summary (CC BY-SA 4.0).** You may copy, share and adapt these
 pictures, including commercially, if you (1) give credit to the creators, as
 in this file, (2) say if you changed them, and (3) share anything you make from

@@ -142,7 +142,7 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
 - Mulberry Symbols: CC BY-SA 4.0
 - OpenMoji: CC BY-SA 4.0
 - Fonts: Atkinson Hyperlegible, Lexend, OpenDyslexic (SIL Open Font License)
-- The app's own code license is still open (MIT or GPL). Decide it before public release.
+- The app's own code and text: © 2026 Richard Wawrzonkowski, all rights reserved (the LICENSE file, same on the site and the app). The app's About > "See all credits and licenses" page lists every source; its text lives in the app repo's beta/data/credits.json (copy it for the site's Credits page).
 
 ## Still open (answer before building)
 
