@@ -95,7 +95,11 @@ export async function openAbout() {
 
   const privacy = h("section", { class: "panel", id: "about-privacy" },
     h("h2", { text: "Privacy" }),
-    h("p", { text: "No accounts, no tracking, no ads. Everything (photos, learners, settings, and which words are used and when) stays on this device. Everyday use data only leaves this iPad in a backup an adult saves." }));
+    h("p", { text: "No accounts, no tracking, no ads. Everything (photos, learners, settings, and which words are used and when) stays on this device. Everyday use data only leaves this iPad in a backup an adult saves." }),
+    // The website's full privacy page (data/about.json "privacyUrl", Nov 18). Hidden when empty.
+    typeof about.privacyUrl === "string" && about.privacyUrl.trim()
+      ? h("a", { class: "btn about-link", id: "about-privacy-link", href: about.privacyUrl.trim(), target: "_blank", rel: "noopener", text: "Read the full privacy page" })
+      : null);
 
   const o = openOverlay([
     h("div", { class: "menu-head" },

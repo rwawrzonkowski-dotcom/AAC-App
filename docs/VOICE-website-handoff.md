@@ -157,7 +157,7 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
 1. Answer the open questions above.
 2. Make a visual mock-up of the Home page from the approved direction, and get Richard's approval.
 3. Create the `rwawrzonkowski-dotcom.github.io` repository and build the 5 pilot pages.
-4. Fill the app's About links with the site's addresses (Website done Nov 18; Resources, Trainings, Reserve a training and Contact wait for those pages). This is a small change made in the app project.
+4. Fill the app's About links with the site's addresses (Website and the Privacy page done Nov 18; Resources waits on Richard; Trainings, Reserve a training and Contact wait for those pages). This is a small change made in the app project.
 5. Before public release:
    - trademark and domain check;
    - Privacy, Credits and Not-medical-advice pages;

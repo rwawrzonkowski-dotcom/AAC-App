@@ -733,6 +733,7 @@ a credits summary, the privacy note and the version. The creator and links are n
   `mailto:you@example.com`). A link with an empty `url` shows as the muted line "Link coming soon: Website" instead of a button.
   These placeholders show **only in beta**; in stable, empty creator and empty links are left out entirely (no Resources heading if every link is empty).
   You can rename, remove or add entries. Links open in a new tab and need internet; the rest of the app stays fully offline.
+- `privacyUrl` (optional, added Nov 18): the website's full privacy page. When filled, the Privacy section shows a "Read the full privacy page" button; when empty, nothing.
 - Keep it valid JSON (straight double quotes, commas between entries, none after the last). If the file is broken the placeholders show.
 - After editing, raise `CACHE_VERSION` in that copy's `sw.js` (for example `beta-aac-v3` to `beta-aac-v4`) so devices fetch the new file.
 
