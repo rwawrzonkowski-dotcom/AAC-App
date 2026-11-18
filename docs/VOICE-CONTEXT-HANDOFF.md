@@ -101,7 +101,7 @@
   - Spanish and bilingual families;
   - BACB conflict-of-interest planning for piloting your own app with your own clients;
   - how to keep it free over time, and the license choice.
-- **Before public release:** trademark and domain check, privacy policy, App Store name (e.g. "VOICE AAC"; "Voice" is taken), code license (MIT or GPL), custom domain.
+- **Before public release:** trademark and domain check, privacy policy, App Store name (e.g. "V.O.I.C.E. AAC"; "Voice" is taken), code license settled (all rights reserved, Nov 18), custom domain.
 - **Smaller items:** about 60 weak symbols to review; the 24 grid isn't built; the About screen links (Website, Resources, Trainings, Reserve a training, Contact) are still blank.
 
 ## 7. Pilot reminders

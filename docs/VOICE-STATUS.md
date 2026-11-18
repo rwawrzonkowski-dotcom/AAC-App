@@ -150,7 +150,7 @@ Scene switcher = 1-second hold on the scene name; session hides the strip, Model
 4. **Phase 2 — teaching and data:** Rounds A (targets, sessions, prompting, fading, mastery), B (everyday recording) and C (reports and export) promoted to clients as VOICE 2.0 on Oct 29 (upgrade from 1.1 verified: learners, boards and stage kept). Next: pilot use of reports and teaching sessions.
 5. **Phase 3 — camera scenes + everything since (Beta 3.0–3.14):** device-tested pieces so far: camera button, scenes, little-word strip, phrase labels, sentence targets, Model mode, Done buttons. **Next decision: promote Beta 3.14 to stable as VOICE 3.0** (backup file version 18: backups from it cannot be restored into VOICE 2.0, so promote before relying on beta backups).
 6. **Website:** answer the open questions in the website plan, then build the pilot pages (Home, Get started, For clinicians, About, Privacy) at rwawrzonkowski-dotcom.github.io.
-7. **Before public release:** trademark and domain check, privacy policy, App Store name (e.g. "VOICE AAC"; "Voice" is taken), app code license (MIT or GPL), move app and site to a custom domain using backup/restore.
+7. **Before public release:** trademark and domain check, privacy policy, App Store name (e.g. "V.O.I.C.E. AAC"; "Voice" is taken), IP attorney check of LICENSE and paid tiers, move app and site to a custom domain using backup/restore.
 8. **Phase 4 — native iPad app** for the App Store (needs a Mac with Xcode and the $99/year developer account).
 
 ## Open smaller items
