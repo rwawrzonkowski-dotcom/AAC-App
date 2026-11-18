@@ -7,6 +7,7 @@
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
+| **Beta 3.45** | Nov 18 | About's Website link now opens the V.O.I.C.E. website (https://rwawrzonkowski-dotcom.github.io/voice/). | data/about.json |
 | **Beta 3.44** | Nov 18 | **Credits and licenses** (Richard): copyright line at the bottom of About; "See all credits and licenses" page with every source's holder, license and link and the notices (not affiliated; not a substitute for an AAC assessment); the old "CREDITS.md in the project" line is gone. data/credits.json is the one source; make-credits.py writes the top of CREDITS.md from it. | js/about.js, styles.css, data/credits.json (new), tools/make-credits.py, CREDITS.md |
 | **V.O.I.C.E. 3.4** | Nov 17 | **Promoted to stable**: Beta 3.42 and 3.43 (the name V.O.I.C.E., read aloud as "voice"; "Find your V.O.I.C.E.!" first setup). Stable channel.js gained APP_NAME and FULL_NAME; make-beta.sh writes them for beta; credits use the new name. Upgrade from 3.3 tested. Cache aac-v24. | repo root, js/channel.js, tools/make-beta.sh, tools/make-credits.py |
 | **Beta 3.43** | Nov 17 | **"Find your V.O.I.C.E.!"** (Richard): first setup heading, with the full name and "Let's set up your first learner." under it; adding another learner says "Add a learner". | js/setup.js, styles.css |

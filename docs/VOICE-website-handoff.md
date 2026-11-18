@@ -24,7 +24,7 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
 | App planning doc | "Portable AAC App — Planning Doc": https://claude.ai/artifact/3NVVeKFmhMpPofYq5kqFee |
 | Stable app (clients use this) | https://rwawrzonkowski-dotcom.github.io/AAC-App/ (V.O.I.C.E. 3.4) |
 | Beta app (testing only) | https://rwawrzonkowski-dotcom.github.io/AAC-App/beta/ (V.O.I.C.E. Beta 3.43) |
-| Where the site will live | A new GitHub repository, `rwawrzonkowski-dotcom.github.io`, published free on GitHub Pages and kept separate from the app |
+| The website (live) | https://rwawrzonkowski-dotcom.github.io/voice/ (the app's About > Website link opens it, from Beta 3.45) |
 
 ## Decisions already made
 
@@ -157,7 +157,7 @@ The public website for **VOICE** (Variable Output for Individualized Communicati
 1. Answer the open questions above.
 2. Make a visual mock-up of the Home page from the approved direction, and get Richard's approval.
 3. Create the `rwawrzonkowski-dotcom.github.io` repository and build the 5 pilot pages.
-4. Fill the app's About links with the site's addresses. This is a small change made in the app project.
+4. Fill the app's About links with the site's addresses (Website done Nov 18; Resources, Trainings, Reserve a training and Contact wait for those pages). This is a small change made in the app project.
 5. Before public release:
    - trademark and domain check;
    - Privacy, Credits and Not-medical-advice pages;
