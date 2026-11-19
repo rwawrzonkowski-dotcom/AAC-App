@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v65";
+const CACHE_VERSION = "beta-aac-v66";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -24,7 +24,7 @@ const FILES = [
   "data/scene-related.json?v=de05050f08",
   "data/scene-words.json?v=4c9d8ed316",
   "data/teaching-templates.json?v=c95ae2570c",
-  "data/word-forms.json?v=89b5450dff",
+  "data/word-forms.json?v=7efa7601fc",
   "fonts/OFL-atkinson-hyperlegible.txt?v=be10884967",
   "fonts/OFL-lexend.txt?v=2c363333f9",
   "fonts/OFL-opendyslexic.txt?v=1ff1e4ec1e",
@@ -1554,17 +1554,17 @@ const FILES = [
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=a5ac8a084f",
   "js/camerabtn.js?v=65ff571ae0",
-  "js/channel.js?v=7df89f1622",
+  "js/channel.js?v=dfec4dfcbf",
   "js/critters.js?v=de320f311e",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=35e21da07c",
   "js/db.js?v=44c9f55183",
   "js/devicetips.js?v=78951e1a01",
-  "js/dial.js?v=2737236a3d",
+  "js/dial.js?v=e63ae256a0",
   "js/dibs.js?v=f592b55324",
   "js/editor.js?v=8407e9e8c2",
   "js/everyday.js?v=96bf669ef0",
-  "js/forms.js?v=4a4528600d",
+  "js/forms.js?v=11502fbd44",
   "js/hold.js?v=209430a5db",
   "js/instrcard.js?v=f47cb8f9eb",
   "js/instrui.js?v=ee3af4f621",

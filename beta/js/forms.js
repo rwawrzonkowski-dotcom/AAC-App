@@ -90,7 +90,7 @@ export function openFormsPopover({ forms, current, pressOptions, onChoose, onClo
 //
 //   Verbs         past = N (up)        -ing = E (right)     -s = S (down)       past participle = W (left)
 //                 negative/contraction (don't, can't) = NE
-//   Describing    -er = E              -est = NE
+//   Describing    -er = E              -est = NE            -ly = S (how: slowly, quietly; Beta 3.47)
 //   Nouns         plural = E
 //   Pronouns      object (me him her us them) = E            possessive (my his your our their its) = S
 //                 reflexive (myself himself ...) = W         other (mine yours hers ours theirs) = SE
@@ -107,7 +107,7 @@ const EXTRA_ORDER = ["NW", "SE", "SW", "NE", "S", "W", "N", "E"];
 // Which slot each form TYPE uses. (Types are also the names of the little marker pictures in js/dial.js.)
 export const TYPE_SLOT = {
   past: "N", ing: "E", s: "S", pp: "W", neg: "NE",
-  er: "E", est: "NE", plural: "E",
+  er: "E", est: "NE", ly: "S", plural: "E",
   obj: "E", poss: "S", refl: "W", "pron-other": "SE",
 };
 
@@ -123,6 +123,7 @@ function classify(section, words) {
     let sawEr = false;
     return forms.map((w) => {
       if (/est$/i.test(w)) return { word: w, type: "est" };
+      if (/ly$/i.test(w)) return { word: w, type: "ly" };            // slowly, quietly (how something is done)
       if (!sawEr) { sawEr = true; return { word: w, type: "er" }; }
       return { word: w, type: "extra" };
     });

@@ -79,6 +79,7 @@ const ICONS = {
   plural: '<circle cx="8" cy="12" r="3" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="3" fill="currentColor" stroke="none"/>',   // two dots
   neg:   '<circle cx="12" cy="12" r="8"/><path d="M6.5 6.5l11 11"/>',               // "no" sign
   er:    '<rect x="5" y="13" width="5" height="7" rx="1" fill="currentColor" stroke="none"/><rect x="13" y="8" width="5" height="12" rx="1" fill="currentColor" stroke="none"/>',
+  ly:    '<path d="M3 14c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/>',                          // a wave: "how" (slowly, quietly)
   est:   '<rect x="3" y="14" width="5" height="6" rx="1" fill="currentColor" stroke="none"/><rect x="10" y="9" width="5" height="11" rx="1" fill="currentColor" stroke="none"/><rect x="17" y="3" width="5" height="17" rx="1" fill="currentColor" stroke="none"/>',
   obj:   '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/>',                      // a person
   poss:  '<circle cx="9" cy="8" r="3"/><path d="M3 19c0-3.5 2.5-5.5 6-5.5s6 2 6 5.5"/><rect x="16" y="14" width="5" height="5" rx="1"/>',   // a person and their thing
