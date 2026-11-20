@@ -44,6 +44,7 @@ import { openDial } from "./dial.js";
 import * as everyday from "./everyday.js";
 import * as scenes from "./scenestrip.js";
 import * as little from "./littlewords.js";
+import * as fctMod from "./fct.js";
 import { applyAccess, getAccess, showToListener } from "./access.js";
 import { createScanner } from "./scan.js";
 import { looksLikePhone } from "./devicetips.js";
@@ -172,6 +173,15 @@ function recordTap({ id, label, spoken, how, form, base, sceneId }) {
 }
 // The chips in the message bar changed (added = a chip was added or replaced, false = deleted): the utterance tracker
 // decides what to record from the chips left in the bar.
+// FCT mode (Beta 3.48, js/fct.js): its requests, waits and behavior tallies are everyday events with how "fct" (not counted as words).
+let fct = null;
+function recordFct(label, extra) {
+  try {
+    const p = getCurrent();
+    if (!everyday.isRecording(p.id)) return;
+    everyday.recordWord(p.id, { wordId: p.fct && p.fct.wordId, label, spoken: label, how: "fct", mode: "learner", gridSize: p.gridSize, stage: p.stage, fct: extra });
+  } catch (e) { console.warn("Could not record FCT:", e); }
+}
 function chipsChanged(added) {
   try { const p = getCurrent(); everyday.sentenceChanged(p.id, state.sentence, { gridSize: p.gridSize, stage: p.stage }, added); } catch (e) { /* never break a tap */ }
 }
@@ -294,6 +304,7 @@ function renderAll() {
   teach.onRender();                     // a running teaching trial re-draws its prompt on the new page
   scenes.onRender(!state.editing && !state.choosing);     // the scene strip shows on the child's board only
   updateLittle();                                           // the little-word strip (Beta 3.7), unless a scene has the strip
+  if (fct) fct.onRender();                                  // FCT mode (Beta 3.48): highlight ring, wait countdown, behavior tally
   drawMoodBadge();                                          // the mood face in the message bar (Beta 3.16)
   if (hintsReady) setTimeout(coachCheck, 600);           // "This is the adult menu", once per learner (js/adulthint.js)
   if (scanner) scanner.sync();                              // switch scanning (Beta 3.21): repaint the highlight on the new buttons
@@ -768,6 +779,7 @@ function onCellTap(cellEl) {
   drawMessage();
   recordTap({ id, label: d.label, spoken: d.spoken, how: "board" });
   chipsChanged(true);
+  if (fct) fct.onWord(id, recMode());       // FCT mode (Beta 3.48): the learner's replacement request starts the wait
   teach.onSelect({ type: "word", id, label: d.label });     // (a no-op unless a teaching trial is running)
 
   if (state.page !== "core") returnToMain(d);
@@ -1258,6 +1270,8 @@ async function start() {
 
   fitLabelsOnResize($("board"));
   // The little-word strip (Beta 3.7): tap = the head word, press and hold = its dial. Touch supports apply as on the board.
+  fct = fctMod.init({ appEl: $("app"), stripEl: $("context-strip"), getProfile: getCurrent, saveProfile, record: recordFct,
+    canRun: () => !state.editing && !state.choosing && !state.modeling && !teach.isActive() });
   attachPressHandling(little.init($("context-strip")), onLittleTap, ".lw-item",
     { holdMs, blocked: tapsBlocked, dialMs: littleDialMs, openDial: openLittleDial });
   attachHold($("adult-hold"), HOLD_TO_OPEN_MS, openAdult);

@@ -1,6 +1,6 @@
 // Service worker: caches every app file so the board works offline.
 // When you change any file, bump CACHE_VERSION so devices pick up the update.
-const CACHE_VERSION = "beta-aac-v66";
+const CACHE_VERSION = "beta-aac-v67";
 // Object recognition for Scenes (beta 3.0): the TensorFlow.js library and the COCO-SSD model (about 19 MB) are NOT in the install list
 // below. They are kept in this separate cache the first time they are used (or when the adult taps "Download object recognition for
 // offline use"), so a normal update never re-downloads them and the activate step below never deletes this cache.
@@ -1546,15 +1546,15 @@ const FILES = [
   "js/about.js?v=b18baf8eda",
   "js/access.js?v=aa47f35d07",
   "js/accessui.js?v=a13422be97",
-  "js/adult.js?v=97ed96bf03",
+  "js/adult.js?v=94156326f9",
   "js/adulthint.js?v=4b52cc0eb3",
-  "js/app.js?v=8d43ce64bb",
-  "js/backup.js?v=da516d51d3",
+  "js/app.js?v=36b611ffec",
+  "js/backup.js?v=f15cfb3434",
   "js/board.js?v=a91dfe0402",
   "js/boarddata.js?v=0dc40b9d78",
   "js/boardmodel.js?v=a5ac8a084f",
   "js/camerabtn.js?v=65ff571ae0",
-  "js/channel.js?v=dfec4dfcbf",
+  "js/channel.js?v=c69cbe3d07",
   "js/critters.js?v=de320f311e",
   "js/datapanel.js?v=9d732dde59",
   "js/datawarning.js?v=35e21da07c",
@@ -1563,7 +1563,9 @@ const FILES = [
   "js/dial.js?v=e63ae256a0",
   "js/dibs.js?v=f592b55324",
   "js/editor.js?v=8407e9e8c2",
-  "js/everyday.js?v=96bf669ef0",
+  "js/everyday.js?v=d56846c22e",
+  "js/fct.js?v=903ef34492",
+  "js/fctdata.js?v=0de6de5d6a",
   "js/forms.js?v=11502fbd44",
   "js/hold.js?v=209430a5db",
   "js/instrcard.js?v=f47cb8f9eb",
@@ -1580,12 +1582,12 @@ const FILES = [
   "js/numberwords.js?v=52f41a7a84",
   "js/photoboxes.js?v=0250b9f5f6",
   "js/predict.js?v=400e6a9e74",
-  "js/profiles.js?v=76fe9bc83d",
+  "js/profiles.js?v=bcc2dcbad0",
   "js/recognize.js?v=50dbddeda9",
   "js/reportcharts.js?v=be74b8dffa",
-  "js/reportdata.js?v=f3b93e0d05",
+  "js/reportdata.js?v=008eb03567",
   "js/reportdoc.js?v=fb69e7842b",
-  "js/reportexport.js?v=fc54029b49",
+  "js/reportexport.js?v=3df88ab422",
   "js/reports.js?v=61e5aa9f69",
   "js/scan.js?v=7e549e6485",
   "js/sceneadult.js?v=36aa39df97",
@@ -1593,7 +1595,7 @@ const FILES = [
   "js/scenestrip.js?v=232b895209",
   "js/scenewords.js?v=14792a490e",
   "js/session.js?v=0d52886c6c",
-  "js/settingsnav.js?v=ffca421565",
+  "js/settingsnav.js?v=93efb8b61d",
   "js/setup.js?v=f1e1f2e996",
   "js/speech.js?v=3ac88eccc4",
   "js/stagerule.js?v=1e7175f7ef",
@@ -1609,7 +1611,7 @@ const FILES = [
   "js/ui.js?v=a82b20d3ba",
   "js/voicepicker.js?v=c326609a5b",
   "manifest.webmanifest?v=2beb7416f6",
-  "styles.css?v=c536e1fac5",
+  "styles.css?v=829ab872e7",
 ];
 // END FILE LIST
 

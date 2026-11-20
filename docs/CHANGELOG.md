@@ -7,6 +7,7 @@
 
 | Version | Date | What changed | Main files |
 |---|---|---|---|
+| **Beta 3.48** | Nov 19 | **FCT mode** (Richard): clinician picks the learner's replacement request; optional highlight ring; the learner's request starts a wait countdown in the context strip (board stays usable), then "give it now"; wait steps 0/5/10/20/30/60 s, up after 3 calm waits, down after 2 with behavior (editable); 1 s hold Behavior tally (restarts a running wait); events recorded as how "fct" (not words). Backup version 23. | js/fct.js, js/fctdata.js (new), js/app.js, js/adult.js, js/settingsnav.js, js/profiles.js, js/backup.js, js/everyday.js, js/reportdata.js, js/reportexport.js, styles.css |
 | **Beta 3.47** | Nov 18 | **-ly forms on the hold dial** (Richard): a new fixed spot below describing words (slowly, quietly, carefully...; 30 words, wave marker), and -er/-est added to 47 describing words that had none (louder, quieter, sunnier, hungrier...). Existing dials unchanged. | js/forms.js, js/dial.js, data/word-forms.json |
 | **V.O.I.C.E. 3.5** | Nov 18 | **Promoted to stable**: Beta 3.44 to 3.46 (copyright line, Credits and licenses page, Website and privacy page links). Upgrade from 3.4 tested. Cache aac-v25. | repo root, data/credits.json (new in stable), CREDITS.md |
 | **Beta 3.46** | Nov 18 | About's Privacy section links to the website's privacy page (new optional `privacyUrl` in data/about.json; README updated). | js/about.js, data/about.json, README.md |

@@ -156,12 +156,13 @@ export function recordWord(learnerId, e) {
   if (e.sessionId) ev.sessionId = e.sessionId;
   if (e.trialId) ev.trialId = e.trialId;
   if (e.sceneId) ev.sceneId = e.sceneId;
+  if (e.how === "fct" && e.fct) ev.fct = cleanFctInfo(e.fct);
   enqueue(st, localDate(time), (row) => applyWord(st, ev, row));
 }
 
 function applyWord(st, ev, row) {
   st.out.events.push(ev);
-  if (ev.how === "tone" || ev.how === "mood") { touch(st, row); return; }       // not a word (Beta 3.16)
+  if (NOT_WORDS.has(ev.how)) { touch(st, row); return; }       // not a word (tone, mood: Beta 3.16; fct: Beta 3.48)
   if (ev.mode === "learner") {
     const key = wordKeyOf(ev);
     row.learnerTaps++;
@@ -463,7 +464,18 @@ export async function exportEveryday(learnerId) {
 
 // "tone" (a message said in a tone from the tone wheel or the mood) and "mood" (the learner set or cleared a mood) are recorded as
 // events too (Beta 3.16), but they are not words: they are not counted in taps, words or new words.
-const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad", "scene", "photo scene", "little", "little dial", "tone", "mood"];
+// "fct" (Beta 3.48) = an FCT mode event (request, wait, behavior tally); also not a word. Its details are in `fct`.
+const HOWS = ["board", "page", "forms", "dial", "keyboard", "numberpad", "scene", "photo scene", "little", "little dial", "tone", "mood", "fct"];
+export const NOT_WORDS = new Set(["tone", "mood", "fct"]);
+function cleanFctInfo(x) {
+  const o = {};
+  if (!x || typeof x !== "object") return o;
+  if (typeof x.wait === "number" && isFinite(x.wait) && x.wait >= 0) o.wait = Math.round(x.wait * 10) / 10;
+  if (typeof x.step === "number" && isFinite(x.step) && x.step >= 0) o.step = Math.floor(x.step);
+  if (typeof x.calm === "boolean") o.calm = x.calm;
+  if (x.during === "wait" || x.during === "other") o.during = x.during;
+  return o;
+}
 const TONE_IDS = ["happy", "excited", "silly", "question", "calm", "sad", "mad", "scared"];
 const MODES = ["learner", "model", "session"];
 const ENDS = ["barSpeak", "clear", "idle"];
@@ -487,6 +499,7 @@ export function cleanEvent(raw) {
   if (typeof raw.sessionId === "string" && ID_RE.test(raw.sessionId)) e.sessionId = raw.sessionId;
   if (typeof raw.trialId === "string" && ID_RE.test(raw.trialId)) e.trialId = raw.trialId;
   if (typeof raw.sceneId === "string" && ID_RE.test(raw.sceneId)) e.sceneId = raw.sceneId;      // (Beta 3.0: the scene a strip or photo-scene tap came from)
+  if (raw.how === "fct" && raw.fct) e.fct = cleanFctInfo(raw.fct);
   return e;
 }
 export function cleanUtterance(raw) {

@@ -99,9 +99,10 @@ export function sentenceRows(sessions, trials) {
 
 export const EVENT_HEADERS = ["date", "time", "word", "how_reached", "mode"];
 const HOW_TEXT = { board: "board", page: "page", forms: "forms", dial: "dial", keyboard: "keyboard", numberpad: "number pad", scene: "scene strip", "photo scene": "scene photo", little: "little-word strip", "little dial": "little-word dial",
-  tone: "message tone (tone wheel)", mood: "mood set (normal = cleared)" };
+  tone: "message tone (tone wheel)", mood: "mood set (normal = cleared)", fct: "FCT mode" };
 export function eventRows(events) {
-  return events.map((e) => [dateOf(e.time), clock(e.time), e.form || e.label, HOW_TEXT[e.how] || e.how, e.mode]);
+  return events.map((e) => [dateOf(e.time), clock(e.time),
+    e.how === "fct" && e.fct ? e.label + (typeof e.fct.wait === "number" ? ` (${e.fct.wait} s)` : "") : e.form || e.label, HOW_TEXT[e.how] || e.how, e.mode]);
 }
 
 export const DAILY_HEADERS = ["date", "taps", "unique_words", "new_words", "messages", "multi_word_messages", "longest_message_words"];

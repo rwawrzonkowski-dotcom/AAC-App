@@ -93,10 +93,12 @@ import { WORDS_BUTTON_CHOICES, cleanWordDial } from "./profiles.js";
 import { cleanAccess } from "./access.js";
 import { cleanScan } from "./scan.js";
 import { cleanStageRule } from "./stagerule.js";
+import { cleanFct } from "./fctdata.js";
 
 export const BACKUP_APP = "AAC-App";
-export const BACKUP_VERSION = 22;   // 19 = Beta 3.23 (Actions folder layout); 20 = Beta 3.25 (the 24 board); 21 = Beta 3.26 (stage 5);
+export const BACKUP_VERSION = 23;   // 19 = Beta 3.23 (Actions folder layout); 20 = Beta 3.25 (the 24 board); 21 = Beta 3.26 (stage 5);
                                     // 22 = Beta 3.28 (letterMode, wordPredict: an older file restores with letter names and no prediction)
+                                    // 23 = Beta 3.48 (fct: FCT mode settings; an older file restores with FCT mode off)
 
 // ---------------------------------------------------------------- saving
 
@@ -139,6 +141,7 @@ export async function buildBackup(learners, { teaching = true, templates = false
       speakLetters: p.speakLetters,
       letterMode: p.letterMode,
       wordPredict: p.wordPredict,
+      fct: p.fct,
       cameraButton: p.cameraButton,
       littleStrip: p.littleStrip,
       toneWheel: p.toneWheel,
@@ -318,6 +321,7 @@ function cleanLearner(raw, index, version) {
   const speakLetters = version >= 6 && raw.speakLetters === true;
   const letterMode = raw.letterMode === "sounds" ? "sounds" : "names";     // (version 22; older files: names, no prediction)
   const wordPredict = raw.wordPredict === true;
+  const fct = cleanFct(raw.fct);                                          // (version 23)
   // Backups older than version 10 (or without the field) were made before the word-forms dial: the defaults.
   const wordDial = cleanWordDial(version >= 10 ? raw.wordDial : null);
 
@@ -370,7 +374,7 @@ function cleanLearner(raw, index, version) {
   const stageRule = cleanStageRule(raw.stageRule);          // Beta 3.22 (still version 18): a backup without it gets 50% of the stage
   const scan = cleanScan(raw.scan);                        // Beta 3.21 (still version 18): a backup without it has scanning Off
   const access = cleanAccess(raw.access);                  // Beta 3.18 (still version 18): a backup without it gets the standard look
-  return { name, stage: Math.min(stage, maxStageFor(gridSize)), gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, letterMode, wordPredict, cameraButton, matchStrictness, littleStrip, toneWheel, access, scan, stageRule, wordDial, notices, teaching, everyday, scenes, things, photos };
+  return { name, stage: Math.min(stage, maxStageFor(gridSize)), gridSize, words, cells, pages, pins, voice, touch, model, wordsButton, wordsOnly, keyboardButton, speakLetters, letterMode, wordPredict, fct, cameraButton, matchStrictness, littleStrip, toneWheel, access, scan, stageRule, wordDial, notices, teaching, everyday, scenes, things, photos };
 }
 
 // Read and check a chosen file. Resolves to { exportedAt, learners: [clean...] }

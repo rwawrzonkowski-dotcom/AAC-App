@@ -273,7 +273,7 @@ export function everydayModel({ daily, firstSeen, range, rawEvents = [], rawUtte
   // Days saved before Beta 2.5 get their how-reached counts and message word totals from the raw rows.
   const rawHow = new Map(), rawWords = new Map(), rawCount = new Map();
   for (const e of rawEvents) {
-    if (e.mode !== "learner") continue;
+    if (e.mode !== "learner" || e.how === "tone" || e.how === "mood" || e.how === "fct") continue;
     const m = rawHow.get(localDate(e.time)) || {};
     m[e.how] = (m[e.how] || 0) + 1; rawHow.set(localDate(e.time), m);
   }
@@ -435,7 +435,7 @@ export function boardHeat({ model, counts, visible }) {
 export function modelCountsFrom(events) {
   const out = {};
   for (const e of events) {
-    if (e.mode !== "model" || !e.wordId || e.how === "tone" || e.how === "mood") continue;
+    if (e.mode !== "model" || !e.wordId || e.how === "tone" || e.how === "mood" || e.how === "fct") continue;
     out[e.wordId] = (out[e.wordId] || 0) + 1;            // (a word form's event carries its base word's id)
   }
   return out;

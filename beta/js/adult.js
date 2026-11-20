@@ -32,6 +32,8 @@ import { scenesSection } from "./sceneadult.js";
 import { openStartSession } from "./teachui.js";
 import { getTargets } from "./teachdata.js";
 import { isRecording } from "./everyday.js";
+import { cleanFct, DEFAULT_STEPS, fmtSec } from "./fct.js";
+import { searchWords, whereIs } from "./scenewords.js";
 import { getScenes } from "./scenestrip.js";
 import { getView, setView, groupedPages, pageById, pageForOldId, visibleIn, searchPages } from "./settingsnav.js";
 import { accessSection, accessSummary } from "./accessui.js";
@@ -125,6 +127,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
         case "touch": { const t = cur.touch; return ["holdOn", "ignoreOn", "liftOff", "zones", "keyguard", "preview", "dwellOn"].some((k) => t[k]) ? "On" : "Off"; }
         case "teaching": { const n = getTargets().length; return n + (n === 1 ? " target" : " targets"); }
         case "data": return isRecording(cur.id) ? "On" : "Off";
+        case "fct": { const f = cleanFct(cur.fct); return f.on && f.wordId ? "On · " + (f.label || f.wordId) : "Off"; }
         case "scenes": { const n = getScenes().length; return n + " saved"; }
         case "backup": { const d = dataSafetyLine(); return d.ok === true ? "Protected" : d.ok === false ? "Not protected" : ""; }
         default: return "";
@@ -190,6 +193,7 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       case "voice": return [voiceSection()];
       case "touch": return [touchSection()];
       case "teaching": return [teachingSection({ refresh, closeMenu: close, ...teach })];
+      case "fct": return [fctSection()];
       case "model": return [modelSection({ refresh, closeMenu: close, onPreviewPrompt })];
       case "reports": return [reportsSection()];
       case "data": return [dataSection({ refresh, sessionActive: teach.sessionActive })];
@@ -585,6 +589,59 @@ export function openAdultMenu({ board, startAt, onLearnerChanged, onVocabChanged
       cur.speakLetters ? h("div", { class: "seg-row touch-seg", id: "letter-mode" }, mode("names", "Letter names"), mode("sounds", "Letter + key word")) : null,
       h("p", { class: "muted", text: "On: every key speaks as it is tapped. Letter names say \"bee\", \"oh\"; Letter + key word says the letter and a word that starts with its sound (\"bee, ball\", \"ess, sun\"). " +
         "Recorded letter sounds will replace this later; iPad voices cannot say a sound on its own." }));
+  }
+
+  // FCT mode (Beta 3.48, js/fct.js): functional communication training. Clinician view only; parents and paras then just see
+  // the countdown and the Behavior tally in the strip.
+  let fctQuery = "";
+  function fctSection() {
+    const cur = getCurrent();
+    cur.fct = cleanFct(cur.fct);
+    const f = cur.fct;
+    const saveF = async (mut) => { mut(f); cur.fct = cleanFct(f); await saveProfile(cur); refresh(); };
+    const seg = (id, on, text, fn) => h("button", { type: "button", class: "seg" + (on ? " on" : ""), id, text, onclick: fn });
+    const pick = (w) => saveF((x) => { x.wordId = w.id; x.label = w.label; x.step = 0; x.calm = 0; x.rough = 0; });
+    const where = f.wordId ? whereIs(f.wordId) : null;
+    // Common replacement requests (only the ones on this board); the search finds any other word.
+    const quick = [["break", "break"], ["help", "help"], ["my-turn", "my turn"], ["finished", "finished"], ["stop", "stop"], ["need-break", "i need a break"]]
+      .map(([id, label]) => searchWords(label, 10).find((w) => w && w.id === id)).filter(Boolean);
+    const results = fctQuery.trim() ? searchWords(fctQuery, 8).filter(Boolean) : [];
+    const chip = (w) => h("button", { type: "button", class: "seg" + (w.id === f.wordId ? " on" : ""), id: "fct-pick-" + w.id, text: w.label, onclick: () => pick(w) });
+    const search = h("input", { type: "search", id: "fct-search", class: "set-search", placeholder: "Find another word", value: fctQuery, "aria-label": "Find a request word",
+      oninput: (e) => { fctQuery = e.target.value; const box = document.getElementById("fct-results"); if (box) box.replaceChildren(...(fctQuery.trim() ? searchWords(fctQuery, 8).filter(Boolean) : []).map(chip)); } });
+    const stepsIn = h("input", { type: "text", id: "fct-steps", class: "text-input", value: f.steps.join(", "), inputmode: "numeric", "aria-label": "Wait steps in seconds",
+      onchange: (e) => saveF((x) => { x.steps = e.target.value.split(/[^0-9]+/).filter(Boolean).map(Number); x.step = 0; x.calm = 0; x.rough = 0; }) });
+    const num = (id, val, lo, hi, set) => h("input", { type: "number", id, class: "num-in", min: lo, max: hi, value: val, onchange: (e) => saveF((x) => set(x, Number(e.target.value))) });
+    const behIn = h("input", { type: "text", id: "fct-beh-name", class: "text-input", value: f.behavior, maxlength: 40, "aria-label": "Name of the problem behavior",
+      onchange: (e) => saveF((x) => { x.behavior = e.target.value; }) });
+    const nextWait = f.steps[f.step] || 0;
+    return h("section", { class: "panel", id: "sec-fct" },
+      h("h2", { text: "FCT mode" }),
+      h("p", { class: "muted", text: "Functional communication training. Pick the learner's replacement request (for example \"break\"). When the learner asks with it, " +
+        "a wait countdown shows above the board; when it ends the bar turns green and the adult gives the break or item. Calm waits make the next wait longer, " +
+        "step by step. Adults record problem behavior by holding Behavior in the strip for 1 second. The board always stays usable." }),
+      h("div", { class: "field" }, h("label", { text: "FCT mode for " + cur.name }),
+        h("div", { class: "seg-row touch-seg" }, seg("fct-off", !f.on, "Off", () => saveF((x) => { x.on = false; })), seg("fct-on", f.on, "On", () => saveF((x) => { x.on = true; })))),
+      h("div", { class: "field", id: "fct-word" }, h("label", { text: "Replacement request" }),
+        h("div", { class: "seg-row wrap-row" }, ...quick.map(chip)),
+        search, h("div", { class: "seg-row wrap-row", id: "fct-results" }, ...results.map(chip)),
+        h("p", { class: "muted", id: "fct-where", text: !f.wordId ? "No word chosen yet: FCT mode starts once a word is picked." :
+          `"${f.label}"` + (where ? (where.status === "visible" ? " is at: " + where.where + "." : " is not showing at this learner's stage yet (" + (where.where || "on another page") + "). Reveal it or pick another word.") : ".") })),
+      h("div", { class: "field" }, h("label", { text: "Highlight ring on the request button" }),
+        h("div", { class: "seg-row touch-seg" }, seg("fct-ring-off", !f.highlight, "Off", () => saveF((x) => { x.highlight = false; })), seg("fct-ring-on", f.highlight, "On", () => saveF((x) => { x.highlight = true; })))),
+      h("div", { class: "field" }, h("label", { text: "Wait steps (seconds)" }), stepsIn,
+        h("p", { class: "muted", text: "Default: " + DEFAULT_STEPS.join(", ") + ". 0 = give it right away. Changing the steps starts again at the first one." })),
+      h("div", { class: "field fct-rules" },
+        h("label", {}, "Longer wait after ", num("fct-up", f.upAfter, 1, 20, (x, v) => { x.upAfter = v; }), " calm waits in a row"),
+        h("label", {}, "Shorter wait after ", num("fct-down", f.downAfter, 1, 20, (x, v) => { x.downAfter = v; }), " waits with problem behavior in a row")),
+      h("div", { class: "field" }, h("label", { text: "Name of the problem behavior (for the records)" }), behIn),
+      h("div", { class: "field", id: "fct-now" },
+        h("label", { text: "Where the learner is now" }),
+        h("p", { id: "fct-status", text: `Next wait: ${fmtSec(nextWait)} (step ${f.step + 1} of ${f.steps.length}). Calm waits in a row: ${f.calm} of ${f.upAfter}.` }),
+        h("button", { type: "button", class: "btn", id: "fct-restart", text: "Start again at the first step",
+          onclick: () => saveF((x) => { x.step = 0; x.calm = 0; x.rough = 0; }) })),
+      h("p", { class: "muted", text: "Recorded with everyday use (Reports > Export > Everyday events, shown as \"FCT mode\"): each request, each finished wait (calm or not) and each behavior tally. " +
+        "FCT mode pauses during teaching sessions, Model mode and Edit mode." }));
   }
 
   // Word guesses above the keyboard (Beta 3.28, default off).

@@ -1578,3 +1578,40 @@ html[data-theme="cvi"] #app .scan-row { outline-color: #ff3b30; }
 .sr-words { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; margin: 8px 0; }
 .sr-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 4px; }
 .sr-select { width: auto; padding: 4px 8px; }
+
+/* ---------- FCT mode (Beta 3.48, js/fct.js) ---------- */
+#fct-bar[hidden] { display: none; }
+#fct-bar { position: absolute; top: 0.5vmin; bottom: 0.5vmin; display: flex; align-items: stretch; gap: 0.5vmin; z-index: 3; }
+#fct-bar.fct-idle { right: 0.6vmin; }
+#app.cam-on #fct-bar.fct-idle { right: calc(9vw + 1.2vmin); }
+#fct-bar.fct-wait, #fct-bar.fct-give { left: 8vmin; right: 0.6vmin; }
+#app.cam-on #fct-bar.fct-wait, #app.cam-on #fct-bar.fct-give { right: calc(9vw + 1.2vmin); }
+#app.little-on.fct-on #little-bar { right: calc(11vw + 1.2vmin); }
+#app.little-on.cam-on.fct-on #little-bar { right: calc(20vw + 2.4vmin); }
+#app.fct-running #little-bar, #app.fct-running #page-title { visibility: hidden; }
+#app.in-session #fct-bar { display: none; }
+.fct-btn { position: relative; flex: 0 0 11vw; display: flex; align-items: center; justify-content: center; gap: 0.6vmin; padding: 0 0.6vmin;
+  border: 0.3vmin solid #6b21a8; border-radius: var(--radius); background: #f3e8ff; color: #3b0764; font-size: min(1.75vmin, 2.6dvh); font-weight: 800;
+  cursor: pointer; touch-action: none; white-space: nowrap; overflow: hidden; }
+.fct-btn .fct-ring { flex: 0 0 auto; width: 2.4vmin; height: 2.4vmin; }
+.fct-btn .hold-ring .ring-bg { stroke: rgba(59, 7, 100, 0.2); }
+.fct-btn .hold-ring .ring-fg { stroke: #3b0764; }
+.fct-btn.holding { filter: brightness(0.92); }
+.fct-stopbtn { flex-basis: 8vw; background: #fff; border-color: #475569; color: #111; }
+.fct-clock { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 1vmin; padding: 0 1.2vmin; border-radius: var(--radius);
+  background: #fff7ed; border: 0.3vmin solid #c2410c; color: #7c2d12; font-weight: 800; font-size: min(2.3vmin, 3.4dvh); }
+.fct-title { white-space: nowrap; }
+.fct-track { flex: 1 1 auto; height: 38%; background: #fed7aa; border-radius: 999px; overflow: hidden; }
+.fct-fill { display: block; height: 100%; width: 100%; background: #ea580c; border-radius: 999px; transition: width 0.2s linear; }
+.fct-sec { min-width: 6ch; text-align: right; font-variant-numeric: tabular-nums; }
+.fct-give { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 0.6vmin; padding: 0 1.2vmin; border-radius: var(--radius);
+  background: #dcfce7; border: 0.3vmin solid #15803d; color: #14532d; font-size: min(2.3vmin, 3.4dvh); white-space: nowrap; overflow: hidden; }
+.fct-note { align-self: center; padding: 0.3vmin 0.8vmin; border-radius: 999px; background: #3b0764; color: #fff; font-size: min(1.6vmin, 2.4dvh); font-weight: 700; white-space: nowrap; }
+.fct-note[hidden] { display: none; }
+/* the replacement request's highlight ring (every copy of the word; nothing moves) */
+#board .cell.fct-target { box-shadow: 0 0 0 0.5vmin #9333ea, 0 0 1.4vmin 0.3vmin rgba(147, 51, 234, 0.55); }
+html[data-motion="reduce"] .fct-fill { transition: none; }
+/* the FCT page in the adult menu */
+#sec-fct .wrap-row { flex-wrap: wrap; margin-bottom: 8px; }
+#sec-fct .fct-rules label { display: block; margin: 6px 0; font-weight: 600; }
+#sec-fct .num-in { width: 4.5em; font-size: 1em; padding: 6px 8px; border: 2px solid #94a3b8; border-radius: 8px; margin: 0 4px; }

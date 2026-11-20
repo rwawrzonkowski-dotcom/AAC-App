@@ -75,6 +75,7 @@ import { deleteEveryday, importEveryday } from "./everyday.js";
 import { deleteScenes, importScenes } from "./scenedata.js";
 import { deleteThings, importThings } from "./things.js";
 import { cleanAccess } from "./access.js";
+import { cleanFct } from "./fctdata.js";
 import { cleanScan } from "./scan.js";
 import { cleanStageRule } from "./stagerule.js";
 import { normSize, maxStageFor } from "./boardmodel.js";
@@ -123,6 +124,7 @@ function makeProfile(name, stage = 1, voice = CHILD_VOICE, gridSize = 45) {
     wordsButton: "auto", wordsOnly: false, keyboardButton: "auto", speakLetters: false, letterMode: "names", wordPredict: false,
     cameraButton: "auto", matchStrictness: "medium", littleStrip: "auto", toneWheel: "off", toneSuggested: false,
     wordDial: { ...DEFAULT_WORD_DIAL }, access: cleanAccess(null), scan: cleanScan(null), stageRule: cleanStageRule(null),
+    fct: cleanFct(null),
   };
 }
 
@@ -224,6 +226,7 @@ export async function initProfiles(board) {
     p.speakLetters = p.speakLetters === true;
     p.letterMode = p.letterMode === "sounds" ? "sounds" : "names";     // (Beta 3.28)
     p.wordPredict = p.wordPredict === true;
+    p.fct = cleanFct(p.fct);                                              // (Beta 3.48: FCT mode, off)
     p.voice = cleanVoice(p.voice);
   }
   // Learners saved before the camera button and My things (Beta 3.1): camera button on Auto, match strictness Medium.
@@ -391,6 +394,7 @@ export async function importLearner(data, replaceId = null) {
     p.scan = cleanScan(data.scan);
     p.stageRule = cleanStageRule(data.stageRule);
     p.wordDial = cleanWordDial(data.wordDial);
+    p.fct = cleanFct(data.fct);
     // Reward pictures belong to the teaching data: when the backup has none, the learner keeps theirs.
     if (!data.teaching) keepRewards = (await db.getPrefix("photos", p.id + "|reward:")).filter((r) => r.value && r.value.blob);
     await db.delPrefix("photos", p.id + "|");
@@ -407,6 +411,7 @@ export async function importLearner(data, replaceId = null) {
     p.cameraButton = data.cameraButton; p.matchStrictness = data.matchStrictness;
     if (data.littleStrip) p.littleStrip = data.littleStrip;      // (Beta 3.18: a NEW learner from a backup now keeps these too)
     if (data.toneWheel) p.toneWheel = data.toneWheel;
+    p.fct = cleanFct(data.fct);
     p.access = cleanAccess(data.access);
     p.scan = cleanScan(data.scan);
     p.stageRule = cleanStageRule(data.stageRule);
